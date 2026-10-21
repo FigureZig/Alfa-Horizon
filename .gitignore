@@ -1,0 +1,15 @@
+# Секреты и локальное окружение
+.env
+**/.env
+!**/.env.example
+
+# Python
+.venv/
+__pycache__/
+
+# ОС и IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

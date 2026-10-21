@@ -1,0 +1,16 @@
+{
+  "CreditReportOfLegalPerson": {
+    "Subject": {
+      "Identity": {
+        "INN": "7701000080"
+      },
+      "Bankruptcy": null
+    },
+    "Credits": {
+      "Credit": []
+    },
+    "RequestsStatistic": {
+      "NumberOfRequests": 0
+    }
+  }
+}

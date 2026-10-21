@@ -1,0 +1,39 @@
+{
+  "mappings": [
+    {
+      "name": "ФНС sshr",
+      "priority": 5,
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/fns/v1/sshr/(7701000019|7701000026|7701000033|7701000040|7701000058|7701000065|7701000072|7701000080|770100000079|770100000142)"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "bodyFileName": "fns/sshr/{{request.pathSegments.[3]}}.json"
+      }
+    },
+    {
+      "name": "ФНС sshr: не найдено",
+      "priority": 9,
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/fns/v1/sshr/[^/]+"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/problem+json"
+        },
+        "jsonBody": {
+          "type": "about:blank",
+          "title": "Not Found",
+          "status": 404,
+          "detail": "Запись не найдена"
+        }
+      }
+    }
+  ]
+}

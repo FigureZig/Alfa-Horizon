@@ -1,0 +1,11 @@
+{
+  "companyInn": "7701000040",
+  "kycDirectorInn": "770100000784",
+  "persons": [
+    {
+      "personInn": "770100000784",
+      "fio": "Иванов Иван Иванович",
+      "level": "owner"
+    }
+  ]
+}

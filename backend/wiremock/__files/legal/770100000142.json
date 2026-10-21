@@ -1,0 +1,16 @@
+{
+  "inn": "770100000142",
+  "bankruptcy": {
+    "stage": null,
+    "efrsbDate": null
+  },
+  "arbitration": {
+    "asDefendantCount": 0,
+    "claimsSum": "0.00"
+  },
+  "enforcement": {
+    "count": 0,
+    "sum": "0.00"
+  },
+  "sanctionsListHit": false
+}

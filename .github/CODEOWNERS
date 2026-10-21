@@ -1,0 +1,4 @@
+# Замените @… на логины GitHub: основной и запасной на каждую зону, чтобы мерж не вставал.
+*           @back-lead @back-backup
+/backend/   @back-lead @back-backup
+/docs/      @back-lead @analyst

@@ -1,0 +1,16 @@
+{
+  "companyInn": "7701000058",
+  "kycDirectorInn": "770100001026",
+  "persons": [
+    {
+      "personInn": "770100001026",
+      "fio": "Фомин Андрей Петрович",
+      "level": "owner"
+    },
+    {
+      "personInn": "770100000784",
+      "fio": "Иванов Иван Иванович",
+      "level": "view"
+    }
+  ]
+}

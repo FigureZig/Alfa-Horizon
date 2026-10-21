@@ -1,0 +1,74 @@
+# Бэкенд одной командой: cd backend && docker compose up --build
+#   API       http://localhost:8000/api/docs
+#   WireMock  http://localhost:8081/__admin   (моки ЕГРЮЛ, ЕГРИП, ФНС, ГИР БО, БКИ, банка, ЕИС)
+#   Postgres  localhost:55432
+# Значения берутся из .env (если его нет — из значений по умолчанию ниже), шаблон — .env.example.
+name: alfa-horizon
+
+x-app: &app
+  build: .
+  environment:
+    DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@postgres:5432/${POSTGRES_DB:-credit}
+    WIREMOCK_URL: http://wiremock:8080
+    DEMO_MODE: ${DEMO_MODE:-true}
+    DEMO_TODAY: ${DEMO_TODAY:-2026-10-21}
+    FEATURE_K1: ${FEATURE_K1:-true}
+    FEATURE_K2: ${FEATURE_K2:-true}
+    FEATURE_K3: ${FEATURE_K3:-true}
+    FEATURE_K4: ${FEATURE_K4:-false}
+    FEATURE_K5: ${FEATURE_K5:-false}
+    LLM_ENABLED: ${LLM_ENABLED:-false}
+  depends_on:
+    migrate:
+      condition: service_completed_successfully
+    wiremock:
+      condition: service_started
+  restart: unless-stopped
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+      POSTGRES_DB: ${POSTGRES_DB:-credit}
+    ports: ["55432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  wiremock:
+    image: wiremock/wiremock:3.9.1
+    command: ["--global-response-templating", "--disable-banner", "--max-request-journal-entries", "1000"]
+    environment:
+      JAVA_OPTS: -Xmx256m
+    ports: ["8081:8080"]
+    volumes: ["./wiremock:/home/wiremock:ro"]
+
+  migrate:
+    <<: *app
+    command: ["python", "-m", "app.migrate"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    <<: *app
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports: ["8000:8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/live')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  worker:
+    <<: *app
+    command: ["python", "-m", "app.worker"]
+
+volumes:
+  pgdata: {}

@@ -1,0 +1,113 @@
+# Кредитная политика банка: пороги, скоринговая карта, цена риска, тексты причин.
+# Версия = имя файла + hash содержимого, пишется в каждое решение (docs/04 §3). Изменение = новый файл.
+version: "2026.10-1"
+
+params:                              # docs/04 §9 — наш дизайн, кроме помеченного
+  tax_debt_max: 50000                # ориентир — условие программы «1764» (docs/10 M7 ⚠️)
+  min_business_age_months: 6
+  overdue_stop_days: 90
+  large_deal_share: 0.25             # крупная сделка: 14-ФЗ ст. 46 п. 1, 208-ФЗ ст. 78
+  auto_authority_max: 10000000       # выше — кредитный специалист
+  provisional_max: 3000000           # до этой суммы при недоступном БКИ — предварительная оферта
+  k_overdraft: 0.4                   # лимит овердрафта ≤ 40% среднемесячных поступлений
+  p_payment: 0.3                     # все платежи по кредитам ≤ 30% среднемесячных поступлений
+  short_term_max_months: 12          # «до 1 года» в табл. ЦБ
+  term_search_step_months: 6         # шаг поиска срока в контрпредложении
+  amount_step_small: 10000           # округление лимита вниз: до 1 млн — до 10 тыс.
+  amount_step_large: 100000          # от 1 млн — до 100 тыс.
+
+scorecard:                           # docs/12: балльная карта, шкала P23
+  base: 600
+  min: 300
+  max: 900
+  pd_scale: { odds_at_base: 15, pdo: 40 }   # odds = 15 × 2^((score − 600) / 40), PD = 1 / (1 + odds)
+  classes: [ { class: A, min: 700 }, { class: B, min: 640 }, { class: C, min: 560 }, { class: D, min: 0 } ]
+  factors:                           # bins: первый подходящий; lt — меньше, le — не больше; без условия — остальное
+    F1_business_age:
+      fact: age_months
+      bins: [ { lt: 12, points: -40 }, { lt: 36, points: 0 }, { lt: 60, points: 20 }, { points: 35 } ]
+      reason: SC_YOUNG_BUSINESS
+    F2_inflow_stability:
+      fact: inflow_cv                # коэффициент вариации месячных поступлений за 12 мес.
+      bins: [ { lt: 0.2, points: 40 }, { lt: 0.4, points: 15 }, { lt: 0.7, points: -15 }, { points: -45 } ]
+      reason: SC_UNSTABLE_INFLOWS
+    F3_inflow_trend:
+      fact: inflow_trend             # среднее за 3 мес. / среднее за предыдущие 9 − 1
+      bins: [ { lt: -0.30, points: -50 }, { lt: -0.10, points: -20 }, { le: 0.10, points: 0 }, { points: 15 } ]
+      reason: SC_DECLINING_INFLOWS
+    F4_debt_load:
+      fact: debt_load                # текущие платежи по БКИ / средние поступления — до новой сделки (docs/13 §5)
+      source: bki
+      bins: [ { lt: 0.15, points: 30 }, { lt: 0.30, points: 10 }, { lt: 0.45, points: -25 }, { points: -60 } ]
+      reason: SC_HIGH_DEBT_LOAD
+    F5_delinquency:
+      fact: max_overdue_days
+      source: bki
+      bins: [ { le: 0, points: 40 }, { le: 5, points: 10 }, { le: 30, points: -30 }, { points: -80 } ]
+      two_payments_skipped: -60      # «пропуск двух платежей» — не лучше −60
+      reason: SC_DELINQUENCY
+    F6_credit_hunger:
+      fact: bki_requests_30d
+      source: bki_info               # есть и в информационной части КИ — без согласия (218-ФЗ ст. 6 ч. 9.1)
+      bins: [ { le: 1, points: 10 }, { le: 4, points: 0 }, { points: -30 } ]
+      reason: SC_CREDIT_HUNGER
+    F7_tax_discipline:
+      fact: tax_debt
+      bins: [ { le: 0, points: 20 }, { points: -10 } ]
+      reason: SC_TAX_DEBT
+    F8_profitability:
+      fact: net_profit
+      segments: [LLC, JSC]           # у ИП нет бухотчётности (402-ФЗ ст. 6 ч. 2 п. 1)
+      bins: [ { le: 0, points: -25 }, { points: 20 } ]
+      reason: SC_LOSS
+    F9_bank_share:
+      fact: bank_share               # поступления на наш счёт / выручка; у ИП выручки в источниках нет → неизвестно
+      bins: [ { lt: 0.30, points: -10 }, { le: 0.70, points: 5 }, { points: 15 } ]
+      reason: SC_LOW_BANK_SHARE
+
+risk_pricing:                        # docs/12 §5: спред за риск = PD × LGD + 1,5 п.п., округление до 0,5
+  pd_for_price: { A: 0.010, B: 0.025, C: 0.065, D: 0.20 }
+  lgd: { none: 0.50, owner_guarantee: 0.50, guarantor: 0.40, collateral: 0.30 }
+  opex_margin_pp: 1.5
+  rounding_pp: 0.5
+
+reasons:                             # тексты для клиента и досье; {…} подставляются из контекста
+  STOP_TAX_DEBT: "Налоговая недоимка {tax_debt} ₽ — больше {tax_debt_max} ₽, допустимых правилами банка"
+  STOP_LIQUIDATION: "Компания в процессе ликвидации"
+  STOP_BANKRUPTCY: "Идёт процедура банкротства"
+  STOP_DELINQUENCY: "Просрочка по кредитам больше {overdue_stop_days} дней"
+  STOP_EIO_DISQUALIFIED: "Руководитель дисквалифицирован"
+  STOP_EIO_UNRELIABLE: "Сведения о руководителе в ЕГРЮЛ отмечены как недостоверные"
+  POL_BUSINESS_AGE: "Бизнесу меньше {min_business_age_months} месяцев"
+  POL_INDUSTRY: "Вид деятельности {okved} не кредитуем: {why}"
+  POL_PRODUCT_FIT: "«{product_name}» не предлагаем для этой отрасли или формы бизнеса"
+  POL_NO_TURNOVER: "Нужны поступления на счёт в нашем банке хотя бы за {months} мес."
+  POL_NO_CONTRACT: "Нет действующего контракта в ЕИС"
+  POL_RISK_CLASS: "Риск по скорингу выше допустимого для продукта"
+  POL_AMOUNT_MIN: "Доступная сумма меньше минимальной для продукта — {min} ₽"
+  POL_AUTHORITY_EXCEEDED: "Сумма выше порога автоматического решения — {auto_authority_max} ₽"
+  POL_INDUSTRY_REVIEW: "Заявки этой отрасли рассматривает специалист"
+  POL_PRODUCT_REVIEW: "Этот продукт рассматривает специалист"
+  CAP_TURNOVER: "Лимит — до 40% среднемесячных поступлений"
+  CAP_PAYMENT_CAPACITY: "Все платежи по кредитам — не больше 30% поступлений"
+  CAP_INTEREST_CAPACITY: "Проценты должны укладываться в 30% поступлений"
+  CAP_PRODUCT_MAX: "Максимум продукта"
+  CAP_COLLATERAL: "До 70% стоимости залога"
+  CAP_CONTRACT: "До 70% цены контракта за вычетом аванса"
+  CAP_SEASONAL_INFLOWS: "До 30% годовых поступлений"
+  REQ_CORP_APPROVAL: "Нужно согласие участников на крупную сделку: кредит — {share_pct}% активов"
+  REQ_COLLATERAL_VALUE: "Укажите стоимость залога"
+  REQ_TURNOVER_DATA: "Нужны данные о поступлениях"
+  REQ_GUARANTOR: "Нужен поручитель"
+  DATA_CONFLICT: "Данные источников расходятся: {what}"
+  DATA_SOURCE_UNAVAILABLE: "Не отвечает источник: {source}"
+  PROVISIONAL: "Условия предварительные: подпись после проверки кредитной истории"
+  SC_YOUNG_BUSINESS: "Бизнесу меньше года"
+  SC_UNSTABLE_INFLOWS: "Поступления заметно колеблются от месяца к месяцу"
+  SC_DECLINING_INFLOWS: "Поступления за 3 месяца снизились"
+  SC_HIGH_DEBT_LOAD: "Платежи по кредитам занимают большую долю поступлений"
+  SC_DELINQUENCY: "Была просрочка по кредиту"
+  SC_CREDIT_HUNGER: "Много запросов в бюро кредитных историй за месяц"
+  SC_TAX_DEBT: "Есть налоговая недоимка"
+  SC_LOSS: "Убыток по отчётности"
+  SC_LOW_BANK_SHARE: "Малая доля оборотов через наш банк"

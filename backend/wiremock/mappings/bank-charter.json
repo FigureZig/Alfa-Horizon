@@ -1,0 +1,39 @@
+{
+  "mappings": [
+    {
+      "name": "Банк: устав",
+      "priority": 5,
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/bank-core/v1/companies/(7701000019|7701000026|7701000033|7701000040|7701000058|7701000065|7701000072|7701000080)/charter"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "bodyFileName": "bank/charter/{{request.pathSegments.[3]}}.json"
+      }
+    },
+    {
+      "name": "Банк: устав: не найдено",
+      "priority": 9,
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/bank-core/v1/companies/[^/]+/charter"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/problem+json"
+        },
+        "jsonBody": {
+          "type": "about:blank",
+          "title": "Not Found",
+          "status": 404,
+          "detail": "Запись не найдена"
+        }
+      }
+    }
+  ]
+}

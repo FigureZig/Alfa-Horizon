@@ -1,0 +1,13 @@
+{
+  "contracts": [
+    {
+      "regNum": "2770100002626000014",
+      "customer": "ГБУ «Городской заказчик № 7»",
+      "price": "18000000.00",
+      "signDate": "2026-09-15",
+      "endDate": "2027-03-31",
+      "advancePercent": 30,
+      "treasurySupport": false
+    }
+  ]
+}

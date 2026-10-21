@@ -1,0 +1,76 @@
+{
+  "mappings": [
+    {
+      "name": "ГИР БО: поиск",
+      "priority": 5,
+      "request": {
+        "method": "GET",
+        "urlPath": "/girbo/v1/organizations/search",
+        "queryParameters": {
+          "query": {
+            "matches": "^(7701000019|7701000026|7701000033|7701000040|7701000058|7701000065|7701000072|7701000080)$"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "bodyFileName": "girbo/search/{{request.query.query}}.json"
+      }
+    },
+    {
+      "name": "ГИР БО: поиск: пусто",
+      "priority": 9,
+      "request": {
+        "method": "GET",
+        "urlPath": "/girbo/v1/organizations/search"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "content": []
+        }
+      }
+    },
+    {
+      "name": "ГИР БО: отчётность",
+      "priority": 5,
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/girbo/v1/organizations/(7701000019|7701000026|7701000033|7701000040|7701000058|7701000065|7701000072|7701000080)/bfo"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "bodyFileName": "girbo/bfo/{{request.pathSegments.[3]}}.json"
+      }
+    },
+    {
+      "name": "ГИР БО: отчётность: не найдено",
+      "priority": 9,
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/girbo/v1/organizations/[^/]+/bfo"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/problem+json"
+        },
+        "jsonBody": {
+          "type": "about:blank",
+          "title": "Not Found",
+          "status": 404,
+          "detail": "Запись не найдена"
+        }
+      }
+    }
+  ]
+}

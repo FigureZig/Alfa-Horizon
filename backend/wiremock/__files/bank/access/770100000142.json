@@ -1,0 +1,11 @@
+{
+  "companyInn": "770100000142",
+  "kycDirectorInn": "770100000142",
+  "persons": [
+    {
+      "personInn": "770100000142",
+      "fio": "Котов Дмитрий Романович",
+      "level": "owner"
+    }
+  ]
+}

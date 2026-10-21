@@ -1,0 +1,11 @@
+{
+  "companyInn": "7701000080",
+  "kycDirectorInn": "770100001347",
+  "persons": [
+    {
+      "personInn": "770100001347",
+      "fio": "Гусев Артём Ильич",
+      "level": "owner"
+    }
+  ]
+}

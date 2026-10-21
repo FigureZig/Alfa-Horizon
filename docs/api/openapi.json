@@ -1,0 +1,1062 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Умный кредитный кабинет",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/health/live": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Live",
+        "operationId": "live_api_v1_health_live_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health/ready": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Ready",
+        "operationId": "ready_api_v1_health_ready_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/catalog": {
+      "get": {
+        "tags": [
+          "catalog"
+        ],
+        "summary": "Get Catalog",
+        "description": "Продукты, цели, отрасли с отраслевыми спредами и ключевая ставка — для подбора и «почему так».",
+        "operationId": "get_catalog_api_v1_catalog_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/calc/loan": {
+      "post": {
+        "tags": [
+          "catalog"
+        ],
+        "summary": "Calc Loan",
+        "description": "Калькулятор: ставка (если не задана), платёж, переплата, график.",
+        "operationId": "calc_loan_api_v1_calc_loan_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoanCalcIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/companies/{inn}/profile": {
+      "get": {
+        "tags": [
+          "company"
+        ],
+        "summary": "Profile",
+        "description": "Что банк знает о компании: факты и откуда каждый источник, с датой и статусом.",
+        "operationId": "profile_api_v1_companies__inn__profile_get",
+        "parameters": [
+          {
+            "name": "inn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{10}$|^\\d{12}$",
+              "description": "ИНН: 10 цифр — юрлицо, 12 — ИП",
+              "title": "Inn"
+            },
+            "description": "ИНН: 10 цифр — юрлицо, 12 — ИП"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/companies/{inn}/refresh": {
+      "post": {
+        "tags": [
+          "company"
+        ],
+        "summary": "Refresh",
+        "description": "Запросить свежие данные из реестров и банка (делает worker). БКИ здесь не запрашивается — только в заявке.",
+        "operationId": "refresh_api_v1_companies__inn__refresh_post",
+        "parameters": [
+          {
+            "name": "inn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{10}$|^\\d{12}$",
+              "description": "ИНН: 10 цифр — юрлицо, 12 — ИП",
+              "title": "Inn"
+            },
+            "description": "ИНН: 10 цифр — юрлицо, 12 — ИП"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/companies/{inn}/products": {
+      "get": {
+        "tags": [
+          "company"
+        ],
+        "summary": "Products",
+        "description": "Подбор: продукты под цель с меткой «предодобрено / условно / рассмотрение / недоступно» и условиями.",
+        "operationId": "products_api_v1_companies__inn__products_get",
+        "parameters": [
+          {
+            "name": "inn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{10}$|^\\d{12}$",
+              "description": "ИНН: 10 цифр — юрлицо, 12 — ИП",
+              "title": "Inn"
+            },
+            "description": "ИНН: 10 цифр — юрлицо, 12 — ИП"
+          },
+          {
+            "name": "goal",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "cash_gap",
+                "stock",
+                "equipment",
+                "growth",
+                "contract"
+              ],
+              "type": "string",
+              "title": "Goal"
+            }
+          },
+          {
+            "name": "amount",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "exclusiveMinimum": 0.0
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "title": "Amount"
+            }
+          },
+          {
+            "name": "term_months",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 120,
+                  "exclusiveMinimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Term Months"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/applications": {
+      "post": {
+        "tags": [
+          "application"
+        ],
+        "summary": "Create Application",
+        "operationId": "create_application_api_v1_applications_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplicationIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/applications/{app_id}": {
+      "get": {
+        "tags": [
+          "application"
+        ],
+        "summary": "Get Application",
+        "operationId": "get_application_api_v1_applications__app_id__get",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "App Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/applications/{app_id}/submit": {
+      "post": {
+        "tags": [
+          "application"
+        ],
+        "summary": "Submit",
+        "description": "Подать: DRAFT → SUBMITTED и задача конвейера в той же транзакции. Повтор с тем же ключом не создаёт дублей.",
+        "operationId": "submit_api_v1_applications__app_id__submit_post",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "App Id"
+            }
+          },
+          {
+            "name": "idempotency-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/applications/{app_id}/events": {
+      "get": {
+        "tags": [
+          "application"
+        ],
+        "summary": "Application Events",
+        "operationId": "application_events_api_v1_applications__app_id__events_get",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "App Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/bank/queue": {
+      "get": {
+        "tags": [
+          "bank"
+        ],
+        "summary": "Queue",
+        "description": "Только исключения: заявки у специалиста с причиной и предложением движка.",
+        "operationId": "queue_api_v1_bank_queue_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/bank/applications/{app_id}/dossier": {
+      "get": {
+        "tags": [
+          "bank"
+        ],
+        "summary": "Dossier",
+        "description": "Всё на одном экране: факты с источниками, скоринг с вкладами, правила с нормами, история.",
+        "operationId": "dossier_api_v1_bank_applications__app_id__dossier_get",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "App Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sandbox/presets": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Presets",
+        "description": "Компании демо-мира и их сценарии (seed/personas.yaml → моки WireMock).",
+        "operationId": "presets_api_v1_sandbox_presets_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sandbox/faults": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "List Faults",
+        "operationId": "list_faults_api_v1_sandbox_faults_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Add Fault",
+        "operationId": "add_fault_api_v1_sandbox_faults_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FaultIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sandbox/faults/{fault_id}": {
+      "delete": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Remove Fault",
+        "operationId": "remove_fault_api_v1_sandbox_faults__fault_id__delete",
+        "parameters": [
+          {
+            "name": "fault_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Fault Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sandbox/reset": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Reset",
+        "description": "Вернуть штатный мир: снять все отказы и сбросить сценарии WireMock, снять паузу воркера.",
+        "operationId": "reset_api_v1_sandbox_reset_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sandbox/worker/{action}": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Worker",
+        "description": "Наш собственный сбой: воркер перестаёт брать задачи, API продолжает работать.",
+        "operationId": "worker_api_v1_sandbox_worker__action__post",
+        "parameters": [
+          {
+            "name": "action",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "pause",
+                "resume"
+              ],
+              "type": "string",
+              "title": "Action"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sandbox/decision": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "What If",
+        "description": "Движок на произвольных фактах — для отладки правил и демонстрации «что если».",
+        "operationId": "what_if_api_v1_sandbox_decision_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WhatIfIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApplicationIn": {
+        "properties": {
+          "inn": {
+            "type": "string",
+            "pattern": "^\\d{10}$|^\\d{12}$",
+            "title": "Inn"
+          },
+          "product": {
+            "type": "string",
+            "enum": [
+              "OVERDRAFT",
+              "EXPRESS",
+              "WORKING_CAPITAL",
+              "INVESTMENT",
+              "CONTRACT",
+              "AGRO_SEASONAL"
+            ],
+            "title": "Product"
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Amount"
+          },
+          "term_months": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 120.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Term Months"
+          },
+          "goal": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "cash_gap",
+                  "stock",
+                  "equipment",
+                  "growth",
+                  "contract"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal"
+          },
+          "consent_bki": {
+            "type": "boolean",
+            "title": "Consent Bki",
+            "description": "согласие на запрос КИ (218-ФЗ ст. 6 ч. 9)",
+            "default": false
+          },
+          "corporate_approval": {
+            "type": "boolean",
+            "title": "Corporate Approval",
+            "description": "решение участников о крупной сделке уже есть",
+            "default": false
+          },
+          "collateral_value": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Collateral Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "inn",
+          "product",
+          "amount"
+        ],
+        "title": "ApplicationIn"
+      },
+      "FaultIn": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "ключ из policy/sources.yaml: egrul, bki, debtam…"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "timeout",
+              "error503",
+              "reset",
+              "garbage",
+              "empty"
+            ],
+            "title": "Mode"
+          },
+          "inn": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{10}$|^\\d{12}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inn",
+            "description": "только для этой компании; пусто — для всех"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "mode"
+        ],
+        "title": "FaultIn"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "LoanCalcIn": {
+        "properties": {
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Amount"
+          },
+          "term_months": {
+            "type": "integer",
+            "maximum": 120.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Term Months"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate",
+            "description": "% годовых; без ставки — посчитаем по отрасли и классу риска"
+          },
+          "product": {
+            "type": "string",
+            "enum": [
+              "OVERDRAFT",
+              "EXPRESS",
+              "WORKING_CAPITAL",
+              "INVESTMENT",
+              "CONTRACT",
+              "AGRO_SEASONAL"
+            ],
+            "title": "Product",
+            "default": "EXPRESS"
+          },
+          "section": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-U]$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Section"
+          },
+          "risk_class": {
+            "type": "string",
+            "enum": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "title": "Risk Class",
+            "default": "B"
+          },
+          "segment": {
+            "type": "string",
+            "enum": [
+              "IP",
+              "LLC",
+              "JSC"
+            ],
+            "title": "Segment",
+            "default": "IP"
+          }
+        },
+        "type": "object",
+        "required": [
+          "amount",
+          "term_months"
+        ],
+        "title": "LoanCalcIn"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WhatIfIn": {
+        "properties": {
+          "facts": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Facts",
+            "description": "факты в формате features.company_facts"
+          },
+          "request": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Request",
+            "description": "{product, amount, term_months, goal, corporate_approval, collateral_value}"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "simulate",
+              "commit"
+            ],
+            "title": "Mode",
+            "default": "simulate"
+          }
+        },
+        "type": "object",
+        "required": [
+          "facts",
+          "request"
+        ],
+        "title": "WhatIfIn"
+      }
+    }
+  }
+}

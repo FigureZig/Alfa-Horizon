@@ -1,0 +1,11 @@
+{
+  "companyInn": "7701000072",
+  "kycDirectorInn": "770100001273",
+  "persons": [
+    {
+      "personInn": "770100001273",
+      "fio": "Полякова Мария Игоревна",
+      "level": "owner"
+    }
+  ]
+}

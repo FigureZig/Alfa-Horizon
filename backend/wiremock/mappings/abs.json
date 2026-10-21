@@ -1,0 +1,59 @@
+{
+  "mappings": [
+    {
+      "name": "АБС: открыть счёт кредита",
+      "priority": 5,
+      "request": {
+        "method": "POST",
+        "urlPath": "/abs/v1/loans"
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "loanId": "{{jsonPath request.body '$.applicationId'}}",
+          "status": "OPENED"
+        }
+      }
+    },
+    {
+      "name": "АБС: выдать",
+      "priority": 5,
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/abs/v1/loans/[^/]+/disburse"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "loanId": "{{request.pathSegments.[3]}}",
+          "status": "DISBURSED",
+          "disbursedAt": "{{now}}"
+        }
+      }
+    },
+    {
+      "name": "АБС: статус",
+      "priority": 5,
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/abs/v1/loans/[^/]+"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "loanId": "{{request.pathSegments.[3]}}",
+          "status": "OPENED"
+        }
+      }
+    }
+  ]
+}

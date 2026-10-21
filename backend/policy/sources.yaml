@@ -1,0 +1,36 @@
+# Внешние источники. Ходит только worker; API читает снапшоты (docs/06 §1). Форматы — docs/09 §2.
+# kind: UL — только юрлица (ИНН 10 цифр), IP — только ИП (12 цифр), ALL — все.
+defaults:
+  timeout_s: 3.0
+  connect_timeout_s: 1.0
+  attempts: 3              # всего попыток, backoff с полным jitter (docs/07 §3)
+  backoff_base_s: 0.5
+  backoff_cap_s: 4.0
+  breaker: { failures: 5, open_s: 30 }
+
+sources:
+  egrul:        { name: "ЕГРЮЛ", kind: UL, method: GET, path: "/egrul/v1/legal-entities/{inn}", ttl_h: 24 }
+  egrip:        { name: "ЕГРИП", kind: IP, method: GET, path: "/egrip/v1/entrepreneurs/{inn}", ttl_h: 24 }
+  rsmp:         { name: "ФНС: реестр МСП", kind: ALL, method: GET, path: "/fns/v1/rsmp/{inn}", ttl_h: 720 }
+  sshr:         { name: "ФНС: численность", kind: ALL, method: GET, path: "/fns/v1/sshr/{inn}", ttl_h: 720 }
+  paytax:       { name: "ФНС: уплаченные налоги", kind: ALL, method: GET, path: "/fns/v1/paytax/{inn}", ttl_h: 720 }
+  debtam:       { name: "ФНС: недоимки", kind: ALL, method: GET, path: "/fns/v1/debtam/{inn}", ttl_h: 168 }
+  snr:          { name: "ФНС: налоговые режимы", kind: ALL, method: GET, path: "/fns/v1/snr/{inn}", ttl_h: 720 }
+  girbo:        { name: "ГИР БО", kind: UL, method: GET, path: "/girbo/v1/organizations/{inn}/bfo", ttl_h: 720 }   # в моке id = ИНН; реальный адаптер сначала делает search
+  legal:        { name: "Юр. проверки", kind: ALL, method: GET, path: "/legal-checks/v1/{inn}", ttl_h: 24 }
+  bank_access:  { name: "Банк: доступы ДБО", kind: ALL, method: GET, path: "/bank-core/v1/companies/{inn}/access", ttl_h: 1 }
+  bank_charter: { name: "Банк: устав", kind: UL, method: GET, path: "/bank-core/v1/companies/{inn}/charter", ttl_h: 1 }
+  bank_tx:      { name: "Банк: операции по счёту", kind: ALL, method: GET, path: "/bank-core/v1/accounts/{inn}/transactions", ttl_h: 1 }
+  eis:          { name: "ЕИС", kind: ALL, method: GET, path: "/eis/v1/contracts?supplierInn={inn}", ttl_h: 24 }
+  bki_info:     { name: "БКИ: информационная часть", kind: ALL, method: POST, path: "/bki/v1/info-part", ttl_h: 24,
+                  body: { subject: { inn: "{inn}" } } }      # обращения и отказы — без согласия, 218-ФЗ ст. 6 ч. 9.1
+  bki:          { name: "БКИ", kind: ALL, method: POST, path: "/bki/v1/credit-reports", ttl_h: 0, timeout_s: 5.0, needs_consent: true,
+                  body: { subject: { inn: "{inn}" }, purpose: "credit_application" } }   # только при согласии, 218-ФЗ ст. 6 ч. 9
+
+# Отказы на лету из песочницы: стаб WireMock с приоритетом 1 поверх штатного (docs/07 §7).
+faults:
+  timeout:  { fixedDelayMilliseconds: 10000 }
+  error503: { status: 503, headers: { Retry-After: "2" } }
+  reset:    { fault: CONNECTION_RESET_BY_PEER }
+  garbage:  { fault: RANDOM_DATA_THEN_CLOSE }
+  empty:    { fault: EMPTY_RESPONSE }

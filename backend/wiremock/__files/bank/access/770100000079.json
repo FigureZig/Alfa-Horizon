@@ -1,0 +1,11 @@
+{
+  "companyInn": "770100000079",
+  "kycDirectorInn": "770100000079",
+  "persons": [
+    {
+      "personInn": "770100000079",
+      "fio": "Смирнова Анна Сергеевна",
+      "level": "owner"
+    }
+  ]
+}

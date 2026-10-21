@@ -1,0 +1,22 @@
+[
+  {
+    "period": "2025",
+    "actualBfoDate": "2026-03-27",
+    "typeCorrections": [
+      {
+        "correction": {
+          "balance": {
+            "current1600": 30000,
+            "current1300": 12000,
+            "current1400": 6000,
+            "current1500": 12000
+          },
+          "financialResult": {
+            "current2110": 90000,
+            "current2400": 2400
+          }
+        }
+      }
+    ]
+  }
+]

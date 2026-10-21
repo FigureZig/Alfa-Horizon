@@ -1,0 +1,16 @@
+{
+  "companyInn": "7701000065",
+  "kycDirectorInn": "770100001107",
+  "persons": [
+    {
+      "personInn": "770100001107",
+      "fio": "Захаров Олег Викторович",
+      "level": "owner"
+    },
+    {
+      "personInn": "770100000784",
+      "fio": "Иванов Иван Иванович",
+      "level": "prepare"
+    }
+  ]
+}

@@ -1,0 +1,3891 @@
+{
+  "accountInn": "770100000079",
+  "account": "40702810000100000079",
+  "currency": "RUB",
+  "balance": {
+    "amount": "330000.00",
+    "asOf": "2026-10-21"
+  },
+  "items": [
+    {
+      "bookingDate": "2025-10-01",
+      "amount": "25435.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-02",
+      "amount": "47079.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-03",
+      "amount": "26228.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-04",
+      "amount": "50264.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-05",
+      "amount": "45104.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-05",
+      "amount": "200000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Перевод на карту предпринимателя",
+      "category": "own_transfer"
+    },
+    {
+      "bookingDate": "2025-10-06",
+      "amount": "49946.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-07",
+      "amount": "48243.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-08",
+      "amount": "38484.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-09",
+      "amount": "42953.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-10",
+      "amount": "34142.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-10",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, первая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2025-10-11",
+      "amount": "37677.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-12",
+      "amount": "35471.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-13",
+      "amount": "47964.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-14",
+      "amount": "28654.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-15",
+      "amount": "45721.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-15",
+      "amount": "250000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Платёж по кредиту",
+      "category": "loan_payment"
+    },
+    {
+      "bookingDate": "2025-10-16",
+      "amount": "41877.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-17",
+      "amount": "39170.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-18",
+      "amount": "38531.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-19",
+      "amount": "40967.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-20",
+      "amount": "53684.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-20",
+      "amount": "60000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Коммунальные платежи и связь",
+      "category": "other"
+    },
+    {
+      "bookingDate": "2025-10-21",
+      "amount": "53389.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-22",
+      "amount": "31651.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-23",
+      "amount": "46517.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-24",
+      "amount": "35535.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-25",
+      "amount": "28861.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-25",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, вторая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2025-10-25",
+      "amount": "150000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Аренда помещения",
+      "category": "rent"
+    },
+    {
+      "bookingDate": "2025-10-26",
+      "amount": "38883.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-27",
+      "amount": "45738.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-27",
+      "amount": "180000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Поставщики кофе и продуктов",
+      "category": "suppliers"
+    },
+    {
+      "bookingDate": "2025-10-28",
+      "amount": "47603.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-28",
+      "amount": "160000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "НДФЛ и страховые взносы",
+      "category": "taxes"
+    },
+    {
+      "bookingDate": "2025-10-29",
+      "amount": "42262.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-30",
+      "amount": "32475.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-10-31",
+      "amount": "29492.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-01",
+      "amount": "28573.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-02",
+      "amount": "27968.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-03",
+      "amount": "38089.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-04",
+      "amount": "46942.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-05",
+      "amount": "49972.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-05",
+      "amount": "200000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Перевод на карту предпринимателя",
+      "category": "own_transfer"
+    },
+    {
+      "bookingDate": "2025-11-06",
+      "amount": "47245.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-07",
+      "amount": "26651.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-08",
+      "amount": "41730.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-09",
+      "amount": "38644.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-10",
+      "amount": "45417.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-10",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, первая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2025-11-11",
+      "amount": "50117.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-12",
+      "amount": "27368.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-13",
+      "amount": "25828.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-14",
+      "amount": "48596.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-15",
+      "amount": "39971.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-15",
+      "amount": "250000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Платёж по кредиту",
+      "category": "loan_payment"
+    },
+    {
+      "bookingDate": "2025-11-16",
+      "amount": "46548.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-17",
+      "amount": "43220.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-18",
+      "amount": "26977.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-19",
+      "amount": "51292.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-20",
+      "amount": "33706.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-20",
+      "amount": "60000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Коммунальные платежи и связь",
+      "category": "other"
+    },
+    {
+      "bookingDate": "2025-11-21",
+      "amount": "41577.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-22",
+      "amount": "24670.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-23",
+      "amount": "50126.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-24",
+      "amount": "24863.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-25",
+      "amount": "40290.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-25",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, вторая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2025-11-25",
+      "amount": "150000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Аренда помещения",
+      "category": "rent"
+    },
+    {
+      "bookingDate": "2025-11-26",
+      "amount": "43699.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-27",
+      "amount": "32308.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-27",
+      "amount": "180000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Поставщики кофе и продуктов",
+      "category": "suppliers"
+    },
+    {
+      "bookingDate": "2025-11-28",
+      "amount": "26899.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-28",
+      "amount": "160000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "НДФЛ и страховые взносы",
+      "category": "taxes"
+    },
+    {
+      "bookingDate": "2025-11-29",
+      "amount": "37237.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-11-30",
+      "amount": "43477.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-01",
+      "amount": "57459.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-02",
+      "amount": "39328.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-03",
+      "amount": "50757.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-04",
+      "amount": "70754.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-05",
+      "amount": "35412.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-05",
+      "amount": "200000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Перевод на карту предпринимателя",
+      "category": "own_transfer"
+    },
+    {
+      "bookingDate": "2025-12-06",
+      "amount": "41904.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-07",
+      "amount": "76656.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-08",
+      "amount": "57751.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-09",
+      "amount": "71149.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-10",
+      "amount": "75591.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-10",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, первая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2025-12-11",
+      "amount": "68572.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-12",
+      "amount": "54689.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-13",
+      "amount": "43912.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-14",
+      "amount": "54707.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-15",
+      "amount": "68549.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-15",
+      "amount": "250000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Платёж по кредиту",
+      "category": "loan_payment"
+    },
+    {
+      "bookingDate": "2025-12-16",
+      "amount": "72441.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-17",
+      "amount": "72314.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-18",
+      "amount": "65750.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-19",
+      "amount": "75813.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-20",
+      "amount": "49624.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-20",
+      "amount": "60000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Коммунальные платежи и связь",
+      "category": "other"
+    },
+    {
+      "bookingDate": "2025-12-21",
+      "amount": "50573.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-22",
+      "amount": "70082.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-23",
+      "amount": "72117.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-24",
+      "amount": "46374.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-25",
+      "amount": "56083.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-25",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, вторая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2025-12-25",
+      "amount": "150000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Аренда помещения",
+      "category": "rent"
+    },
+    {
+      "bookingDate": "2025-12-26",
+      "amount": "49338.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-27",
+      "amount": "46783.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-27",
+      "amount": "180000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Поставщики кофе и продуктов",
+      "category": "suppliers"
+    },
+    {
+      "bookingDate": "2025-12-28",
+      "amount": "35642.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-28",
+      "amount": "160000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "НДФЛ и страховые взносы",
+      "category": "taxes"
+    },
+    {
+      "bookingDate": "2025-12-29",
+      "amount": "40468.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-30",
+      "amount": "53396.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2025-12-31",
+      "amount": "76012.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-01",
+      "amount": "39006.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-02",
+      "amount": "36388.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-03",
+      "amount": "29715.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-04",
+      "amount": "24814.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-05",
+      "amount": "30732.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-05",
+      "amount": "200000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Перевод на карту предпринимателя",
+      "category": "own_transfer"
+    },
+    {
+      "bookingDate": "2026-01-06",
+      "amount": "43652.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-07",
+      "amount": "23717.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-08",
+      "amount": "35096.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-09",
+      "amount": "28146.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-10",
+      "amount": "41562.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-10",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, первая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2026-01-11",
+      "amount": "31900.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-12",
+      "amount": "38149.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-13",
+      "amount": "27047.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-14",
+      "amount": "27697.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-15",
+      "amount": "40875.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-15",
+      "amount": "250000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Платёж по кредиту",
+      "category": "loan_payment"
+    },
+    {
+      "bookingDate": "2026-01-16",
+      "amount": "29934.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-17",
+      "amount": "23398.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-18",
+      "amount": "35473.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-19",
+      "amount": "42889.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-20",
+      "amount": "30721.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-20",
+      "amount": "60000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Коммунальные платежи и связь",
+      "category": "other"
+    },
+    {
+      "bookingDate": "2026-01-21",
+      "amount": "28911.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-22",
+      "amount": "38275.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-23",
+      "amount": "44543.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-24",
+      "amount": "22217.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-25",
+      "amount": "44090.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-25",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, вторая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2026-01-25",
+      "amount": "150000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Аренда помещения",
+      "category": "rent"
+    },
+    {
+      "bookingDate": "2026-01-26",
+      "amount": "30893.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-27",
+      "amount": "25718.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-27",
+      "amount": "180000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Поставщики кофе и продуктов",
+      "category": "suppliers"
+    },
+    {
+      "bookingDate": "2026-01-28",
+      "amount": "43863.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-28",
+      "amount": "160000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "НДФЛ и страховые взносы",
+      "category": "taxes"
+    },
+    {
+      "bookingDate": "2026-01-29",
+      "amount": "43073.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-30",
+      "amount": "41509.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-01-31",
+      "amount": "25997.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-01",
+      "amount": "31341.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-02",
+      "amount": "33784.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-03",
+      "amount": "43839.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-04",
+      "amount": "33646.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-05",
+      "amount": "37556.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-05",
+      "amount": "200000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Перевод на карту предпринимателя",
+      "category": "own_transfer"
+    },
+    {
+      "bookingDate": "2026-02-06",
+      "amount": "39155.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-07",
+      "amount": "34324.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-08",
+      "amount": "39962.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-09",
+      "amount": "35869.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-10",
+      "amount": "49518.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-10",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, первая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2026-02-11",
+      "amount": "32967.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-12",
+      "amount": "23510.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-13",
+      "amount": "44989.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-14",
+      "amount": "33817.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-15",
+      "amount": "40850.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-15",
+      "amount": "250000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Платёж по кредиту",
+      "category": "loan_payment"
+    },
+    {
+      "bookingDate": "2026-02-16",
+      "amount": "34977.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-17",
+      "amount": "31791.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-18",
+      "amount": "32634.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-19",
+      "amount": "33953.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-20",
+      "amount": "29267.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-20",
+      "amount": "60000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Коммунальные платежи и связь",
+      "category": "other"
+    },
+    {
+      "bookingDate": "2026-02-21",
+      "amount": "27789.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-22",
+      "amount": "44549.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-23",
+      "amount": "43407.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-24",
+      "amount": "50890.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-25",
+      "amount": "36234.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-25",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, вторая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2026-02-25",
+      "amount": "150000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Аренда помещения",
+      "category": "rent"
+    },
+    {
+      "bookingDate": "2026-02-26",
+      "amount": "38902.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-27",
+      "amount": "37641.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-27",
+      "amount": "180000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Поставщики кофе и продуктов",
+      "category": "suppliers"
+    },
+    {
+      "bookingDate": "2026-02-28",
+      "amount": "52839.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-02-28",
+      "amount": "160000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "НДФЛ и страховые взносы",
+      "category": "taxes"
+    },
+    {
+      "bookingDate": "2026-03-01",
+      "amount": "31829.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-02",
+      "amount": "38598.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-03",
+      "amount": "55038.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-04",
+      "amount": "63839.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-05",
+      "amount": "38138.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-05",
+      "amount": "200000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Перевод на карту предпринимателя",
+      "category": "own_transfer"
+    },
+    {
+      "bookingDate": "2026-03-06",
+      "amount": "35811.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-07",
+      "amount": "43457.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-08",
+      "amount": "45596.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-09",
+      "amount": "29166.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-10",
+      "amount": "36028.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-10",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, первая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2026-03-11",
+      "amount": "61889.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-12",
+      "amount": "54512.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-13",
+      "amount": "39716.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-14",
+      "amount": "47485.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-15",
+      "amount": "33609.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-15",
+      "amount": "250000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Платёж по кредиту",
+      "category": "loan_payment"
+    },
+    {
+      "bookingDate": "2026-03-16",
+      "amount": "41442.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-17",
+      "amount": "49720.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-18",
+      "amount": "55880.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-19",
+      "amount": "41942.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-20",
+      "amount": "46951.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-20",
+      "amount": "60000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Коммунальные платежи и связь",
+      "category": "other"
+    },
+    {
+      "bookingDate": "2026-03-21",
+      "amount": "36592.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-22",
+      "amount": "60055.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-23",
+      "amount": "43264.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-24",
+      "amount": "36181.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-25",
+      "amount": "62315.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-25",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, вторая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2026-03-25",
+      "amount": "150000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Аренда помещения",
+      "category": "rent"
+    },
+    {
+      "bookingDate": "2026-03-26",
+      "amount": "33528.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-27",
+      "amount": "57407.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-27",
+      "amount": "180000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Поставщики кофе и продуктов",
+      "category": "suppliers"
+    },
+    {
+      "bookingDate": "2026-03-28",
+      "amount": "49570.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-28",
+      "amount": "160000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "НДФЛ и страховые взносы",
+      "category": "taxes"
+    },
+    {
+      "bookingDate": "2026-03-29",
+      "amount": "29915.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-30",
+      "amount": "53780.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-03-31",
+      "amount": "46747.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-01",
+      "amount": "42628.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-02",
+      "amount": "67181.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-03",
+      "amount": "38084.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-04",
+      "amount": "59549.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-05",
+      "amount": "34538.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-05",
+      "amount": "200000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Перевод на карту предпринимателя",
+      "category": "own_transfer"
+    },
+    {
+      "bookingDate": "2026-04-06",
+      "amount": "35990.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-07",
+      "amount": "56319.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-08",
+      "amount": "48743.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-09",
+      "amount": "47352.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-10",
+      "amount": "62345.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-10",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, первая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2026-04-11",
+      "amount": "48881.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-12",
+      "amount": "55121.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-13",
+      "amount": "59580.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-14",
+      "amount": "51405.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-15",
+      "amount": "38752.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-15",
+      "amount": "250000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Платёж по кредиту",
+      "category": "loan_payment"
+    },
+    {
+      "bookingDate": "2026-04-16",
+      "amount": "58911.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-17",
+      "amount": "68453.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-18",
+      "amount": "53809.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-19",
+      "amount": "65262.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-20",
+      "amount": "60564.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-20",
+      "amount": "60000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Коммунальные платежи и связь",
+      "category": "other"
+    },
+    {
+      "bookingDate": "2026-04-21",
+      "amount": "70813.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-22",
+      "amount": "37190.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-23",
+      "amount": "38609.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-24",
+      "amount": "67480.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-25",
+      "amount": "58588.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-25",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, вторая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2026-04-25",
+      "amount": "150000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Аренда помещения",
+      "category": "rent"
+    },
+    {
+      "bookingDate": "2026-04-26",
+      "amount": "66580.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-27",
+      "amount": "40805.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-27",
+      "amount": "180000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Поставщики кофе и продуктов",
+      "category": "suppliers"
+    },
+    {
+      "bookingDate": "2026-04-28",
+      "amount": "34779.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-28",
+      "amount": "160000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "НДФЛ и страховые взносы",
+      "category": "taxes"
+    },
+    {
+      "bookingDate": "2026-04-29",
+      "amount": "63094.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-04-30",
+      "amount": "68595.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-01",
+      "amount": "59436.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-02",
+      "amount": "66998.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-03",
+      "amount": "65929.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-04",
+      "amount": "55522.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-05",
+      "amount": "51151.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-05",
+      "amount": "200000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Перевод на карту предпринимателя",
+      "category": "own_transfer"
+    },
+    {
+      "bookingDate": "2026-05-06",
+      "amount": "80134.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-07",
+      "amount": "60107.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-08",
+      "amount": "65332.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-09",
+      "amount": "82575.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-10",
+      "amount": "66122.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-10",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, первая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2026-05-11",
+      "amount": "66563.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-12",
+      "amount": "37847.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-13",
+      "amount": "71089.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-14",
+      "amount": "71979.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-15",
+      "amount": "72677.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-15",
+      "amount": "250000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Платёж по кредиту",
+      "category": "loan_payment"
+    },
+    {
+      "bookingDate": "2026-05-16",
+      "amount": "61188.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-17",
+      "amount": "64548.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-18",
+      "amount": "62954.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-19",
+      "amount": "41212.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-20",
+      "amount": "51289.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-20",
+      "amount": "60000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Коммунальные платежи и связь",
+      "category": "other"
+    },
+    {
+      "bookingDate": "2026-05-21",
+      "amount": "60692.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-22",
+      "amount": "74246.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-23",
+      "amount": "42283.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-24",
+      "amount": "52750.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-25",
+      "amount": "72043.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-25",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, вторая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2026-05-25",
+      "amount": "150000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Аренда помещения",
+      "category": "rent"
+    },
+    {
+      "bookingDate": "2026-05-26",
+      "amount": "41658.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-27",
+      "amount": "59196.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-27",
+      "amount": "180000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Поставщики кофе и продуктов",
+      "category": "suppliers"
+    },
+    {
+      "bookingDate": "2026-05-28",
+      "amount": "78573.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-28",
+      "amount": "160000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "НДФЛ и страховые взносы",
+      "category": "taxes"
+    },
+    {
+      "bookingDate": "2026-05-29",
+      "amount": "77233.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-30",
+      "amount": "70460.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-05-31",
+      "amount": "66214.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-01",
+      "amount": "64239.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-02",
+      "amount": "47582.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-03",
+      "amount": "97766.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-04",
+      "amount": "69348.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-05",
+      "amount": "75754.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-05",
+      "amount": "200000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Перевод на карту предпринимателя",
+      "category": "own_transfer"
+    },
+    {
+      "bookingDate": "2026-06-06",
+      "amount": "87684.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-07",
+      "amount": "66258.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-08",
+      "amount": "98394.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-09",
+      "amount": "44446.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-10",
+      "amount": "53651.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-10",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, первая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2026-06-11",
+      "amount": "88818.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-12",
+      "amount": "91282.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-13",
+      "amount": "90343.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-14",
+      "amount": "67231.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-15",
+      "amount": "52720.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-15",
+      "amount": "250000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Платёж по кредиту",
+      "category": "loan_payment"
+    },
+    {
+      "bookingDate": "2026-06-16",
+      "amount": "89247.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-17",
+      "amount": "71831.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-18",
+      "amount": "99172.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-19",
+      "amount": "86159.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-20",
+      "amount": "65319.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-20",
+      "amount": "60000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Коммунальные платежи и связь",
+      "category": "other"
+    },
+    {
+      "bookingDate": "2026-06-21",
+      "amount": "46288.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-22",
+      "amount": "80307.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-23",
+      "amount": "63697.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-24",
+      "amount": "67672.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-25",
+      "amount": "47310.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-25",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, вторая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2026-06-25",
+      "amount": "150000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Аренда помещения",
+      "category": "rent"
+    },
+    {
+      "bookingDate": "2026-06-26",
+      "amount": "55237.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-27",
+      "amount": "45110.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-27",
+      "amount": "180000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Поставщики кофе и продуктов",
+      "category": "suppliers"
+    },
+    {
+      "bookingDate": "2026-06-28",
+      "amount": "51452.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-28",
+      "amount": "160000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "НДФЛ и страховые взносы",
+      "category": "taxes"
+    },
+    {
+      "bookingDate": "2026-06-29",
+      "amount": "89717.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-06-30",
+      "amount": "45966.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-01",
+      "amount": "45375.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-02",
+      "amount": "34704.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-03",
+      "amount": "49862.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-04",
+      "amount": "31522.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-05",
+      "amount": "65048.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-05",
+      "amount": "200000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Перевод на карту предпринимателя",
+      "category": "own_transfer"
+    },
+    {
+      "bookingDate": "2026-07-06",
+      "amount": "59134.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-07",
+      "amount": "61805.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-08",
+      "amount": "48233.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-09",
+      "amount": "38554.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-10",
+      "amount": "55008.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-10",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, первая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2026-07-11",
+      "amount": "35598.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-12",
+      "amount": "51644.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-13",
+      "amount": "64481.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-14",
+      "amount": "58160.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-15",
+      "amount": "46465.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-15",
+      "amount": "250000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Платёж по кредиту",
+      "category": "loan_payment"
+    },
+    {
+      "bookingDate": "2026-07-16",
+      "amount": "46811.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-17",
+      "amount": "48558.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-18",
+      "amount": "37946.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-19",
+      "amount": "51979.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-20",
+      "amount": "36914.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-20",
+      "amount": "60000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Коммунальные платежи и связь",
+      "category": "other"
+    },
+    {
+      "bookingDate": "2026-07-21",
+      "amount": "49539.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-22",
+      "amount": "59645.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-23",
+      "amount": "55920.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-24",
+      "amount": "57617.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-25",
+      "amount": "65493.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-25",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, вторая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2026-07-25",
+      "amount": "150000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Аренда помещения",
+      "category": "rent"
+    },
+    {
+      "bookingDate": "2026-07-26",
+      "amount": "53830.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-27",
+      "amount": "58886.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-27",
+      "amount": "180000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Поставщики кофе и продуктов",
+      "category": "suppliers"
+    },
+    {
+      "bookingDate": "2026-07-28",
+      "amount": "31874.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-28",
+      "amount": "160000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "НДФЛ и страховые взносы",
+      "category": "taxes"
+    },
+    {
+      "bookingDate": "2026-07-29",
+      "amount": "45973.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-30",
+      "amount": "66409.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-07-31",
+      "amount": "37013.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-01",
+      "amount": "53266.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-02",
+      "amount": "31822.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-03",
+      "amount": "49648.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-04",
+      "amount": "45621.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-05",
+      "amount": "43577.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-05",
+      "amount": "200000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Перевод на карту предпринимателя",
+      "category": "own_transfer"
+    },
+    {
+      "bookingDate": "2026-08-06",
+      "amount": "40815.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-07",
+      "amount": "39329.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-08",
+      "amount": "61845.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-09",
+      "amount": "35922.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-10",
+      "amount": "42186.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-10",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, первая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2026-08-11",
+      "amount": "40499.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-12",
+      "amount": "71742.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-13",
+      "amount": "35020.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-14",
+      "amount": "33508.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-15",
+      "amount": "59906.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-15",
+      "amount": "250000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Платёж по кредиту",
+      "category": "loan_payment"
+    },
+    {
+      "bookingDate": "2026-08-16",
+      "amount": "60374.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-17",
+      "amount": "50441.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-18",
+      "amount": "31722.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-19",
+      "amount": "62710.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-20",
+      "amount": "30968.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-20",
+      "amount": "60000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Коммунальные платежи и связь",
+      "category": "other"
+    },
+    {
+      "bookingDate": "2026-08-21",
+      "amount": "52970.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-22",
+      "amount": "48932.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-23",
+      "amount": "49085.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-24",
+      "amount": "41474.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-25",
+      "amount": "66777.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-25",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, вторая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2026-08-25",
+      "amount": "150000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Аренда помещения",
+      "category": "rent"
+    },
+    {
+      "bookingDate": "2026-08-26",
+      "amount": "56335.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-27",
+      "amount": "67114.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-27",
+      "amount": "180000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Поставщики кофе и продуктов",
+      "category": "suppliers"
+    },
+    {
+      "bookingDate": "2026-08-28",
+      "amount": "42618.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-28",
+      "amount": "160000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "НДФЛ и страховые взносы",
+      "category": "taxes"
+    },
+    {
+      "bookingDate": "2026-08-29",
+      "amount": "38500.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-30",
+      "amount": "48841.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-08-31",
+      "amount": "66433.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-01",
+      "amount": "66157.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-02",
+      "amount": "39341.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-03",
+      "amount": "46097.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-04",
+      "amount": "39434.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-05",
+      "amount": "51469.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-05",
+      "amount": "200000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Перевод на карту предпринимателя",
+      "category": "own_transfer"
+    },
+    {
+      "bookingDate": "2026-09-06",
+      "amount": "52934.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-07",
+      "amount": "59323.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-08",
+      "amount": "61953.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-09",
+      "amount": "31128.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-10",
+      "amount": "58762.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-10",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, первая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2026-09-11",
+      "amount": "51890.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-12",
+      "amount": "47270.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-13",
+      "amount": "51458.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-14",
+      "amount": "58433.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-15",
+      "amount": "51184.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-15",
+      "amount": "250000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Платёж по кредиту",
+      "category": "loan_payment"
+    },
+    {
+      "bookingDate": "2026-09-16",
+      "amount": "66415.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-17",
+      "amount": "67290.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-18",
+      "amount": "51993.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-19",
+      "amount": "63611.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-20",
+      "amount": "61360.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-20",
+      "amount": "60000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Коммунальные платежи и связь",
+      "category": "other"
+    },
+    {
+      "bookingDate": "2026-09-21",
+      "amount": "50743.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-22",
+      "amount": "69793.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-23",
+      "amount": "45230.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-24",
+      "amount": "67091.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-25",
+      "amount": "52312.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-25",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, вторая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2026-09-25",
+      "amount": "150000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Аренда помещения",
+      "category": "rent"
+    },
+    {
+      "bookingDate": "2026-09-26",
+      "amount": "70596.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-27",
+      "amount": "34218.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-27",
+      "amount": "180000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Поставщики кофе и продуктов",
+      "category": "suppliers"
+    },
+    {
+      "bookingDate": "2026-09-28",
+      "amount": "45638.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-28",
+      "amount": "160000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "НДФЛ и страховые взносы",
+      "category": "taxes"
+    },
+    {
+      "bookingDate": "2026-09-29",
+      "amount": "45296.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-09-30",
+      "amount": "41581.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-01",
+      "amount": "34958.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-02",
+      "amount": "55574.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-03",
+      "amount": "48968.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-04",
+      "amount": "60021.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-05",
+      "amount": "30036.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-05",
+      "amount": "200000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Перевод на карту предпринимателя",
+      "category": "own_transfer"
+    },
+    {
+      "bookingDate": "2026-10-06",
+      "amount": "46990.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-07",
+      "amount": "30758.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-08",
+      "amount": "55866.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-09",
+      "amount": "39734.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-10",
+      "amount": "45882.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-10",
+      "amount": "230000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Зарплата сотрудникам, первая половина",
+      "category": "salary"
+    },
+    {
+      "bookingDate": "2026-10-11",
+      "amount": "36272.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-12",
+      "amount": "32974.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-13",
+      "amount": "33399.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-14",
+      "amount": "30375.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-15",
+      "amount": "36056.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-15",
+      "amount": "250000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Платёж по кредиту",
+      "category": "loan_payment"
+    },
+    {
+      "bookingDate": "2026-10-16",
+      "amount": "44466.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-17",
+      "amount": "60153.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-18",
+      "amount": "38007.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-19",
+      "amount": "58983.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-20",
+      "amount": "58861.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возмещение по операциям эквайринга",
+      "category": "acquiring"
+    },
+    {
+      "bookingDate": "2026-10-20",
+      "amount": "60000.00",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Коммунальные платежи и связь",
+      "category": "other"
+    }
+  ]
+}

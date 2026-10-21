@@ -1,0 +1,253 @@
+# Демо-мир: компании, люди, их данные в реестрах и банке. Единственный источник правды для моков WireMock
+# (python seed/gen_mocks.py → wiremock/) и golden-тестов (tests/test_scenarios.py).
+# ИНН и ОГРН — с верными контрольными цифрами ФНС, люди и компании вымышленные. Суммы — рубли, ГИР БО — тыс. ₽.
+today: "2026-10-21"
+
+people:
+  smirnova:  { fio: [Смирнова, Анна, Сергеевна], inn: "770100000079" }
+  orlov:     { fio: [Орлов, Павел, Дмитриевич], inn: "770100000216" }
+  kravets:   { fio: [Кравец, Елена, Викторовна], inn: "770100000390" }
+  li:        { fio: [Ли, Алексей, Николаевич], inn: "770100000463" }
+  morozov:   { fio: [Морозов, Константин, Сергеевич], inn: "770100000537" }
+  belov:     { fio: [Белов, Игорь, Андреевич], inn: "770100000600" }
+  ivanov:    { fio: [Иванов, Иван, Иванович], inn: "770100000784" }
+  sidorov:   { fio: [Сидоров, Пётр, Алексеевич], inn: "770100000858" }
+  nikitin:   { fio: [Никитин, Сергей, Олегович], inn: "770100000921" }
+  fomin:     { fio: [Фомин, Андрей, Петрович], inn: "770100001026" }
+  zakharov:  { fio: [Захаров, Олег, Викторович], inn: "770100001107" }
+  kotov:     { fio: [Котов, Дмитрий, Романович], inn: "770100000142" }
+  polyakova: { fio: [Полякова, Мария, Игоревна], inn: "770100001273" }
+  gusev:     { fio: [Гусев, Артём, Ильич], inn: "770100001347" }
+
+# inflows — поступления за 12 полных месяцев до today (2025-10 … 2026-09), от старого к новому.
+# outflows — регулярные платежи [назначение, день месяца, сумма, категория]; если не заданы — генерируются от оборотов.
+# bki.credits — [сумма, остаток долга, платёж в месяц, макс. просрочка в днях]. eio — [человек, должность].
+# scenario.expect — golden-результат движка в режиме commit при работающих источниках.
+companies:
+  - key: smirnova
+    preset: S7
+    name: "ИП Смирнова Анна Сергеевна"
+    inn: "770100000079"
+    ogrn: "324774600000013"
+    owner: smirnova
+    registered: "2024-10-15"
+    okved: ["56.30", "Подача напитков"]
+    msp: 1
+    headcount: 9
+    tax: { regime: USN, debt: 0 }
+    retail: true
+    inflows: [1250000, 1150000, 1800000, 1050000, 1050000, 1400000, 1600000, 1950000, 2100000, 1550000, 1500000, 1600000]
+    balance: 330000
+    outflows:
+      - ["Перевод на карту предпринимателя", 5, 200000, own_transfer]
+      - ["Зарплата сотрудникам, первая половина", 10, 230000, salary]
+      - ["Платёж по кредиту", 15, 250000, loan_payment]
+      - ["Коммунальные платежи и связь", 20, 60000, other]
+      - ["Зарплата сотрудникам, вторая половина", 25, 230000, salary]
+      - ["Аренда помещения", 25, 150000, rent]
+      - ["Поставщики кофе и продуктов", 27, 180000, suppliers]
+      - ["НДФЛ и страховые взносы", 28, 160000, taxes]
+    access: [[smirnova, owner]]
+    bki: { credits: [[5000000, 3600000, 250000, 0]], requests: 1 }
+    scenario:
+      request: { product: OVERDRAFT, amount: 400000, term_months: 12, goal: cash_gap }
+      expect: { outcome: APPROVE, risk_class: B, score: 695, rate: "17.00", amount: "400000.00" }
+
+  - key: vector
+    preset: S3
+    name: "ООО «Вектор-Трейд»"
+    inn: "7701000019"
+    ogrn: "1227746000020"
+    registered: "2022-03-10"
+    okved: ["46.90", "Торговля оптовая неспециализированная"]
+    msp: 2
+    headcount: 25
+    eio: [[orlov, "Генеральный директор"]]
+    participants: [[orlov, 100]]
+    charter: { decisionMethod: protocol }
+    girbo: { assets: 30000, revenue: 90000, profit: 2400 }
+    tax: { regime: OSN, debt: 0 }
+    inflows: [1300000, 3200000, 1100000, 2700000, 1000000, 2900000, 1400000, 3300000, 1100000, 1900000, 1600000, 2500000]
+    balance: 900000
+    access: [[orlov, owner]]
+    bki: { credits: [[6000000, 3500000, 250000, 0], [3000000, 1800000, 150000, 0]], requests: 3 }
+    scenario:
+      request: { product: WORKING_CAPITAL, amount: 5000000, term_months: 24, goal: stock }
+      expect: { outcome: COUNTER_OFFER, counter: [AMOUNT], risk_class: B, score: 685, rate: "22.70", amount: "3200000.00",
+                alternative: { amount: "4400000.00", term_months: 36 } }
+
+  - key: masterstroy
+    preset: S2
+    name: "ООО «Мастер-Строй»"
+    inn: "7701000026"
+    ogrn: "1197746000033"
+    registered: "2019-04-02"
+    okved: ["41.20", "Строительство жилых и нежилых зданий"]
+    msp: 2
+    headcount: 40
+    eio: [[kravets, "Директор"]]
+    participants: [[kravets, 40], [li, 35], [morozov, 25]]
+    charter: { decisionMethod: protocol }
+    girbo: { assets: 20000, revenue: 48000, profit: 1800 }
+    tax: { regime: OSN, debt: 0 }
+    inflows: [2200000, 3600000, 2400000, 3900000, 2000000, 3300000, 2900000, 4100000, 2600000, 3000000, 2800000, 3200000]
+    balance: 1500000
+    access: [[kravets, owner]]
+    bki: { credits: [[9000000, 6000000, 300000, 0]], requests: 1 }
+    eis:
+      - { regNum: "2770100002626000014", customer: "ГБУ «Городской заказчик № 7»", price: 18000000,
+          signDate: "2026-09-15", endDate: "2027-03-31", advancePercent: 30 }
+    scenario:
+      request: { product: WORKING_CAPITAL, amount: 6000000, term_months: 24, goal: stock }
+      expect: { outcome: REQUEST_INFO, asks: [REQ_CORP_APPROVAL], risk_class: A, score: 785 }
+
+  - key: romashka
+    preset: S4
+    name: "ООО «Ромашка-Сервис»"
+    inn: "7701000033"
+    ogrn: "1217746000064"
+    registered: "2021-06-01"
+    okved: ["81.21", "Деятельность по общей уборке зданий"]
+    msp: 1
+    headcount: 30
+    eio: [[belov, "Директор"]]
+    participants: [[belov, 100]]
+    charter: { decisionMethod: protocol }
+    girbo: { assets: 6000, revenue: 14000, profit: 300 }
+    tax: { regime: USN, debt: 72000 }
+    inflows: [1100000, 1200000, 1150000, 1250000, 1100000, 1200000, 1300000, 1150000, 1200000, 1250000, 1200000, 1150000]
+    balance: 250000
+    access: [[belov, owner]]
+    bki: { credits: [[2000000, 900000, 80000, 0]], requests: 2 }
+    scenario:
+      request: { product: EXPRESS, amount: 2000000, term_months: 18, goal: cash_gap }
+      expect: { outcome: REJECT, kind: STOP_FIXABLE, reasons_include: [STOP_TAX_DEBT] }
+
+  - key: hleb
+    preset: S5
+    name: "ООО «Северный Хлеб»"
+    inn: "7701000040"
+    ogrn: "1177746000046"
+    registered: "2017-06-20"
+    okved: ["10.71", "Производство хлеба и мучных кондитерских изделий, тортов и пирожных недлительного хранения"]
+    msp: 2
+    headcount: 60
+    eio: [[ivanov, "Генеральный директор"]]
+    participants: [[ivanov, 60], [sidorov, 40]]
+    charter: { decisionMethod: protocol }
+    girbo: { assets: 42000, revenue: 96000, profit: 3100 }
+    tax: { regime: OSN, debt: 0 }
+    inflows: [7600000, 8300000, 7900000, 8600000, 7400000, 8200000, 8000000, 8500000, 7800000, 8300000, 8400000, 8200000]
+    balance: 2400000
+    access: [[ivanov, owner]]
+    bki: { credits: [[8000000, 4500000, 190000, 0], [5000000, 2600000, 120000, 0]], requests: 1 }
+    scenario:
+      request: { product: WORKING_CAPITAL, amount: 12000000, term_months: 24, goal: stock, corporate_approval: true }
+      expect: { outcome: MANUAL_REVIEW, reasons_include: [POL_AUTHORITY_EXCEEDED], risk_class: A, score: 810,
+                rate: "18.40", amount: "12000000.00" }
+
+  - key: kotov
+    preset: N2
+    name: "ИП Котов Дмитрий Романович"
+    inn: "770100000142"
+    ogrn: "322774600000029"
+    owner: kotov
+    registered: "2022-05-16"
+    okved: ["49.41", "Деятельность автомобильного грузового транспорта"]
+    msp: 1
+    headcount: 3
+    tax: { regime: USN, debt: 0 }
+    inflows: [1400000, 2300000, 1400000, 2300000, 1300000, 1900000, 1600000, 2500000, 1500000, 1800000, 1600000, 2000000]
+    balance: 400000
+    access: [[kotov, owner]]
+    bki: { credits: [[4800000, 2100000, 200000, 0]], requests: 2 }
+    scenario:
+      request: { product: EXPRESS, amount: 3500000, term_months: 24, goal: equipment }
+      expect: { outcome: APPROVE, risk_class: A, score: 725, rate: "21.30", amount: "3500000.00" }
+      expect_without_bki: { outcome: MANUAL_REVIEW, reasons_include: [DATA_SOURCE_UNAVAILABLE] }
+
+  - key: sklad
+    preset: R8
+    name: "ООО «Склад-Логистик»"
+    inn: "7701000058"
+    ogrn: "1187746000056"
+    registered: "2018-02-12"
+    okved: ["52.10", "Деятельность по складированию и хранению"]
+    msp: 2
+    headcount: 45
+    eio: [[nikitin, "Генеральный директор"]]
+    participants: [[nikitin, 60], [ivanov, 40]]
+    charter: { decisionMethod: notary }
+    girbo: { assets: 120000, revenue: 150000, profit: 6000 }
+    tax: { regime: OSN, debt: 0 }
+    inflows: [4300000, 4700000, 4400000, 4600000, 4200000, 4500000, 4600000, 4800000, 4300000, 4500000, 4600000, 4500000]
+    balance: 3100000
+    kyc_director: fomin            # в анкете банка другой директор → расхождение данных
+    access: [[fomin, owner], [ivanov, view]]
+    bki: { credits: [[20000000, 12000000, 600000, 0], [10000000, 7000000, 400000, 0]], requests: 1 }
+    scenario:
+      request: { product: INVESTMENT, amount: 25000000, term_months: 60, goal: equipment, collateral_value: 36000000 }
+      expect: { outcome: MANUAL_REVIEW, reasons_include: [DATA_CONFLICT, POL_PRODUCT_REVIEW] }
+
+  - key: lenta
+    preset: R8
+    name: "ООО «Лента-Опт»"
+    inn: "7701000065"
+    ogrn: "1167746000070"
+    registered: "2016-09-05"
+    okved: ["46.39", "Торговля оптовая неспециализированная пищевыми продуктами, напитками и табачными изделиями"]
+    msp: 2
+    headcount: 20
+    eio: [[zakharov, "Генеральный директор"]]
+    participants: [[zakharov, 100]]
+    charter: { decisionMethod: protocol }
+    girbo: { assets: 25000, revenue: 70000, profit: 1500 }
+    tax: { regime: OSN, debt: 0 }
+    inflows: [5200000, 5600000, 5100000, 5900000, 4800000, 5400000, 5500000, 6000000, 5300000, 5700000, 5600000, 5900000]
+    balance: 1800000
+    access: [[zakharov, owner], [ivanov, prepare]]
+    bki: { credits: [[5000000, 2500000, 150000, 0]], requests: 1 }
+
+  - key: pole
+    preset: AGRO
+    name: "ООО «Зелёное Поле»"
+    inn: "7701000072"
+    ogrn: "1207746000087"
+    registered: "2020-03-11"
+    okved: ["01.11", "Выращивание зерновых (кроме риса), зернобобовых культур и семян масличных культур"]
+    msp: 2
+    headcount: 35
+    eio: [[polyakova, "Генеральный директор"]]
+    participants: [[polyakova, 100]]
+    charter: { decisionMethod: protocol }
+    girbo: { assets: 50000, revenue: 40000, profit: 2200 }
+    tax: { regime: ESHN, debt: 0 }
+    inflows: [6500000, 2000000, 800000, 600000, 500000, 700000, 1000000, 1500000, 2000000, 3000000, 7500000, 9900000]
+    balance: 4200000
+    access: [[polyakova, owner]]
+    bki: { credits: [[6000000, 1800000, 150000, 0]], requests: 1 }
+    scenario:
+      request: { product: AGRO_SEASONAL, amount: 8000000, term_months: 10, goal: stock }
+      expect: { outcome: APPROVE, risk_class: A, score: 740, rate: "16.00", amount: "8000000.00" }
+
+  - key: cloud
+    preset: S8
+    name: "ООО «Код и Облако»"
+    inn: "7701000080"
+    ogrn: "1237746000095"
+    registered: "2023-02-14"
+    okved: ["62.01", "Разработка компьютерного программного обеспечения"]
+    msp: 1
+    headcount: 12
+    eio: [[gusev, "Генеральный директор"]]
+    participants: [[gusev, 100]]
+    charter: { decisionMethod: protocol }
+    girbo: { assets: 9000, revenue: 32000, profit: 1200 }
+    tax: { regime: USN, debt: 0 }
+    inflows: [2100000, 3000000, 1800000, 2700000, 1700000, 2500000, 2400000, 3200000, 1800000, 2900000, 2800000, 3100000]
+    balance: 1300000
+    access: [[gusev, owner]]
+    bki: { credits: [], requests: 0 }
+    scenario:
+      request: { product: INVESTMENT, amount: 5000000, term_months: 36, goal: equipment, collateral_value: 7000000 }
+      expect: { outcome: COUNTER_OFFER, counter: [PRODUCT], product: EXPRESS, risk_class: A, score: 785, rate: "23.30" }

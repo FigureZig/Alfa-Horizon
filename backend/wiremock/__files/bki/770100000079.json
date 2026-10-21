@@ -1,0 +1,29 @@
+{
+  "CreditReportOfNaturalPerson": {
+    "Subject": {
+      "Identity": {
+        "INN": "770100000079"
+      },
+      "Bankruptcy": null
+    },
+    "Credits": {
+      "Credit": [
+        {
+          "DateOfConclusion": "2025-03-14",
+          "Amount": "5000000.00",
+          "CurrentLimit": "0.00",
+          "PrincipalDebt": "3600000.00",
+          "OverdueAmount": "0.00",
+          "PastdueDate": null,
+          "PastDepthOfDelayInDay": 0,
+          "AvgMonthPaymentSum": "250000.00",
+          "TwoPaymentsSkipped": false,
+          "LastPaymentDate": "2026-09-15"
+        }
+      ]
+    },
+    "RequestsStatistic": {
+      "NumberOfRequests": 1
+    }
+  }
+}

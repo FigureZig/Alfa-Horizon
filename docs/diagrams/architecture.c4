@@ -1,0 +1,298 @@
+// Архитектура «Умный кредитный кабинет» (LikeC4) — источник правды для C4.
+// Просмотр: npx likec4 start kb/diagrams   Проверка: npx likec4 validate kb/diagrams
+// Ground truth — kb/README.md. Ручки и поля внешних систем — kb/09_data_contracts.md; права из сущностей — kb/05_legal.md; устойчивость — kb/07_resilience.md.
+// BPMN: scenarios-bpmn.drawio (K0, S0, E1, D1–D4, F1–F2, R1–R13); draw.io C4 L2 / L3 / L3-W — c4-data-flows.drawio.
+
+specification {
+  element actor {
+    style { shape person }
+  }
+  element system
+  element container
+  element component
+  element database {
+    style { shape cylinder }
+  }
+  element external {
+    style { color muted }
+  }
+  tag smart
+  tag mocked
+  tag demo
+}
+
+model {
+  client = actor 'Клиент МСБ' {
+    description 'Директор, бухгалтер, представитель по МЧД, участник; права вычисляются из сущностей реестров'
+  }
+  underwriter = actor 'Кредитный аналитик' {
+    description 'Ручное рассмотрение исключений'
+  }
+  tester = actor 'Проверяющий (демо)' {
+    #demo
+    description 'Песочница сценариев, только DEMO_MODE'
+  }
+
+  cabinet = system 'Умный кредитный кабинет' {
+    description 'Кредитный конвейер МСБ: от возникновения потребности до выдачи'
+
+    web = container 'Web' {
+      technology 'nginx + Vue 3 SPA'
+      description 'Зоны: клиент, банк, песочница (DEMO_MODE); reverse proxy /api'
+    }
+
+    api = container 'API' {
+      technology 'Python 3.13, FastAPI, модульный монолит'
+      description 'REST /api/v1 (OpenAPI 3.1) + SSE; наружу не ходит, читает снапшоты реестров из БД'
+
+      parties = component 'parties' {
+        description 'Сущности из реестров (ЕИО совм./незав., участники, МЧД, ДБО, дисквалификация, устав) и вычисление прав человек × компания'
+      }
+      catalog = component 'catalog' {
+        description 'Продукты, версии политики, ключевая ставка, отраслевые спреды'
+      }
+      applications = component 'applications' {
+        description 'Заявка, state machine (OFFERED с видом оферты, INFO_REQUESTED, UNDER_REVIEW, REJECTED…), дозапросы, оферты, корпоративные решения'
+      }
+      decisioning = component 'decisioning' {
+        #smart
+        description 'Стоп-факторы → RiskModel (порт; скоринг — отдельная работа) → политика → decision.outcome: APPROVE · COUNTER_OFFER (AMOUNT, TERM, PRODUCT) · APPROVE_WITH_CONDITIONS · REQUEST_INFO · MANUAL_REVIEW · REJECT; режимы simulate / commit'
+      }
+      insights = component 'insights' {
+        #smart
+        description 'Доп. слой K (kb/14), за фича-флагами: forecast (K1), signals (K1, K5), offers (K2), advisor (K3), repayment (K4). Зависит только от основы'
+      }
+      tasks = component 'tasks' {
+        description 'Inbox задач и in-app уведомления: вычисляется по заявкам в ожидании и правам, отдельной таблицы нет'
+      }
+      signing = component 'signing' {
+        description 'ПЭП-подписи (63-ФЗ ст. 6, 9): события signature.added, без отдельных таблиц'
+      }
+      loans = component 'loans' {
+        description 'Кредит после выдачи, график: в данных заявки (обслуживание — вне базового объёма)'
+      }
+      audit = component 'audit' {
+        description 'Журнал только на добавление: таблица events с хэш-цепочкой'
+      }
+      sandbox = component 'sandbox' {
+        #demo
+        description 'Песочница: персоны, пресеты R1–R13, события реестров; пишет только в моки'
+      }
+    }
+
+    worker = container 'Worker' {
+      technology 'тот же Python-пакет, отдельный процесс'
+      description 'единственный, кто вызывает внешние ручки; шаги конвейера с чекпоинтами, таймеры, снапшоты, здоровье интеграций'
+
+      dispatcher = component 'dispatcher' {
+        description 'SKIP LOCKED: забирает задачи из jobs'
+      }
+      orchestrator = component 'orchestrator' {
+        description 'шаги конвейера, чекпоинты, аренда, дедлайны; пересмотр (RECHECK) после восстановления источника'
+      }
+      integrations = component 'integrations' {
+        description 'адаптеры; на каждый вызов: таймаут, ретраи с jitter в одном слое, breaker, bulkhead, проверка контракта; Idempotency-Key и сверка для АБС'
+      }
+      snapshots = component 'snapshots' {
+        description 'TTL, stale-while-revalidate, provenance, hash; изменение → registry.changed'
+      }
+      health = component 'health' {
+        description 'breaker по источнику: CLOSED → OPEN → HALF_OPEN; integration.health_changed'
+      }
+      sweeper = component 'sweeper' {
+        description 'таймеры и дедлайны, просроченные аренды, снятие отказов по времени (DEMO_MODE)'
+      }
+    }
+
+    db = database 'PostgreSQL 17' {
+      description '5 таблиц: applications, events (история, аудит, NOTIFY), jobs (очередь и таймеры), snapshots, kv'
+    }
+  }
+
+  outer = external 'Внешний мир (моки WireMock)' {
+    #mocked
+    description 'Поля — по реальным спецификациям (kb/18)'
+    egrul = external 'ЕГРЮЛ / ЕГРИП' {
+      #mocked
+      technology 'формат ФНС 4.06'
+      description 'СведДолжнФЛ, СвПолном/ВидПолном, СвУчредит/ДоляУстКап, СвДискв, СвНедДанДолжнФЛ, СвОКВЭДОсн, КодОПФ'
+    }
+    fns = external 'ФНС: открытые данные' {
+      #mocked
+      technology 'XSD наборов ФНС'
+      description 'реестр МСП (КатСубМСП), ССЧР, уплаченные налоги, недоимки (ОбщСумНедоим), спецрежимы'
+    }
+    rdl = external 'ФНС: реестр дисквалифицированных лиц' {
+      #mocked
+      technology 'CSV-структура ФНС'
+    }
+    girbo = external 'ГИР БО' {
+      #mocked
+      technology 'JSON bo.nalog.gov.ru'
+      description 'balance.current1600 (итог актива), financialResult.current2110 / current2400'
+    }
+    bki = external 'БКИ' {
+      #mocked
+      technology 'формат ЦБ «Кредитный отчёт» v3.4'
+      description 'Credits/Credit, Bankruptcy, OtherJudgements, RequestsStatistic — только при действующем согласии'
+    }
+    mchd = external 'Реестр МЧД (ФНС)' {
+      #mocked
+      technology 'm4d.nalog.gov.ru'
+      description 'status, powers[], validTo'
+    }
+    legal = external 'Юр. проверки' {
+      #mocked
+      description 'банкротство, суды, исполнительные производства, перечни'
+    }
+    core = external 'Банк: ядро (KYC, ДБО, счета, устав)' {
+      #mocked
+    }
+    abs = external 'АБС (выдача)' {
+      #mocked
+      technology 'Idempotency-Key'
+    }
+    eis = external 'ЕИС закупки' {
+      #mocked
+      description 'контракты поставщика (K5)'
+    }
+    wmadmin = external 'WireMock admin API' {
+      #demo
+      description 'только DEMO_MODE: песочница меняет «реестры»'
+    }
+  }
+
+  client -> cabinet.web 'работает в кабинете' {
+    technology 'HTTPS'
+  }
+  underwriter -> cabinet.web 'разбирает очередь' {
+    technology 'HTTPS'
+  }
+  tester -> cabinet.web 'песочница /sandbox' {
+    technology 'HTTPS'
+  }
+
+  cabinet.web -> cabinet.api 'вызывает' {
+    technology 'REST /api/v1, SSE'
+  }
+  cabinet.api -> cabinet.db 'заявки, события, задачи, снапшоты' {
+    technology 'SQL'
+  }
+  cabinet.worker -> cabinet.db 'задачи, снапшоты, NOTIFY' {
+    technology 'SKIP LOCKED'
+  }
+
+  cabinet.api.applications -> cabinet.api.parties 'кто вправе действовать'
+  cabinet.api.applications -> cabinet.api.decisioning 'commit-решение'
+  cabinet.api.insights -> cabinet.api.decisioning 'simulate: предодобрение, что-если'
+  cabinet.api.insights -> cabinet.api.applications 'K2: оффер → DRAFT; K3: клон с изменениями'
+  cabinet.api.insights -> cabinet.api.loans 'K4: режим погашения из поступлений'
+  cabinet.api.applications -> cabinet.api.tasks 'задачи нужным людям'
+  cabinet.api.tasks -> cabinet.api.parties 'получатели задач'
+  cabinet.api.applications -> cabinet.api.signing 'документы на подпись'
+  cabinet.api.applications -> cabinet.api.loans 'ISSUED → кредит'
+  cabinet.api.applications -> cabinet.api.audit 'каждый переход'
+  cabinet.api.catalog -> cabinet.api.decisioning 'параметры политики'
+  cabinet.api.sandbox -> outer.wmadmin 'меняет «реестры»' {
+    technology 'POST /__admin/mappings'
+  }
+
+  cabinet.worker.dispatcher -> cabinet.worker.orchestrator 'задача шага'
+  cabinet.worker.orchestrator -> cabinet.worker.integrations 'нужен факт'
+  cabinet.worker.integrations -> cabinet.worker.snapshots 'ответ → снапшот'
+  cabinet.worker.integrations -> cabinet.worker.health 'успех или отказ'
+  cabinet.worker.health -> cabinet.worker.orchestrator 'источник вернулся → догнать шаги'
+  cabinet.worker.sweeper -> cabinet.worker.orchestrator 'дедлайны, просроченные аренды'
+
+  cabinet.worker -> outer.egrul 'реквизиты, ЕИО, участники' {
+    technology 'GET /egrul/v1/legal-entities/{inn}'
+  }
+  cabinet.worker -> outer.fns 'МСП, налоги, недоимки' {
+    technology 'GET /fns/v1/{dataset}/{inn}'
+  }
+  cabinet.worker -> outer.rdl 'дисквалификация' {
+    technology 'GET /fns/v1/disqualified'
+  }
+  cabinet.worker -> outer.girbo 'активы для порога 25%' {
+    technology 'GET /girbo/v1/organizations/{id}/bfo'
+  }
+  cabinet.worker -> outer.bki 'кредитный отчёт (после согласия)' {
+    technology 'POST /bki/v1/credit-reports'
+  }
+  cabinet.worker -> outer.mchd 'статус и полномочия МЧД' {
+    technology 'GET /mchd/v1/poa'
+  }
+  cabinet.worker -> outer.legal 'стоп-факторы' {
+    technology 'GET /legal-checks/v1/{inn}'
+  }
+  cabinet.worker -> outer.core 'KYC, доступы, устав, транзакции (U1, K1, K4)' {
+    technology 'GET /bank-core/v1/*'
+  }
+  cabinet.worker -> outer.abs 'открыть счёт, выдать' {
+    technology 'POST /abs/v1/loans'
+  }
+  cabinet.worker -> outer.eis 'контракты поставщика (K5)' {
+    technology 'GET /eis/v1/contracts'
+  }
+}
+
+views {
+  view index {
+    title 'Контекст'
+    include *
+  }
+
+  view containers of cabinet {
+    title 'Контейнеры и внешние системы'
+    include *
+    include outer.*
+  }
+
+  view components of cabinet.api {
+    title 'Модули API'
+    include *
+    style element.tag = #smart {
+      color green
+    }
+    style element.tag = #demo {
+      color amber
+    }
+  }
+
+  dynamic view r12_director_change {
+    title 'R12: смена директора в ЕГРЮЛ во время процесса'
+    tester -> cabinet.web 'событие: новый директор'
+    cabinet.web -> cabinet.api 'POST /api/v1/sandbox/events'
+    cabinet.worker -> outer.egrul 'перечитать ЕГРЮЛ: СведДолжнФЛ'
+    cabinet.worker -> cabinet.db 'новый снапшот, registry.changed'
+    cabinet.api -> cabinet.db 'пересчёт прав, задача новому ЕИО'
+    client -> cabinet.web 'новый директор подписывает оферту'
+    cabinet.worker -> outer.abs 'выдача'
+  }
+
+  dynamic view k1k2_cash_gap {
+    title 'K1 → K2: радар разрыва → оффер в 1 клик → та же заявка и тот же конвейер'
+    cabinet.worker -> outer.core 'транзакции за 12 мес.'
+    cabinet.worker -> cabinet.db 'снапшот транзакций'
+    cabinet.api.insights -> cabinet.db 'K1: прогноз остатка 30 дн., сигнал CASH_GAP'
+    cabinet.api.insights -> cabinet.api.decisioning 'K2: simulate — предрешённый оффер'
+    client -> cabinet.web '«Закрыть разрыв» в 1 клик'
+    cabinet.web -> cabinet.api.insights 'принять оффер'
+    cabinet.api.insights -> cabinet.api.applications 'DRAFT предзаполнен'
+    cabinet.api.applications -> cabinet.api.decisioning 'commit после полной проверки: оферта, дозапрос или отказ'
+  }
+
+  dynamic view n1_bki_timeout {
+    title 'N1: БКИ не отвечает → предварительная оферта, без перезапусков'
+    tester -> cabinet.web 'песочница: отказ «БКИ таймаут»'
+    cabinet.web -> cabinet.api.sandbox 'POST /api/v1/sandbox/faults'
+    cabinet.api.sandbox -> outer.wmadmin 'стаб отказа, priority 1'
+    cabinet.worker -> outer.bki 'кредитный отчёт: таймаут, ретраи с jitter'
+    cabinet.worker -> cabinet.db 'шаг RETRY_WAIT, breaker, флаг SOURCE_WAIT'
+    cabinet.api.applications -> cabinet.api.decisioning 'дедлайн: политика PROVISIONAL'
+    client -> cabinet.web 'видит предварительную оферту и честный статус'
+    tester -> cabinet.web 'песочница: снять отказ'
+    cabinet.worker -> outer.bki 'отчёт получен'
+    cabinet.api.applications -> cabinet.api.decisioning 'пересмотр: оферта подтверждена или дифф'
+  }
+}

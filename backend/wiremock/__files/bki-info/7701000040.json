@@ -1,0 +1,11 @@
+{
+  "subject": {
+    "inn": "7701000040"
+  },
+  "requests": {
+    "last30days": 1
+  },
+  "refusals": {
+    "last30days": 0
+  }
+}

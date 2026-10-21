@@ -1,0 +1,122 @@
+# Каталог: продукты × отрасли × цели клиента. Цифры — наш дизайн (docs/13), нормы — там, где они есть.
+# Деньги в рублях, сроки в месяцах. Сегменты: IP — ИП, LLC — ООО, JSC — АО.
+version: "2026.10-1"
+
+goals:   # что выбирает клиент в подборе → какие продукты смотреть, по порядку
+  cash_gap:  { name: "Закрыть кассовый разрыв", products: [OVERDRAFT, EXPRESS] }
+  stock:     { name: "Закупить товар или сырьё", products: [WORKING_CAPITAL, EXPRESS, AGRO_SEASONAL, OVERDRAFT] }
+  equipment: { name: "Купить оборудование или транспорт", products: [INVESTMENT, EXPRESS] }
+  growth:    { name: "Развить бизнес", products: [INVESTMENT, WORKING_CAPITAL, EXPRESS] }
+  contract:  { name: "Исполнить госконтракт", products: [CONTRACT, WORKING_CAPITAL, EXPRESS] }
+
+# repayment: revolving — кредитование счёта; annuity — равные платежи; bullet — проценты ежемесячно, долг в конце.
+# caps: что ограничивает сумму (минимум из применимых, docs/04 §3). class_multiplier — множитель лимита по классу риска.
+# class_policy: auto — решает система; conditional — только с поручителем; manual — специалист; reject — отказ + путь к одобрению.
+# security: обеспечение по умолчанию; owner_guarantee — поручительство собственника, LGD не снижает (docs/13 §4).
+products:
+  OVERDRAFT:
+    name: "Овердрафт"
+    law: "ГК РФ ст. 850 — кредитование счёта"
+    segments: [IP, LLC, JSC]
+    amount: { min: 100000, max: 15000000 }
+    term_months: { min: 12, max: 12 }
+    tranche_days: 60
+    repayment: revolving
+    caps: [TURNOVER, PRODUCT_MAX]
+    requires: { turnover_months: 3 }
+    security: { default: none }
+    class_multiplier: { A: 1.0, B: 1.0, C: 0.6, D: 0.0 }
+    class_policy: { A: auto, B: auto, C: auto, D: manual }
+
+  EXPRESS:
+    name: "Экспресс-кредит"
+    segments: [IP, LLC, JSC]
+    amount: { min: 300000, max: 10000000 }
+    term_months: { min: 3, max: 36 }
+    repayment: annuity
+    caps: [PAYMENT_CAPACITY, PRODUCT_MAX]
+    security: { default: none, LLC: owner_guarantee, JSC: owner_guarantee }   # ИП и так отвечает всем имуществом (ГК ст. 24)
+    class_multiplier: { A: 1.0, B: 0.85, C: 0.6, D: 0.0 }
+    class_policy: { A: auto, B: auto, C: conditional, D: reject }
+
+  WORKING_CAPITAL:
+    name: "Оборотный кредит"
+    segments: [IP, LLC, JSC]
+    amount: { min: 1000000, max: 50000000 }
+    term_months: { min: 3, max: 36 }
+    repayment: annuity
+    caps: [PAYMENT_CAPACITY, PRODUCT_MAX]
+    security: { default: none, LLC: owner_guarantee, JSC: owner_guarantee }
+    class_multiplier: { A: 1.0, B: 0.85, C: 0.6, D: 0.0 }
+    class_policy: { A: auto, B: auto, C: conditional, D: manual }
+
+  INVESTMENT:
+    name: "Инвестиционный кредит"
+    segments: [IP, LLC, JSC]
+    amount: { min: 3000000, max: 150000000 }
+    term_months: { min: 12, max: 84 }
+    repayment: annuity
+    caps: [PAYMENT_CAPACITY, COLLATERAL, PRODUCT_MAX]
+    ltv_max: 0.7                       # сумма ≤ 70% стоимости залога
+    security: { default: collateral }  # залог приобретаемого
+    class_multiplier: { A: 1.0, B: 0.85, C: 0.6, D: 0.0 }
+    class_policy: { A: manual, B: manual, C: manual, D: reject }
+
+  CONTRACT:
+    name: "Кредит на исполнение контракта"
+    segments: [IP, LLC, JSC]
+    amount: { min: 500000, max: 30000000 }
+    term_months: { min: 3, max: 24 }
+    repayment: bullet
+    caps: [CONTRACT, INTEREST_CAPACITY, PRODUCT_MAX]
+    contract_share: 0.7                # до 70% от (цена контракта − аванс)
+    requires: { eis_contract: true }
+    security: { default: none }
+    class_multiplier: { A: 1.0, B: 1.0, C: 0.7, D: 0.0 }
+    class_policy: { A: auto, B: auto, C: conditional, D: reject }
+
+  AGRO_SEASONAL:
+    name: "Сезонный кредит аграриям"
+    segments: [IP, LLC, JSC]
+    amount: { min: 500000, max: 30000000 }
+    term_months: { min: 6, max: 12 }
+    repayment: bullet                  # долг гасится после реализации урожая
+    caps: [SEASONAL_INFLOWS, INTEREST_CAPACITY, PRODUCT_MAX]
+    seasonal_share: 0.3                # до 30% годовых поступлений
+    security: { default: none, LLC: owner_guarantee, JSC: owner_guarantee }
+    class_multiplier: { A: 1.0, B: 0.85, C: 0.6, D: 0.0 }
+    class_policy: { A: auto, B: auto, C: conditional, D: manual }
+    programs: ["Льготные агрокредиты, ПП РФ № 1528 — только маркер, условия на 10.2026 не проверены (docs/10 M9)"]
+
+# Разделы ОКВЭД 2 → какие продукты доступны. manual — любую заявку смотрит специалист. stop — не кредитуем.
+# alternatives — некредитные подсказки на экране отказа (docs/02 §7).
+sections:
+  A: { name: "Сельское, лесное хозяйство, охота, рыболовство и рыбоводство", products: [OVERDRAFT, EXPRESS, WORKING_CAPITAL, AGRO_SEASONAL, INVESTMENT, CONTRACT], alternatives: [leasing], note: "сезонный цикл: долг гасится после урожая" }
+  B: { name: "Добыча полезных ископаемых", products: [OVERDRAFT, WORKING_CAPITAL, INVESTMENT], manual: true, note: "отраслевой и экологический риск" }
+  C: { name: "Обрабатывающие производства", products: [OVERDRAFT, EXPRESS, WORKING_CAPITAL, INVESTMENT, CONTRACT], alternatives: [leasing, factoring] }
+  D: { name: "Обеспечение электрической энергией, газом и паром; кондиционирование воздуха", products: [OVERDRAFT, WORKING_CAPITAL, INVESTMENT], manual: true, note: "регулируемые тарифы и крупные вложения" }
+  E: { name: "Водоснабжение; водоотведение, организация сбора и утилизации отходов", products: [OVERDRAFT, EXPRESS, WORKING_CAPITAL, INVESTMENT, CONTRACT] }
+  F: { name: "Строительство", products: [OVERDRAFT, EXPRESS, WORKING_CAPITAL, CONTRACT, INVESTMENT], alternatives: [bank_guarantee], note: "проектный цикл, авансы и госзаказ" }
+  G: { name: "Торговля оптовая и розничная; ремонт автотранспортных средств", products: [OVERDRAFT, EXPRESS, WORKING_CAPITAL, CONTRACT, INVESTMENT], alternatives: [factoring], note: "оборот товара — основной продукт оборотный кредит" }
+  H: { name: "Транспортировка и хранение", products: [OVERDRAFT, EXPRESS, WORKING_CAPITAL, INVESTMENT, CONTRACT], alternatives: [leasing] }
+  I: { name: "Деятельность гостиниц и предприятий общественного питания", products: [OVERDRAFT, EXPRESS, INVESTMENT], note: "ежедневная выручка, длинного оборотного цикла нет" }
+  J: { name: "Деятельность в области информации и связи", products: [OVERDRAFT, EXPRESS, WORKING_CAPITAL, CONTRACT], note: "мало залогового имущества — инвестиционного кредита нет" }
+  K: { name: "Деятельность финансовая и страховая", products: [], stop: "финансовые организации кредитуются вне продукта для МСП" }
+  L: { name: "Деятельность по операциям с недвижимым имуществом", products: [OVERDRAFT, EXPRESS, INVESTMENT], note: "залог — сама недвижимость" }
+  M: { name: "Деятельность профессиональная, научная и техническая", products: [OVERDRAFT, EXPRESS, WORKING_CAPITAL, CONTRACT], note: "услуги без залоговой базы" }
+  N: { name: "Деятельность административная и сопутствующие услуги", products: [OVERDRAFT, EXPRESS, WORKING_CAPITAL, CONTRACT] }
+  O: { name: "Государственное управление и обеспечение военной безопасности; социальное обеспечение", products: [], stop: "не субъект МСП (209-ФЗ ст. 4)" }
+  P: { name: "Образование", products: [OVERDRAFT, EXPRESS, INVESTMENT] }
+  Q: { name: "Деятельность в области здравоохранения и социальных услуг", products: [OVERDRAFT, EXPRESS, WORKING_CAPITAL, INVESTMENT, CONTRACT] }
+  R: { name: "Деятельность в области культуры, спорта, организации досуга и развлечений", products: [OVERDRAFT, EXPRESS] }
+  S: { name: "Предоставление прочих видов услуг", products: [OVERDRAFT, EXPRESS] }
+  T: { name: "Деятельность домашних хозяйств как работодателей", products: [], stop: "не предпринимательская деятельность" }
+  U: { name: "Деятельность экстерриториальных организаций и органов", products: [], stop: "не субъект МСП" }
+
+stop_codes:   # класс ОКВЭД перекрывает раздел
+  "92": "азартные игры — вне кредитной политики банка"
+
+alternatives:
+  leasing: "Лизинг — техника и транспорт без залога"
+  factoring: "Факторинг — деньги под отгрузки до оплаты покупателем"
+  bank_guarantee: "Банковская гарантия — вместо денег на обеспечение контракта"
