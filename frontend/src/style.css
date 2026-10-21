@@ -1,0 +1,29 @@
+@import 'tailwindcss';
+@import 'tailwindcss-primeui';
+@import './theme/palette.css';
+
+@custom-variant dark (&:where(.app-dark, .app-dark *));
+
+@theme inline {
+    /* Акценты */
+    --color-fino-accent: var(--fino-accent);
+    --color-fino-accent-hover: var(--fino-accent-hover);
+
+    /* Поверхности */
+    --color-fino-surface: var(--fino-surface);
+    --color-fino-surface-secondary: var(--fino-surface-secondary);
+    --color-fino-surface-hover: var(--fino-surface-hover);
+
+    /* Границы */
+    --color-fino-border: var(--fino-border);
+
+    /* Текст */
+    --color-fino-text: var(--fino-text);
+    --color-fino-text-muted: var(--fino-text-muted);
+}
+
+body {
+    margin: 0;
+    min-width: 320px;
+}
+

@@ -1,0 +1,31 @@
+:root {
+    /* Акцентные цвета */
+    --fino-accent: #FFF1F0;
+    --fino-accent-hover: #FFE0DD;
+
+    /* Поверхности */
+    --fino-surface: #FFFFFF;
+    --fino-surface-secondary: #F3F4F5;
+    --fino-surface-hover: #EBECEF;
+
+    /* Границы */
+    --fino-border: #E7E8EB;
+
+    /* Текст */
+    --fino-text: #212124;
+    --fino-text-muted: #75757E;
+}
+
+.app-dark {
+    --fino-accent: #3B211F;
+    --fino-accent-hover: #512925;
+
+    --fino-surface: #1C1C20;
+    --fino-surface-secondary: #26262B;
+    --fino-surface-hover: #333338;
+
+    --fino-border: #333338;
+
+    --fino-text: #FFFFFF;
+    --fino-text-muted: #8D8D93;
+}
