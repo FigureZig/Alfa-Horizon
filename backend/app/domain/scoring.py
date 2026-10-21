@@ -28,7 +28,11 @@ def score(facts: dict, segment: str, card: dict, *, skip_sources: tuple[str, ...
         total += points
         contributions.append({"factor": factor, "value": value, "points": points, "reason": f["reason"]})
 
+    # лучший случай для неизвестных источников: их факторы дали бы максимум — решение «нет» не должно от них зависеть
+    best = total + sum(max(b["points"] for b in f["bins"]) for f in card["factors"].values()
+                       if f.get("source") in skip_sources and segment in f.get("segments", [segment]))
     total = max(card["min"], min(card["max"], total))
+    best = max(card["min"], min(card["max"], best))
     scale = card["pd_scale"]
     odds = scale["odds_at_base"] * 2 ** ((total - card["base"]) / scale["pdo"])
     risk_class = next(c["class"] for c in card["classes"] if total >= c["min"])
@@ -37,6 +41,7 @@ def score(facts: dict, segment: str, card: dict, *, skip_sources: tuple[str, ...
         "score": total,
         "pd": round(1 / (1 + odds), 4),
         "class": risk_class,
+        "best_class": next(c["class"] for c in card["classes"] if best >= c["min"]),
         "contributions": contributions,
         "missing": missing,
         "weak": [c["reason"] for c in weakest],   # три самых отрицательных вклада → «почему так» и рычаги K3

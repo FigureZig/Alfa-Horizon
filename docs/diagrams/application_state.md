@@ -12,6 +12,7 @@ stateDiagram-v2
     DRAFT --> WITHDRAWN: удалить / 30 дн.
 
     SUBMITTED --> CHECKING: старт конвейера
+    SUBMITTED --> WITHDRAWN: отозвать
     CHECKING --> OFFERED: APPROVE · COUNTER_OFFER · APPROVE_WITH_CONDITIONS
     CHECKING --> INFO_REQUESTED: REQUEST_INFO
     CHECKING --> UNDER_REVIEW: MANUAL_REVIEW / источник недоступен до дедлайна

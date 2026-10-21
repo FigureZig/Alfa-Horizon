@@ -15,6 +15,7 @@
 | [08_demo_sandbox.md](08_demo_sandbox.md) | демо: «Кто я», пресеты, события мира, отказы интеграций, сценарий показа |
 | [09_data_contracts.md](09_data_contracts.md) | внешние системы: ручки и поля в форматах первоисточников (ЕГРЮЛ 4.06, наборы ФНС, ГИР БО, кредитный отчёт ЦБ) |
 | [10_sources.md](10_sources.md) | реестр источников: цифры, нормы и практики со ссылками и статусом проверки |
+| [test-scenarios.md](test-scenarios.md) | тестовые сценарии ядра, собранные из кода: граф статусов и 16 сквозных прогонов, pairwise-персоны с исходами, стоп-факторы, инварианты |
 | [diagrams/](diagrams/) | сценарии в BPMN (`scenarios-bpmn.drawio`, PNG — `png/scenarios/`), C4 с потоками данных (`c4-data-flows.drawio`, PNG — `png/`), архитектура как код (`architecture.c4`, LikeC4), статусы заявки (`application_state.md`, Mermaid) |
 | [api/openapi.json](api/openapi.json) | контракт API, выгружается из бэкенда |
 
@@ -26,7 +27,7 @@
 | OpenAPI | [api/openapi.json](api/openapi.json); живой Swagger — http://localhost:8000/api/docs |
 | Диаграмма статусов | [diagrams/application_state.md](diagrams/application_state.md); в коде — таблица переходов `backend/app/domain/state.py` |
 | Модель данных | [06_architecture.md](06_architecture.md) §4; схема — `backend/migrations/001_init.sql` |
-| Тестовые сценарии | [02_product.md](02_product.md) §8, [07_resilience.md](07_resilience.md) §6, [13_credit_mechanics.md](13_credit_mechanics.md) §8; автотесты — `backend/tests` по демо-миру `backend/seed/personas.yaml` |
+| Тестовые сценарии | [test-scenarios.md](test-scenarios.md) — сводка из кода; [02_product.md](02_product.md) §8, [07_resilience.md](07_resilience.md) §6, [13_credit_mechanics.md](13_credit_mechanics.md) §8; автотесты — `backend/tests` |
 | Коллекция запросов | в работе; пока — примеры в `backend/README.md` |
 | Запуск одной командой | [README](../README.md) в корне |
 

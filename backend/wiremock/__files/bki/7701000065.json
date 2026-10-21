@@ -9,14 +9,14 @@
     "Credits": {
       "Credit": [
         {
-          "DateOfConclusion": "2025-03-14",
+          "DateOfConclusion": "2024-10-14",
           "Amount": "5000000.00",
           "CurrentLimit": "0.00",
-          "PrincipalDebt": "2500000.00",
+          "PrincipalDebt": "2965774.52",
           "OverdueAmount": "0.00",
           "PastdueDate": null,
           "PastDepthOfDelayInDay": 0,
-          "AvgMonthPaymentSum": "150000.00",
+          "AvgMonthPaymentSum": "149500.59",
           "TwoPaymentsSkipped": false,
           "LastPaymentDate": "2026-09-15"
         }

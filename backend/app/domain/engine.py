@@ -16,6 +16,7 @@ from .state import OUTCOME_STATUS
 OFFER_KIND = {"APPROVE": "AS_REQUESTED", "COUNTER_OFFER": "COUNTER", "APPROVE_WITH_CONDITIONS": "CONDITIONAL"}
 PREAPPROVAL_LABEL = {"APPROVE": "PREAPPROVED", "COUNTER_OFFER": "PREAPPROVED", "APPROVE_WITH_CONDITIONS": "CONDITIONAL",
                      "REQUEST_INFO": "REVIEW", "MANUAL_REVIEW": "REVIEW", "REJECT": "UNAVAILABLE"}
+REJECT_REASON_KINDS = {"stop", "policy", "score", "cap"}     # в отказе — только то, что его объясняет
 CAP_ASK = {"CAP_COLLATERAL": "REQ_COLLATERAL_VALUE", "CAP_TURNOVER": "REQ_TURNOVER_DATA",
            "CAP_PAYMENT_CAPACITY": "REQ_TURNOVER_DATA", "CAP_INTEREST_CAPACITY": "REQ_TURNOVER_DATA",
            "CAP_SEASONAL_INFLOWS": "REQ_TURNOVER_DATA"}
@@ -58,18 +59,20 @@ def decide(facts: dict, request: dict, pol: dict, mode: str = "simulate", *, all
     stops = _stops(facts, params, pol, log)
     if stops:
         return _result("REJECT", **res, kind=_reject_kind(stops), hints=_hints(pol, section))
+    if segment is None or section is None:          # реестр не ответил: ЕГРЮЛ/ЕГРИП — WAIT → дедлайн → MANUAL (docs/07 §4)
+        log.reason("DATA_SOURCE_UNAVAILABLE", "manual", source="ЕГРЮЛ/ЕГРИП")
+        return _result("MANUAL_REVIEW", **res, flags=["SOURCE_WAIT"] if mode == "commit" else [])
 
-    misfit = _misfit(code, facts, pol)
+    misfit = _misfit(code, facts, pol, amount)
     if misfit:
-        log.reason(misfit, "policy", product_name=product["name"], months=product.get("requires", {}).get("turnover_months"))
+        log.reason(misfit, "policy", product_name=product["name"], months=product.get("requires", {}).get("turnover_months"),
+                   min=product["amount"]["min"])
         alt = _alternative(facts, request, pol, mode) if allow_alternative else None
         if alt:
-            return _product_counter(alt, log)
+            return _product_counter(alt, log, res["request"])
         return _result("REJECT", **res, kind="POLICY", hints=_hints(pol, section))
 
     asks, manual, flags, conditions = [], [], [], []
-    if _needs_corporate_approval(facts, amount, params, request, log):
-        asks.append("REQ_CORP_APPROVAL")
     for what in facts.get("conflicts", []):
         manual.append("DATA_CONFLICT")
         log.reason("DATA_CONFLICT", "manual", what=what)
@@ -79,19 +82,25 @@ def decide(facts: dict, request: dict, pol: dict, mode: str = "simulate", *, all
 
     # БКИ неизвестно → факторы БКИ = 0 (docs/12 §3); в заявке — политика факта PROVISIONAL или MANUAL (docs/07 §4)
     bki_known = bool(facts.get("bki_known"))
+    unknown = () if bki_known else ("bki",) if facts.get("bki_info_known") else ("bki", "bki_info")
+    risk = score(facts, segment, pol["scorecard"], skip_sources=unknown)
+    log.step("scoring", score=risk["score"], risk_class=risk["class"], best_class=risk["best_class"], missing=risk["missing"])
+
+    class_policy = product["class_policy"][risk["class"]]
+    if class_policy == "reject" and product["class_policy"][risk["best_class"]] != "reject":
+        class_policy = "wait"                       # отказ держится только на неизвестной КИ — неизвестно ≠ плохо (docs/07 §1)
+    provisional = False
     if not bki_known and mode == "commit":
-        if amount <= dec(params["provisional_max"]):
-            flags.append("PROVISIONAL")
-            log.reason("PROVISIONAL", "flag")
+        if amount <= dec(params["provisional_max"]) and class_policy != "wait":
+            provisional = True                      # флаг ставим, только если дойдёт до оферты
         else:
             flags.append("SOURCE_WAIT")
             manual.append("DATA_SOURCE_UNAVAILABLE")
             log.reason("DATA_SOURCE_UNAVAILABLE", "manual", source="БКИ")
-    unknown = () if bki_known else ("bki",) if facts.get("bki_info_known") else ("bki", "bki_info")
-    risk = score(facts, segment, pol["scorecard"], skip_sources=unknown)
-    log.step("scoring", score=risk["score"], risk_class=risk["class"], missing=risk["missing"])
+    elif class_policy == "wait":
+        manual.append("BKI_NEEDED")
+        log.reason("BKI_NEEDED", "manual")
 
-    class_policy = product["class_policy"][risk["class"]]
     if class_policy == "reject":
         log.reason("POL_RISK_CLASS", "policy")
         for weak in risk["weak"]:
@@ -100,6 +109,10 @@ def decide(facts: dict, request: dict, pol: dict, mode: str = "simulate", *, all
     if class_policy == "manual":
         manual.append("POL_PRODUCT_REVIEW")
         log.reason("POL_PRODUCT_REVIEW", "manual")
+    if class_policy == "wait" or (class_policy == "manual" and not dec(product["class_multiplier"][risk["class"]])):
+        # авто-оферты нет: ждём КИ или класс без авто-лимита (D, docs/12 §5–6) — сумму и документы определит специалист
+        log.step("outcome", outcome="MANUAL_REVIEW", manual=manual)
+        return _result("MANUAL_REVIEW", **res, risk=risk, flags=flags)
     security = cat.security_for(product, segment)
     if class_policy == "conditional":
         security = "guarantor"
@@ -122,12 +135,17 @@ def decide(facts: dict, request: dict, pol: dict, mode: str = "simulate", *, all
         log.reason("POL_AMOUNT_MIN", "policy", min=product["amount"]["min"])
         alt = _alternative(facts, request, pol, mode) if allow_alternative else None
         if alt:
-            return _product_counter(alt, log)
+            return _product_counter(alt, log, res["request"])
         return _result("REJECT", **res, kind="POLICY", risk=risk, caps=quote["caps"], hints=_hints(pol, section))
 
+    if _needs_corporate_approval(facts, offer["amount"], params, request, log):   # крупность — по самой сделке
+        asks.insert(0, "REQ_CORP_APPROVAL")
     if offer["amount"] > dec(params["auto_authority_max"]):
         manual.append("POL_AUTHORITY_EXCEEDED")
         log.reason("POL_AUTHORITY_EXCEEDED", "manual")
+    if provisional:
+        flags.append("PROVISIONAL")
+        log.reason("PROVISIONAL", "flag")
 
     if asks:
         outcome = "REQUEST_INFO"
@@ -188,9 +206,10 @@ def _stops(facts: dict, params: dict, pol: dict, log: _Log) -> list[tuple[str, b
     age = facts.get("age_months")
     if age is not None and age < params["min_business_age_months"]:
         stop("POL_BUSINESS_AGE", True)
-    ok, why = cat.section_check(pol, facts.get("okved"), facts.get("section"))
-    if not ok:
-        stop("POL_INDUSTRY", False, okved=facts.get("okved"), why=why)
+    if facts.get("okved"):                          # без ответа реестра отрасль неизвестна — это не отказ
+        ok, why = cat.section_check(pol, facts["okved"], facts.get("section"))
+        if not ok:
+            stop("POL_INDUSTRY", False, okved=facts["okved"], why=why)
     log.step("stops", found=[code for code, _ in found])
     return found
 
@@ -201,10 +220,12 @@ def _reject_kind(stops: list[tuple[str, bool]]) -> str:
     return "STOP_FIXABLE" if all(fixable for _, fixable in stops) else "STOP_FINAL"
 
 
-def _misfit(code: str, facts: dict, pol: dict) -> str | None:
-    """Продукт не предлагается этой отрасли или сегменту, либо нет нужных данных для него."""
+def _misfit(code: str, facts: dict, pol: dict, amount: Decimal) -> str | None:
+    """Продукт не предлагается этой отрасли или сегменту, сумма меньше минимальной, либо нет нужных данных."""
     if code not in cat.available_products(pol, facts.get("section"), facts.get("segment")):
         return "POL_PRODUCT_FIT"
+    if amount < dec(pol["products"][code]["amount"]["min"]):
+        return "POL_AMOUNT_RANGE"
     requires = pol["products"][code].get("requires", {})
     if requires.get("turnover_months") and (facts.get("turnover_months") or 0) < requires["turnover_months"]:
         return "POL_NO_TURNOVER"
@@ -217,7 +238,7 @@ def _alternative(facts: dict, request: dict, pol: dict, mode: str) -> dict | Non
     """Другой продукт под ту же цель клиента → контрпредложение PRODUCT (docs/04 §8 п. 5)."""
     goal = request.get("goal")
     for code in pol["goals"].get(goal, {}).get("products", []):
-        if code == request["product"] or _misfit(code, facts, pol):
+        if code == request["product"] or _misfit(code, facts, pol, dec(request["amount"])):
             continue
         d = decide(facts, {**request, "product": code}, pol, mode, allow_alternative=False)
         if d["outcome"] != "REJECT":
@@ -225,8 +246,10 @@ def _alternative(facts: dict, request: dict, pol: dict, mode: str) -> dict | Non
     return None
 
 
-def _product_counter(alt: dict, log: _Log) -> dict:
-    alt["reasons"] = log.reasons + alt["reasons"]
+def _product_counter(alt: dict, log: _Log, request: dict) -> dict:
+    alt["request"] = _request_view(request)          # в решении — то, что просил клиент, а не подобранный продукт
+    why_not = [r for r in log.reasons if r["kind"] in REJECT_REASON_KINDS]   # почему не тот продукт; условия — от нового
+    alt["reasons"] = why_not + alt["reasons"]
     alt["trace"] = log.trace + alt["trace"]
     alt["counter"] = ["PRODUCT", *[c for c in alt["counter"] if c != "PRODUCT"]]
     if alt["outcome"] in ("APPROVE", "COUNTER_OFFER"):
@@ -305,6 +328,11 @@ def _hints(pol: dict, section) -> list[str]:
     return [pol["alternatives"][k] for k in keys]
 
 
+def _request_view(request: dict) -> dict:
+    return {"product": request["product"], "amount": money(request["amount"]), "termMonths": request.get("term_months"),
+            "goal": request.get("goal")}
+
+
 def _result(outcome: str, *, log: _Log, pol: dict, mode: str, request: dict, kind=None, risk=None, offer=None,
             alternatives=(), counter=(), conditions=(), asks=(), flags=(), caps=None, hints=()) -> dict:
     return {
@@ -318,13 +346,12 @@ def _result(outcome: str, *, log: _Log, pol: dict, mode: str, request: dict, kin
         "conditions": list(conditions),                 # GUARANTEE · COLLATERAL
         "asks": list(asks),
         "flags": list(flags),
-        "request": {"product": request["product"], "amount": money(request["amount"]),
-                    "termMonths": request.get("term_months"), "goal": request.get("goal")},
+        "request": _request_view(request),
         "offer": offer,
         "alternatives": [a for a in alternatives if a],
         "caps": caps,
         "risk": risk,
         "hints": list(hints),                           # некредитные альтернативы (лизинг, факторинг, гарантия)
-        "reasons": log.reasons,
+        "reasons": [r for r in log.reasons if outcome != "REJECT" or r["kind"] in REJECT_REASON_KINDS],
         "trace": log.trace,
     }

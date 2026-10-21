@@ -547,6 +547,63 @@
         }
       }
     },
+    "/api/v1/sandbox/personas": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "List Personas",
+        "operationId": "list_personas_api_v1_sandbox_personas_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Create Persona",
+        "description": "Собрать свою персону и поставить её ответы в WireMock на лету; worker сразу подтягивает данные компании.",
+        "operationId": "create_persona_api_v1_sandbox_personas_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonaIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/sandbox/faults": {
       "get": {
         "tags": [
@@ -985,6 +1042,147 @@
           "term_months"
         ],
         "title": "LoanCalcIn"
+      },
+      "PersonaIn": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "IP",
+              "LLC",
+              "JSC"
+            ],
+            "title": "Kind",
+            "default": "LLC"
+          },
+          "okved": {
+            "type": "string",
+            "pattern": "^\\d{2}(\\.\\d{1,2}){0,2}$",
+            "title": "Okved",
+            "description": "ОКВЭД 2: от него отрасль, продукты, спред",
+            "default": "62.01"
+          },
+          "okved_name": {
+            "type": "string",
+            "title": "Okved Name",
+            "default": "Основной вид деятельности"
+          },
+          "age_months": {
+            "type": "integer",
+            "maximum": 600.0,
+            "minimum": 1.0,
+            "title": "Age Months",
+            "description": "сколько месяцев бизнесу",
+            "default": 36
+          },
+          "headcount": {
+            "type": "integer",
+            "maximum": 250.0,
+            "minimum": 1.0,
+            "title": "Headcount",
+            "default": 12
+          },
+          "inflow_avg": {
+            "type": "integer",
+            "minimum": 10000.0,
+            "title": "Inflow Avg",
+            "description": "средние поступления на счёт в месяц, ₽",
+            "default": 3000000
+          },
+          "inflow_cv": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Inflow Cv",
+            "description": "разброс поступлений от месяца к месяцу",
+            "default": 0.3
+          },
+          "inflow_trend": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": -0.9,
+            "title": "Inflow Trend",
+            "description": "последние 3 месяца к предыдущим 9, минус 1",
+            "default": 0.0
+          },
+          "debt_load": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Debt Load",
+            "description": "платежи по текущим кредитам / поступления",
+            "default": 0.15
+          },
+          "overdue_days": {
+            "type": "integer",
+            "maximum": 365.0,
+            "minimum": 0.0,
+            "title": "Overdue Days",
+            "description": "максимальная просрочка в КИ",
+            "default": 0
+          },
+          "bki_requests": {
+            "type": "integer",
+            "maximum": 50.0,
+            "minimum": 0.0,
+            "title": "Bki Requests",
+            "description": "запросы в БКИ за 30 дней",
+            "default": 1
+          },
+          "tax_debt": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Tax Debt",
+            "description": "недоимка, ₽",
+            "default": 0
+          },
+          "participants": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Participants",
+            "description": "участников ООО",
+            "default": 1
+          },
+          "profit_margin": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": -1.0,
+            "title": "Profit Margin",
+            "description": "чистая прибыль / выручка",
+            "default": 0.05
+          },
+          "flags": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "liquidation",
+                "bankruptcy",
+                "unreliable_eio",
+                "disqualified_eio"
+              ]
+            },
+            "type": "array",
+            "title": "Flags",
+            "default": []
+          },
+          "contract_price": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Price",
+            "description": "действующий госконтракт в ЕИС, ₽"
+          }
+        },
+        "type": "object",
+        "title": "PersonaIn",
+        "description": "Своя персона: компания из нескольких параметров. ИНН, ОГРН, люди, выписка и ответы всех источников\nстроятся тем же seed/world.py, что и демо-мир, и проходят ту же проверку корректности."
       },
       "ValidationError": {
         "properties": {

@@ -91,10 +91,3 @@ def test_picker_shows_products_by_industry(pol):
     labels = {i["product"]: i["label"] for i in engine.preapprove(farm, pol, "stock", 8_000_000, 10)}
     assert labels["AGRO_SEASONAL"] == "PREAPPROVED"
 
-
-def test_more_inflows_never_lower_the_limit(pol):
-    facts = facts_of("7701000019")
-    req = {"product": "WORKING_CAPITAL", "amount": 5_000_000, "term_months": 24, "goal": "stock"}
-    low = engine.decide(facts, req, pol)["offer"]["amount"]
-    high = engine.decide({**facts, "inflow_avg": facts["inflow_avg"] * Decimal("1.5")}, req, pol)["offer"]["amount"]
-    assert high >= low

@@ -1,33 +1,28 @@
-"""Тесты домена без БД и сети: факты собираем прямо из сгенерированных моков (wiremock/__files)."""
+"""Тесты домена без БД и сети: ответы источников строим в памяти тем же seed/world.py, что пишет моки WireMock,
+и пропускаем через JSON — движок видит ровно то, что отдал бы WireMock."""
 
-import json
 from datetime import date
-from pathlib import Path
+from functools import cache
 
 import pytest
-import yaml
 
 from app.features import company_facts
 from app.policy import load
+from seed import world
 
-ROOT = Path(__file__).resolve().parents[1]
-WORLD = yaml.safe_load((ROOT / "seed" / "personas.yaml").read_text("utf-8"))
+WORLD = world.load()
 TODAY = date.fromisoformat(WORLD["today"])
-FILES = ROOT / "wiremock" / "__files"
-SOURCE_FOLDERS = {
-    "egrul": "egrul", "egrip": "egrip", "rsmp": "fns/rsmp", "sshr": "fns/sshr", "paytax": "fns/paytax",
-    "debtam": "fns/debtam", "snr": "fns/snr", "girbo": "girbo/bfo", "legal": "legal", "bank_access": "bank/access",
-    "bank_charter": "bank/charter", "bank_tx": "bank/tx", "eis": "eis", "bki": "bki", "bki_info": "bki-info",
-}
+PEOPLE = WORLD["people"]
+COMPANIES = {c["inn"]: c for c in WORLD["companies"]}
+
+
+@cache
+def _served(inn: str) -> dict:
+    return world.served(COMPANIES[inn], PEOPLE, TODAY)
 
 
 def mock_payloads(inn: str, without: tuple[str, ...] = ()) -> dict:
-    out = {}
-    for source, folder in SOURCE_FOLDERS.items():
-        path = FILES / folder / f"{inn}.json"
-        if source not in without and path.exists():
-            out[source] = json.loads(path.read_text("utf-8"))
-    return out
+    return {source: body for source, body in _served(inn).items() if source not in without}
 
 
 def facts_of(inn: str, without: tuple[str, ...] = ()) -> dict:

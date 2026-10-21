@@ -9,26 +9,26 @@
     "Credits": {
       "Credit": [
         {
-          "DateOfConclusion": "2025-03-14",
+          "DateOfConclusion": "2025-04-14",
           "Amount": "20000000.00",
           "CurrentLimit": "0.00",
-          "PrincipalDebt": "12000000.00",
+          "PrincipalDebt": "15652903.11",
           "OverdueAmount": "0.00",
           "PastdueDate": null,
           "PastDepthOfDelayInDay": 0,
-          "AvgMonthPaymentSum": "600000.00",
+          "AvgMonthPaymentSum": "497051.52",
           "TwoPaymentsSkipped": false,
           "LastPaymentDate": "2026-09-15"
         },
         {
-          "DateOfConclusion": "2025-04-14",
+          "DateOfConclusion": "2026-01-14",
           "Amount": "10000000.00",
           "CurrentLimit": "0.00",
-          "PrincipalDebt": "7000000.00",
+          "PrincipalDebt": "7977972.31",
           "OverdueAmount": "0.00",
           "PastdueDate": null,
           "PastDepthOfDelayInDay": 0,
-          "AvgMonthPaymentSum": "400000.00",
+          "AvgMonthPaymentSum": "361523.96",
           "TwoPaymentsSkipped": false,
           "LastPaymentDate": "2026-09-15"
         }
