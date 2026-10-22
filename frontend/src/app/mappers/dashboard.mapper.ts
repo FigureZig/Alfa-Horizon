@@ -1,17 +1,19 @@
-import {DashboardStatisticsDto } from '@/app/types/dashboard/dashboard-statistics-dto.ts'
-import {DashboardStatisticInterface} from "@/app/types/dashboard/dashboard-statistic-interface.ts";
+import type { DashboardSummaryCardDto } from '@/app/types/dashboard/dashboard-summary-card-dto'
+import type { DashboardSummaryCardInterface } from '@/app/types/dashboard/dashboard-summary-card-interface'
 
 export class DashboardMapper {
-    static toEntity(data: DashboardStatisticsDto): DashboardStatisticInterface {
-        if (!data) {
-            throw new Error('Dashboard data is required')
-        }
-
-        return {
-            balance: data.total_balance,
-            income: data.monthly_income,
-            expenses: data.monthly_expenses,
-            activeCredits: data.active_loans_count,
-        }
+  static toEntity(data: DashboardSummaryCardDto): DashboardSummaryCardInterface {
+    if (!data) {
+      throw new Error('Dashboard summary card data is required')
     }
+
+    return {
+      id: data.id,
+      type: data.type,
+      title: data.title,
+      amount: data.amount,
+      currency: data.currency,
+      description: data.description,
+    }
+  }
 }

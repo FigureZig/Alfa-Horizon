@@ -1,12 +1,22 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import { useTheme } from '@/app/composables/useTheme'
 
 const { theme, toggleTheme } = useTheme()
 const { t, locale } = useI18n({ useScope: 'global' })
 
+const route = useRoute()
+
 const isDark = computed(() => theme.value === 'dark')
+
+// В кабинете логотип ведёт на главную текущей демо-персоны, вне кабинета — к выбору персоны
+const homeRoute = computed(() =>
+  route.params.inn
+    ? { name: 'dashboard', params: { inn: route.params.inn } }
+    : { name: 'sandbox' },
+)
 
 function toggleLocale() {
   locale.value = locale.value === 'ru' ? 'en' : 'ru'
@@ -33,7 +43,7 @@ function changeTheme() {
     >
       <!-- Логотип -->
       <RouterLink
-        to="/"
+        :to="homeRoute"
         class="group flex min-w-0 items-center gap-3"
         :aria-label="t('header.home')"
       >

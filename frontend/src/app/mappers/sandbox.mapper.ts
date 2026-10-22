@@ -14,6 +14,7 @@ export class SandboxMapper {
       code: data.code,
       kind: data.kind,
       fullName: data.full_name,
+      inn: data.inn,
       initials: SandboxMapper.toInitials(data.full_name),
       organization: data.organization,
       scenario: data.scenario,
@@ -29,6 +30,7 @@ export class SandboxMapper {
     return {
       kind: form.kind,
       full_name: form.fullName.trim(),
+      inn: form.inn.trim(),
       organization: form.organization.trim(),
       code: form.code.trim(),
       scenario: form.scenario.trim(),

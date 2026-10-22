@@ -19,8 +19,23 @@ function getInitialLocale(): AppLocale {
         : 'en'
 }
 
+// Русские формы множественного числа: 1 день | 2 дня | 5 дней
+function getRussianPluralIndex(choice: number): number {
+    const value = Math.abs(choice) % 100
+    const lastDigit = value % 10
+
+    if (value > 10 && value < 20) return 2
+    if (lastDigit === 1) return 0
+    if (lastDigit >= 2 && lastDigit <= 4) return 1
+
+    return 2
+}
+
 export const i18n = createI18n({
     legacy: false,
+    pluralRules: {
+        ru: getRussianPluralIndex,
+    },
     globalInjection: true,
     locale: getInitialLocale(),
     fallbackLocale: 'ru',

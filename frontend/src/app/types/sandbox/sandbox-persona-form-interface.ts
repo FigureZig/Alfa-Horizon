@@ -3,6 +3,7 @@ import type { SandboxPersonaKindEnum } from '@/app/types/sandbox/sandbox-persona
 export interface SandboxPersonaFormInterface {
   kind: SandboxPersonaKindEnum
   fullName: string
+  inn: string
   organization: string
   code: string
   scenario: string

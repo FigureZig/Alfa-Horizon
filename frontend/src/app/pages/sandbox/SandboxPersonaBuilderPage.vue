@@ -16,6 +16,7 @@ import { sandboxService } from '@/app/services/sandbox/sandbox.service'
 import { SandboxMapper } from '@/app/mappers/sandbox.mapper'
 import { SandboxPersonaKindEnum } from '@/app/types/sandbox/sandbox-persona-kind-enum'
 import type { SandboxPersonaFormInterface } from '@/app/types/sandbox/sandbox-persona-form-interface'
+import type { Nullable } from '@/app/types/nullable'
 
 type TextFieldKey = Exclude<keyof SandboxPersonaFormInterface, 'kind'>
 
@@ -24,14 +25,19 @@ interface FormFieldInterface {
   isMultiline: boolean
   maxLength: number
   colSpanClass: string
+  inputMode?: 'numeric'
 }
+
+// Формат ИНН как в API: 10 цифр — юрлицо, 12 — ИП
+const INN_PATTERN = /^(\d{10}|\d{12})$/
 
 const FORM_FIELDS: FormFieldInterface[] = [
   { key: 'fullName', isMultiline: false, maxLength: 80, colSpanClass: 'lg:col-span-4' },
   { key: 'organization', isMultiline: false, maxLength: 120, colSpanClass: 'lg:col-span-5' },
   { key: 'code', isMultiline: false, maxLength: 8, colSpanClass: 'lg:col-span-3' },
-  { key: 'loginLabel', isMultiline: false, maxLength: 60, colSpanClass: 'lg:col-span-4' },
-  { key: 'scenario', isMultiline: false, maxLength: 120, colSpanClass: 'lg:col-span-8' },
+  { key: 'inn', isMultiline: false, maxLength: 12, colSpanClass: 'lg:col-span-3', inputMode: 'numeric' },
+  { key: 'loginLabel', isMultiline: false, maxLength: 60, colSpanClass: 'lg:col-span-3' },
+  { key: 'scenario', isMultiline: false, maxLength: 120, colSpanClass: 'lg:col-span-6' },
   { key: 'permissions', isMultiline: true, maxLength: 300, colSpanClass: 'lg:col-span-6' },
   { key: 'profile', isMultiline: true, maxLength: 300, colSpanClass: 'lg:col-span-6' },
   { key: 'registries', isMultiline: true, maxLength: 300, colSpanClass: 'lg:col-span-6' },
@@ -46,6 +52,7 @@ const $fetch = useApiFetch()
 const form = reactive<SandboxPersonaFormInterface>({
   kind: SandboxPersonaKindEnum.Client,
   fullName: '',
+  inn: '',
   organization: '',
   code: '',
   scenario: '',
@@ -64,13 +71,27 @@ const kindOptions = computed(() => [
   { value: SandboxPersonaKindEnum.Bank, label: t('sandbox.builder.kind.bank') },
 ])
 
+function getFieldError(key: TextFieldKey): Nullable<string> {
+  const value = form[key].trim()
+
+  if (!value) return t('sandbox.builder.required')
+  if (key === 'inn' && !INN_PATTERN.test(value)) return t('sandbox.builder.innInvalid')
+
+  return null
+}
+
 const fields = computed(() =>
-  FORM_FIELDS.map((field) => ({
-    ...field,
-    label: t(`sandbox.builder.fields.${field.key}.label`),
-    placeholder: t(`sandbox.builder.fields.${field.key}.placeholder`),
-    isInvalid: isSubmitted.value && !form[field.key].trim(),
-  })),
+  FORM_FIELDS.map((field) => {
+    const error = isSubmitted.value ? getFieldError(field.key) : null
+
+    return {
+      ...field,
+      label: t(`sandbox.builder.fields.${field.key}.label`),
+      placeholder: t(`sandbox.builder.fields.${field.key}.placeholder`),
+      error,
+      isInvalid: Boolean(error),
+    }
+  }),
 )
 
 const isFormValid = computed(() => fields.value.every((field) => !field.isInvalid))
@@ -204,6 +225,7 @@ function cancelBuilding() {
                 v-model="form[field.key]"
                 :placeholder="field.placeholder"
                 :maxlength="field.maxLength"
+                :inputmode="field.inputMode"
                 :invalid="field.isInvalid"
                 :disabled="isSubmitting"
                 fluid
@@ -215,7 +237,7 @@ function cancelBuilding() {
                 size="small"
                 variant="simple"
               >
-                {{ t('sandbox.builder.required') }}
+                {{ field.error }}
               </Message>
             </div>
           </div>

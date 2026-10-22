@@ -1,40 +1,127 @@
 <script setup lang="ts">
-import {computed, onMounted, ref} from 'vue'
-import {useI18n} from 'vue-i18n'
-import {dashboardService} from '@/app/services/dashboard/dashboard.service'
-import {DashboardMapper} from '@/app/mappers/dashboard.mapper'
-import FinanceStatCard from '@/app/features/dashboard/components/FinanceStatCard.vue'
-import CashFlowChart from '@/app/features/dashboard/components/CashFlowChart.vue'
-import AiRecommendationCard from '@/app/features/dashboard/components/AiRecommendationCard.vue'
-import RecentTransactions from '@/app/features/dashboard/components/RecentTransactions.vue'
-import {DashboardStatisticInterface} from "@/app/types/dashboard/dashboard-statistic-interface.ts";
-import { useApiFetch } from '@/app/composables/useApiFetch';
-import {Nullable} from "@/app/types/nullable.ts";
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
-import Skeleton from 'primevue/skeleton'
+import { HttpStatusCode, isAxiosError } from 'axios'
+import AppErrorState from '@/app/components/AppErrorState.vue'
+import ApplicationsAndTasksCard from '@/app/features/dashboard/components/ApplicationsAndTasksCard.vue'
+import CashForecastSection from '@/app/features/dashboard/components/CashForecastSection.vue'
+import CompanyInsightsCard from '@/app/features/dashboard/components/CompanyInsightsCard.vue'
+import DashboardGreeting from '@/app/features/dashboard/components/DashboardGreeting.vue'
+import DashboardGreetingSkeleton from '@/app/features/dashboard/components/DashboardGreetingSkeleton.vue'
+import FinanceStatCard from '@/app/features/dashboard/components/FinanceStatCard.vue'
+import FinanceStatCardSkeleton from '@/app/features/dashboard/components/FinanceStatCardSkeleton.vue'
+import PreApprovedProductsCard from '@/app/features/dashboard/components/PreApprovedProductsCard.vue'
+import { useApiFetch } from '@/app/composables/useApiFetch'
+import { useCompanyOverview } from '@/app/composables/useCompanyOverview'
+import { useCompanyProducts } from '@/app/composables/useCompanyProducts'
+import { useDemoPersona } from '@/app/composables/useDemoPersona'
+import { useFeatureFlags } from '@/app/composables/useFeatureFlags'
+import { useFormatters } from '@/app/composables/useFormatters'
+import { dashboardService } from '@/app/services/dashboard/dashboard.service'
+import { DashboardMapper } from '@/app/mappers/dashboard.mapper'
+import { DashboardSummaryCardTypeEnum } from '@/app/types/dashboard/dashboard-summary-card-type-enum'
+import type { AppLocale } from '@/app/i18n'
+import type { CreditProductInterface } from '@/app/types/company/credit-product-interface'
+import type { DashboardSummaryCardInterface } from '@/app/types/dashboard/dashboard-summary-card-interface'
 
-const {t, locale} = useI18n()
+const SUMMARY_SKELETON_COUNT = 3
+const DEFAULT_CARD_ICON = 'pi pi-chart-line'
 
+const SUMMARY_CARD_ICONS: Record<DashboardSummaryCardTypeEnum, string> = {
+  [DashboardSummaryCardTypeEnum.Balance]: 'pi pi-wallet',
+  [DashboardSummaryCardTypeEnum.Outflow]: 'pi pi-arrow-up-right',
+  [DashboardSummaryCardTypeEnum.Inflow]: 'pi pi-arrow-down-left',
+}
+
+const props = defineProps<{
+  inn: string
+}>()
+
+const { t, locale } = useI18n({ useScope: 'global' })
 const $fetch = useApiFetch()
 const toast = useToast()
+const router = useRouter()
+const { isK1Enabled } = useFeatureFlags()
+const { formatCurrency } = useFormatters()
 
-const dashboard = ref<Nullable<DashboardStatisticInterface>>(null)
-const isLoading = ref(false)
-const error = ref(false)
+// Один запрос /products на страницу — его результат делят прогноз K1/K2 и «Предодобрено»
+const {
+  products,
+  isProductsLoading,
+  productsError,
+  loadProducts,
+} = useCompanyProducts(() => props.inn)
 
-async function onLoading() {
-  if (isLoading.value) return
+const {
+  applicationsSummary,
+  isApplicationsLoading,
+  applicationsError,
+  loadApplicationsSummary,
+  profile,
+  isProfileLoading,
+  profileError,
+  loadProfile,
+} = useCompanyOverview(() => props.inn)
+const {
+  demoPersona,
+  error: demoPersonaError,
+  loadDemoPersona,
+} = useDemoPersona()
 
-  isLoading.value = true
-  error.value = false
+const summaryCards = ref<DashboardSummaryCardInterface[]>([])
+const isSummaryLoading = ref(false)
+const summaryError = ref(false)
+
+// Номер последнего запроса: ответ по предыдущей персоне не должен перезаписать текущую
+let lastSummaryRequestId = 0
+
+// Скелетоны только при первой загрузке: при смене языка карточки остаются на месте
+const isSummarySkeletonVisible = computed(() => isSummaryLoading.value && !summaryCards.value.length)
+
+// Пустой массив от бэкенда — блок карточек не показываем вовсе
+const isSummaryVisible = computed(() =>
+  isSummaryLoading.value || summaryError.value || summaryCards.value.length > 0,
+)
+
+const formattedSummaryCards = computed(() =>
+  summaryCards.value.map((card) => ({
+    id: card.id,
+    title: card.title,
+    value: formatCurrency(card.amount, card.currency),
+    icon: SUMMARY_CARD_ICONS[card.type] ?? DEFAULT_CARD_ICON,
+    description: card.description,
+  })),
+)
+
+async function loadSummary() {
+  const requestId = ++lastSummaryRequestId
+  const inn = props.inn
+
+  isSummaryLoading.value = true
+  summaryError.value = false
 
   try {
-    const { data } = await dashboardService.fetchDashboard($fetch)
+    const { data } = await dashboardService.fetchSummary(
+      $fetch,
+      inn,
+      locale.value as AppLocale,
+    )
 
-    dashboard.value = DashboardMapper.toEntity(data.data)
+    if (requestId !== lastSummaryRequestId) return
+
+    summaryCards.value = data.data.map((card) => DashboardMapper.toEntity(card))
   } catch (err: unknown) {
-    console.error('Dashboard loading failed:', err)
-    error.value = true
+    if (requestId !== lastSummaryRequestId) return
+
+    console.error('Dashboard summary loading failed:', err)
+    summaryCards.value = []
+
+    // Несуществующую персону обрабатывает загрузка её профиля (уведомление и возврат в /sandbox)
+    if (isAxiosError(err) && err.response?.status === HttpStatusCode.NotFound) return
+
+    summaryError.value = true
 
     toast.add({
       severity: 'error',
@@ -43,163 +130,130 @@ async function onLoading() {
       life: 4000,
     })
   } finally {
-    isLoading.value = false
+    if (requestId === lastSummaryRequestId) {
+      isSummaryLoading.value = false
+    }
   }
 }
 
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat(locale.value, {
-    style: 'currency',
-    currency: 'RUB',
-    maximumFractionDigits: 0,
-  }).format(value)
+function onDemoPersonaChange() {
+  // Карточки другой персоны сразу убираем, при смене языка оставляем до ответа
+  summaryCards.value = []
+  loadSummary()
 }
 
-const stats = computed(() => {
-  if (!dashboard.value) return []
+function onLocaleChange() {
+  loadSummary()
+}
 
-  return [
-    {
-      title: t('dashboard.balance'),
-      value: formatCurrency(dashboard.value.balance),
-      icon: 'pi pi-wallet',
-      description: t('dashboard.balanceDescription'),
-    },
-    {
-      title: t('dashboard.income'),
-      value: formatCurrency(dashboard.value.income),
-      icon: 'pi pi-arrow-up-right',
-      description: t('dashboard.incomeDescription'),
-    },
-    {
-      title: t('dashboard.expenses'),
-      value: formatCurrency(dashboard.value.expenses),
-      icon: 'pi pi-arrow-down-left',
-      description: t('dashboard.expensesDescription'),
-    },
-    {
-      title: t('dashboard.activeCredits'),
-      value: String(dashboard.value.activeCredits),
-      icon: 'pi pi-credit-card',
-      description: t('dashboard.activeCreditsDescription'),
-    },
-  ]
-})
+function applyForProduct(product: CreditProductInterface) {
+  router.push({
+    name: 'applications',
+    params: { inn: props.inn },
+    query: { productId: product.id },
+  })
+}
 
-onMounted(onLoading)
+function retryDemoPersona() {
+  loadDemoPersona(props.inn)
+}
+
+watch(() => props.inn, onDemoPersonaChange, { immediate: true })
+watch(locale, onLocaleChange)
 </script>
 
 <template>
   <div class="flex min-w-0 flex-col gap-6">
-    <div>
-      <h1
-        class="text-2xl font-bold tracking-tight text-fino-text sm:text-3xl"
-      >
-        {{ t('dashboard.title') }}
-      </h1>
+    <!-- Приветствие -->
+    <DashboardGreeting
+      v-if="demoPersona"
+      :first-name="demoPersona.firstName"
+      :organization-name="demoPersona.organizationName"
+    />
 
-      <p class="mt-2 text-sm text-fino-text-muted">
-        {{ t('dashboard.description') }}
-      </p>
-    </div>
+    <AppErrorState
+      v-else-if="demoPersonaError"
+      :message="t('dashboard.personaLoadError')"
+      @retry="retryDemoPersona"
+    />
 
-    <!-- Финансовая статистика -->
-    <!-- Финансовая статистика -->
-    <section :aria-label="t('dashboard.overview')">
-      <!-- Скелетоны при загрузке -->
+    <DashboardGreetingSkeleton v-else />
+
+    <!-- Финансовые карточки: количество и содержимое определяет бэкенд -->
+    <section
+      v-if="isSummaryVisible"
+      :aria-label="t('dashboard.overview')"
+    >
       <div
-        v-if="isLoading"
-        class="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-4"
+        v-if="isSummarySkeletonVisible"
+        class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
         aria-busy="true"
       >
-        <div
-          v-for="index in 4"
+        <FinanceStatCardSkeleton
+          v-for="index in SUMMARY_SKELETON_COUNT"
           :key="index"
-          class="rounded-3xl border border-fino-border bg-fino-surface p-5 sm:p-6"
-        >
-          <div class="flex items-start justify-between gap-4">
-            <Skeleton
-              width="55%"
-              height="0.875rem"
-            />
-
-            <Skeleton
-              shape="circle"
-              size="2.5rem"
-            />
-          </div>
-
-          <Skeleton
-            width="75%"
-            height="2rem"
-            class="mt-6"
-          />
-
-          <Skeleton
-            width="60%"
-            height="0.75rem"
-            class="mt-4"
-          />
-        </div>
+        />
       </div>
 
-      <!-- Ошибка загрузки -->
+      <AppErrorState
+        v-else-if="summaryError"
+        :message="t('dashboard.loadError')"
+        @retry="loadSummary"
+      />
+
       <div
-        v-else-if="error"
-        class="rounded-3xl border border-fino-border bg-fino-surface p-6"
-      >
-        <div class="flex items-start gap-3">
-          <i
-            class="pi pi-exclamation-circle mt-0.5 text-xl text-primary"
-            aria-hidden="true"
-          />
-
-          <div>
-            <p class="text-sm font-medium text-fino-text">
-              {{ t('dashboard.loadError') }}
-            </p>
-
-            <button
-              type="button"
-              class="mt-3 cursor-pointer text-sm font-semibold text-primary transition-opacity hover:opacity-80"
-              @click="onLoading"
-            >
-              <i
-                class="pi pi-refresh mr-1"
-                aria-hidden="true"
-              />
-              {{ t('dashboard.retry') }}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Загруженные карточки -->
-      <div
-        v-else-if="dashboard"
-        class="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-4"
+        v-else
+        class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
       >
         <FinanceStatCard
-          v-for="stat in stats"
-          :key="stat.icon"
-          :title="stat.title"
-          :value="stat.value"
-          :icon="stat.icon"
-          :description="stat.description"
+          v-for="card in formattedSummaryCards"
+          :key="card.id"
+          :title="card.title"
+          :value="card.value"
+          :icon="card.icon"
+          :description="card.description"
         />
       </div>
     </section>
 
-    <!-- График и AI-рекомендации -->
-    <div class="grid min-w-0 grid-cols-1 gap-4 2xl:grid-cols-3">
-      <div class="min-w-0 2xl:col-span-2">
-        <CashFlowChart />
-      </div>
+    <!-- K1/K2: прогноз остатка и посчитанное кредитное предложение -->
+    <CashForecastSection
+      v-if="isK1Enabled"
+      :inn="inn"
+      :products="products"
+      :is-products-loading="isProductsLoading"
+      :products-error="productsError"
+      @retry-products="loadProducts"
+    />
 
-      <AiRecommendationCard />
-    </div>
+    <!-- Сводка по компании: три независимых виджета -->
+    <section
+      class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
+      :aria-label="t('dashboard.companyOverview')"
+    >
+      <PreApprovedProductsCard
+        :products="products"
+        :is-loading="isProductsLoading"
+        :has-error="productsError"
+        @apply="applyForProduct"
+        @retry="loadProducts"
+      />
 
-    <!-- Последние операции -->
-    <RecentTransactions />
+      <ApplicationsAndTasksCard
+        :inn="inn"
+        :summary="applicationsSummary"
+        :is-loading="isApplicationsLoading"
+        :has-error="applicationsError"
+        @retry="loadApplicationsSummary"
+      />
+
+      <CompanyInsightsCard
+        class="md:col-span-2 xl:col-span-1"
+        :profile="profile"
+        :is-loading="isProfileLoading"
+        :has-error="profileError"
+        @retry="loadProfile"
+      />
+    </section>
   </div>
 </template>
