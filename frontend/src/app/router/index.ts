@@ -5,6 +5,8 @@ import {
 
 import DashboardLayout from '@/app/layouts/DashboardLayout.vue'
 import DashboardPage from '@/app/pages/dashboard/DashboardPage.vue'
+import CreditsPage from '@/app/pages/credits/CreditsPage.vue'
+import ApplicationsPage from '@/app/pages/applications/ApplicationsPage.vue'
 import ErrorPage from "@/app/pages/error/ErrorPage.vue";
 import SandboxPage from '@/app/pages/sandbox/SandboxPage.vue'
 import SandboxPersonaBuilderPage from '@/app/pages/sandbox/SandboxPersonaBuilderPage.vue'
@@ -14,13 +16,32 @@ export const router = createRouter({
 
     routes: [
         {
+            // Пользовательский путь начинается с выбора демо-персоны
             path: '/',
+            redirect: { name: 'sandbox' },
+        },
+        {
+            // ИНН компании демо-персоны в адресе: кабинет переживает перезагрузку страницы.
+            // Формат как в API: 10 цифр — юрлицо, 12 — ИП; иначе сработает страница 404.
+            path: '/cabinet/:inn(\\d{10}|\\d{12})',
             component: DashboardLayout,
+            props: true,
             children: [
                 {
                     path: '',
                     name: 'dashboard',
                     component: DashboardPage,
+                    props: true,
+                },
+                {
+                    path: 'credits',
+                    name: 'credits',
+                    component: CreditsPage,
+                },
+                {
+                    path: 'applications',
+                    name: 'applications',
+                    component: ApplicationsPage,
                 },
             ],
         },

@@ -1,21 +1,27 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import SidebarAiCard from './SidebarAiCard.vue'
+import type { RouteLocationRaw } from 'vue-router'
 
 defineProps<{
   navigation: {
-    to: string
+    name: string
+    to: RouteLocationRaw
     icon: string
     label: string
+    exact: boolean
   }[]
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
+
+function isItemActive(exact: boolean, isActive: boolean, isExactActive: boolean): boolean {
+  return exact ? isExactActive : isActive
+}
 </script>
 
 <template>
   <aside
-    class="hidden w-72 shrink-0 self-start rounded-3xl
+    class="hidden w-72 shrink-0 self-start rounded-3xl lg:sticky lg:top-28
            border border-fino-border bg-fino-surface
            p-4 shadow-sm motion-safe:animate-sidebar-enter
            lg:block"
@@ -32,8 +38,8 @@ const { t } = useI18n({ useScope: 'global' })
     <nav class="flex flex-col gap-1">
       <RouterLink
         v-for="item in navigation"
-        :key="item.to"
-        v-slot="{ href, navigate, isActive }"
+        :key="item.name"
+        v-slot="{ href, navigate, isActive, isExactActive }"
         :to="item.to"
         custom
       >
@@ -49,7 +55,7 @@ const { t } = useI18n({ useScope: 'global' })
               ? 'bg-fino-accent font-semibold text-primary'
               : 'text-fino-text-muted hover:bg-fino-surface-hover hover:text-fino-text'
           "
-          :aria-current="isActive ? 'page' : undefined"
+          :aria-current="isItemActive(item.exact, isActive, isExactActive) ? 'page' : undefined"
           @click="navigate"
         >
           <i
@@ -69,7 +75,5 @@ const { t } = useI18n({ useScope: 'global' })
         </a>
       </RouterLink>
     </nav>
-
-    <SidebarAiCard />
   </aside>
 </template>

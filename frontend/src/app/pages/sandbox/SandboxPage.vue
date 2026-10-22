@@ -94,7 +94,8 @@ function loginAsPersona(persona: SandboxPersonaInterface) {
     life: 4000,
   })
 
-  router.push({ name: 'dashboard' })
+  // ИНН компании персоны в маршруте — по нему кабинет загружает все персональные данные
+  router.push({ name: 'dashboard', params: { inn: persona.inn } })
 }
 
 function loginAsOfficer() {

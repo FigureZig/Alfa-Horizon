@@ -5,6 +5,7 @@ export interface SandboxPersonaInterface {
   code: string
   kind: SandboxPersonaKindEnum
   fullName: string
+  inn: string
   initials: string
   organization: string
   scenario: string

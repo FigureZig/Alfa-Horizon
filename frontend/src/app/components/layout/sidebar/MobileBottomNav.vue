@@ -1,15 +1,22 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import type { RouteLocationRaw } from 'vue-router'
 
 defineProps<{
   navigation: {
-    to: string
+    name: string
+    to: RouteLocationRaw
     icon: string
     label: string
+    exact: boolean
   }[]
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
+
+function isItemActive(exact: boolean, isActive: boolean, isExactActive: boolean): boolean {
+  return exact ? isExactActive : isActive
+}
 </script>
 
 <template>
@@ -21,11 +28,11 @@ const { t } = useI18n({ useScope: 'global' })
            lg:hidden"
     :aria-label="t('nav.menu')"
   >
-    <div class="mx-auto grid max-w-lg grid-cols-4 gap-1">
+    <div class="mx-auto grid max-w-lg grid-cols-3 gap-1">
       <RouterLink
         v-for="item in navigation"
-        :key="item.to"
-        v-slot="{ href, navigate, isActive }"
+        :key="item.name"
+        v-slot="{ href, navigate, isActive, isExactActive }"
         :to="item.to"
         custom
       >
@@ -42,14 +49,14 @@ const { t } = useI18n({ useScope: 'global' })
               ? 'text-primary'
               : 'text-fino-text-muted hover:text-fino-text'
           "
-          :aria-current="isActive ? 'page' : undefined"
+          :aria-current="isItemActive(item.exact, isActive, isExactActive) ? 'page' : undefined"
           @click="navigate"
         >
           <span
             class="flex h-9 w-12 items-center justify-center
                    rounded-xl transition-colors duration-200"
             :class="
-              isActive ? 'bg-fino-accent' : 'bg-transparent'
+              isItemActive(item.exact, isActive, isExactActive) ? 'bg-fino-accent' : 'bg-transparent'
             "
           >
             <i
@@ -62,7 +69,7 @@ const { t } = useI18n({ useScope: 'global' })
           <span
             class="w-full truncate text-[10px] leading-tight
                    sm:text-xs"
-            :class="isActive ? 'font-semibold' : 'font-medium'"
+            :class="isItemActive(item.exact, isActive, isExactActive) ? 'font-semibold' : 'font-medium'"
           >
             {{ t(item.label) }}
           </span>

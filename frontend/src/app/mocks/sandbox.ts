@@ -4,17 +4,20 @@ import type { ApiResponse } from '@/app/types/api-response'
 import type { SandboxPersonaCreateDto } from '@/app/types/sandbox/sandbox-persona-create-dto'
 import type { SandboxPersonaDto } from '@/app/types/sandbox/sandbox-persona-dto'
 import { SandboxPersonaKindEnum } from '@/app/types/sandbox/sandbox-persona-kind-enum'
+import { addDemoPersonaMock } from '@/app/mocks/demo-persona'
 
 const MOCK_RESPONSE_DELAY = 500
 
 /**
  * Мок ответа GET v1/sandbox/personas?lang=<locale>.
  * Бэкенд отдаёт данные персон на языке из параметра `lang`.
+ * `inn` — ИНН компании персоны, по нему открывается кабинет.
  */
 export const sandboxPersonasMock: Record<AppLocale, SandboxPersonaDto[]> = {
   ru: [
     {
       id: 's7',
+      inn: '770100000079',
       code: 'S7',
       kind: SandboxPersonaKindEnum.Client,
       full_name: 'Анна Смирнова',
@@ -28,6 +31,7 @@ export const sandboxPersonasMock: Record<AppLocale, SandboxPersonaDto[]> = {
     },
     {
       id: 's3',
+      inn: '7701000019',
       code: 'S3',
       kind: SandboxPersonaKindEnum.Client,
       full_name: 'Павел Орлов',
@@ -41,6 +45,7 @@ export const sandboxPersonasMock: Record<AppLocale, SandboxPersonaDto[]> = {
     },
     {
       id: 's2',
+      inn: '7701000026',
       code: 'S2',
       kind: SandboxPersonaKindEnum.Client,
       full_name: 'Елена Кравец',
@@ -54,6 +59,7 @@ export const sandboxPersonasMock: Record<AppLocale, SandboxPersonaDto[]> = {
     },
     {
       id: 's4',
+      inn: '7701000033',
       code: 'S4',
       kind: SandboxPersonaKindEnum.Client,
       full_name: 'Игорь Белов',
@@ -67,6 +73,7 @@ export const sandboxPersonasMock: Record<AppLocale, SandboxPersonaDto[]> = {
     },
     {
       id: 'r8',
+      inn: '7701000040',
       code: 'R8',
       kind: SandboxPersonaKindEnum.Client,
       full_name: 'Иван Иванов',
@@ -80,6 +87,7 @@ export const sandboxPersonasMock: Record<AppLocale, SandboxPersonaDto[]> = {
     },
     {
       id: 'r12',
+      inn: '7701000065',
       code: 'R12',
       kind: SandboxPersonaKindEnum.Client,
       full_name: 'Олег Захаров',
@@ -93,6 +101,7 @@ export const sandboxPersonasMock: Record<AppLocale, SandboxPersonaDto[]> = {
     },
     {
       id: 'n1',
+      inn: '770100000079',
       code: 'N1',
       kind: SandboxPersonaKindEnum.Client,
       full_name: 'Анна Смирнова',
@@ -106,6 +115,7 @@ export const sandboxPersonasMock: Record<AppLocale, SandboxPersonaDto[]> = {
     },
     {
       id: 'bank',
+      inn: '7701000097',
       code: 'Банк',
       kind: SandboxPersonaKindEnum.Bank,
       full_name: 'Мария Соколова',
@@ -121,6 +131,7 @@ export const sandboxPersonasMock: Record<AppLocale, SandboxPersonaDto[]> = {
   en: [
     {
       id: 's7',
+      inn: '770100000079',
       code: 'S7',
       kind: SandboxPersonaKindEnum.Client,
       full_name: 'Anna Smirnova',
@@ -134,6 +145,7 @@ export const sandboxPersonasMock: Record<AppLocale, SandboxPersonaDto[]> = {
     },
     {
       id: 's3',
+      inn: '7701000019',
       code: 'S3',
       kind: SandboxPersonaKindEnum.Client,
       full_name: 'Pavel Orlov',
@@ -147,6 +159,7 @@ export const sandboxPersonasMock: Record<AppLocale, SandboxPersonaDto[]> = {
     },
     {
       id: 's2',
+      inn: '7701000026',
       code: 'S2',
       kind: SandboxPersonaKindEnum.Client,
       full_name: 'Elena Kravets',
@@ -160,6 +173,7 @@ export const sandboxPersonasMock: Record<AppLocale, SandboxPersonaDto[]> = {
     },
     {
       id: 's4',
+      inn: '7701000033',
       code: 'S4',
       kind: SandboxPersonaKindEnum.Client,
       full_name: 'Igor Belov',
@@ -173,6 +187,7 @@ export const sandboxPersonasMock: Record<AppLocale, SandboxPersonaDto[]> = {
     },
     {
       id: 'r8',
+      inn: '7701000040',
       code: 'R8',
       kind: SandboxPersonaKindEnum.Client,
       full_name: 'Ivan Ivanov',
@@ -186,6 +201,7 @@ export const sandboxPersonasMock: Record<AppLocale, SandboxPersonaDto[]> = {
     },
     {
       id: 'r12',
+      inn: '7701000065',
       code: 'R12',
       kind: SandboxPersonaKindEnum.Client,
       full_name: 'Oleg Zakharov',
@@ -199,6 +215,7 @@ export const sandboxPersonasMock: Record<AppLocale, SandboxPersonaDto[]> = {
     },
     {
       id: 'n1',
+      inn: '770100000079',
       code: 'N1',
       kind: SandboxPersonaKindEnum.Client,
       full_name: 'Anna Smirnova',
@@ -212,6 +229,7 @@ export const sandboxPersonasMock: Record<AppLocale, SandboxPersonaDto[]> = {
     },
     {
       id: 'bank',
+      inn: '7701000097',
       code: 'Bank',
       kind: SandboxPersonaKindEnum.Bank,
       full_name: 'Maria Sokolova',
@@ -249,7 +267,7 @@ export function sandboxPersonasMockAdapter(
 
 /**
  * Axios-адаптер для POST v1/sandbox/personas: добавляет персону в мок-список,
- * чтобы она появилась на странице /sandbox после возврата.
+ * чтобы она появилась на странице /sandbox после возврата и в неё можно было войти.
  */
 export function sandboxPersonaCreateMockAdapter(
   config: InternalAxiosRequestConfig,
@@ -265,6 +283,7 @@ export function sandboxPersonaCreateMockAdapter(
     setTimeout(() => {
       sandboxPersonasMock.ru.push(persona)
       sandboxPersonasMock.en.push(persona)
+      addDemoPersonaMock(persona)
 
       resolve({
         data: { data: persona },
