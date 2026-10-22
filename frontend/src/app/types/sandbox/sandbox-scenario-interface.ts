@@ -1,3 +1,4 @@
+import type { ApplicationDetailStatusEnum } from '@/app/types/application/application-detail-status-enum'
 import type { Nullable } from '@/app/types/nullable'
 
 export interface SandboxScenarioStepInterface {
@@ -7,7 +8,7 @@ export interface SandboxScenarioStepInterface {
   title: string
   button: Nullable<string>
   request: { method: string; path: string; body: Nullable<Record<string, unknown>> }
-  expectedStatus: Nullable<string>
+  expectedStatus: Nullable<ApplicationDetailStatusEnum>
   expectedHttp: number
   note: string
 }

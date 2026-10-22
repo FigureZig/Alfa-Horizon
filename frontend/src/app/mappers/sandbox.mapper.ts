@@ -24,6 +24,8 @@ export class SandboxMapper {
       registries: data.registries,
       preview: data.preview,
       loginLabel: data.login_label,
+      isCustom: data.custom,
+      personInn: data.person_inn,
     }
   }
 

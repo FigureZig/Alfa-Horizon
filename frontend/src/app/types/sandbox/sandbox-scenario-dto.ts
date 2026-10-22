@@ -1,11 +1,14 @@
+import type { ApplicationDetailStatusEnum } from '@/app/types/application/application-detail-status-enum'
+import type { Nullable } from '@/app/types/nullable'
+
 export interface SandboxScenarioStepDto {
   n: number
-  user: { id: string; full_name: string; code: string } | null
+  user: Nullable<{ id: string; full_name: string; code: string }>
   action: string
   title: string
-  button: string | null
-  api: { method: string; path: string; body: Record<string, unknown> | null }
-  expect_status: string | null
+  button: Nullable<string>
+  api: { method: string; path: string; body: Nullable<Record<string, unknown>> }
+  expect_status: Nullable<ApplicationDetailStatusEnum>
   expect_http: number
   note: string
 }

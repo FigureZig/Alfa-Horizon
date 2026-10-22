@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import AppHeader from '@/app/components/layout/AppHeader.vue'
 import SandboxDemoBadge from '@/app/features/sandbox/components/SandboxDemoBadge.vue'
@@ -9,6 +9,7 @@ import SandboxPersonaCard from '@/app/features/sandbox/components/SandboxPersona
 import SandboxPersonaCardSkeleton from '@/app/features/sandbox/components/SandboxPersonaCardSkeleton.vue'
 import SandboxPersonaDetails from '@/app/features/sandbox/components/SandboxPersonaDetails.vue'
 import SandboxPersonaDetailsSkeleton from '@/app/features/sandbox/components/SandboxPersonaDetailsSkeleton.vue'
+import SandboxWorldPanel from '@/app/features/sandbox/components/SandboxWorldPanel.vue'
 import { useApiFetch } from '@/app/composables/useApiFetch'
 import { useSession } from '@/app/composables/useSession'
 import { sandboxService } from '@/app/services/sandbox/sandbox.service'
@@ -21,6 +22,7 @@ import type { Nullable } from '@/app/types/nullable'
 const PERSONA_SKELETON_COUNT = 8
 
 const { t, locale } = useI18n({ useScope: 'global' })
+const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 const $fetch = useApiFetch()
@@ -43,6 +45,23 @@ const officerPersona = computed(() =>
 
 const isEmpty = computed(() => !isLoading.value && !error.value && !personas.value.length)
 
+const guideCompanies = computed(() => {
+  const companies = new Map<string, { inn: string, name: string, members: number }>()
+
+  for (const persona of personas.value) {
+    if (!persona.isCustom || persona.kind !== SandboxPersonaKindEnum.Client) continue
+
+    const company = companies.get(persona.inn)
+    if (company) {
+      company.members++
+    } else {
+      companies.set(persona.inn, { inn: persona.inn, name: persona.organization, members: 1 })
+    }
+  }
+
+  return [...companies.values()].filter((company) => company.members > 1)
+})
+
 async function loadPersonas() {
   if (isLoading.value) return
 
@@ -52,9 +71,17 @@ async function loadPersonas() {
   try {
     const { data } = await sandboxService.fetchPersonas($fetch, locale.value as AppLocale)
 
-    personas.value = data.data.map((persona) => SandboxMapper.toEntity(persona))
+    personas.value = data.data
+      .map((persona) => SandboxMapper.toEntity(persona))
+      .sort((first, second) => Number(second.isCustom) - Number(first.isCustom))
 
-    // Сохраняем выбор при перезагрузке (например, после смены языка)
+    const requestedPersona = route.query.persona
+    const requestedId = typeof requestedPersona === 'string' ? requestedPersona : null
+
+    // После создания показываем владельца; при смене языка сохраняем текущий выбор.
+    if (!selectedPersonaId.value && requestedId && personas.value.some((persona) => persona.id === requestedId)) {
+      selectedPersonaId.value = requestedId
+    }
     if (!selectedPersona.value) {
       selectedPersonaId.value = personas.value[0]?.id ?? null
     }
@@ -142,7 +169,10 @@ watch(locale, loadPersonas)
   <div class="min-h-screen bg-fino-surface-secondary">
     <AppHeader>
       <template #profile>
-        <SandboxDemoBadge />
+        <div class="flex items-center gap-2">
+          <SandboxWorldPanel />
+          <SandboxDemoBadge />
+        </div>
       </template>
     </AppHeader>
 
@@ -156,7 +186,62 @@ watch(locale, loadPersonas)
         <p class="mt-2 max-w-2xl text-sm leading-relaxed text-fino-text-muted">
           {{ t('sandbox.description') }}
         </p>
+
+        <RouterLink
+          :to="{ name: 'sandbox-scenarios' }"
+          class="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:opacity-80"
+        >
+          <i
+            class="pi pi-map"
+            aria-hidden="true"
+          />
+          {{ t('sandbox.scenarios.open') }}
+        </RouterLink>
       </div>
+
+      <section
+        v-if="guideCompanies.length"
+        class="rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm sm:p-6"
+        :aria-label="t('sandbox.guide.openGuide')"
+      >
+        <div class="flex items-start gap-3">
+          <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-fino-accent text-primary">
+            <i
+              class="pi pi-map"
+              aria-hidden="true"
+            />
+          </span>
+          <div>
+            <h2 class="text-base font-bold text-fino-text">
+              {{ t('sandbox.guide.openGuide') }}
+            </h2>
+            <p class="mt-1 text-sm text-fino-text-muted">
+              {{ t('sandbox.guide.chooseCompany') }}
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-4 grid gap-3 sm:grid-cols-2">
+          <RouterLink
+            v-for="company in guideCompanies"
+            :key="company.inn"
+            :to="{ name: 'sandbox-scenario-guide', params: { inn: company.inn } }"
+            class="flex min-h-16 items-center justify-between gap-3 rounded-2xl border border-fino-border
+                   bg-fino-surface-secondary px-4 py-3 transition-colors hover:border-primary"
+          >
+            <span class="min-w-0">
+              <span class="block break-words text-sm font-semibold text-fino-text">{{ company.name }}</span>
+              <span class="mt-1 block text-xs text-fino-text-muted">
+                {{ t('sandbox.guide.memberCount', { count: company.members }) }}
+              </span>
+            </span>
+            <i
+              class="pi pi-arrow-right shrink-0 text-sm text-primary"
+              aria-hidden="true"
+            />
+          </RouterLink>
+        </div>
+      </section>
 
       <!-- Скелетоны при загрузке -->
       <div

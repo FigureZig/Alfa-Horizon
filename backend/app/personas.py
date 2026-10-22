@@ -148,8 +148,26 @@ def presets() -> list[dict]:
     return out
 
 
+def participant_personas(owner: dict) -> list[dict]:
+    if owner["kind"] != "client" or owner.get("derived"):
+        return []
+    company = owner["companies"][0]
+    people = owner["people"]
+    owner_key = owner["person"]["key"]
+    return [{**owner, "id": f"{owner['id']}-p{index}",
+             "person": {"key": person_key, **people[person_key]}, "derived": True, "texts": {}}
+            for index, (person_key, _) in enumerate(company.get("participants", []), 1)
+            if person_key != owner_key]
+
+
 async def customs(conn) -> list[dict]:
-    return await store.kv_get(conn, CUSTOM_KEY, [])
+    saved = await store.kv_get(conn, CUSTOM_KEY, [])
+    ids = {persona["id"] for persona in saved}
+    result = []
+    for persona in saved:
+        result.append(persona)
+        result.extend(member for member in participant_personas(persona) if member["id"] not in ids)
+    return result
 
 
 async def all_personas(conn) -> list[dict]:
@@ -170,8 +188,9 @@ async def for_company(conn, inn: str) -> dict | None:
         next((p for p in clients if any(c["inn"] == inn for c in p["companies"])), None)
 
 
-async def add(conn, persona: dict) -> None:
-    await store.kv_set(conn, CUSTOM_KEY, [p for p in await customs(conn) if p["id"] != persona["id"]] + [persona])
+async def add_many(conn, new_personas: list[dict]) -> None:
+    ids = {persona["id"] for persona in new_personas}
+    await store.kv_set(conn, CUSTOM_KEY, [p for p in await customs(conn) if p["id"] not in ids] + new_personas)
 
 
 async def active_id(conn) -> str:

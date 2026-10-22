@@ -52,6 +52,7 @@ const IP_INN_LENGTH = 12
 const LEGAL_INN_LENGTH = 10
 
 const NUMBER_FIELDS: NumberFieldInterface[] = [
+  { paramId: 'participants', key: 'participants', fractionDigits: 0, forms: [LegalFormEnum.Llc] },
   { paramId: 'age_months', key: 'ageMonths', fractionDigits: 0, unit: 'months' },
   { paramId: 'headcount', key: 'headcount', fractionDigits: 0, unit: 'people' },
   { paramId: 'inflow_avg', key: 'inflowAvg', fractionDigits: 0, unit: 'rub' },
@@ -61,7 +62,6 @@ const NUMBER_FIELDS: NumberFieldInterface[] = [
   { paramId: 'overdue_days', key: 'overdueDays', fractionDigits: 0, unit: 'days' },
   { paramId: 'bki_requests', key: 'bkiRequests', fractionDigits: 0 },
   { paramId: 'tax_debt', key: 'taxDebt', fractionDigits: 0, unit: 'rub' },
-  { paramId: 'participants', key: 'participants', fractionDigits: 0, forms: [LegalFormEnum.Llc] },
   { paramId: 'profit_margin', key: 'profitMargin', fractionDigits: 2 },
   { paramId: 'contract_price', key: 'contractPrice', fractionDigits: 0, unit: 'rub' },
 ]
@@ -225,7 +225,7 @@ async function submitPersona() {
   isSubmitting.value = true
 
   try {
-    await sandboxService.createPersona($fetch, SandboxMapper.toPayload(form))
+    const { data } = await sandboxService.createPersona($fetch, SandboxMapper.toPayload(form))
 
     toast.add({
       severity: 'success',
@@ -234,7 +234,7 @@ async function submitPersona() {
       life: 4000,
     })
 
-    await router.push({ name: 'sandbox' })
+    await router.push({ name: 'sandbox', query: { persona: data.data.id } })
   } catch (err: unknown) {
     console.error('Sandbox persona creation failed:', err)
 

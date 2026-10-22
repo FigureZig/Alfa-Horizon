@@ -15,6 +15,8 @@ import BankQueuePage from '@/app/pages/bank/BankQueuePage.vue'
 import ErrorPage from "@/app/pages/error/ErrorPage.vue";
 import SandboxPage from '@/app/pages/sandbox/SandboxPage.vue'
 import SandboxPersonaBuilderPage from '@/app/pages/sandbox/SandboxPersonaBuilderPage.vue'
+import SandboxScenariosPage from '@/app/pages/sandbox/SandboxScenariosPage.vue'
+import SandboxScenarioGuidePage from '@/app/pages/sandbox/SandboxScenarioGuidePage.vue'
 
 export const router = createRouter({
     history: createWebHistory(),
@@ -105,6 +107,17 @@ export const router = createRouter({
             path: '/sandbox/personas/new',
             name: 'sandbox-persona-builder',
             component: SandboxPersonaBuilderPage,
+        },
+        {
+            path: '/sandbox/scenarios',
+            name: 'sandbox-scenarios',
+            component: SandboxScenariosPage,
+        },
+        {
+            path: '/sandbox/guide/:inn(\\d{10})',
+            name: 'sandbox-scenario-guide',
+            component: SandboxScenarioGuidePage,
+            props: true,
         },
         {
             path: '/403',

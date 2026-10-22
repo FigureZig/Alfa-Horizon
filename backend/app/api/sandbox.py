@@ -250,6 +250,7 @@ async def create_persona(body: PersonaIn, lang: Lang = "ru"):
         role = body.organization or "Кредитный специалист"
         persona = {**base, "id": f"b{seq}", "kind": "bank", "staff": {"key": f"staff{seq}", "fio": fio,
                                                                        "role": {"ru": role, "en": role}}}
+        created_personas = [persona]
     else:
         card_fields = {"kind", "form", "okved", "okved_name", "full_name", "organization", "code", "inn", "flags", *TEXT_FIELDS}
         spec = {**body.model_dump(exclude=card_fields), "inn": inn,
@@ -264,8 +265,9 @@ async def create_persona(body: PersonaIn, lang: Lang = "ru"):
         owner = company.get("owner") or company["eio"][0][0]
         persona = {**base, "id": f"c{seq}", "kind": "client", "person": {"key": owner, **people[owner]},
                    "companies": [company], "people": people}
+        created_personas = [persona, *personas.participant_personas(persona)]
     async with pool.acquire() as conn:
-        await personas.add(conn, persona)
+        await personas.add_many(conn, created_personas)
         if persona["kind"] == "client":
             await store.enqueue(conn, "refresh_company", {"inn": persona["companies"][0]["inn"]})
     return ok(personas.card(persona, lang))
