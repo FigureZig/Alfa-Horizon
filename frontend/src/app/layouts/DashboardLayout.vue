@@ -6,6 +6,7 @@ import AppHeader from '@/app/components/layout/AppHeader.vue'
 import AppSidebar from '@/app/components/layout/AppSidebar.vue'
 import ApplicationPageSkeleton from '@/app/features/application/components/ApplicationPageSkeleton.vue'
 import DemoPersonaProfile from '@/app/features/demo-persona/components/DemoPersonaProfile.vue'
+import SandboxWorldPanel from '@/app/features/sandbox/components/SandboxWorldPanel.vue'
 import { useDemoPersona } from '@/app/composables/useDemoPersona'
 
 const props = defineProps<{
@@ -50,7 +51,10 @@ watch([demoPersona, () => route.name], redirectByRole, { immediate: true })
   <div class="min-h-screen bg-fino-surface-secondary">
     <AppHeader>
       <template #profile>
-        <DemoPersonaProfile />
+        <div class="flex items-center gap-2">
+          <SandboxWorldPanel :inn="isBankStaff ? undefined : inn" />
+          <DemoPersonaProfile />
+        </div>
       </template>
     </AppHeader>
 

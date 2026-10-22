@@ -4,7 +4,16 @@ import type { ApiResponse } from '@/app/types/api-response'
 import type { SandboxPersonaCreateDto } from '@/app/types/sandbox/sandbox-persona-create-dto'
 import type { SandboxLoginDto } from '@/app/types/sandbox/sandbox-login-dto'
 import type { SandboxPersonaDto } from '@/app/types/sandbox/sandbox-persona-dto'
+import type { SandboxScenarioDto } from '@/app/types/sandbox/sandbox-scenario-dto'
 import type { SandboxPersonaOptionsDto } from '@/app/types/sandbox/sandbox-persona-options-dto'
+import type {
+  SandboxClockAdvanceDto,
+  SandboxClockDto,
+  SandboxEventCreateDto,
+  SandboxFaultCreateDto,
+  SandboxFaultDto,
+  SandboxWorkerDto,
+} from '@/app/types/sandbox/sandbox-world-dto'
 
 const ROUTE_PREFIX_SANDBOX = 'v1/sandbox'
 
@@ -39,10 +48,56 @@ export const sandboxService = {
     )
   },
 
+  // Сценарии по ролям: кем войти, что нажать и какой статус ждать на каждом шаге
+  async fetchScenarios($fetch: AxiosInstance, locale: AppLocale) {
+    return await $fetch.get<ApiResponse<SandboxScenarioDto[]>>(
+      `${ROUTE_PREFIX_SANDBOX}/scenarios`,
+      {
+        params: { lang: locale },
+      },
+    )
+  },
+
   async createPersona($fetch: AxiosInstance, payload: SandboxPersonaCreateDto) {
     return await $fetch.post<ApiResponse<SandboxPersonaDto>>(
       `${ROUTE_PREFIX_SANDBOX}/personas`,
       payload,
     )
+  },
+
+  // ── Мир симулятора: часы, события реестров, отказы источников, воркер ─────────
+
+  async fetchClock($fetch: AxiosInstance) {
+    return await $fetch.get<ApiResponse<SandboxClockDto>>(`${ROUTE_PREFIX_SANDBOX}/clock`)
+  },
+
+  async advanceClock($fetch: AxiosInstance, payload: SandboxClockAdvanceDto) {
+    return await $fetch.post<ApiResponse<SandboxClockDto>>(`${ROUTE_PREFIX_SANDBOX}/clock`, payload)
+  },
+
+  async createEvent($fetch: AxiosInstance, payload: SandboxEventCreateDto) {
+    return await $fetch.post<ApiResponse<{ status: string }>>(`${ROUTE_PREFIX_SANDBOX}/events`, payload)
+  },
+
+  async fetchFaults($fetch: AxiosInstance) {
+    return await $fetch.get<ApiResponse<SandboxFaultDto[]>>(`${ROUTE_PREFIX_SANDBOX}/faults`)
+  },
+
+  async createFault($fetch: AxiosInstance, payload: SandboxFaultCreateDto) {
+    return await $fetch.post<ApiResponse<SandboxFaultDto>>(`${ROUTE_PREFIX_SANDBOX}/faults`, payload)
+  },
+
+  async deleteFault($fetch: AxiosInstance, faultId: string) {
+    return await $fetch.delete(`${ROUTE_PREFIX_SANDBOX}/faults/${encodeURIComponent(faultId)}`)
+  },
+
+  async setWorkerPaused($fetch: AxiosInstance, isPaused: boolean) {
+    return await $fetch.post<ApiResponse<SandboxWorkerDto>>(
+      `${ROUTE_PREFIX_SANDBOX}/worker/${isPaused ? 'pause' : 'resume'}`,
+    )
+  },
+
+  async reset($fetch: AxiosInstance) {
+    return await $fetch.post<ApiResponse<{ status: string }>>(`${ROUTE_PREFIX_SANDBOX}/reset`)
   },
 }

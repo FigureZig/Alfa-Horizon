@@ -54,6 +54,52 @@ async def test_custom_persona_from_frontend_builder(stand):
     assert {p["product"] for p in products} == {"OVERDRAFT", "EXPRESS"}
 
 
+async def test_custom_company_members_can_approve_a_large_deal(stand):
+    owner = await stand.call("POST", "/sandbox/personas", expect=201,
+                             json={"full_name": "Олег Петров", "organization": "ООО «Пекарня»",
+                                   "participants": 3, "flags": ["large_deal"]})
+    cards = await stand.call("GET", "/sandbox/personas")
+    members = [card for card in cards if card["company_inn"] == owner["inn"]]
+    assert len(members) == 3
+    assert len({card["id"] for card in members}) == len({card["person_inn"] for card in members}) == 3
+    assert members[0]["id"] == owner["id"]
+    assert all(card["custom"] and card["kind"] == "client" for card in members)
+    assert all("Участник" in card["scenario"] for card in members[1:])
+
+    owner_headers = await stand.login(owner["id"])
+    app = await stand.call("POST", "/applications", owner_headers, expect=201,
+                           json={"inn": owner["inn"], "product": "EXPRESS", "amount": 1_500_000,
+                                 "term_months": 24, "goal": "growth", "consent_bki": True})
+    path = f"/applications/{app['id']}"
+    await stand.call("POST", f"{path}/submit", owner_headers)
+    await stand.pump()
+    waiting = await stand.call("GET", path, owner_headers)
+    assert waiting["status"] == "INFO_REQUESTED"
+    assert len(waiting["approval"]["participants"]) == 3
+
+    for member in members[1:]:
+        member_headers = await stand.login(member["id"])
+        me = await stand.call("GET", "/me", member_headers)
+        assert me["companies"][0]["can"]["approve"] and not me["companies"][0]["can"]["prepare"]
+        visible = await stand.call("GET", path, member_headers)
+        assert "vote" in visible["available_actions"] and "sign" not in visible["available_actions"]
+        voted = await stand.call("POST", f"{path}/approvals/vote", member_headers, json={"vote": "for"})
+    assert voted["status"] == "CHECKING"
+
+    await stand.pump()
+    offered = await stand.call("GET", path, owner_headers)
+    assert offered["status"] == "OFFERED"
+    if "PROVISIONAL" in offered["flags"]:
+        await stand.advance(1)
+        await stand.step(fast_forward=True)
+        offered = await stand.call("GET", path, owner_headers)
+        assert "PROVISIONAL" not in offered["flags"]
+    await stand.call("POST", f"{path}/offer/accept", owner_headers, json={"variant": 0})
+    await stand.call("POST", f"{path}/signatures", owner_headers)
+    await stand.pump()
+    assert (await stand.call("GET", path, owner_headers))["status"] == "ISSUED"
+
+
 async def test_provisional_offer_signs_only_after_credit_history(stand):
     """N1: БКИ не отвечает → предварительная оферта; подпись заблокирована; БКИ вернулось → флаг снят → выдача."""
     headers = await stand.login("n1")

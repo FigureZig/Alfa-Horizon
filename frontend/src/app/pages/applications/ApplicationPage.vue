@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import Dialog from 'primevue/dialog'
 import AppErrorState from '@/app/components/AppErrorState.vue'
 import ApplicationExplanationCard from '@/app/features/application/components/ApplicationExplanationCard.vue'
@@ -36,6 +37,7 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
+const route = useRoute()
 const { formatCurrency, formatDateTime } = useFormatters()
 
 const {
@@ -216,6 +218,19 @@ async function confirmAction() {
           class="mt-3"
           :flags="application.flags"
         />
+
+        <RouterLink
+          v-if="application.approval || route.query.guide === inn"
+          :to="{ name: 'sandbox-scenario-guide', params: { inn }, query: { applicationId } }"
+          class="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-fino-accent px-4
+                 text-sm font-semibold text-primary hover:opacity-80"
+        >
+          <i
+            class="pi pi-map text-sm"
+            aria-hidden="true"
+          />
+          {{ t('sandbox.guide.openGuide') }}
+        </RouterLink>
       </div>
 
       <div class="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">

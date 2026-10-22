@@ -8,7 +8,10 @@ import '@/theme/palette.css'
 import 'primeicons/primeicons.css'
 import { router } from '@/app/router'
 import { i18n } from '@/app/i18n'
+import { initTheme } from '@/app/composables/useTheme'
 import ToastService from 'primevue/toastservice'
+
+initTheme()
 
 const app = createApp(App)
 

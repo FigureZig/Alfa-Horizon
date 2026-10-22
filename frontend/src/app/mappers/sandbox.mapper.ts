@@ -24,6 +24,8 @@ export class SandboxMapper {
       registries: data.registries,
       preview: data.preview,
       loginLabel: data.login_label,
+      isCustom: data.custom,
+      personInn: data.person_inn,
     }
   }
 
@@ -32,13 +34,6 @@ export class SandboxMapper {
       full_name: form.fullName.trim(),
       inn: SandboxMapper.toOptionalText(form.inn),
       organization: SandboxMapper.toOptionalText(form.organization),
-      code: SandboxMapper.toOptionalText(form.code),
-      scenario: SandboxMapper.toOptionalText(form.scenario),
-      permissions: SandboxMapper.toOptionalText(form.permissions),
-      profile: SandboxMapper.toOptionalText(form.profile),
-      registries: SandboxMapper.toOptionalText(form.registries),
-      preview: SandboxMapper.toOptionalText(form.preview),
-      login_label: SandboxMapper.toOptionalText(form.loginLabel),
       form: form.form,
       okved: form.okved.trim(),
       okved_name: form.okvedName.trim(),

@@ -1,4 +1,5 @@
 import type { SandboxPersonaKindEnum } from '@/app/types/sandbox/sandbox-persona-kind-enum'
+import type { Nullable } from '@/app/types/nullable'
 
 export interface SandboxPersonaInterface {
   id: string
@@ -14,4 +15,6 @@ export interface SandboxPersonaInterface {
   registries: string
   preview: string
   loginLabel: string
+  isCustom: boolean
+  personInn: Nullable<string>
 }

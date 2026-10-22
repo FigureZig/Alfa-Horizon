@@ -13,6 +13,8 @@ export interface SandboxPersonaDto {
   registries: string
   preview: string
   login_label: string
+  custom: boolean
+  person_inn: string | null
   // Компании персоны: по ним в рабочем месте банка ИНН заявки получает название
   companies?: { inn: string, name: string }[]
 }

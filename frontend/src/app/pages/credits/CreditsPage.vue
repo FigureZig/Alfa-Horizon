@@ -149,7 +149,7 @@ watch(() => props.inn, onInnChange)
       </p>
     </div>
 
-    <div class="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
+    <div class="grid grid-cols-1 items-start gap-6 2xl:grid-cols-[minmax(0,1fr)_24rem]">
       <div class="flex min-w-0 flex-col gap-6">
         <!-- Продукты банка -->
         <section
@@ -180,7 +180,7 @@ watch(() => props.inn, onInnChange)
 
           <div
             v-if="isCatalogLoading && !catalogProducts.length"
-            class="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3"
+            class="grid grid-cols-1 gap-4 md:grid-cols-2"
             aria-busy="true"
           >
             <CreditProductCardSkeleton
@@ -204,7 +204,7 @@ watch(() => props.inn, onInnChange)
 
           <ul
             v-else
-            class="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3"
+            class="grid grid-cols-1 gap-4 md:grid-cols-2"
           >
             <li
               v-for="card in cards"
@@ -243,7 +243,7 @@ watch(() => props.inn, onInnChange)
       <!-- Кредитное здоровье -->
       <aside
         v-if="!isScoreUnavailable"
-        class="min-w-0 xl:sticky xl:top-28"
+        class="min-w-0 2xl:sticky 2xl:top-28"
       >
         <CreditHealthCard
           :credit-score="creditScore"

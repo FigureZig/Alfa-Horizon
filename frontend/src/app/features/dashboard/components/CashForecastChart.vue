@@ -305,28 +305,30 @@ function handlePointerLeave() {
       </span>
     </div>
 
-    <!-- Табличное представление для скринридеров -->
-    <table class="sr-only">
-      <caption>{{ t('cashForecast.chartLabel') }}</caption>
-      <thead>
-        <tr>
-          <th scope="col">
-            {{ t('cashForecast.tableDate') }}
-          </th>
-          <th scope="col">
-            {{ t('cashForecast.tableBalance') }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="row in tableRows"
-          :key="row.key"
-        >
-          <td>{{ row.date }}</td>
-          <td>{{ row.balance }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- Табличное представление для скринридеров. sr-only у самой таблицы не обрезается и растягивает страницу, поэтому он на обёртке -->
+    <div class="sr-only">
+      <table>
+        <caption>{{ t('cashForecast.chartLabel') }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">
+              {{ t('cashForecast.tableDate') }}
+            </th>
+            <th scope="col">
+              {{ t('cashForecast.tableBalance') }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="row in tableRows"
+            :key="row.key"
+          >
+            <td>{{ row.date }}</td>
+            <td>{{ row.balance }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>

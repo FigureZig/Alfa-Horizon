@@ -48,13 +48,14 @@ const goalOptions = computed(() =>
 
 type FormErrorKey = 'product' | 'amount' | 'termMonths'
 
+// Пока продукт не выбран, поля заблокированы: подсказка объясняет почему
 const amountHint = computed(() =>
   selectedProduct.value
     ? t('application.new.amountRange', {
       min: formatCurrency(selectedProduct.value.amountMin, 'RUB'),
       max: formatCurrency(selectedProduct.value.amountMax, 'RUB'),
     })
-    : undefined,
+    : t('application.new.selectProductFirst'),
 )
 
 const termHint = computed(() =>
@@ -63,7 +64,7 @@ const termHint = computed(() =>
       min: selectedProduct.value.termMonthsMin,
       max: selectedProduct.value.termMonthsMax,
     })
-    : undefined,
+    : t('application.new.selectProductFirst'),
 )
 
 const termSuffix = computed(() => ` ${t('application.new.months')}`)
@@ -152,7 +153,8 @@ async function handleSubmit() {
   const application = await createAndSubmit(form)
 
   if (application) {
-    await router.push({ name: 'application', params: { inn: props.inn, applicationId: application.id } })
+    await router.push({ name: 'application', params: { inn: props.inn, applicationId: application.id },
+      query: route.query.guide === props.inn ? { guide: props.inn } : {} })
   }
 }
 
