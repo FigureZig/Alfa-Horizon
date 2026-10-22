@@ -245,7 +245,8 @@ watch(locale, loadScenarios, { immediate: true })
               </span>
 
               <div class="flex min-w-0 flex-1 flex-col gap-2">
-                <p class="break-words text-sm font-semibold text-fino-text">
+                <p class="break-words text-sm text-fino-text">
+                  <span class="font-bold">{{ step.user ? step.user.fullName : t('sandbox.scenarios.system') }}</span>
                   {{ step.title }}
                 </p>
 
@@ -257,10 +258,6 @@ watch(locale, loadScenarios, { immediate: true })
                 </p>
 
                 <div class="flex flex-wrap items-center gap-2">
-                  <span class="text-xs font-semibold text-fino-text-muted">
-                    {{ step.user ? step.user.fullName : t('sandbox.scenarios.system') }}
-                  </span>
-
                   <span
                     v-if="isForbiddenStep(step)"
                     class="rounded-lg bg-red-500/10 px-2.5 py-1 text-xs font-semibold
@@ -270,7 +267,7 @@ watch(locale, loadScenarios, { immediate: true })
                   </span>
 
                   <template v-else-if="step.expectedStatus">
-                    <span class="text-xs text-fino-text-muted">{{ t('sandbox.scenarios.expectedStatus') }}:</span>
+                    <span class="text-xs text-fino-text-muted">{{ t('sandbox.scenarios.expectedStatus') }}</span>
                     <ApplicationStatusBadge :status="step.expectedStatus" />
                   </template>
                 </div>

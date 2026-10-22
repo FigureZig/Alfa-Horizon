@@ -138,7 +138,8 @@ function handleSubmit() {
       :allow-empty="false"
       :disabled="isBusy"
       :aria-label="t('bank.decision.title')"
-      class="max-w-full"
+      class="grid w-full grid-cols-3 [&_.p-togglebutton]:min-w-0 [&_.p-togglebutton]:px-2
+             [&_.p-togglebutton]:text-center [&_.p-togglebutton]:whitespace-normal"
     />
 
     <!-- Одобрить: цена риска остаётся, меняются сумма и срок -->

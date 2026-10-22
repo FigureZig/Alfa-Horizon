@@ -225,6 +225,7 @@ export default {
             productPlaceholder: 'Choose a product',
             amount: 'Amount',
             amountRange: 'From {min} to {max}',
+            selectProductFirst: 'Choose a product first',
             term: 'Term',
             termRange: 'From {min} to {max} mo.',
             months: 'mo.',

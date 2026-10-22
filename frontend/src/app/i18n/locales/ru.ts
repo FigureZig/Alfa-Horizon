@@ -225,6 +225,7 @@ export default {
             productPlaceholder: 'Выберите продукт',
             amount: 'Сумма',
             amountRange: 'От {min} до {max}',
+            selectProductFirst: 'Сначала выберите продукт',
             term: 'Срок',
             termRange: 'От {min} до {max} мес.',
             months: 'мес.',

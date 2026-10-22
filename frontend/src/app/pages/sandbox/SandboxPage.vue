@@ -189,13 +189,20 @@ watch(locale, loadPersonas)
 
         <RouterLink
           :to="{ name: 'sandbox-scenarios' }"
-          class="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:opacity-80"
+          class="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-fino-border
+                 bg-fino-surface px-4 py-2 text-sm font-semibold text-fino-text transition-colors
+                 hover:border-primary focus-visible:outline-2 focus-visible:outline-primary
+                 motion-reduce:transition-none"
         >
           <i
-            class="pi pi-map"
+            class="pi pi-list-check text-primary"
             aria-hidden="true"
           />
           {{ t('sandbox.scenarios.open') }}
+          <i
+            class="pi pi-arrow-right text-xs text-primary"
+            aria-hidden="true"
+          />
         </RouterLink>
       </div>
 

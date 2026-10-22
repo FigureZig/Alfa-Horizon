@@ -31,6 +31,10 @@ function readStoredToken(): Nullable<string> {
 
 let sessionToken = readStoredToken()
 
+export function getSessionToken(): Nullable<string> {
+  return sessionToken
+}
+
 export function setSessionToken(token: string) {
   sessionToken = token
 

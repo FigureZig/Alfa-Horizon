@@ -9,6 +9,7 @@ import InputText from 'primevue/inputtext'
 import Message from 'primevue/message'
 import Select from 'primevue/select'
 import Skeleton from 'primevue/skeleton'
+import Toast from 'primevue/toast'
 import { useSandboxWorld } from '@/app/composables/useSandboxWorld'
 import { SandboxEventTypeEnum } from '@/app/types/sandbox/sandbox-event-type-enum'
 import { SandboxFaultModeEnum } from '@/app/types/sandbox/sandbox-fault-mode-enum'
@@ -19,6 +20,8 @@ const props = defineProps<{
 }>()
 
 const SECONDS_IN_HOUR = 3600
+// Свой канал уведомлений: общие тосты справа сверху закрывают заголовок открытой панели
+const TOAST_GROUP = 'world'
 const CLOCK_STEP_DAYS = [1, 7, 30]
 const INN_PATTERN = /^(\d{10}|\d{12})$/
 const AMOUNT_EVENT_TYPES: SandboxEventTypeEnum[] = [
@@ -101,6 +104,7 @@ async function runCommand(command: () => Promise<void>, successKey: string) {
 
     toast.add({
       severity: 'success',
+      group: TOAST_GROUP,
       summary: t('toast.success'),
       detail: t(successKey),
       life: 3000,
@@ -112,6 +116,7 @@ async function runCommand(command: () => Promise<void>, successKey: string) {
 
     toast.add({
       severity: 'error',
+      group: TOAST_GROUP,
       summary: t('toast.error'),
       detail: t('sandbox.world.commandError'),
       life: 4000,
@@ -213,6 +218,11 @@ watch(() => props.inn, (inn) => {
       aria-hidden="true"
     />
   </button>
+
+  <Toast
+    :group="TOAST_GROUP"
+    position="bottom-left"
+  />
 
   <Drawer
     v-model:visible="isVisible"
