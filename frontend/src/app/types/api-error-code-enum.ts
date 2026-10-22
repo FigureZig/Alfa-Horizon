@@ -1,0 +1,27 @@
+/**
+ * Машинные коды ошибок API, на которые реагирует фронт. Полный список — в контракте бэкенда.
+ */
+export enum ApiErrorCodeEnum {
+  CompanyNotLoaded = 'COMPANY_NOT_LOADED',
+  CompanyNotFound = 'COMPANY_NOT_FOUND',
+  FeatureOff = 'FEATURE_OFF',
+  TokenInvalid = 'TOKEN_INVALID',
+  UserUnknown = 'USER_UNKNOWN',
+  LoginRequired = 'LOGIN_REQUIRED',
+  InnInvalid = 'INN_INVALID',
+  InnTaken = 'INN_TAKEN',
+  PersonaInvalid = 'PERSONA_INVALID',
+  NotFound = 'NOT_FOUND',
+  Forbidden = 'FORBIDDEN',
+  InvalidTransition = 'INVALID_TRANSITION',
+  InvalidStatus = 'INVALID_STATUS',
+  CannotWithdraw = 'CANNOT_WITHDRAW',
+  BkiPending = 'BKI_PENDING',
+  SourceWait = 'SOURCE_WAIT',
+  AwaitingSecondKey = 'AWAITING_SECOND_KEY',
+  NothingToConfirm = 'NOTHING_TO_CONFIRM',
+  SamePerson = 'SAME_PERSON',
+  BankOnly = 'BANK_ONLY',
+  RoleRequired = 'ROLE_REQUIRED',
+  AmountRequired = 'AMOUNT_REQUIRED',
+}

@@ -1,7 +1,11 @@
 import { useI18n } from 'vue-i18n'
 
-// Даты из API приходят как YYYY-MM-DD: разбираем в локальное время, чтобы не съехать на сутки
+const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/
+
+// Дата YYYY-MM-DD — в локальное время, чтобы не съехать на сутки; дата со временем (ISO 8601) — как есть
 function parseIsoDate(isoDate: string): Date {
+  if (!DATE_ONLY_PATTERN.test(isoDate)) return new Date(isoDate)
+
   const [year, month, day] = isoDate.split('-').map(Number)
 
   return new Date(year, month - 1, day)
@@ -40,5 +44,17 @@ export function useFormatters() {
     return new Intl.ListFormat(locale.value, { type: 'conjunction' }).format(items)
   }
 
-  return { formatCurrency, formatPercent, formatDate, formatDateTime, formatList }
+  // Длительность в секундах: «0,27 сек.», «12 сек.», «15 мин.»
+  function formatDuration(seconds: number): string {
+    const isMinutes = seconds >= 60
+
+    return new Intl.NumberFormat(locale.value, {
+      style: 'unit',
+      unit: isMinutes ? 'minute' : 'second',
+      unitDisplay: 'short',
+      maximumFractionDigits: isMinutes || seconds >= 10 ? 0 : 2,
+    }).format(isMinutes ? seconds / 60 : seconds)
+  }
+
+  return { formatCurrency, formatPercent, formatDate, formatDateTime, formatList, formatDuration }
 }

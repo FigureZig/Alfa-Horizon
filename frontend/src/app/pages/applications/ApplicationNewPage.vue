@@ -1,0 +1,402 @@
+<script setup lang="ts">
+import { computed, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import Checkbox from 'primevue/checkbox'
+import InputNumber from 'primevue/inputnumber'
+import Message from 'primevue/message'
+import Select from 'primevue/select'
+import AppErrorState from '@/app/components/AppErrorState.vue'
+import SandboxPersonaField from '@/app/features/sandbox/components/SandboxPersonaField.vue'
+import { useApplicationCreate } from '@/app/composables/useApplicationCreate'
+import { useCatalogProducts } from '@/app/composables/useCatalogProducts'
+import { useDemoPersona } from '@/app/composables/useDemoPersona'
+import { useFormatters } from '@/app/composables/useFormatters'
+import type { ApplicationFormInterface } from '@/app/types/application/application-form-interface'
+import type { Nullable } from '@/app/types/nullable'
+
+const props = defineProps<{
+  inn: string
+}>()
+
+const { t, locale } = useI18n({ useScope: 'global' })
+const route = useRoute()
+const router = useRouter()
+const { formatCurrency, formatPercent } = useFormatters()
+const { demoPersona } = useDemoPersona()
+const { products, isLoading: isCatalogLoading, error: catalogError, loadProducts } = useCatalogProducts()
+const { isSubmitting, errorMessage, createAndSubmit } = useApplicationCreate(props.inn)
+
+const form = reactive<ApplicationFormInterface>({
+  product: null,
+  amount: null,
+  termMonths: null,
+  goal: null,
+  consentBki: false,
+})
+
+const isSubmitted = ref(false)
+const isPrefilled = ref(false)
+
+const selectedProduct = computed(() => products.value.find((product) => product.code === form.product) ?? null)
+
+const productOptions = computed(() => products.value.map((product) => ({ code: product.code, name: product.name })))
+
+const goalOptions = computed(() =>
+  (selectedProduct.value?.goals ?? []).map((goal) => ({ code: goal, label: t(`application.goal.${goal}`) })),
+)
+
+type FormErrorKey = 'product' | 'amount' | 'termMonths'
+
+const amountHint = computed(() =>
+  selectedProduct.value
+    ? t('application.new.amountRange', {
+      min: formatCurrency(selectedProduct.value.amountMin, 'RUB'),
+      max: formatCurrency(selectedProduct.value.amountMax, 'RUB'),
+    })
+    : undefined,
+)
+
+const termHint = computed(() =>
+  selectedProduct.value
+    ? t('application.new.termRange', {
+      min: selectedProduct.value.termMonthsMin,
+      max: selectedProduct.value.termMonthsMax,
+    })
+    : undefined,
+)
+
+const termSuffix = computed(() => ` ${t('application.new.months')}`)
+
+const errors = computed<Partial<Record<FormErrorKey, string>>>(() => {
+  if (!isSubmitted.value) return {}
+
+  const product = selectedProduct.value
+  const required = t('application.new.required')
+  const result: Partial<Record<FormErrorKey, string>> = {}
+
+  if (!product) {
+    result.product = required
+    return result
+  }
+
+  if (form.amount === null) {
+    result.amount = required
+  } else if (form.amount < product.amountMin || form.amount > product.amountMax) {
+    result.amount = t('application.new.amountRange', {
+      min: formatCurrency(product.amountMin, 'RUB'),
+      max: formatCurrency(product.amountMax, 'RUB'),
+    })
+  }
+
+  if (form.termMonths === null) {
+    result.termMonths = required
+  } else if (form.termMonths < product.termMonthsMin || form.termMonths > product.termMonthsMax) {
+    result.termMonths = t('application.new.termRange', { min: product.termMonthsMin, max: product.termMonthsMax })
+  }
+
+  return result
+})
+
+const isFormValid = computed(() => {
+  const product = selectedProduct.value
+
+  return Boolean(
+    product
+    && form.amount !== null && form.amount >= product.amountMin && form.amount <= product.amountMax
+    && form.termMonths !== null && form.termMonths >= product.termMonthsMin && form.termMonths <= product.termMonthsMax,
+  )
+})
+
+function parseNumberQuery(value: unknown): Nullable<number> {
+  const parsed = typeof value === 'string' ? Number(value) : NaN
+
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+// Подставляем в форму предложение, с которого пришёл пользователь: продукт, сумму, срок и цель из адреса
+function applyQueryPrefill() {
+  const product = products.value.find((item) => item.code === route.query.product)
+
+  if (!product) return
+
+  form.product = product.code
+  form.amount = parseNumberQuery(route.query.amount) ?? product.amountMin
+  form.termMonths = parseNumberQuery(route.query.term) ?? product.termMonthsMin
+  form.goal = product.goals.find((goal) => goal === route.query.goal) ?? null
+}
+
+// Сумма, срок и цель должны подходить выбранному продукту
+function applyProductBounds() {
+  const product = selectedProduct.value
+
+  if (!product) return
+
+  form.amount = form.amount === null
+    ? product.amountMin
+    : Math.min(Math.max(form.amount, product.amountMin), product.amountMax)
+  form.termMonths = form.termMonths === null
+    ? product.termMonthsMin
+    : Math.min(Math.max(form.termMonths, product.termMonthsMin), product.termMonthsMax)
+
+  if (form.goal && !product.goals.includes(form.goal)) {
+    form.goal = null
+  }
+}
+
+async function handleSubmit() {
+  isSubmitted.value = true
+
+  if (!isFormValid.value) return
+
+  const application = await createAndSubmit(form)
+
+  if (application) {
+    await router.push({ name: 'application', params: { inn: props.inn, applicationId: application.id } })
+  }
+}
+
+function handleCancel() {
+  router.push({ name: 'applications', params: { inn: props.inn } })
+}
+
+function handleCatalogLoaded() {
+  if (isPrefilled.value || !products.value.length) return
+
+  isPrefilled.value = true
+  applyQueryPrefill()
+}
+
+watch(products, handleCatalogLoaded, { immediate: true })
+watch(() => form.product, applyProductBounds)
+</script>
+
+<template>
+  <div class="flex min-w-0 flex-col gap-6">
+    <div>
+      <RouterLink
+        :to="{ name: 'applications', params: { inn } }"
+        class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-opacity hover:opacity-80"
+      >
+        <i
+          class="pi pi-arrow-left text-xs"
+          aria-hidden="true"
+        />
+        {{ t('application.back') }}
+      </RouterLink>
+
+      <h1 class="mt-3 text-2xl font-bold tracking-tight text-fino-text sm:text-3xl">
+        {{ t('application.new.title') }}
+      </h1>
+
+      <p class="mt-2 text-sm text-fino-text-muted">
+        {{ t('application.new.description') }}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+      <div class="min-w-0 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm sm:p-6">
+        <AppErrorState
+          v-if="catalogError"
+          :message="t('application.new.catalogError')"
+          is-inline
+          @retry="loadProducts"
+        />
+
+        <form
+          v-else
+          class="flex flex-col gap-5"
+          novalidate
+          :aria-busy="isCatalogLoading || isSubmitting"
+          @submit.prevent="handleSubmit"
+        >
+          <SandboxPersonaField
+            input-id="application-product"
+            :label="t('application.new.product')"
+            :error="errors.product ?? null"
+          >
+            <Select
+              v-model="form.product"
+              input-id="application-product"
+              :options="productOptions"
+              option-label="name"
+              option-value="code"
+              :placeholder="t('application.new.productPlaceholder')"
+              :loading="isCatalogLoading"
+              :invalid="Boolean(errors.product)"
+              :disabled="isSubmitting"
+              fluid
+            />
+          </SandboxPersonaField>
+
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <SandboxPersonaField
+              input-id="application-amount"
+              :label="t('application.new.amount')"
+              :hint="amountHint"
+              :error="errors.amount ?? null"
+            >
+              <InputNumber
+                v-model="form.amount"
+                input-id="application-amount"
+                :min="selectedProduct?.amountMin"
+                :max="selectedProduct?.amountMax"
+                :max-fraction-digits="0"
+                suffix=" ₽"
+                :locale="locale"
+                :invalid="Boolean(errors.amount)"
+                :disabled="!selectedProduct || isSubmitting"
+                fluid
+              />
+            </SandboxPersonaField>
+
+            <SandboxPersonaField
+              input-id="application-term"
+              :label="t('application.new.term')"
+              :hint="termHint"
+              :error="errors.termMonths ?? null"
+            >
+              <InputNumber
+                v-model="form.termMonths"
+                input-id="application-term"
+                :min="selectedProduct?.termMonthsMin"
+                :max="selectedProduct?.termMonthsMax"
+                :max-fraction-digits="0"
+                :suffix="termSuffix"
+                :locale="locale"
+                :invalid="Boolean(errors.termMonths)"
+                :disabled="!selectedProduct || isSubmitting"
+                fluid
+              />
+            </SandboxPersonaField>
+          </div>
+
+          <SandboxPersonaField
+            v-if="goalOptions.length"
+            input-id="application-goal"
+            :label="t('application.new.goal')"
+            :hint="t('application.new.goalHint')"
+            :error="null"
+          >
+            <Select
+              v-model="form.goal"
+              input-id="application-goal"
+              :options="goalOptions"
+              option-label="label"
+              option-value="code"
+              :placeholder="t('application.new.goalPlaceholder')"
+              show-clear
+              :disabled="isSubmitting"
+              fluid
+            />
+          </SandboxPersonaField>
+
+          <label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-fino-border p-3 text-sm text-fino-text">
+            <Checkbox
+              v-model="form.consentBki"
+              binary
+              :disabled="isSubmitting"
+              class="mt-0.5 shrink-0"
+            />
+
+            <span class="min-w-0">
+              <span class="block font-semibold">{{ t('application.new.consent') }}</span>
+              <span class="mt-0.5 block text-xs leading-relaxed text-fino-text-muted">
+                {{ t('application.new.consentHint') }}
+              </span>
+            </span>
+          </label>
+
+          <Message
+            v-if="errorMessage"
+            severity="error"
+            role="alert"
+          >
+            {{ errorMessage }}
+          </Message>
+
+          <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              class="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-xl border
+                     border-fino-border bg-fino-surface px-5 py-3 text-sm font-semibold text-fino-text
+                     transition-colors duration-200 hover:bg-fino-surface-hover
+                     disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none
+                     focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              :disabled="isSubmitting"
+              @click="handleCancel"
+            >
+              {{ t('application.new.cancel') }}
+            </button>
+
+            <button
+              type="submit"
+              class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl
+                     bg-primary px-5 py-3 text-sm font-semibold text-primary-contrast
+                     transition-all duration-200 hover:opacity-90 active:scale-95
+                     disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none
+                     focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              :disabled="isSubmitting || isCatalogLoading"
+              :aria-busy="isSubmitting"
+            >
+              <i
+                :class="isSubmitting ? 'pi pi-spinner pi-spin' : 'pi pi-send'"
+                class="text-xs"
+                aria-hidden="true"
+              />
+              {{ t('application.new.submit') }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Данные компании и продукта подставляются автоматически -->
+      <aside class="flex min-w-0 flex-col gap-4">
+        <article class="rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
+          <h2 class="text-sm font-semibold text-fino-text">
+            {{ t('application.new.company') }}
+          </h2>
+
+          <p class="mt-3 break-words text-base font-bold text-fino-text">
+            {{ demoPersona?.organizationName }}
+          </p>
+
+          <p class="mt-1 text-sm text-fino-text-muted">
+            {{ t('application.new.inn', { inn }) }}
+          </p>
+        </article>
+
+        <article
+          v-if="selectedProduct"
+          class="rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm"
+        >
+          <h2 class="text-sm font-semibold text-fino-text">
+            {{ selectedProduct.name }}
+          </h2>
+
+          <p class="mt-2 text-sm text-fino-text-muted">
+            {{ t('application.new.rateFrom', { rate: formatPercent(selectedProduct.rateFrom) }) }}
+          </p>
+
+          <ul class="mt-3 flex flex-col gap-2">
+            <li
+              v-for="benefit in selectedProduct.benefits"
+              :key="benefit"
+              class="flex items-start gap-2 text-sm text-fino-text"
+            >
+              <i
+                class="pi pi-check mt-0.5 text-xs text-primary"
+                aria-hidden="true"
+              />
+              <span class="min-w-0 break-words">{{ benefit }}</span>
+            </li>
+          </ul>
+
+          <p class="mt-3 border-t border-fino-border pt-3 text-xs text-fino-text-muted">
+            {{ selectedProduct.decisionText }}
+          </p>
+        </article>
+      </aside>
+    </div>
+  </div>
+</template>

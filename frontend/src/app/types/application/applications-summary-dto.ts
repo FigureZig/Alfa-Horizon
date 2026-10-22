@@ -20,8 +20,8 @@ export interface TaskDto {
 }
 
 /**
- * Ответ GET v1/companies/{inn}/applications/summary.
- * Предлагаемый контракт — согласовать с бэкендом. Заявки и задачи — независимые списки.
+ * Ответ GET v1/companies/{inn}/applications/summary. Заявки и задачи — независимые списки.
+ * `due_date` у задачи — дата со временем (ISO 8601). Сверх DTO API отдаёт status_detail, flags, all_tasks.
  */
 export interface ApplicationsSummaryDto {
   applications: ApplicationSummaryItemDto[]

@@ -10,6 +10,7 @@ import SandboxPersonaCardSkeleton from '@/app/features/sandbox/components/Sandbo
 import SandboxPersonaDetails from '@/app/features/sandbox/components/SandboxPersonaDetails.vue'
 import SandboxPersonaDetailsSkeleton from '@/app/features/sandbox/components/SandboxPersonaDetailsSkeleton.vue'
 import { useApiFetch } from '@/app/composables/useApiFetch'
+import { useSession } from '@/app/composables/useSession'
 import { sandboxService } from '@/app/services/sandbox/sandbox.service'
 import { SandboxMapper } from '@/app/mappers/sandbox.mapper'
 import { SandboxPersonaKindEnum } from '@/app/types/sandbox/sandbox-persona-kind-enum'
@@ -27,6 +28,8 @@ const $fetch = useApiFetch()
 const personas = ref<SandboxPersonaInterface[]>([])
 const selectedPersonaId = ref<Nullable<string>>(null)
 const isLoading = ref(false)
+const isLoggingIn = ref(false)
+const { loginAsPersona: startSession } = useSession()
 const error = ref(false)
 const detailsRef = useTemplateRef<HTMLElement>('details')
 
@@ -86,16 +89,39 @@ async function selectPersona(persona: SandboxPersonaInterface) {
   })
 }
 
-function loginAsPersona(persona: SandboxPersonaInterface) {
-  toast.add({
-    severity: 'success',
-    summary: t('toast.success'),
-    detail: t('sandbox.loginSuccess', { name: persona.fullName }),
-    life: 4000,
-  })
+async function loginAsPersona(persona: SandboxPersonaInterface) {
+  if (isLoggingIn.value) return
 
-  // ИНН компании персоны в маршруте — по нему кабинет загружает все персональные данные
-  router.push({ name: 'dashboard', params: { inn: persona.inn } })
+  isLoggingIn.value = true
+
+  try {
+    // Вход на бэкенде: токен персоны, её права и сбор данных компании
+    const signedInPersona = await startSession(persona.id)
+
+    toast.add({
+      severity: 'success',
+      summary: t('toast.success'),
+      detail: t('sandbox.loginSuccess', { name: signedInPersona.fullName }),
+      life: 4000,
+    })
+
+    // ИНН компании персоны в маршруте — по нему кабинет загружает все персональные данные;
+    // сотрудник банка попадает сразу в очередь заявок
+    const targetRoute = signedInPersona.kind === SandboxPersonaKindEnum.Bank ? 'bank-queue' : 'dashboard'
+
+    await router.push({ name: targetRoute, params: { inn: signedInPersona.inn } })
+  } catch (err: unknown) {
+    console.error('Sandbox login failed:', err)
+
+    toast.add({
+      severity: 'error',
+      summary: t('toast.error'),
+      detail: t('toast.loginError'),
+      life: 4000,
+    })
+  } finally {
+    isLoggingIn.value = false
+  }
 }
 
 function loginAsOfficer() {
@@ -258,6 +284,7 @@ watch(locale, loadPersonas)
               v-if="selectedPersona"
               :key="selectedPersona.id"
               :persona="selectedPersona"
+              :is-logging-in="isLoggingIn"
               @login="loginAsPersona"
               @login-as-officer="loginAsOfficer"
             />

@@ -2,8 +2,7 @@ import { readonly, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
-import { HttpStatusCode, isAxiosError } from 'axios'
-import { useApiFetch } from '@/app/composables/useApiFetch'
+import { isNotFoundError, useApiFetch } from '@/app/composables/useApiFetch'
 import { demoPersonaService } from '@/app/services/demo-persona/demo-persona.service'
 import { DemoPersonaMapper } from '@/app/mappers/demo-persona.mapper'
 import type { AppLocale } from '@/app/i18n'
@@ -57,7 +56,7 @@ export function useDemoPersona() {
 
       console.error('Demo persona loading failed:', err)
 
-      if (isAxiosError(err) && err.response?.status === HttpStatusCode.NotFound) {
+      if (isNotFoundError(err)) {
         toast.add({
           severity: 'error',
           summary: t('toast.error'),

@@ -5,12 +5,12 @@ import type { Nullable } from '@/app/types/nullable'
 
 export interface CompanyActivityDto {
   okved_code: string
-  name: string
+  name: Nullable<string>
 }
 
 /**
  * Ответ GET v1/companies/{inn}/profile — что банк знает о компании.
- * Предлагаемый контракт — согласовать с бэкендом. Любое поле может отсутствовать.
+ * Любое поле может быть null. Сверх DTO API отдаёт name, msp_category, headcount, facts, source_details.
  */
 export interface CompanyProfileDto {
   inn: string
@@ -22,4 +22,6 @@ export interface CompanyProfileDto {
   currency: string
   sources: DataSourceEnum[]
   updated_at: Nullable<string>
+  // Все факты компании; нужен только раздел ОКВЭД (`section`) для расчёта ставки
+  facts: { section?: Nullable<string> }
 }

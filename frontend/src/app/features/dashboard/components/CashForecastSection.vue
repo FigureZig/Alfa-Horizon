@@ -9,6 +9,7 @@ import CreditOfferCard from './CreditOfferCard.vue'
 import CreditOfferCardSkeleton from './CreditOfferCardSkeleton.vue'
 import { useCashForecast } from '@/app/composables/useCashForecast'
 import { useFeatureFlags } from '@/app/composables/useFeatureFlags'
+import { CreditGoalEnum } from '@/app/types/application/credit-goal-enum'
 import type { CreditProductInterface } from '@/app/types/company/credit-product-interface'
 
 // Продукты K2 загружает страница: тот же ответ использует карточка «Предодобрено»
@@ -31,6 +32,7 @@ const {
   forecast,
   isForecastLoading,
   forecastError,
+  isForecastDisabled,
   hasCashGap,
   loadForecast,
 } = useCashForecast(() => props.inn)
@@ -53,11 +55,17 @@ const isOfferVisible = computed(() =>
 
 const isOfferSkeletonVisible = computed(() => props.isProductsLoading && !recommendedProduct.value)
 
+// Предложение, закрывающее разрыв: форма заявки открывается с его продуктом, суммой, сроком и целью
 function closeGap(product: CreditProductInterface) {
   router.push({
-    name: 'applications',
+    name: 'application-new',
     params: { inn: props.inn },
-    query: { productId: product.id },
+    query: {
+      product: product.code,
+      amount: product.amount,
+      term: product.termMonths,
+      goal: CreditGoalEnum.CashGap,
+    },
   })
 }
 
@@ -72,6 +80,7 @@ function showCreditOptions() {
 
 <template>
   <section
+    v-if="!isForecastDisabled"
     class="grid grid-cols-1 items-stretch gap-4"
     :class="{ 'xl:grid-cols-[minmax(0,1fr)_22rem]': isOfferVisible }"
     :aria-label="t('cashForecast.sectionLabel')"

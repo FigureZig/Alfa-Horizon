@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
 import AppErrorState from '@/app/components/AppErrorState.vue'
 import ApplicationsAndTasksCardSkeleton from './ApplicationsAndTasksCardSkeleton.vue'
 import { useFormatters } from '@/app/composables/useFormatters'
@@ -45,7 +46,7 @@ const applications = computed(() =>
     statusClass: ATTENTION_STATUSES.includes(application.status)
       ? 'bg-fino-accent text-primary'
       : 'bg-fino-surface-secondary text-fino-text-muted',
-    to: { ...applicationsRoute.value, query: { applicationId: application.id } },
+    to: { name: 'application', params: { inn: props.inn, applicationId: application.id } },
   })),
 )
 
@@ -54,6 +55,10 @@ const tasks = computed(() =>
     id: task.id,
     title: task.title,
     icon: TASK_ICONS[task.type] ?? 'pi pi-check-square',
+    // Задача ведёт к заявке, где её можно выполнить: подписать, ответить банку
+    to: task.applicationId
+      ? { name: 'application', params: { inn: props.inn, applicationId: task.applicationId } }
+      : null,
     meta: [
       t(`applicationsTasks.taskType.${task.type}`),
       task.dueDate
@@ -208,23 +213,31 @@ function handleRetry() {
             <li
               v-for="task in tasks"
               :key="task.id"
-              class="flex items-start gap-2"
             >
-              <i
-                :class="task.icon"
-                class="mt-0.5 text-xs text-primary"
-                aria-hidden="true"
-              />
+              <component
+                :is="task.to ? RouterLink : 'div'"
+                :to="task.to ?? undefined"
+                class="group flex items-start gap-2 rounded-lg focus-visible:outline-2 focus-visible:outline-primary"
+              >
+                <i
+                  :class="task.icon"
+                  class="mt-0.5 text-xs text-primary"
+                  aria-hidden="true"
+                />
 
-              <div class="min-w-0">
-                <p class="break-words text-xs text-fino-text">
-                  {{ task.title }}
-                </p>
+                <div class="min-w-0">
+                  <p
+                    class="break-words text-xs text-fino-text"
+                    :class="{ 'group-hover:text-primary': task.to }"
+                  >
+                    {{ task.title }}
+                  </p>
 
-                <p class="text-[11px] text-fino-text-muted">
-                  {{ task.meta }}
-                </p>
-              </div>
+                  <p class="text-[11px] text-fino-text-muted">
+                    {{ task.meta }}
+                  </p>
+                </div>
+              </component>
             </li>
           </ul>
         </div>

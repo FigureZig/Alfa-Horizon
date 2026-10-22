@@ -7,6 +7,11 @@ import DashboardLayout from '@/app/layouts/DashboardLayout.vue'
 import DashboardPage from '@/app/pages/dashboard/DashboardPage.vue'
 import CreditsPage from '@/app/pages/credits/CreditsPage.vue'
 import ApplicationsPage from '@/app/pages/applications/ApplicationsPage.vue'
+import ApplicationNewPage from '@/app/pages/applications/ApplicationNewPage.vue'
+import ApplicationPage from '@/app/pages/applications/ApplicationPage.vue'
+import BankDossierPage from '@/app/pages/bank/BankDossierPage.vue'
+import BankMetricsPage from '@/app/pages/bank/BankMetricsPage.vue'
+import BankQueuePage from '@/app/pages/bank/BankQueuePage.vue'
 import ErrorPage from "@/app/pages/error/ErrorPage.vue";
 import SandboxPage from '@/app/pages/sandbox/SandboxPage.vue'
 import SandboxPersonaBuilderPage from '@/app/pages/sandbox/SandboxPersonaBuilderPage.vue'
@@ -37,11 +42,57 @@ export const router = createRouter({
                     path: 'credits',
                     name: 'credits',
                     component: CreditsPage,
+                    props: true,
                 },
                 {
+                    // Родитель без компонента: пункт меню «Заявки» активен на всех страницах заявок
                     path: 'applications',
-                    name: 'applications',
-                    component: ApplicationsPage,
+                    children: [
+                        {
+                            path: '',
+                            name: 'applications',
+                            component: ApplicationsPage,
+                            props: true,
+                        },
+                        {
+                            // Новая заявка; продукт, сумма, срок и цель подставляются из ?product=&amount=&term=&goal=
+                            path: 'new',
+                            name: 'application-new',
+                            component: ApplicationNewPage,
+                            props: true,
+                        },
+                        {
+                            path: ':applicationId',
+                            name: 'application',
+                            component: ApplicationPage,
+                            props: true,
+                        },
+                    ],
+                },
+                // Рабочее место банка: только для сотрудников (DashboardLayout уводит клиентов и сотрудников
+                // с чужих страниц). Досье вложено в очередь, чтобы пункт меню «Очередь» оставался активным.
+                {
+                    path: 'bank/queue',
+                    children: [
+                        {
+                            path: '',
+                            name: 'bank-queue',
+                            component: BankQueuePage,
+                            props: true,
+                        },
+                        {
+                            path: ':applicationId',
+                            name: 'bank-dossier',
+                            component: BankDossierPage,
+                            props: true,
+                        },
+                    ],
+                },
+                {
+                    path: 'bank/metrics',
+                    name: 'bank-metrics',
+                    component: BankMetricsPage,
+                    props: true,
                 },
             ],
         },

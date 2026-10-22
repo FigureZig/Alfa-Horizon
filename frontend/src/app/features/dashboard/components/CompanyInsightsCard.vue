@@ -32,6 +32,16 @@ function getRegistrationBadge(profile: CompanyProfileInterface): string {
     : form
 }
 
+function getActivityBadge(profile: CompanyProfileInterface): string {
+  const activity = profile.activity
+
+  if (!activity) return ''
+
+  return activity.name
+    ? t('companyInsights.activity', { name: activity.name, code: activity.okvedCode })
+    : t('companyInsights.activityCode', { code: activity.okvedCode })
+}
+
 // Бейдж показываем, только если значение пришло от API
 const badges = computed(() => {
   const profile = props.profile
@@ -42,9 +52,7 @@ const badges = computed(() => {
     { key: 'registration', label: getRegistrationBadge(profile) },
     {
       key: 'activity',
-      label: profile.activity
-        ? t('companyInsights.activity', { name: profile.activity.name, code: profile.activity.okvedCode })
-        : '',
+      label: getActivityBadge(profile),
     },
     {
       key: 'tax',

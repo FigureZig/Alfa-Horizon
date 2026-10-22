@@ -9,6 +9,7 @@ export class CreditProductMapper {
 
     return {
       id: data.id,
+      code: data.product,
       name: data.name,
       amount: data.amount,
       currency: data.currency,

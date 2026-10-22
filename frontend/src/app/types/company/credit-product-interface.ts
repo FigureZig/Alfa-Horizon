@@ -1,5 +1,8 @@
+import type { CreditProductCodeEnum } from '@/app/types/application/credit-product-code-enum'
+
 export interface CreditProductInterface {
   id: string
+  code: CreditProductCodeEnum
   name: string
   amount: number
   currency: string

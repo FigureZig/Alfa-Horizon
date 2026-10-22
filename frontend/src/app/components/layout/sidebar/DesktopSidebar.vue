@@ -51,7 +51,7 @@ function isItemActive(exact: boolean, isActive: boolean, isExactActive: boolean)
                  hover:-translate-x-0.5
                  focus-visible:outline-2 focus-visible:outline-primary"
           :class="
-            isActive
+            isItemActive(item.exact, isActive, isExactActive)
               ? 'bg-fino-accent font-semibold text-primary'
               : 'text-fino-text-muted hover:bg-fino-surface-hover hover:text-fino-text'
           "

@@ -18,6 +18,7 @@ export class CompanyProfileMapper {
       currency: data.currency,
       sources: data.sources,
       updatedAt: data.updated_at,
+      section: data.facts?.section ?? null,
     }
   }
 }

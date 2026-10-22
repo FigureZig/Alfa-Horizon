@@ -1,3 +1,4 @@
+import { DemoPersonaRoleEnum } from '@/app/types/demo-persona/demo-persona-role-enum'
 import type { DemoPersonaDto } from '@/app/types/demo-persona/demo-persona-dto'
 import type { DemoPersonaInterface } from '@/app/types/demo-persona/demo-persona-interface'
 
@@ -14,6 +15,8 @@ export class DemoPersonaMapper {
       fullName: [data.first_name, data.last_name].filter(Boolean).join(' '),
       initials: data.initials,
       organizationName: data.organization_name,
+      role: data.role,
+      isBankStaff: data.role !== DemoPersonaRoleEnum.Client,
     }
   }
 }

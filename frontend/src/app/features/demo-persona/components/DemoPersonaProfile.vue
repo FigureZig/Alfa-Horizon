@@ -3,15 +3,18 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import DemoPersonaProfileSkeleton from './DemoPersonaProfileSkeleton.vue'
 import { useDemoPersona } from '@/app/composables/useDemoPersona'
+import { useSession } from '@/app/composables/useSession'
 
 const { t } = useI18n({ useScope: 'global' })
 const router = useRouter()
 const { demoPersona, isLoading, resetDemoPersona } = useDemoPersona()
+const { logout: endSession } = useSession()
 
-// Завершаем только демо-сессию: основная авторизация (если появится) не затрагивается
-function logout() {
+// Завершаем демо-сессию: токен забывается, данные персоны сбрасываются
+async function logout() {
+  await endSession()
   resetDemoPersona()
-  router.push({ name: 'sandbox' })
+  await router.push({ name: 'sandbox' })
 }
 </script>
 

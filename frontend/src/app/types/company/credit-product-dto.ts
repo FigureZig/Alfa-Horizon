@@ -1,3 +1,5 @@
+import type { CreditProductCodeEnum } from '@/app/types/application/credit-product-code-enum'
+
 /**
  * Предодобренный кредитный продукт (результат K2) из GET v1/companies/{inn}/products.
  * `amount` — доступный лимит; `is_rate_from` — ставка «от»;
@@ -6,6 +8,7 @@
  */
 export interface CreditProductDto {
   id: string
+  product: CreditProductCodeEnum
   name: string
   amount: number
   currency: string

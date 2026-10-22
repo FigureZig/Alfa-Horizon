@@ -6,6 +6,7 @@ import type { SandboxPersonaInterface } from '@/app/types/sandbox/sandbox-person
 
 const props = defineProps<{
   persona: SandboxPersonaInterface
+  isLoggingIn: boolean
 }>()
 
 const emit = defineEmits<{
@@ -23,6 +24,10 @@ const fields = computed(() => [
   { key: 'registries', label: t('sandbox.details.registries'), value: props.persona.registries },
   { key: 'preview', label: t('sandbox.details.preview'), value: props.persona.preview },
 ])
+
+const loginIconClass = computed(() =>
+  props.isLoggingIn ? 'pi pi-spinner pi-spin' : 'pi pi-arrow-right',
+)
 
 function handleLogin() {
   emit('login', props.persona)
@@ -105,12 +110,16 @@ function handleLoginAsOfficer() {
                text-primary-contrast transition-all duration-200
                hover:opacity-90 active:scale-95
                focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
+               disabled:cursor-wait disabled:opacity-70
                motion-reduce:transition-none"
+        :disabled="isLoggingIn"
+        :aria-busy="isLoggingIn"
         @click="handleLogin"
       >
         {{ persona.loginLabel }}
         <i
-          class="pi pi-arrow-right text-xs"
+          :class="loginIconClass"
+          class="text-xs"
           aria-hidden="true"
         />
       </button>
@@ -123,7 +132,9 @@ function handleLoginAsOfficer() {
                text-center text-sm font-semibold text-fino-text
                transition-colors duration-200 hover:bg-fino-surface-hover
                focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
+               disabled:cursor-wait disabled:opacity-70
                motion-reduce:transition-none"
+        :disabled="isLoggingIn"
         @click="handleLoginAsOfficer"
       >
         {{ t('sandbox.loginAsOfficer') }}
