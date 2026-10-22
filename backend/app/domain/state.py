@@ -38,6 +38,7 @@ EDGES: dict[tuple[str, str], frozenset[str]] = {
     ("SIGNING", "WITHDRAWN"): frozenset({"client"}),
     ("SIGNED", "DISBURSING"): frozenset({"system"}),                   # перепроверка по свежим данным пройдена
     ("SIGNED", "REJECTED"): frozenset({"system"}),                     # всплыл стоп-фактор, ГК ст. 821 п. 1
+    ("SIGNED", "UNDER_REVIEW"): frozenset({"system", "timer"}),        # финальную проверку не провести до дедлайна (N6)
     ("SIGNED", "WITHDRAWN"): frozenset({"client"}),
     ("DISBURSING", "ISSUED"): frozenset({"system"}),                   # зачислено, сверка по ключу идемпотентности
     ("DISBURSING", "UNDER_REVIEW"): frozenset({"system", "timer"}),    # сбой АБС до дедлайна

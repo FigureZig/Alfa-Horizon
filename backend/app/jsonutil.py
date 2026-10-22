@@ -25,3 +25,8 @@ def dumps(obj) -> str:
 def plain(obj):
     """Структура только из JSON-типов — для ответов API и записи в JSONB."""
     return json.loads(dumps(obj))
+
+
+def canonical(obj) -> str:
+    """Канонический JSON для хэша: ключи по порядку, без пробелов — тот же текст после круга через jsonb."""
+    return json.dumps(plain(obj), ensure_ascii=False, sort_keys=True, separators=(",", ":"))

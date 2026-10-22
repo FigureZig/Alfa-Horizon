@@ -92,7 +92,7 @@ def check(d: dict, facts: dict, request: dict, pol: dict) -> list[str]:
         if outcome == "COUNTER_OFFER":
             if not d["counter"]:
                 bad("контрпредложение без вида")
-            same = ("product", "amount", "termMonths")
+            same = ("product", "amount", "term_months")
             if [offer[k] for k in same] == [asked[k] for k in same]:
                 bad("контрпредложение совпадает с запросом")
         if offer["amount"] > dec(params["auto_authority_max"]):
@@ -113,33 +113,33 @@ def offer_violations(o: dict, d: dict, facts: dict, request: dict, pol: dict) ->
     params, out = pol["params"], []
     bad = out.append
     product, r = pol["products"][o["product"]], o["rate"]
-    bucket = catalog.term_bucket(o["termMonths"], params)
+    bucket = catalog.term_bucket(o["term_months"], params)
     if o["product"] not in catalog.available_products(pol, facts.get("section"), facts.get("segment")):
         bad("продукта нет для этой отрасли или формы бизнеса")
 
-    if r["total"] != r["keyRate"] + r["industry"] + r["risk"]:
+    if r["total"] != r["key_rate"] + r["industry"] + r["risk"]:
         bad("ставка не равна сумме частей")
-    if r["keyRate"] != dec(pol["market"]["key_rate"]["value"]):
+    if r["key_rate"] != dec(pol["market"]["key_rate"]["value"]):
         bad("КС не из политики")
     if r["bucket"] != bucket or r["industry"] != catalog.industry_spread(pol["market"], facts.get("section"), bucket):
         bad("отраслевой спред не по разделу ОКВЭД и сроку")
-    if d["risk"] and (r["riskClass"] != d["risk"]["class"]
+    if d["risk"] and (r["risk_class"] != d["risk"]["class"]
                       or r["risk"] != catalog.risk_spread(pol["risk_pricing"], d["risk"]["class"], r["security"])):
         bad("спред за риск не по классу и обеспечению")
     worst = max(catalog.risk_spread(pol["risk_pricing"], "D", s) for s in pol["risk_pricing"]["lgd"])
-    if not r["keyRate"] <= r["total"] <= r["keyRate"] + catalog.industry_spread(pol["market"], None, "short") + worst:
+    if not r["key_rate"] <= r["total"] <= r["key_rate"] + catalog.industry_spread(pol["market"], None, "short") + worst:
         bad(f"ставка {r['total']} вне коридора")
 
     lo, hi = dec(product["amount"]["min"]), dec(product["amount"]["max"])
     if not lo <= o["amount"] <= hi:
         bad(f"сумма вне границ продукта {lo}–{hi}")
-    if not product["term_months"]["min"] <= o["termMonths"] <= product["term_months"]["max"]:
+    if not product["term_months"]["min"] <= o["term_months"] <= product["term_months"]["max"]:
         bad("срок вне границ продукта")
     if o["amount"] != d["request"]["amount"]:
         step = params["amount_step_small"] if o["amount"] < 1_000_000 else params["amount_step_large"]
         if o["amount"] % step:
             bad(f"сумма не кратна шагу {step}")
-    if o["payment"] != payment(product["repayment"], o["amount"], r["total"], o["termMonths"]):
+    if o["payment"] != payment(product["repayment"], o["amount"], r["total"], o["term_months"]):
         bad("платёж не совпадает с калькулятором")
 
     inflow, debts = facts.get("inflow_avg"), dec(facts.get("debt_payments") or 0)

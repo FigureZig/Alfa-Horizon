@@ -1,0 +1,25 @@
+# Весь стенд одной командой (Docker Compose ≥ 2.20 — нужен include):
+#   cd infra && docker compose up --build
+#   Фронт     http://localhost:8080            (nginx: /api → сервис api)
+#   API       http://localhost:8000/api/docs
+#   WireMock  http://localhost:8081/__admin    (моки реестров, БКИ, банка)
+#   Postgres  localhost:55432
+# Бэкенд описан в backend/docker-compose.yml и подключается сюда целиком: один источник правды, бэкенд можно
+# поднимать и отдельно. Фронт собирается из frontend/ без правок в нём — Dockerfile лежит здесь, в infra/.
+name: alfa-horizon
+
+include:
+  - ../backend/docker-compose.yml
+
+services:
+  web:
+    build:
+      context: ../frontend
+      dockerfile: ../infra/frontend.Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
+    ports: ["${WEB_PORT:-8080}:80"]
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped

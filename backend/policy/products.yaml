@@ -16,6 +16,10 @@ goals:   # что выбирает клиент в подборе → какие
 products:
   OVERDRAFT:
     name: "Овердрафт"
+    name_en: "Overdraft"
+    benefits:
+      ru: ["Лимит от оборотов по счёту", "Гасится автоматически из поступлений", "Без залога и поручителей"]
+      en: ["Limit based on account turnover", "Repaid automatically from incoming payments", "No collateral or guarantors"]
     law: "ГК РФ ст. 850 — кредитование счёта"
     segments: [IP, LLC, JSC]
     amount: { min: 100000, max: 15000000 }
@@ -30,6 +34,10 @@ products:
 
   EXPRESS:
     name: "Экспресс-кредит"
+    name_en: "Express loan"
+    benefits:
+      ru: ["Решение по данным банка и реестров", "Без залога", "Равные платежи до 3 лет"]
+      en: ["Decision based on bank and registry data", "No collateral", "Equal payments for up to 3 years"]
     segments: [IP, LLC, JSC]
     amount: { min: 300000, max: 10000000 }
     term_months: { min: 3, max: 36 }
@@ -41,6 +49,10 @@ products:
 
   WORKING_CAPITAL:
     name: "Оборотный кредит"
+    name_en: "Working capital loan"
+    benefits:
+      ru: ["На закупку товара и сырья", "Срок до 3 лет", "Поручительство собственника вместо залога"]
+      en: ["For stock and raw materials", "Up to 3 years", "Owner's guarantee instead of collateral"]
     segments: [IP, LLC, JSC]
     amount: { min: 1000000, max: 50000000 }
     term_months: { min: 3, max: 36 }
@@ -52,6 +64,10 @@ products:
 
   INVESTMENT:
     name: "Инвестиционный кредит"
+    name_en: "Investment loan"
+    benefits:
+      ru: ["Под залог приобретаемого имущества", "Срок до 7 лет", "Решение с кредитным специалистом"]
+      en: ["Secured by the asset you buy", "Up to 7 years", "Decision together with a loan officer"]
     segments: [IP, LLC, JSC]
     amount: { min: 3000000, max: 150000000 }
     term_months: { min: 12, max: 84 }
@@ -64,6 +80,10 @@ products:
 
   CONTRACT:
     name: "Кредит на исполнение контракта"
+    name_en: "Contract execution loan"
+    benefits:
+      ru: ["Под выручку по госконтракту", "Долг гасится в конце срока", "До 70% цены контракта за вычетом аванса"]
+      en: ["Backed by public contract revenue", "Principal repaid at the end", "Up to 70% of the contract price net of advance"]
     segments: [IP, LLC, JSC]
     amount: { min: 500000, max: 30000000 }
     term_months: { min: 3, max: 24 }
@@ -77,6 +97,10 @@ products:
 
   AGRO_SEASONAL:
     name: "Сезонный кредит аграриям"
+    name_en: "Seasonal farm loan"
+    benefits:
+      ru: ["Лимит от годовых поступлений", "Погашение после урожая", "Проценты ежемесячно"]
+      en: ["Limit based on annual inflows", "Repaid after the harvest", "Monthly interest only"]
     segments: [IP, LLC, JSC]
     amount: { min: 500000, max: 30000000 }
     term_months: { min: 6, max: 12 }

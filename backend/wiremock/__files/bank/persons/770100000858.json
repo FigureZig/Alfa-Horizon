@@ -3,5 +3,14 @@
   "fio": "Сидоров Пётр Алексеевич",
   "snils": "70100000878",
   "kycStatus": "VERIFIED",
-  "key": "sidorov"
+  "key": "sidorov",
+  "companies": [
+    {
+      "companyInn": "7701000040",
+      "level": "registry",
+      "roles": [
+        "participant"
+      ]
+    }
+  ]
 }

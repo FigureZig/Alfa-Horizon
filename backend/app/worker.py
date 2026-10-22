@@ -1,17 +1,19 @@
-"""Worker: берёт задачи из jobs (FOR UPDATE SKIP LOCKED), ходит во внешние системы, пишет снапшоты и решения.
-Запуск: python -m app.worker. Единственный процесс, который вызывает внешние ручки (docs/06 §1)."""
+"""Worker: берёт задачи из jobs (FOR UPDATE SKIP LOCKED), ходит во внешние системы, пишет снапшоты и решения;
+между задачами — sweeper сроков по часам симулятора. Запуск: python -m app.worker.
+Единственный процесс, который вызывает внешние ручки (docs/06 §1)."""
 
 import asyncio
 import logging
+import time
 
 import httpx
 
-from . import company, sources, store
-from .domain import engine
-from .policy import load as load_policy
+from . import lifecycle, sources, store
+from .features import person_links
 
 log = logging.getLogger("worker")
 RETRY_DELAYS_S = (2, 5, 15, 30, 60)        # дальше — FAILED, заявка уходит специалисту (docs/07 §8)
+SWEEP_EVERY_S = 1.0
 HANDLERS = {}
 
 
@@ -22,40 +24,53 @@ def handler(kind: str):
     return register
 
 
+async def _app(conn, job: dict) -> dict:
+    return await lifecycle.load(conn, job["application_id"])
+
+
 @handler("refresh_company")
 async def refresh_company(conn, job: dict, client: httpx.AsyncClient) -> None:
+    """Обновить снапшоты компании; если пришло событие мира — пересмотреть её оферты и подписи (RECHECK)."""
     payload = job["payload"]
     result = await sources.refresh(conn, client, payload["inn"], with_bki=payload.get("with_bki", False))
     await store.add_event(conn, "registry.changed", "worker", {"inn": payload["inn"], "sources": result})
+    if payload.get("recheck"):
+        await lifecycle.recheck(conn, payload["inn"], payload.get("reason"))
+
+
+@handler("refresh_person")
+async def refresh_person(conn, job: dict, client: httpx.AsyncClient) -> None:
+    """Кто человек для банка: карточка клиента и компании с доступом в ДБО → обновить каждую компанию."""
+    inn = job["payload"]["inn"]
+    await sources.refresh(conn, client, inn, scope="person")
+    card = (await store.snapshots(conn, inn)).get("bank_person")
+    for link in person_links(card["payload"] if card else None):
+        await sources.refresh(conn, client, link["inn"])
 
 
 @handler("pipeline")
 async def pipeline(conn, job: dict, client: httpx.AsyncClient) -> None:
-    """Конвейер заявки: данные → решение → статус. Повторный запуск безопасен: решённую заявку не трогаем."""
-    app = await store.get_application(conn, job["application_id"])
-    if app["status"] == "SUBMITTED":
-        app = await store.move(conn, app, "CHECKING", "worker", reason="старт конвейера")
-    if app["status"] != "CHECKING":
-        return
-    inn = app["company_inn"]
-    await store.add_event(conn, "step.changed", "worker", {"step": "sources", "state": "RUNNING"}, app["id"])
-    fetched = await sources.refresh(conn, client, inn, with_bki=bool(app["data"].get("consent_bki")))
-    await store.add_event(conn, "step.changed", "worker", {"step": "sources", "state": "DONE", "sources": fetched}, app["id"])
+    await lifecycle.start_checking(conn, await _app(conn, job))
 
-    facts, _ = await company.facts(conn, inn)
-    decision = engine.decide(facts, app["data"]["request"], load_policy(), mode="commit")
-    flags = list(dict.fromkeys(decision["flags"] + (["DEGRADED_DATA"] if facts["degraded"] else [])))
-    async with conn.transaction():
-        await store.add_event(conn, "decision.made", "engine", {
-            "outcome": decision["outcome"], "offerKind": decision["offerKind"], "policyVersion": decision["policyVersion"],
-            "reasons": decision["reasons"], "flags": flags}, app["id"])
-        await store.move(conn, app, decision["status"], "engine", flags=flags, data_patch={"decision": decision},
-                         reason=decision["outcome"])
+
+@handler("decide")
+async def decide(conn, job: dict, client: httpx.AsyncClient) -> None:
+    await lifecycle.decide(conn, client, await _app(conn, job))
+
+
+@handler("disburse")
+async def disburse(conn, job: dict, client: httpx.AsyncClient) -> None:
+    await lifecycle.disburse(conn, client, await _app(conn, job))
+
+
+@handler("bki_followup")
+async def bki_followup(conn, job: dict, client: httpx.AsyncClient) -> None:
+    await lifecycle.bki_followup(conn, client, await _app(conn, job))
 
 
 async def run_once(pool, client: httpx.AsyncClient) -> bool:
     async with pool.acquire() as conn:
-        if await store.kv_get(conn, "worker:paused", False):     # наш собственный сбой из песочницы (docs/07 §7)
+        if await store.kv_get(conn, "worker:paused", False):     # наш собственный сбой из симулятора (docs/07 §7)
             return False
         job = await store.claim(conn)
     if job is None:
@@ -74,12 +89,26 @@ async def run_once(pool, client: httpx.AsyncClient) -> bool:
     return True
 
 
+async def sweep_once(pool) -> int:
+    async with pool.acquire() as conn:
+        if await store.kv_get(conn, "worker:paused", False):
+            return 0
+        return await lifecycle.sweep(conn)
+
+
 async def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
     pool = await store.pool()
     log.info("worker started")
+    last_sweep = 0.0
     async with httpx.AsyncClient(trust_env=False) as client:     # прокси из окружения не берём: внутренние вызовы
         while True:
+            if time.monotonic() - last_sweep >= SWEEP_EVERY_S:
+                try:
+                    await sweep_once(pool)
+                except Exception:  # noqa: BLE001 — сроки проверим на следующем круге
+                    log.exception("sweep failed")
+                last_sweep = time.monotonic()
             if not await run_once(pool, client):
                 await asyncio.sleep(0.5)
 

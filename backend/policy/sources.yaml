@@ -1,5 +1,6 @@
 # Внешние источники. Ходит только worker; API читает снапшоты (docs/06 §1). Форматы — docs/09 §2.
 # kind: UL — только юрлица (ИНН 10 цифр), IP — только ИП (12 цифр), ALL — все.
+# scope: company (по умолчанию) — данные компании; person — данные человека по его ИНН (кто он для банка и где у него доступ).
 defaults:
   timeout_s: 3.0
   connect_timeout_s: 1.0
@@ -22,10 +23,16 @@ sources:
   bank_charter: { name: "Банк: устав", kind: UL, method: GET, path: "/bank-core/v1/companies/{inn}/charter", ttl_h: 1 }
   bank_tx:      { name: "Банк: операции по счёту", kind: ALL, method: GET, path: "/bank-core/v1/accounts/{inn}/transactions", ttl_h: 1 }
   eis:          { name: "ЕИС", kind: ALL, method: GET, path: "/eis/v1/contracts?supplierInn={inn}", ttl_h: 24 }
+  mchd:         { name: "Реестр МЧД", kind: UL, method: GET, path: "/mchd/v1/poa?principalInn={inn}", ttl_h: 1 }   # перед подписью — свежий (docs/07 §4)
+  bank_person:  { name: "Банк: клиент-физлицо", scope: person, kind: ALL, method: GET, path: "/bank-core/v1/persons/{inn}", ttl_h: 1 }
   bki_info:     { name: "БКИ: информационная часть", kind: ALL, method: POST, path: "/bki/v1/info-part", ttl_h: 24,
                   body: { subject: { inn: "{inn}" } } }      # обращения и отказы — без согласия, 218-ФЗ ст. 6 ч. 9.1
   bki:          { name: "БКИ", kind: ALL, method: POST, path: "/bki/v1/credit-reports", ttl_h: 0, timeout_s: 5.0, needs_consent: true,
                   body: { subject: { inn: "{inn}" }, purpose: "credit_application" } }   # только при согласии, 218-ФЗ ст. 6 ч. 9
+
+# Команды во внешние системы (не источники фактов): отказ на них тоже ставит песочница.
+commands:
+  abs:          { name: "АБС: выдача", method: POST, path: "/abs/v1/loans", timeout_s: 3.0, attempts: 3 }   # ключ идемпотентности = id заявки
 
 # Отказы на лету из песочницы: стаб WireMock с приоритетом 1 поверх штатного (docs/07 §7).
 faults:

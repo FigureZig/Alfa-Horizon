@@ -8,7 +8,7 @@ import asyncpg
 
 from .config import settings
 from .domain import state
-from .jsonutil import dumps, plain
+from .jsonutil import canonical, dumps, plain
 
 _pool: asyncpg.Pool | None = None
 
@@ -23,6 +23,13 @@ async def pool() -> asyncpg.Pool:
     if _pool is None:
         _pool = await asyncpg.create_pool(settings.database_url, min_size=1, max_size=10, init=_init_conn)
     return _pool
+
+
+async def listener() -> asyncpg.Connection:
+    """Отдельное соединение для LISTEN (живой таймлайн заявки): занято всё время потока, поэтому не из пула."""
+    conn = await asyncpg.connect(settings.database_url)
+    await _init_conn(conn)
+    return conn
 
 
 async def close() -> None:
@@ -68,14 +75,34 @@ async def kv_set(conn, key: str, value) -> None:
                           ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = now()""", key, value)
 
 
+async def kv_delete(conn, key: str) -> None:
+    await conn.execute("DELETE FROM kv WHERE key = $1", key)
+
+
 # ── события (аудит с хэш-цепочкой) ───────────────────────────────────────────────────────────────────────────────
+
+
+def _link(prev: str | None, type_: str, application_id, body) -> str:
+    """Звено цепочки аудита: хэш предыдущей записи + тип + заявка + канонический JSON события (docs/10 P19)."""
+    return hashlib.sha256(f"{prev}|{type_}|{application_id}|{canonical(body)}".encode()).hexdigest()
+
+
+async def verify_chain(conn) -> dict:
+    """Пересчитать цепочку аудита: любая правка или удаление записи ломает звено, и видно, с какой записи."""
+    prev, count = None, 0
+    for row in await conn.fetch("SELECT id, application_id, type, payload, prev_hash, hash FROM events ORDER BY id"):
+        count += 1
+        if row["prev_hash"] != prev or row["hash"] != _link(prev, row["type"], row["application_id"], row["payload"]):
+            return {"events": count, "intact": False, "broken_at": row["id"], "last_hash": prev}
+        prev = row["hash"]
+    return {"events": count, "intact": True, "broken_at": None, "last_hash": prev}
 
 
 async def add_event(conn, type_: str, actor: str, payload: dict, application_id=None, idempotency_key=None) -> None:
     await conn.execute("SELECT pg_advisory_xact_lock(4242)")       # одна цепочка без развилок
     prev = await conn.fetchval("SELECT hash FROM events ORDER BY id DESC LIMIT 1")
     body = plain(payload)
-    digest = hashlib.sha256(f"{prev}|{type_}|{application_id}|{dumps(body)}".encode()).hexdigest()
+    digest = _link(prev, type_, application_id, body)
     await conn.execute(
         """INSERT INTO events (application_id, type, actor, payload, idempotency_key, prev_hash, hash)
            VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (idempotency_key) DO NOTHING""",
@@ -95,6 +122,11 @@ async def enqueue(conn, kind: str, payload: dict | None = None, application_id=N
     await conn.execute("""INSERT INTO jobs (kind, application_id, payload, run_at)
                           VALUES ($1, $2, $3, now() + make_interval(secs => $4))""",
                        kind, application_id, payload or {}, delay_s)
+
+
+async def pending(conn, kind: str, application_id) -> bool:
+    return bool(await conn.fetchval("""SELECT 1 FROM jobs WHERE kind = $1 AND application_id = $2
+                                       AND status IN ('PENDING', 'RUNNING', 'RETRY_WAIT') LIMIT 1""", kind, application_id))
 
 
 async def claim(conn, lease_s: int = 120) -> dict | None:
@@ -148,6 +180,33 @@ async def move(conn, app: dict, to: str, actor: str, *, flags=None, data_patch: 
     return dict(row)
 
 
+async def patch(conn, app: dict, actor: str, event: str, payload: dict, *, flags=None, data_patch: dict | None = None,
+                idempotency_key: str | None = None) -> dict:
+    """Изменение без смены статуса (подпись добавлена, флаг SLA): та же блокировка и событие в той же транзакции."""
+    data = {**app["data"], **plain(data_patch or {})}
+    async with conn.transaction():
+        row = await conn.fetchrow(
+            """UPDATE applications SET flags = $3, data = $4, version = version + 1, updated_at = now()
+               WHERE id = $1 AND version = $2 RETURNING *""",
+            app["id"], app["version"], list(flags if flags is not None else app["flags"]), data)
+        if row is None:
+            raise state.TransitionError("заявку изменили параллельно — повторите действие")
+        await add_event(conn, event, actor, payload, app["id"], idempotency_key)
+    return dict(row)
+
+
 async def queue(conn, statuses=("UNDER_REVIEW",)) -> list[dict]:
     rows = await conn.fetch("SELECT * FROM applications WHERE status = ANY($1) ORDER BY updated_at", list(statuses))
+    return [dict(r) for r in rows]
+
+
+async def applications(conn, company_inn: str) -> list[dict]:
+    rows = await conn.fetch("SELECT * FROM applications WHERE company_inn = $1 ORDER BY created_at DESC", company_inn)
+    return [dict(r) for r in rows]
+
+
+async def with_deadlines(conn) -> list[dict]:
+    """Заявки, у которых тикает срок: сроки статусов и SLA ручного рассмотрения (sweeper worker)."""
+    rows = await conn.fetch("""SELECT * FROM applications
+                               WHERE data ? 'deadline' AND data->'deadline' <> 'null'::jsonb OR status = 'UNDER_REVIEW'""")
     return [dict(r) for r in rows]

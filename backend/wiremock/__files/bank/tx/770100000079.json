@@ -1,7 +1,12 @@
 {
   "accountInn": "770100000079",
-  "account": "40702810000100000079",
+  "account": "40802810670100000079",
+  "bik": "044525777",
   "currency": "RUB",
+  "openingBalance": {
+    "amount": "191287.51",
+    "asOf": "2025-10-01"
+  },
   "balance": {
     "amount": "330000.00",
     "asOf": "2026-10-21"
@@ -13,7 +18,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "216722.51"
     },
     {
       "bookingDate": "2025-10-02",
@@ -21,7 +27,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "263801.51"
     },
     {
       "bookingDate": "2025-10-03",
@@ -29,7 +36,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "290029.51"
     },
     {
       "bookingDate": "2025-10-04",
@@ -37,7 +45,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "340293.51"
     },
     {
       "bookingDate": "2025-10-05",
@@ -45,7 +54,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "385397.51"
     },
     {
       "bookingDate": "2025-10-05",
@@ -53,7 +63,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Перевод на карту предпринимателя",
-      "category": "own_transfer"
+      "category": "own_transfer",
+      "balanceAfter": "185397.51"
     },
     {
       "bookingDate": "2025-10-06",
@@ -61,7 +72,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "235343.51"
     },
     {
       "bookingDate": "2025-10-07",
@@ -69,7 +81,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "283586.51"
     },
     {
       "bookingDate": "2025-10-08",
@@ -77,7 +90,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "322070.51"
     },
     {
       "bookingDate": "2025-10-09",
@@ -85,7 +99,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "365023.51"
     },
     {
       "bookingDate": "2025-10-10",
@@ -93,7 +108,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "399165.51"
     },
     {
       "bookingDate": "2025-10-10",
@@ -101,7 +117,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "169165.51"
     },
     {
       "bookingDate": "2025-10-11",
@@ -109,7 +126,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "206842.51"
     },
     {
       "bookingDate": "2025-10-12",
@@ -117,7 +135,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "242313.51"
     },
     {
       "bookingDate": "2025-10-13",
@@ -125,7 +144,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "290277.51"
     },
     {
       "bookingDate": "2025-10-14",
@@ -133,7 +153,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "318931.51"
     },
     {
       "bookingDate": "2025-10-15",
@@ -141,7 +162,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "364652.51"
     },
     {
       "bookingDate": "2025-10-15",
@@ -149,7 +171,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "115032.00"
     },
     {
       "bookingDate": "2025-10-16",
@@ -157,7 +180,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "156909.00"
     },
     {
       "bookingDate": "2025-10-17",
@@ -165,7 +189,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "196079.00"
     },
     {
       "bookingDate": "2025-10-18",
@@ -173,7 +198,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "234610.00"
     },
     {
       "bookingDate": "2025-10-19",
@@ -181,7 +207,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "275577.00"
     },
     {
       "bookingDate": "2025-10-20",
@@ -189,7 +216,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "329261.00"
     },
     {
       "bookingDate": "2025-10-20",
@@ -197,7 +225,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Коммунальные платежи и связь",
-      "category": "other"
+      "category": "other",
+      "balanceAfter": "269261.00"
     },
     {
       "bookingDate": "2025-10-21",
@@ -205,7 +234,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "322650.00"
     },
     {
       "bookingDate": "2025-10-22",
@@ -213,7 +243,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "354301.00"
     },
     {
       "bookingDate": "2025-10-23",
@@ -221,7 +252,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "400818.00"
     },
     {
       "bookingDate": "2025-10-24",
@@ -229,7 +261,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "436353.00"
     },
     {
       "bookingDate": "2025-10-25",
@@ -237,7 +270,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "465214.00"
     },
     {
       "bookingDate": "2025-10-25",
@@ -245,7 +279,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "235214.00"
     },
     {
       "bookingDate": "2025-10-25",
@@ -253,7 +288,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда помещения",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "85214.00"
     },
     {
       "bookingDate": "2025-10-26",
@@ -261,7 +297,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "124097.00"
     },
     {
       "bookingDate": "2025-10-27",
@@ -269,7 +306,17 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "169835.00"
+    },
+    {
+      "bookingDate": "2025-10-27",
+      "amount": "20000.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Пополнение счёта предпринимателем",
+      "category": "own_transfer",
+      "balanceAfter": "189835.00"
     },
     {
       "bookingDate": "2025-10-27",
@@ -277,7 +324,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Поставщики кофе и продуктов",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "9835.00"
     },
     {
       "bookingDate": "2025-10-28",
@@ -285,7 +333,17 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "57438.00"
+    },
+    {
+      "bookingDate": "2025-10-28",
+      "amount": "110000.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Пополнение счёта предпринимателем",
+      "category": "own_transfer",
+      "balanceAfter": "167438.00"
     },
     {
       "bookingDate": "2025-10-28",
@@ -293,7 +351,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "НДФЛ и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "7438.00"
     },
     {
       "bookingDate": "2025-10-29",
@@ -301,7 +360,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "49700.00"
     },
     {
       "bookingDate": "2025-10-30",
@@ -309,7 +369,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "82175.00"
     },
     {
       "bookingDate": "2025-10-31",
@@ -317,7 +378,17 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "111667.00"
+    },
+    {
+      "bookingDate": "2025-10-31",
+      "amount": "79620.51",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Пополнение счёта предпринимателем",
+      "category": "own_transfer",
+      "balanceAfter": "191287.51"
     },
     {
       "bookingDate": "2025-11-01",
@@ -325,7 +396,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "219860.51"
     },
     {
       "bookingDate": "2025-11-02",
@@ -333,7 +405,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "247828.51"
     },
     {
       "bookingDate": "2025-11-03",
@@ -341,7 +414,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "285917.51"
     },
     {
       "bookingDate": "2025-11-04",
@@ -349,7 +423,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "332859.51"
     },
     {
       "bookingDate": "2025-11-05",
@@ -357,7 +432,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "382831.51"
     },
     {
       "bookingDate": "2025-11-05",
@@ -365,7 +441,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Перевод на карту предпринимателя",
-      "category": "own_transfer"
+      "category": "own_transfer",
+      "balanceAfter": "182831.51"
     },
     {
       "bookingDate": "2025-11-06",
@@ -373,7 +450,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "230076.51"
     },
     {
       "bookingDate": "2025-11-07",
@@ -381,7 +459,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "256727.51"
     },
     {
       "bookingDate": "2025-11-08",
@@ -389,7 +468,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "298457.51"
     },
     {
       "bookingDate": "2025-11-09",
@@ -397,7 +477,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "337101.51"
     },
     {
       "bookingDate": "2025-11-10",
@@ -405,7 +486,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "382518.51"
     },
     {
       "bookingDate": "2025-11-10",
@@ -413,7 +495,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "152518.51"
     },
     {
       "bookingDate": "2025-11-11",
@@ -421,7 +504,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "202635.51"
     },
     {
       "bookingDate": "2025-11-12",
@@ -429,7 +513,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "230003.51"
     },
     {
       "bookingDate": "2025-11-13",
@@ -437,7 +522,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "255831.51"
     },
     {
       "bookingDate": "2025-11-14",
@@ -445,7 +531,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "304427.51"
     },
     {
       "bookingDate": "2025-11-15",
@@ -453,7 +540,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "344398.51"
     },
     {
       "bookingDate": "2025-11-15",
@@ -461,7 +549,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "94778.00"
     },
     {
       "bookingDate": "2025-11-16",
@@ -469,7 +558,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "141326.00"
     },
     {
       "bookingDate": "2025-11-17",
@@ -477,7 +567,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "184546.00"
     },
     {
       "bookingDate": "2025-11-18",
@@ -485,7 +576,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "211523.00"
     },
     {
       "bookingDate": "2025-11-19",
@@ -493,7 +585,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "262815.00"
     },
     {
       "bookingDate": "2025-11-20",
@@ -501,7 +594,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "296521.00"
     },
     {
       "bookingDate": "2025-11-20",
@@ -509,7 +603,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Коммунальные платежи и связь",
-      "category": "other"
+      "category": "other",
+      "balanceAfter": "236521.00"
     },
     {
       "bookingDate": "2025-11-21",
@@ -517,7 +612,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "278098.00"
     },
     {
       "bookingDate": "2025-11-22",
@@ -525,7 +621,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "302768.00"
     },
     {
       "bookingDate": "2025-11-23",
@@ -533,7 +630,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "352894.00"
     },
     {
       "bookingDate": "2025-11-24",
@@ -541,7 +639,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "377757.00"
     },
     {
       "bookingDate": "2025-11-25",
@@ -549,7 +648,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "418047.00"
     },
     {
       "bookingDate": "2025-11-25",
@@ -557,7 +657,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "188047.00"
     },
     {
       "bookingDate": "2025-11-25",
@@ -565,7 +666,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда помещения",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "38047.00"
     },
     {
       "bookingDate": "2025-11-26",
@@ -573,7 +675,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "81746.00"
     },
     {
       "bookingDate": "2025-11-27",
@@ -581,7 +684,17 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "114054.00"
+    },
+    {
+      "bookingDate": "2025-11-27",
+      "amount": "70000.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Пополнение счёта предпринимателем",
+      "category": "own_transfer",
+      "balanceAfter": "184054.00"
     },
     {
       "bookingDate": "2025-11-27",
@@ -589,7 +702,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Поставщики кофе и продуктов",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "4054.00"
     },
     {
       "bookingDate": "2025-11-28",
@@ -597,7 +711,17 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "30953.00"
+    },
+    {
+      "bookingDate": "2025-11-28",
+      "amount": "130000.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Пополнение счёта предпринимателем",
+      "category": "own_transfer",
+      "balanceAfter": "160953.00"
     },
     {
       "bookingDate": "2025-11-28",
@@ -605,7 +729,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "НДФЛ и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "953.00"
     },
     {
       "bookingDate": "2025-11-29",
@@ -613,7 +738,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "38190.00"
     },
     {
       "bookingDate": "2025-11-30",
@@ -621,7 +747,17 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "81667.00"
+    },
+    {
+      "bookingDate": "2025-11-30",
+      "amount": "109620.51",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Пополнение счёта предпринимателем",
+      "category": "own_transfer",
+      "balanceAfter": "191287.51"
     },
     {
       "bookingDate": "2025-12-01",
@@ -629,7 +765,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "248746.51"
     },
     {
       "bookingDate": "2025-12-02",
@@ -637,7 +774,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "288074.51"
     },
     {
       "bookingDate": "2025-12-03",
@@ -645,7 +783,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "338831.51"
     },
     {
       "bookingDate": "2025-12-04",
@@ -653,7 +792,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "409585.51"
     },
     {
       "bookingDate": "2025-12-05",
@@ -661,7 +801,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "444997.51"
     },
     {
       "bookingDate": "2025-12-05",
@@ -669,7 +810,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Перевод на карту предпринимателя",
-      "category": "own_transfer"
+      "category": "own_transfer",
+      "balanceAfter": "244997.51"
     },
     {
       "bookingDate": "2025-12-06",
@@ -677,7 +819,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "286901.51"
     },
     {
       "bookingDate": "2025-12-07",
@@ -685,7 +828,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "363557.51"
     },
     {
       "bookingDate": "2025-12-08",
@@ -693,7 +837,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "421308.51"
     },
     {
       "bookingDate": "2025-12-09",
@@ -701,7 +846,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "492457.51"
     },
     {
       "bookingDate": "2025-12-10",
@@ -709,7 +855,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "568048.51"
     },
     {
       "bookingDate": "2025-12-10",
@@ -717,7 +864,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "338048.51"
     },
     {
       "bookingDate": "2025-12-11",
@@ -725,7 +873,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "406620.51"
     },
     {
       "bookingDate": "2025-12-12",
@@ -733,7 +882,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "461309.51"
     },
     {
       "bookingDate": "2025-12-13",
@@ -741,7 +891,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "505221.51"
     },
     {
       "bookingDate": "2025-12-14",
@@ -749,7 +900,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "559928.51"
     },
     {
       "bookingDate": "2025-12-15",
@@ -757,7 +909,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "628477.51"
     },
     {
       "bookingDate": "2025-12-15",
@@ -765,7 +918,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "378857.00"
     },
     {
       "bookingDate": "2025-12-16",
@@ -773,7 +927,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "451298.00"
     },
     {
       "bookingDate": "2025-12-17",
@@ -781,7 +936,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "523612.00"
     },
     {
       "bookingDate": "2025-12-18",
@@ -789,7 +945,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "589362.00"
     },
     {
       "bookingDate": "2025-12-19",
@@ -797,7 +954,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "665175.00"
     },
     {
       "bookingDate": "2025-12-20",
@@ -805,7 +963,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "714799.00"
     },
     {
       "bookingDate": "2025-12-20",
@@ -813,7 +972,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Коммунальные платежи и связь",
-      "category": "other"
+      "category": "other",
+      "balanceAfter": "654799.00"
     },
     {
       "bookingDate": "2025-12-21",
@@ -821,7 +981,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "705372.00"
     },
     {
       "bookingDate": "2025-12-22",
@@ -829,7 +990,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "775454.00"
     },
     {
       "bookingDate": "2025-12-23",
@@ -837,7 +999,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "847571.00"
     },
     {
       "bookingDate": "2025-12-24",
@@ -845,7 +1008,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "893945.00"
     },
     {
       "bookingDate": "2025-12-25",
@@ -853,7 +1017,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "950028.00"
     },
     {
       "bookingDate": "2025-12-25",
@@ -861,7 +1026,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "720028.00"
     },
     {
       "bookingDate": "2025-12-25",
@@ -869,7 +1035,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда помещения",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "570028.00"
     },
     {
       "bookingDate": "2025-12-26",
@@ -877,7 +1044,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "619366.00"
     },
     {
       "bookingDate": "2025-12-27",
@@ -885,7 +1053,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "666149.00"
     },
     {
       "bookingDate": "2025-12-27",
@@ -893,7 +1062,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Поставщики кофе и продуктов",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "486149.00"
     },
     {
       "bookingDate": "2025-12-28",
@@ -901,7 +1071,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "521791.00"
     },
     {
       "bookingDate": "2025-12-28",
@@ -909,7 +1080,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "НДФЛ и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "361791.00"
     },
     {
       "bookingDate": "2025-12-29",
@@ -917,7 +1089,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "402259.00"
     },
     {
       "bookingDate": "2025-12-30",
@@ -925,7 +1098,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "455655.00"
     },
     {
       "bookingDate": "2025-12-31",
@@ -933,7 +1107,17 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "531667.00"
+    },
+    {
+      "bookingDate": "2025-12-31",
+      "amount": "340379.49",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Перевод на личный счёт предпринимателя",
+      "category": "own_transfer",
+      "balanceAfter": "191287.51"
     },
     {
       "bookingDate": "2026-01-01",
@@ -941,7 +1125,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "230293.51"
     },
     {
       "bookingDate": "2026-01-02",
@@ -949,7 +1134,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "266681.51"
     },
     {
       "bookingDate": "2026-01-03",
@@ -957,7 +1143,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "296396.51"
     },
     {
       "bookingDate": "2026-01-04",
@@ -965,7 +1152,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "321210.51"
     },
     {
       "bookingDate": "2026-01-05",
@@ -973,7 +1161,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "351942.51"
     },
     {
       "bookingDate": "2026-01-05",
@@ -981,7 +1170,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Перевод на карту предпринимателя",
-      "category": "own_transfer"
+      "category": "own_transfer",
+      "balanceAfter": "151942.51"
     },
     {
       "bookingDate": "2026-01-06",
@@ -989,7 +1179,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "195594.51"
     },
     {
       "bookingDate": "2026-01-07",
@@ -997,7 +1188,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "219311.51"
     },
     {
       "bookingDate": "2026-01-08",
@@ -1005,7 +1197,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "254407.51"
     },
     {
       "bookingDate": "2026-01-09",
@@ -1013,7 +1206,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "282553.51"
     },
     {
       "bookingDate": "2026-01-10",
@@ -1021,7 +1215,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "324115.51"
     },
     {
       "bookingDate": "2026-01-10",
@@ -1029,7 +1224,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "94115.51"
     },
     {
       "bookingDate": "2026-01-11",
@@ -1037,7 +1233,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "126015.51"
     },
     {
       "bookingDate": "2026-01-12",
@@ -1045,7 +1242,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "164164.51"
     },
     {
       "bookingDate": "2026-01-13",
@@ -1053,7 +1251,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "191211.51"
     },
     {
       "bookingDate": "2026-01-14",
@@ -1061,7 +1260,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "218908.51"
     },
     {
       "bookingDate": "2026-01-15",
@@ -1069,7 +1269,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "259783.51"
     },
     {
       "bookingDate": "2026-01-15",
@@ -1077,7 +1278,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "10163.00"
     },
     {
       "bookingDate": "2026-01-16",
@@ -1085,7 +1287,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "40097.00"
     },
     {
       "bookingDate": "2026-01-17",
@@ -1093,7 +1296,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "63495.00"
     },
     {
       "bookingDate": "2026-01-18",
@@ -1101,7 +1305,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "98968.00"
     },
     {
       "bookingDate": "2026-01-19",
@@ -1109,7 +1314,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "141857.00"
     },
     {
       "bookingDate": "2026-01-20",
@@ -1117,7 +1323,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "172578.00"
     },
     {
       "bookingDate": "2026-01-20",
@@ -1125,7 +1332,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Коммунальные платежи и связь",
-      "category": "other"
+      "category": "other",
+      "balanceAfter": "112578.00"
     },
     {
       "bookingDate": "2026-01-21",
@@ -1133,7 +1341,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "141489.00"
     },
     {
       "bookingDate": "2026-01-22",
@@ -1141,7 +1350,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "179764.00"
     },
     {
       "bookingDate": "2026-01-23",
@@ -1149,7 +1359,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "224307.00"
     },
     {
       "bookingDate": "2026-01-24",
@@ -1157,7 +1368,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "246524.00"
     },
     {
       "bookingDate": "2026-01-25",
@@ -1165,7 +1377,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "290614.00"
     },
     {
       "bookingDate": "2026-01-25",
@@ -1173,7 +1386,17 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "60614.00"
+    },
+    {
+      "bookingDate": "2026-01-25",
+      "amount": "90000.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Пополнение счёта предпринимателем",
+      "category": "own_transfer",
+      "balanceAfter": "150614.00"
     },
     {
       "bookingDate": "2026-01-25",
@@ -1181,7 +1404,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда помещения",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "614.00"
     },
     {
       "bookingDate": "2026-01-26",
@@ -1189,7 +1413,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "31507.00"
     },
     {
       "bookingDate": "2026-01-27",
@@ -1197,7 +1422,17 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "57225.00"
+    },
+    {
+      "bookingDate": "2026-01-27",
+      "amount": "130000.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Пополнение счёта предпринимателем",
+      "category": "own_transfer",
+      "balanceAfter": "187225.00"
     },
     {
       "bookingDate": "2026-01-27",
@@ -1205,7 +1440,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Поставщики кофе и продуктов",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "7225.00"
     },
     {
       "bookingDate": "2026-01-28",
@@ -1213,7 +1449,17 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "51088.00"
+    },
+    {
+      "bookingDate": "2026-01-28",
+      "amount": "110000.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Пополнение счёта предпринимателем",
+      "category": "own_transfer",
+      "balanceAfter": "161088.00"
     },
     {
       "bookingDate": "2026-01-28",
@@ -1221,7 +1467,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "НДФЛ и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "1088.00"
     },
     {
       "bookingDate": "2026-01-29",
@@ -1229,7 +1476,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "44161.00"
     },
     {
       "bookingDate": "2026-01-30",
@@ -1237,7 +1485,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "85670.00"
     },
     {
       "bookingDate": "2026-01-31",
@@ -1245,7 +1494,17 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "111667.00"
+    },
+    {
+      "bookingDate": "2026-01-31",
+      "amount": "79620.51",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Пополнение счёта предпринимателем",
+      "category": "own_transfer",
+      "balanceAfter": "191287.51"
     },
     {
       "bookingDate": "2026-02-01",
@@ -1253,7 +1512,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "222628.51"
     },
     {
       "bookingDate": "2026-02-02",
@@ -1261,7 +1521,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "256412.51"
     },
     {
       "bookingDate": "2026-02-03",
@@ -1269,7 +1530,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "300251.51"
     },
     {
       "bookingDate": "2026-02-04",
@@ -1277,7 +1539,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "333897.51"
     },
     {
       "bookingDate": "2026-02-05",
@@ -1285,7 +1548,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "371453.51"
     },
     {
       "bookingDate": "2026-02-05",
@@ -1293,7 +1557,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Перевод на карту предпринимателя",
-      "category": "own_transfer"
+      "category": "own_transfer",
+      "balanceAfter": "171453.51"
     },
     {
       "bookingDate": "2026-02-06",
@@ -1301,7 +1566,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "210608.51"
     },
     {
       "bookingDate": "2026-02-07",
@@ -1309,7 +1575,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "244932.51"
     },
     {
       "bookingDate": "2026-02-08",
@@ -1317,7 +1584,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "284894.51"
     },
     {
       "bookingDate": "2026-02-09",
@@ -1325,7 +1593,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "320763.51"
     },
     {
       "bookingDate": "2026-02-10",
@@ -1333,7 +1602,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "370281.51"
     },
     {
       "bookingDate": "2026-02-10",
@@ -1341,7 +1611,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "140281.51"
     },
     {
       "bookingDate": "2026-02-11",
@@ -1349,7 +1620,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "173248.51"
     },
     {
       "bookingDate": "2026-02-12",
@@ -1357,7 +1629,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "196758.51"
     },
     {
       "bookingDate": "2026-02-13",
@@ -1365,7 +1638,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "241747.51"
     },
     {
       "bookingDate": "2026-02-14",
@@ -1373,7 +1647,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "275564.51"
     },
     {
       "bookingDate": "2026-02-15",
@@ -1381,7 +1656,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "316414.51"
     },
     {
       "bookingDate": "2026-02-15",
@@ -1389,7 +1665,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "66794.00"
     },
     {
       "bookingDate": "2026-02-16",
@@ -1397,7 +1674,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "101771.00"
     },
     {
       "bookingDate": "2026-02-17",
@@ -1405,7 +1683,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "133562.00"
     },
     {
       "bookingDate": "2026-02-18",
@@ -1413,7 +1692,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "166196.00"
     },
     {
       "bookingDate": "2026-02-19",
@@ -1421,7 +1701,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "200149.00"
     },
     {
       "bookingDate": "2026-02-20",
@@ -1429,7 +1710,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "229416.00"
     },
     {
       "bookingDate": "2026-02-20",
@@ -1437,7 +1719,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Коммунальные платежи и связь",
-      "category": "other"
+      "category": "other",
+      "balanceAfter": "169416.00"
     },
     {
       "bookingDate": "2026-02-21",
@@ -1445,7 +1728,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "197205.00"
     },
     {
       "bookingDate": "2026-02-22",
@@ -1453,7 +1737,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "241754.00"
     },
     {
       "bookingDate": "2026-02-23",
@@ -1461,7 +1746,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "285161.00"
     },
     {
       "bookingDate": "2026-02-24",
@@ -1469,7 +1755,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "336051.00"
     },
     {
       "bookingDate": "2026-02-25",
@@ -1477,7 +1764,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "372285.00"
     },
     {
       "bookingDate": "2026-02-25",
@@ -1485,7 +1773,17 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "142285.00"
+    },
+    {
+      "bookingDate": "2026-02-25",
+      "amount": "10000.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Пополнение счёта предпринимателем",
+      "category": "own_transfer",
+      "balanceAfter": "152285.00"
     },
     {
       "bookingDate": "2026-02-25",
@@ -1493,7 +1791,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда помещения",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "2285.00"
     },
     {
       "bookingDate": "2026-02-26",
@@ -1501,7 +1800,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "41187.00"
     },
     {
       "bookingDate": "2026-02-27",
@@ -1509,7 +1809,17 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "78828.00"
+    },
+    {
+      "bookingDate": "2026-02-27",
+      "amount": "110000.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Пополнение счёта предпринимателем",
+      "category": "own_transfer",
+      "balanceAfter": "188828.00"
     },
     {
       "bookingDate": "2026-02-27",
@@ -1517,7 +1827,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Поставщики кофе и продуктов",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "8828.00"
     },
     {
       "bookingDate": "2026-02-28",
@@ -1525,7 +1836,17 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "61667.00"
+    },
+    {
+      "bookingDate": "2026-02-28",
+      "amount": "100000.00",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Пополнение счёта предпринимателем",
+      "category": "own_transfer",
+      "balanceAfter": "161667.00"
     },
     {
       "bookingDate": "2026-02-28",
@@ -1533,7 +1854,17 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "НДФЛ и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "1667.00"
+    },
+    {
+      "bookingDate": "2026-02-28",
+      "amount": "189620.51",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Пополнение счёта предпринимателем",
+      "category": "own_transfer",
+      "balanceAfter": "191287.51"
     },
     {
       "bookingDate": "2026-03-01",
@@ -1541,7 +1872,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "223116.51"
     },
     {
       "bookingDate": "2026-03-02",
@@ -1549,7 +1881,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "261714.51"
     },
     {
       "bookingDate": "2026-03-03",
@@ -1557,7 +1890,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "316752.51"
     },
     {
       "bookingDate": "2026-03-04",
@@ -1565,7 +1899,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "380591.51"
     },
     {
       "bookingDate": "2026-03-05",
@@ -1573,7 +1908,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "418729.51"
     },
     {
       "bookingDate": "2026-03-05",
@@ -1581,7 +1917,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Перевод на карту предпринимателя",
-      "category": "own_transfer"
+      "category": "own_transfer",
+      "balanceAfter": "218729.51"
     },
     {
       "bookingDate": "2026-03-06",
@@ -1589,7 +1926,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "254540.51"
     },
     {
       "bookingDate": "2026-03-07",
@@ -1597,7 +1935,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "297997.51"
     },
     {
       "bookingDate": "2026-03-08",
@@ -1605,7 +1944,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "343593.51"
     },
     {
       "bookingDate": "2026-03-09",
@@ -1613,7 +1953,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "372759.51"
     },
     {
       "bookingDate": "2026-03-10",
@@ -1621,7 +1962,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "408787.51"
     },
     {
       "bookingDate": "2026-03-10",
@@ -1629,7 +1971,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "178787.51"
     },
     {
       "bookingDate": "2026-03-11",
@@ -1637,7 +1980,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "240676.51"
     },
     {
       "bookingDate": "2026-03-12",
@@ -1645,7 +1989,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "295188.51"
     },
     {
       "bookingDate": "2026-03-13",
@@ -1653,7 +1998,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "334904.51"
     },
     {
       "bookingDate": "2026-03-14",
@@ -1661,7 +2007,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "382389.51"
     },
     {
       "bookingDate": "2026-03-15",
@@ -1669,7 +2016,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "415998.51"
     },
     {
       "bookingDate": "2026-03-15",
@@ -1677,7 +2025,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "166378.00"
     },
     {
       "bookingDate": "2026-03-16",
@@ -1685,7 +2034,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "207820.00"
     },
     {
       "bookingDate": "2026-03-17",
@@ -1693,7 +2043,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "257540.00"
     },
     {
       "bookingDate": "2026-03-18",
@@ -1701,7 +2052,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "313420.00"
     },
     {
       "bookingDate": "2026-03-19",
@@ -1709,7 +2061,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "355362.00"
     },
     {
       "bookingDate": "2026-03-20",
@@ -1717,7 +2070,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "402313.00"
     },
     {
       "bookingDate": "2026-03-20",
@@ -1725,7 +2079,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Коммунальные платежи и связь",
-      "category": "other"
+      "category": "other",
+      "balanceAfter": "342313.00"
     },
     {
       "bookingDate": "2026-03-21",
@@ -1733,7 +2088,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "378905.00"
     },
     {
       "bookingDate": "2026-03-22",
@@ -1741,7 +2097,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "438960.00"
     },
     {
       "bookingDate": "2026-03-23",
@@ -1749,7 +2106,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "482224.00"
     },
     {
       "bookingDate": "2026-03-24",
@@ -1757,7 +2115,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "518405.00"
     },
     {
       "bookingDate": "2026-03-25",
@@ -1765,7 +2124,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "580720.00"
     },
     {
       "bookingDate": "2026-03-25",
@@ -1773,7 +2133,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "350720.00"
     },
     {
       "bookingDate": "2026-03-25",
@@ -1781,7 +2142,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда помещения",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "200720.00"
     },
     {
       "bookingDate": "2026-03-26",
@@ -1789,7 +2151,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "234248.00"
     },
     {
       "bookingDate": "2026-03-27",
@@ -1797,7 +2160,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "291655.00"
     },
     {
       "bookingDate": "2026-03-27",
@@ -1805,7 +2169,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Поставщики кофе и продуктов",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "111655.00"
     },
     {
       "bookingDate": "2026-03-28",
@@ -1813,7 +2178,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "161225.00"
     },
     {
       "bookingDate": "2026-03-28",
@@ -1821,7 +2187,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "НДФЛ и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "1225.00"
     },
     {
       "bookingDate": "2026-03-29",
@@ -1829,7 +2196,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "31140.00"
     },
     {
       "bookingDate": "2026-03-30",
@@ -1837,7 +2205,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "84920.00"
     },
     {
       "bookingDate": "2026-03-31",
@@ -1845,7 +2214,17 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "131667.00"
+    },
+    {
+      "bookingDate": "2026-03-31",
+      "amount": "59620.51",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Пополнение счёта предпринимателем",
+      "category": "own_transfer",
+      "balanceAfter": "191287.51"
     },
     {
       "bookingDate": "2026-04-01",
@@ -1853,7 +2232,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "233915.51"
     },
     {
       "bookingDate": "2026-04-02",
@@ -1861,7 +2241,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "301096.51"
     },
     {
       "bookingDate": "2026-04-03",
@@ -1869,7 +2250,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "339180.51"
     },
     {
       "bookingDate": "2026-04-04",
@@ -1877,7 +2259,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "398729.51"
     },
     {
       "bookingDate": "2026-04-05",
@@ -1885,7 +2268,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "433267.51"
     },
     {
       "bookingDate": "2026-04-05",
@@ -1893,7 +2277,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Перевод на карту предпринимателя",
-      "category": "own_transfer"
+      "category": "own_transfer",
+      "balanceAfter": "233267.51"
     },
     {
       "bookingDate": "2026-04-06",
@@ -1901,7 +2286,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "269257.51"
     },
     {
       "bookingDate": "2026-04-07",
@@ -1909,7 +2295,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "325576.51"
     },
     {
       "bookingDate": "2026-04-08",
@@ -1917,7 +2304,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "374319.51"
     },
     {
       "bookingDate": "2026-04-09",
@@ -1925,7 +2313,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "421671.51"
     },
     {
       "bookingDate": "2026-04-10",
@@ -1933,7 +2322,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "484016.51"
     },
     {
       "bookingDate": "2026-04-10",
@@ -1941,7 +2331,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "254016.51"
     },
     {
       "bookingDate": "2026-04-11",
@@ -1949,7 +2340,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "302897.51"
     },
     {
       "bookingDate": "2026-04-12",
@@ -1957,7 +2349,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "358018.51"
     },
     {
       "bookingDate": "2026-04-13",
@@ -1965,7 +2358,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "417598.51"
     },
     {
       "bookingDate": "2026-04-14",
@@ -1973,7 +2367,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "469003.51"
     },
     {
       "bookingDate": "2026-04-15",
@@ -1981,7 +2376,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "507755.51"
     },
     {
       "bookingDate": "2026-04-15",
@@ -1989,7 +2385,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "258135.00"
     },
     {
       "bookingDate": "2026-04-16",
@@ -1997,7 +2394,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "317046.00"
     },
     {
       "bookingDate": "2026-04-17",
@@ -2005,7 +2403,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "385499.00"
     },
     {
       "bookingDate": "2026-04-18",
@@ -2013,7 +2412,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "439308.00"
     },
     {
       "bookingDate": "2026-04-19",
@@ -2021,7 +2421,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "504570.00"
     },
     {
       "bookingDate": "2026-04-20",
@@ -2029,7 +2430,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "565134.00"
     },
     {
       "bookingDate": "2026-04-20",
@@ -2037,7 +2439,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Коммунальные платежи и связь",
-      "category": "other"
+      "category": "other",
+      "balanceAfter": "505134.00"
     },
     {
       "bookingDate": "2026-04-21",
@@ -2045,7 +2448,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "575947.00"
     },
     {
       "bookingDate": "2026-04-22",
@@ -2053,7 +2457,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "613137.00"
     },
     {
       "bookingDate": "2026-04-23",
@@ -2061,7 +2466,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "651746.00"
     },
     {
       "bookingDate": "2026-04-24",
@@ -2069,7 +2475,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "719226.00"
     },
     {
       "bookingDate": "2026-04-25",
@@ -2077,7 +2484,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "777814.00"
     },
     {
       "bookingDate": "2026-04-25",
@@ -2085,7 +2493,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "547814.00"
     },
     {
       "bookingDate": "2026-04-25",
@@ -2093,7 +2502,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда помещения",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "397814.00"
     },
     {
       "bookingDate": "2026-04-26",
@@ -2101,7 +2511,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "464394.00"
     },
     {
       "bookingDate": "2026-04-27",
@@ -2109,7 +2520,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "505199.00"
     },
     {
       "bookingDate": "2026-04-27",
@@ -2117,7 +2529,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Поставщики кофе и продуктов",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "325199.00"
     },
     {
       "bookingDate": "2026-04-28",
@@ -2125,7 +2538,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "359978.00"
     },
     {
       "bookingDate": "2026-04-28",
@@ -2133,7 +2547,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "НДФЛ и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "199978.00"
     },
     {
       "bookingDate": "2026-04-29",
@@ -2141,7 +2556,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "263072.00"
     },
     {
       "bookingDate": "2026-04-30",
@@ -2149,7 +2565,17 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "331667.00"
+    },
+    {
+      "bookingDate": "2026-04-30",
+      "amount": "140379.49",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Перевод на личный счёт предпринимателя",
+      "category": "own_transfer",
+      "balanceAfter": "191287.51"
     },
     {
       "bookingDate": "2026-05-01",
@@ -2157,7 +2583,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "250723.51"
     },
     {
       "bookingDate": "2026-05-02",
@@ -2165,7 +2592,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "317721.51"
     },
     {
       "bookingDate": "2026-05-03",
@@ -2173,7 +2601,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "383650.51"
     },
     {
       "bookingDate": "2026-05-04",
@@ -2181,7 +2610,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "439172.51"
     },
     {
       "bookingDate": "2026-05-05",
@@ -2189,7 +2619,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "490323.51"
     },
     {
       "bookingDate": "2026-05-05",
@@ -2197,7 +2628,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Перевод на карту предпринимателя",
-      "category": "own_transfer"
+      "category": "own_transfer",
+      "balanceAfter": "290323.51"
     },
     {
       "bookingDate": "2026-05-06",
@@ -2205,7 +2637,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "370457.51"
     },
     {
       "bookingDate": "2026-05-07",
@@ -2213,7 +2646,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "430564.51"
     },
     {
       "bookingDate": "2026-05-08",
@@ -2221,7 +2655,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "495896.51"
     },
     {
       "bookingDate": "2026-05-09",
@@ -2229,7 +2664,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "578471.51"
     },
     {
       "bookingDate": "2026-05-10",
@@ -2237,7 +2673,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "644593.51"
     },
     {
       "bookingDate": "2026-05-10",
@@ -2245,7 +2682,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "414593.51"
     },
     {
       "bookingDate": "2026-05-11",
@@ -2253,7 +2691,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "481156.51"
     },
     {
       "bookingDate": "2026-05-12",
@@ -2261,7 +2700,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "519003.51"
     },
     {
       "bookingDate": "2026-05-13",
@@ -2269,7 +2709,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "590092.51"
     },
     {
       "bookingDate": "2026-05-14",
@@ -2277,7 +2718,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "662071.51"
     },
     {
       "bookingDate": "2026-05-15",
@@ -2285,7 +2727,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "734748.51"
     },
     {
       "bookingDate": "2026-05-15",
@@ -2293,7 +2736,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "485128.00"
     },
     {
       "bookingDate": "2026-05-16",
@@ -2301,7 +2745,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "546316.00"
     },
     {
       "bookingDate": "2026-05-17",
@@ -2309,7 +2754,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "610864.00"
     },
     {
       "bookingDate": "2026-05-18",
@@ -2317,7 +2763,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "673818.00"
     },
     {
       "bookingDate": "2026-05-19",
@@ -2325,7 +2772,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "715030.00"
     },
     {
       "bookingDate": "2026-05-20",
@@ -2333,7 +2781,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "766319.00"
     },
     {
       "bookingDate": "2026-05-20",
@@ -2341,7 +2790,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Коммунальные платежи и связь",
-      "category": "other"
+      "category": "other",
+      "balanceAfter": "706319.00"
     },
     {
       "bookingDate": "2026-05-21",
@@ -2349,7 +2799,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "767011.00"
     },
     {
       "bookingDate": "2026-05-22",
@@ -2357,7 +2808,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "841257.00"
     },
     {
       "bookingDate": "2026-05-23",
@@ -2365,7 +2817,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "883540.00"
     },
     {
       "bookingDate": "2026-05-24",
@@ -2373,7 +2826,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "936290.00"
     },
     {
       "bookingDate": "2026-05-25",
@@ -2381,7 +2835,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "1008333.00"
     },
     {
       "bookingDate": "2026-05-25",
@@ -2389,7 +2844,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "778333.00"
     },
     {
       "bookingDate": "2026-05-25",
@@ -2397,7 +2853,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда помещения",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "628333.00"
     },
     {
       "bookingDate": "2026-05-26",
@@ -2405,7 +2862,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "669991.00"
     },
     {
       "bookingDate": "2026-05-27",
@@ -2413,7 +2871,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "729187.00"
     },
     {
       "bookingDate": "2026-05-27",
@@ -2421,7 +2880,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Поставщики кофе и продуктов",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "549187.00"
     },
     {
       "bookingDate": "2026-05-28",
@@ -2429,7 +2889,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "627760.00"
     },
     {
       "bookingDate": "2026-05-28",
@@ -2437,7 +2898,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "НДФЛ и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "467760.00"
     },
     {
       "bookingDate": "2026-05-29",
@@ -2445,7 +2907,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "544993.00"
     },
     {
       "bookingDate": "2026-05-30",
@@ -2453,7 +2916,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "615453.00"
     },
     {
       "bookingDate": "2026-05-31",
@@ -2461,7 +2925,17 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "681667.00"
+    },
+    {
+      "bookingDate": "2026-05-31",
+      "amount": "490379.49",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Перевод на личный счёт предпринимателя",
+      "category": "own_transfer",
+      "balanceAfter": "191287.51"
     },
     {
       "bookingDate": "2026-06-01",
@@ -2469,7 +2943,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "255526.51"
     },
     {
       "bookingDate": "2026-06-02",
@@ -2477,7 +2952,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "303108.51"
     },
     {
       "bookingDate": "2026-06-03",
@@ -2485,7 +2961,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "400874.51"
     },
     {
       "bookingDate": "2026-06-04",
@@ -2493,7 +2970,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "470222.51"
     },
     {
       "bookingDate": "2026-06-05",
@@ -2501,7 +2979,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "545976.51"
     },
     {
       "bookingDate": "2026-06-05",
@@ -2509,7 +2988,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Перевод на карту предпринимателя",
-      "category": "own_transfer"
+      "category": "own_transfer",
+      "balanceAfter": "345976.51"
     },
     {
       "bookingDate": "2026-06-06",
@@ -2517,7 +2997,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "433660.51"
     },
     {
       "bookingDate": "2026-06-07",
@@ -2525,7 +3006,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "499918.51"
     },
     {
       "bookingDate": "2026-06-08",
@@ -2533,7 +3015,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "598312.51"
     },
     {
       "bookingDate": "2026-06-09",
@@ -2541,7 +3024,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "642758.51"
     },
     {
       "bookingDate": "2026-06-10",
@@ -2549,7 +3033,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "696409.51"
     },
     {
       "bookingDate": "2026-06-10",
@@ -2557,7 +3042,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "466409.51"
     },
     {
       "bookingDate": "2026-06-11",
@@ -2565,7 +3051,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "555227.51"
     },
     {
       "bookingDate": "2026-06-12",
@@ -2573,7 +3060,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "646509.51"
     },
     {
       "bookingDate": "2026-06-13",
@@ -2581,7 +3069,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "736852.51"
     },
     {
       "bookingDate": "2026-06-14",
@@ -2589,7 +3078,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "804083.51"
     },
     {
       "bookingDate": "2026-06-15",
@@ -2597,7 +3087,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "856803.51"
     },
     {
       "bookingDate": "2026-06-15",
@@ -2605,7 +3096,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "607183.00"
     },
     {
       "bookingDate": "2026-06-16",
@@ -2613,7 +3105,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "696430.00"
     },
     {
       "bookingDate": "2026-06-17",
@@ -2621,7 +3114,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "768261.00"
     },
     {
       "bookingDate": "2026-06-18",
@@ -2629,7 +3123,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "867433.00"
     },
     {
       "bookingDate": "2026-06-19",
@@ -2637,7 +3132,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "953592.00"
     },
     {
       "bookingDate": "2026-06-20",
@@ -2645,7 +3141,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "1018911.00"
     },
     {
       "bookingDate": "2026-06-20",
@@ -2653,7 +3150,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Коммунальные платежи и связь",
-      "category": "other"
+      "category": "other",
+      "balanceAfter": "958911.00"
     },
     {
       "bookingDate": "2026-06-21",
@@ -2661,7 +3159,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "1005199.00"
     },
     {
       "bookingDate": "2026-06-22",
@@ -2669,7 +3168,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "1085506.00"
     },
     {
       "bookingDate": "2026-06-23",
@@ -2677,7 +3177,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "1149203.00"
     },
     {
       "bookingDate": "2026-06-24",
@@ -2685,7 +3186,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "1216875.00"
     },
     {
       "bookingDate": "2026-06-25",
@@ -2693,7 +3195,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "1264185.00"
     },
     {
       "bookingDate": "2026-06-25",
@@ -2701,7 +3204,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "1034185.00"
     },
     {
       "bookingDate": "2026-06-25",
@@ -2709,7 +3213,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда помещения",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "884185.00"
     },
     {
       "bookingDate": "2026-06-26",
@@ -2717,7 +3222,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "939422.00"
     },
     {
       "bookingDate": "2026-06-27",
@@ -2725,7 +3231,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "984532.00"
     },
     {
       "bookingDate": "2026-06-27",
@@ -2733,7 +3240,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Поставщики кофе и продуктов",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "804532.00"
     },
     {
       "bookingDate": "2026-06-28",
@@ -2741,7 +3249,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "855984.00"
     },
     {
       "bookingDate": "2026-06-28",
@@ -2749,7 +3258,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "НДФЛ и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "695984.00"
     },
     {
       "bookingDate": "2026-06-29",
@@ -2757,7 +3267,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "785701.00"
     },
     {
       "bookingDate": "2026-06-30",
@@ -2765,7 +3276,17 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "831667.00"
+    },
+    {
+      "bookingDate": "2026-06-30",
+      "amount": "640379.49",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Перевод на личный счёт предпринимателя",
+      "category": "own_transfer",
+      "balanceAfter": "191287.51"
     },
     {
       "bookingDate": "2026-07-01",
@@ -2773,7 +3294,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "236662.51"
     },
     {
       "bookingDate": "2026-07-02",
@@ -2781,7 +3303,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "271366.51"
     },
     {
       "bookingDate": "2026-07-03",
@@ -2789,7 +3312,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "321228.51"
     },
     {
       "bookingDate": "2026-07-04",
@@ -2797,7 +3321,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "352750.51"
     },
     {
       "bookingDate": "2026-07-05",
@@ -2805,7 +3330,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "417798.51"
     },
     {
       "bookingDate": "2026-07-05",
@@ -2813,7 +3339,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Перевод на карту предпринимателя",
-      "category": "own_transfer"
+      "category": "own_transfer",
+      "balanceAfter": "217798.51"
     },
     {
       "bookingDate": "2026-07-06",
@@ -2821,7 +3348,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "276932.51"
     },
     {
       "bookingDate": "2026-07-07",
@@ -2829,7 +3357,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "338737.51"
     },
     {
       "bookingDate": "2026-07-08",
@@ -2837,7 +3366,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "386970.51"
     },
     {
       "bookingDate": "2026-07-09",
@@ -2845,7 +3375,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "425524.51"
     },
     {
       "bookingDate": "2026-07-10",
@@ -2853,7 +3384,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "480532.51"
     },
     {
       "bookingDate": "2026-07-10",
@@ -2861,7 +3393,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "250532.51"
     },
     {
       "bookingDate": "2026-07-11",
@@ -2869,7 +3402,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "286130.51"
     },
     {
       "bookingDate": "2026-07-12",
@@ -2877,7 +3411,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "337774.51"
     },
     {
       "bookingDate": "2026-07-13",
@@ -2885,7 +3420,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "402255.51"
     },
     {
       "bookingDate": "2026-07-14",
@@ -2893,7 +3429,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "460415.51"
     },
     {
       "bookingDate": "2026-07-15",
@@ -2901,7 +3438,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "506880.51"
     },
     {
       "bookingDate": "2026-07-15",
@@ -2909,7 +3447,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "257260.00"
     },
     {
       "bookingDate": "2026-07-16",
@@ -2917,7 +3456,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "304071.00"
     },
     {
       "bookingDate": "2026-07-17",
@@ -2925,7 +3465,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "352629.00"
     },
     {
       "bookingDate": "2026-07-18",
@@ -2933,7 +3474,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "390575.00"
     },
     {
       "bookingDate": "2026-07-19",
@@ -2941,7 +3483,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "442554.00"
     },
     {
       "bookingDate": "2026-07-20",
@@ -2949,7 +3492,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "479468.00"
     },
     {
       "bookingDate": "2026-07-20",
@@ -2957,7 +3501,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Коммунальные платежи и связь",
-      "category": "other"
+      "category": "other",
+      "balanceAfter": "419468.00"
     },
     {
       "bookingDate": "2026-07-21",
@@ -2965,7 +3510,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "469007.00"
     },
     {
       "bookingDate": "2026-07-22",
@@ -2973,7 +3519,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "528652.00"
     },
     {
       "bookingDate": "2026-07-23",
@@ -2981,7 +3528,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "584572.00"
     },
     {
       "bookingDate": "2026-07-24",
@@ -2989,7 +3537,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "642189.00"
     },
     {
       "bookingDate": "2026-07-25",
@@ -2997,7 +3546,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "707682.00"
     },
     {
       "bookingDate": "2026-07-25",
@@ -3005,7 +3555,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "477682.00"
     },
     {
       "bookingDate": "2026-07-25",
@@ -3013,7 +3564,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда помещения",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "327682.00"
     },
     {
       "bookingDate": "2026-07-26",
@@ -3021,7 +3573,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "381512.00"
     },
     {
       "bookingDate": "2026-07-27",
@@ -3029,7 +3582,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "440398.00"
     },
     {
       "bookingDate": "2026-07-27",
@@ -3037,7 +3591,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Поставщики кофе и продуктов",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "260398.00"
     },
     {
       "bookingDate": "2026-07-28",
@@ -3045,7 +3600,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "292272.00"
     },
     {
       "bookingDate": "2026-07-28",
@@ -3053,7 +3609,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "НДФЛ и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "132272.00"
     },
     {
       "bookingDate": "2026-07-29",
@@ -3061,7 +3618,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "178245.00"
     },
     {
       "bookingDate": "2026-07-30",
@@ -3069,7 +3627,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "244654.00"
     },
     {
       "bookingDate": "2026-07-31",
@@ -3077,7 +3636,17 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "281667.00"
+    },
+    {
+      "bookingDate": "2026-07-31",
+      "amount": "90379.49",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Перевод на личный счёт предпринимателя",
+      "category": "own_transfer",
+      "balanceAfter": "191287.51"
     },
     {
       "bookingDate": "2026-08-01",
@@ -3085,7 +3654,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "244553.51"
     },
     {
       "bookingDate": "2026-08-02",
@@ -3093,7 +3663,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "276375.51"
     },
     {
       "bookingDate": "2026-08-03",
@@ -3101,7 +3672,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "326023.51"
     },
     {
       "bookingDate": "2026-08-04",
@@ -3109,7 +3681,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "371644.51"
     },
     {
       "bookingDate": "2026-08-05",
@@ -3117,7 +3690,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "415221.51"
     },
     {
       "bookingDate": "2026-08-05",
@@ -3125,7 +3699,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Перевод на карту предпринимателя",
-      "category": "own_transfer"
+      "category": "own_transfer",
+      "balanceAfter": "215221.51"
     },
     {
       "bookingDate": "2026-08-06",
@@ -3133,7 +3708,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "256036.51"
     },
     {
       "bookingDate": "2026-08-07",
@@ -3141,7 +3717,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "295365.51"
     },
     {
       "bookingDate": "2026-08-08",
@@ -3149,7 +3726,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "357210.51"
     },
     {
       "bookingDate": "2026-08-09",
@@ -3157,7 +3735,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "393132.51"
     },
     {
       "bookingDate": "2026-08-10",
@@ -3165,7 +3744,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "435318.51"
     },
     {
       "bookingDate": "2026-08-10",
@@ -3173,7 +3753,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "205318.51"
     },
     {
       "bookingDate": "2026-08-11",
@@ -3181,7 +3762,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "245817.51"
     },
     {
       "bookingDate": "2026-08-12",
@@ -3189,7 +3771,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "317559.51"
     },
     {
       "bookingDate": "2026-08-13",
@@ -3197,7 +3780,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "352579.51"
     },
     {
       "bookingDate": "2026-08-14",
@@ -3205,7 +3789,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "386087.51"
     },
     {
       "bookingDate": "2026-08-15",
@@ -3213,7 +3798,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "445993.51"
     },
     {
       "bookingDate": "2026-08-15",
@@ -3221,7 +3807,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "196373.00"
     },
     {
       "bookingDate": "2026-08-16",
@@ -3229,7 +3816,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "256747.00"
     },
     {
       "bookingDate": "2026-08-17",
@@ -3237,7 +3825,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "307188.00"
     },
     {
       "bookingDate": "2026-08-18",
@@ -3245,7 +3834,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "338910.00"
     },
     {
       "bookingDate": "2026-08-19",
@@ -3253,7 +3843,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "401620.00"
     },
     {
       "bookingDate": "2026-08-20",
@@ -3261,7 +3852,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "432588.00"
     },
     {
       "bookingDate": "2026-08-20",
@@ -3269,7 +3861,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Коммунальные платежи и связь",
-      "category": "other"
+      "category": "other",
+      "balanceAfter": "372588.00"
     },
     {
       "bookingDate": "2026-08-21",
@@ -3277,7 +3870,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "425558.00"
     },
     {
       "bookingDate": "2026-08-22",
@@ -3285,7 +3879,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "474490.00"
     },
     {
       "bookingDate": "2026-08-23",
@@ -3293,7 +3888,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "523575.00"
     },
     {
       "bookingDate": "2026-08-24",
@@ -3301,7 +3897,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "565049.00"
     },
     {
       "bookingDate": "2026-08-25",
@@ -3309,7 +3906,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "631826.00"
     },
     {
       "bookingDate": "2026-08-25",
@@ -3317,7 +3915,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "401826.00"
     },
     {
       "bookingDate": "2026-08-25",
@@ -3325,7 +3924,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда помещения",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "251826.00"
     },
     {
       "bookingDate": "2026-08-26",
@@ -3333,7 +3933,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "308161.00"
     },
     {
       "bookingDate": "2026-08-27",
@@ -3341,7 +3942,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "375275.00"
     },
     {
       "bookingDate": "2026-08-27",
@@ -3349,7 +3951,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Поставщики кофе и продуктов",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "195275.00"
     },
     {
       "bookingDate": "2026-08-28",
@@ -3357,7 +3960,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "237893.00"
     },
     {
       "bookingDate": "2026-08-28",
@@ -3365,7 +3969,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "НДФЛ и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "77893.00"
     },
     {
       "bookingDate": "2026-08-29",
@@ -3373,7 +3978,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "116393.00"
     },
     {
       "bookingDate": "2026-08-30",
@@ -3381,7 +3987,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "165234.00"
     },
     {
       "bookingDate": "2026-08-31",
@@ -3389,7 +3996,17 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "231667.00"
+    },
+    {
+      "bookingDate": "2026-08-31",
+      "amount": "40379.49",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Перевод на личный счёт предпринимателя",
+      "category": "own_transfer",
+      "balanceAfter": "191287.51"
     },
     {
       "bookingDate": "2026-09-01",
@@ -3397,7 +4014,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "257444.51"
     },
     {
       "bookingDate": "2026-09-02",
@@ -3405,7 +4023,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "296785.51"
     },
     {
       "bookingDate": "2026-09-03",
@@ -3413,7 +4032,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "342882.51"
     },
     {
       "bookingDate": "2026-09-04",
@@ -3421,7 +4041,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "382316.51"
     },
     {
       "bookingDate": "2026-09-05",
@@ -3429,7 +4050,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "433785.51"
     },
     {
       "bookingDate": "2026-09-05",
@@ -3437,7 +4059,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Перевод на карту предпринимателя",
-      "category": "own_transfer"
+      "category": "own_transfer",
+      "balanceAfter": "233785.51"
     },
     {
       "bookingDate": "2026-09-06",
@@ -3445,7 +4068,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "286719.51"
     },
     {
       "bookingDate": "2026-09-07",
@@ -3453,7 +4077,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "346042.51"
     },
     {
       "bookingDate": "2026-09-08",
@@ -3461,7 +4086,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "407995.51"
     },
     {
       "bookingDate": "2026-09-09",
@@ -3469,7 +4095,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "439123.51"
     },
     {
       "bookingDate": "2026-09-10",
@@ -3477,7 +4104,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "497885.51"
     },
     {
       "bookingDate": "2026-09-10",
@@ -3485,7 +4113,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "267885.51"
     },
     {
       "bookingDate": "2026-09-11",
@@ -3493,7 +4122,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "319775.51"
     },
     {
       "bookingDate": "2026-09-12",
@@ -3501,7 +4131,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "367045.51"
     },
     {
       "bookingDate": "2026-09-13",
@@ -3509,7 +4140,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "418503.51"
     },
     {
       "bookingDate": "2026-09-14",
@@ -3517,7 +4149,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "476936.51"
     },
     {
       "bookingDate": "2026-09-15",
@@ -3525,7 +4158,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "528120.51"
     },
     {
       "bookingDate": "2026-09-15",
@@ -3533,7 +4167,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "278500.00"
     },
     {
       "bookingDate": "2026-09-16",
@@ -3541,7 +4176,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "344915.00"
     },
     {
       "bookingDate": "2026-09-17",
@@ -3549,7 +4185,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "412205.00"
     },
     {
       "bookingDate": "2026-09-18",
@@ -3557,7 +4194,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "464198.00"
     },
     {
       "bookingDate": "2026-09-19",
@@ -3565,7 +4203,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "527809.00"
     },
     {
       "bookingDate": "2026-09-20",
@@ -3573,7 +4212,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "589169.00"
     },
     {
       "bookingDate": "2026-09-20",
@@ -3581,7 +4221,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Коммунальные платежи и связь",
-      "category": "other"
+      "category": "other",
+      "balanceAfter": "529169.00"
     },
     {
       "bookingDate": "2026-09-21",
@@ -3589,7 +4230,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "579912.00"
     },
     {
       "bookingDate": "2026-09-22",
@@ -3597,7 +4239,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "649705.00"
     },
     {
       "bookingDate": "2026-09-23",
@@ -3605,7 +4248,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "694935.00"
     },
     {
       "bookingDate": "2026-09-24",
@@ -3613,7 +4257,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "762026.00"
     },
     {
       "bookingDate": "2026-09-25",
@@ -3621,7 +4266,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "814338.00"
     },
     {
       "bookingDate": "2026-09-25",
@@ -3629,7 +4275,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "584338.00"
     },
     {
       "bookingDate": "2026-09-25",
@@ -3637,7 +4284,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда помещения",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "434338.00"
     },
     {
       "bookingDate": "2026-09-26",
@@ -3645,7 +4293,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "504934.00"
     },
     {
       "bookingDate": "2026-09-27",
@@ -3653,7 +4302,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "539152.00"
     },
     {
       "bookingDate": "2026-09-27",
@@ -3661,7 +4311,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Поставщики кофе и продуктов",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "359152.00"
     },
     {
       "bookingDate": "2026-09-28",
@@ -3669,7 +4320,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "404790.00"
     },
     {
       "bookingDate": "2026-09-28",
@@ -3677,7 +4329,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "НДФЛ и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "244790.00"
     },
     {
       "bookingDate": "2026-09-29",
@@ -3685,7 +4338,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "290086.00"
     },
     {
       "bookingDate": "2026-09-30",
@@ -3693,7 +4347,17 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "331667.00"
+    },
+    {
+      "bookingDate": "2026-09-30",
+      "amount": "140379.49",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Перевод на личный счёт предпринимателя",
+      "category": "own_transfer",
+      "balanceAfter": "191287.51"
     },
     {
       "bookingDate": "2026-10-01",
@@ -3701,7 +4365,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "226245.51"
     },
     {
       "bookingDate": "2026-10-02",
@@ -3709,7 +4374,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "281819.51"
     },
     {
       "bookingDate": "2026-10-03",
@@ -3717,7 +4383,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "330787.51"
     },
     {
       "bookingDate": "2026-10-04",
@@ -3725,7 +4392,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "390808.51"
     },
     {
       "bookingDate": "2026-10-05",
@@ -3733,7 +4401,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "420844.51"
     },
     {
       "bookingDate": "2026-10-05",
@@ -3741,7 +4410,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Перевод на карту предпринимателя",
-      "category": "own_transfer"
+      "category": "own_transfer",
+      "balanceAfter": "220844.51"
     },
     {
       "bookingDate": "2026-10-06",
@@ -3749,7 +4419,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "267834.51"
     },
     {
       "bookingDate": "2026-10-07",
@@ -3757,7 +4428,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "298592.51"
     },
     {
       "bookingDate": "2026-10-08",
@@ -3765,7 +4437,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "354458.51"
     },
     {
       "bookingDate": "2026-10-09",
@@ -3773,7 +4446,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "394192.51"
     },
     {
       "bookingDate": "2026-10-10",
@@ -3781,7 +4455,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "440074.51"
     },
     {
       "bookingDate": "2026-10-10",
@@ -3789,7 +4464,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата сотрудникам, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "210074.51"
     },
     {
       "bookingDate": "2026-10-11",
@@ -3797,7 +4473,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "246346.51"
     },
     {
       "bookingDate": "2026-10-12",
@@ -3805,7 +4482,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "279320.51"
     },
     {
       "bookingDate": "2026-10-13",
@@ -3813,7 +4491,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "312719.51"
     },
     {
       "bookingDate": "2026-10-14",
@@ -3821,7 +4500,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "343094.51"
     },
     {
       "bookingDate": "2026-10-15",
@@ -3829,7 +4509,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "379150.51"
     },
     {
       "bookingDate": "2026-10-15",
@@ -3837,7 +4518,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "129530.00"
     },
     {
       "bookingDate": "2026-10-16",
@@ -3845,7 +4527,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "173996.00"
     },
     {
       "bookingDate": "2026-10-17",
@@ -3853,7 +4536,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "234149.00"
     },
     {
       "bookingDate": "2026-10-18",
@@ -3861,7 +4545,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "272156.00"
     },
     {
       "bookingDate": "2026-10-19",
@@ -3869,7 +4554,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "331139.00"
     },
     {
       "bookingDate": "2026-10-20",
@@ -3877,7 +4563,8 @@
       "direction": "in",
       "counterpartyInn": null,
       "purpose": "Возмещение по операциям эквайринга",
-      "category": "acquiring"
+      "category": "acquiring",
+      "balanceAfter": "390000.00"
     },
     {
       "bookingDate": "2026-10-20",
@@ -3885,7 +4572,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Коммунальные платежи и связь",
-      "category": "other"
+      "category": "other",
+      "balanceAfter": "330000.00"
     }
   ]
 }

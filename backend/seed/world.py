@@ -1,6 +1,6 @@
-"""Демо-мир: из описания компании — ответы всех внешних источников в форматах docs/09.
+"""Мир симулятора: из описания компании — ответы всех внешних источников в форматах docs/09.
 
-Чистые функции без записи на диск. Генератор моков пишет их в wiremock/, песочница ставит в WireMock на лету
+Чистые функции без записи на диск. Генератор моков пишет их в wiremock/, симулятор ставит в WireMock на лету
 («своя персона»), тесты строят мир в памяти. validate() — правила корректности: контрольные цифры, даты,
 согласованность источников между собой. Платежи по кредитам, категория МСП и платежи в выписке банка
 не задаются руками, а выводятся, поэтому разойтись не могут.
@@ -9,6 +9,7 @@
 import calendar
 import json
 import random
+import uuid
 from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
@@ -24,8 +25,9 @@ WORLD = Path(__file__).resolve().parent / "personas.yaml"
 FILES = {
     "egrul": "egrul", "egrip": "egrip", "rsmp": "fns/rsmp", "sshr": "fns/sshr", "paytax": "fns/paytax",
     "debtam": "fns/debtam", "snr": "fns/snr", "girbo": "girbo/bfo", "legal": "legal", "bank_access": "bank/access",
-    "bank_charter": "bank/charter", "bank_tx": "bank/tx", "eis": "eis", "bki": "bki", "bki_info": "bki-info",
+    "bank_charter": "bank/charter", "bank_tx": "bank/tx", "eis": "eis", "bki": "bki", "bki_info": "bki-info", "mchd": "mchd",
 }
+POWERS = {"CREDIT_AGREEMENT_SIGN": "Подписание кредитного договора"}   # в проде — коды классификатора ЕСНСИ (docs/09)
 OPF = {"LLC": ("12300", "Общество с ограниченной ответственностью"),
        "JSC": ("12267", "Непубличное акционерное общество")}
 # 209-ФЗ ст. 4: численность ≤ 15 / 100 / 250 чел., доход ≤ 120 млн / 800 млн / 2 млрд ₽ (ПП РФ № 265; docs/10 L9, L10).
@@ -33,6 +35,7 @@ OPF = {"LLC": ("12300", "Общество с ограниченной ответ
 MSP_LIMITS = ((1, 15, 120_000_000), (2, 100, 800_000_000), (3, 250, 2_000_000_000))
 FLAGS = {"liquidation", "bankruptcy", "unreliable_eio", "disqualified_eio"}
 UL_ONLY_FLAGS = {"liquidation", "unreliable_eio", "disqualified_eio"}     # отметки ЕГРЮЛ; в ЕГРИП их нет
+BIK = "044525777"                    # БИК банка в моках — синтетический
 _W10 = (2, 4, 10, 3, 5, 9, 4, 6, 8)
 _W11 = (7, 2, 4, 10, 3, 5, 9, 4, 6, 8)
 _W12 = (3, 7, 2, 4, 10, 3, 5, 9, 4, 6, 8)
@@ -84,6 +87,20 @@ def snils(base9: str) -> str:
     return f"{base9}{check:02d}"
 
 
+def account(inn: str, bik: str = BIK) -> str:
+    """Расчётный счёт: 40702 — юрлицо, 40802 — ИП; 810 — рубли; 9-я цифра — ключ по БИК (алгоритм ЦБ, веса 7-1-3)."""
+    base = ("40702" if len(inn) == 10 else "40802") + "810" + "0" + inn[-11:].rjust(11, "0")
+    digits = bik[-3:] + base
+    key = sum(int(d) * w for d, w in zip(digits, (7, 1, 3) * 8, strict=False)) % 10 * 3 % 10
+    return base[:8] + str(key) + base[9:]
+
+
+def account_valid(number: str, bik: str = BIK) -> bool:
+    if len(number) != 20 or not number.isdigit():
+        return False
+    return sum(int(d) * w for d, w in zip(bik[-3:] + number, (7, 1, 3) * 8, strict=False)) % 10 == 0
+
+
 def msp_category(headcount: int, revenue: float) -> int | None:
     by_head = next((cat for cat, people, _ in MSP_LIMITS if headcount <= people), None)
     by_revenue = next((cat for cat, _, limit in MSP_LIMITS if revenue <= limit), None)
@@ -119,6 +136,13 @@ def validate(c: dict, people: dict, today: date) -> list[str]:
     say = errors.append
     if not inn_valid(c["inn"]):
         say("ИНН с неверной контрольной цифрой")
+    for poa in c.get("poa", []):
+        if not ul:
+            say("МЧД в мире — только у юрлиц (доверенность ИП не моделируем)")
+        if poa["person"] not in people:
+            say(f"представитель по МЧД {poa['person']} не описан в people")
+        if set(poa["powers"]) - set(POWERS):
+            say(f"неизвестные полномочия МЧД: {sorted(set(poa['powers']) - set(POWERS))}")
     if not ogrn_valid(c["ogrn"]) or len(c["ogrn"]) != (13 if ul else 15):
         say("ОГРН/ОГРНИП неверный или не того типа")
     else:
@@ -164,6 +188,11 @@ def validate(c: dict, people: dict, today: date) -> list[str]:
     for k in c.get("eis", []):
         if k["price"] <= 0 or not 0 <= k["advancePercent"] < 100 or k["signDate"] >= k["endDate"]:
             say(f"контракт {k['regNum']}: цена, аванс или даты неверны")
+    if c.get("balance") is not None and len(c["inflows"]) == 12 and not errors:
+        current = _month_flows(c, today, random.Random(int(c["inn"])))[-1][3]
+        start = Decimal(c["balance"]) - sum((_signed(t) for t in current), Decimal(0))
+        if start + _dip(current) < 0:                       # счёт без овердрафта: в этом месяце ушёл бы в минус
+            say(f"остаток {c['balance']} не сходится с платежами текущего месяца — счёт уходил бы в минус")
     return errors
 
 
@@ -277,15 +306,18 @@ def _default_outflows(c: dict) -> list:
     return [[p, d, round(a, -3), cat] for p, d, a, cat in rows]
 
 
-def transactions(c: dict, today: date) -> dict:
-    """Операции по счёту: поступления в сумме дают ровно inflows; регулярные платежи и платежи по кредитам из БКИ."""
-    rng = random.Random(int(c["inn"]))
+def _signed(t: dict) -> Decimal:
+    return Decimal(t["amount"]) if t["direction"] == "in" else -Decimal(t["amount"])
+
+
+def _month_flows(c: dict, today: date, rng: random.Random) -> list[tuple[int, int, int, list[dict]]]:
+    """Поступления и регулярные платежи по месяцам: 12 полных и текущий до вчерашнего дня."""
     months = [divmod(today.year * 12 + today.month - 1 - back, 12) for back in range(12, -1, -1)]
     loans = sum(k["payment"] for k in credits(c))
     outflows = (c.get("outflows") or _default_outflows(c)) + ([["Платежи по кредитам", 15, loans, "loan_payment"]] * bool(loans))
-    items = []
+    out = []
     for i, (y, m0) in enumerate(months):
-        m = m0 + 1
+        m, items = m0 + 1, []
         last_day = calendar.monthrange(y, m)[1] if i < 12 else today.day - 1
         total = c["inflows"][i] if i < 12 else int(sum(c["inflows"][-3:]) / 3 * last_day / 30 * 0.85)
         if c.get("retail"):
@@ -304,9 +336,75 @@ def transactions(c: dict, today: date) -> dict:
             if day <= last_day:
                 items.append({"bookingDate": f"{y}-{m:02d}-{day:02d}", "amount": f"{amount:.2f}", "direction": "out",
                               "counterpartyInn": None, "purpose": purpose_out, "category": category_out})
-    items.sort(key=lambda t: (t["bookingDate"], t["direction"]))
-    return {"accountInn": c["inn"], "account": "40702810" + c["inn"][-10:].rjust(12, "0"), "currency": "RUB",
-            "balance": {"amount": f"{c['balance']:.2f}", "asOf": today.isoformat()}, "items": items}
+        items.sort(key=lambda t: (t["bookingDate"], t["direction"]))       # в один день приход раньше расхода
+        out.append((y, m, last_day, items))
+    return out
+
+
+def _dip(items: list[dict]) -> Decimal:
+    """Насколько глубоко уходит остаток внутри месяца относительно его начала."""
+    running, low = Decimal(0), Decimal(0)
+    for t in items:
+        running += _signed(t)
+        low = min(low, running)
+    return low
+
+
+def _own_funds(c: dict, booking_date: str, amount: Decimal, *, back: bool) -> dict:
+    """Свои деньги, не выручка: излишек — на депозит (у ИП — на личный счёт), нехватка — обратно или из своих."""
+    ul = is_ul(c)
+    if back:
+        purpose = "Возврат депозита на расчётный счёт" if ul else "Пополнение счёта предпринимателем"
+    else:
+        purpose = "Размещение свободного остатка на депозите" if ul else "Перевод на личный счёт предпринимателя"
+    return {"bookingDate": booking_date, "amount": f"{amount:.2f}", "direction": "in" if back else "out",
+            "counterpartyInn": None, "purpose": purpose, "category": "deposit" if ul else "own_transfer"}
+
+
+def _walk(c: dict, items: list[dict], start: Decimal, *, top_up: bool) -> tuple[list[dict], Decimal]:
+    """Остаток по операциям; не хватает на платёж — в тот же день пополнение своими деньгами (счёт без овердрафта)."""
+    out, running = [], start
+    for t in items:
+        if top_up and t["direction"] == "out" and running < Decimal(t["amount"]):
+            need = Decimal(t["amount"]) - running
+            refill = (need / 10_000).to_integral_value(rounding="ROUND_CEILING") * 10_000
+            out.append(_own_funds(c, t["bookingDate"], refill, back=True))
+            running += refill
+        running += _signed(t)
+        out.append(t)
+    return out, running
+
+
+def transactions(c: dict, today: date) -> dict:
+    """Выписка, которая сходится: входящий остаток + приход − расход = сегодняшний, без ухода в минус без овердрафта.
+
+    Поступления в сумме дают ровно inflows, регулярные платежи — по описанию, платежи по кредитам — из БКИ.
+    Не хватает на платёж — в тот же день пополнение своими деньгами; в конце месяца остаток возвращается к одному
+    уровню (излишек — на депозит или личный счёт ИП). Уровень подбирается так, чтобы остаток сегодня был равен balance
+    из описания; если balance не задан (своя персона) — минимальный, при котором текущий месяц проходит без пополнений.
+    """
+    rng = random.Random(int(c["inn"]))
+    months = _month_flows(c, today, rng)
+    current = months[-1][3]
+    current_net = sum((_signed(t) for t in current), Decimal(0))
+    if c.get("balance") is not None:
+        level = Decimal(c["balance"]) - current_net
+    else:
+        level = max(-_dip(current), Decimal(0)) + Decimal(round(sum(c["inflows"]) / 12 * 0.1, -3))
+    items, running = [], level
+    for i, (y, m, last_day, month_items) in enumerate(months):
+        walked, running = _walk(c, month_items, running, top_up=i < 12)
+        items += walked
+        if i < 12 and running != level:
+            items.append(_own_funds(c, f"{y}-{m:02d}-{last_day:02d}", abs(running - level), back=running < level))
+            running = level
+    balance = level
+    for t in items:
+        balance += _signed(t)
+        t["balanceAfter"] = f"{balance:.2f}"
+    return {"accountInn": c["inn"], "account": account(c["inn"]), "bik": BIK, "currency": "RUB",
+            "openingBalance": {"amount": f"{level:.2f}", "asOf": items[0]["bookingDate"] if items else today.isoformat()},
+            "balance": {"amount": f"{balance:.2f}", "asOf": today.isoformat()}, "items": items}
 
 
 def payloads(c: dict, people: dict, today: date) -> dict:
@@ -333,13 +431,40 @@ def payloads(c: dict, people: dict, today: date) -> dict:
                        "refusals": {"last30days": 0}}
     if c.get("eis"):
         out["eis"] = {"contracts": [{**k, "price": f"{k['price']:.2f}", "treasurySupport": False} for k in c["eis"]]}
+    if c.get("poa"):
+        out["mchd"] = {"items": [mchd(c, poa, people) for poa in c["poa"]]}
     return out
 
 
-def person_card(key: str, person: dict) -> dict:
-    """Карточка клиента-физлица в банке (KYC): по ней демо-пользователь входит как этот человек."""
+def mchd(c: dict, poa: dict, people: dict) -> dict:
+    """Машиночитаемая доверенность в формате публичного реестра ФНС (m4d): статус, доверитель, представитель, полномочия."""
+    person = people[poa["person"]]
+    guid = str(uuid.uuid5(uuid.NAMESPACE_OID, f"mchd:{c['inn']}:{person['inn']}"))
+    return {"guid": guid, "status": poa["status"], "principal": {"inn": c["inn"], "ogrn": c["ogrn"]},
+            "representative": {"inn": person["inn"], "snils": snils(person["inn"][1:10]), "fio": " ".join(person["fio"])},
+            "powers": [{"code": code, "name": POWERS[code]} for code in poa["powers"]],
+            "validFrom": poa["valid_from"], "validTo": poa["valid_to"]}
+
+
+def registry_roles(c: dict, key: str) -> list[str]:
+    """Кем человек записан в реестре: ИП, руководитель, участник."""
+    roles = ["owner"] * (c.get("owner") == key)
+    roles += ["eio"] * any(p == key for p, _ in c.get("eio", []))
+    roles += ["participant"] * any(p == key for p, _ in c.get("participants", []))
+    return roles
+
+
+def person_card(key: str, person: dict, companies: list[dict]) -> dict:
+    """Карточка клиента-физлица в банке: KYC и связи с компаниями — доступ в ДБО (уровень) и роли по реестру.
+    Руководителей и участников с долей банк знает и без ДБО: их он идентифицирует по 115-ФЗ ст. 7."""
+    links = []
+    for c in companies:
+        level = next((lvl for p, lvl in c["access"] if p == key), None)
+        roles = registry_roles(c, key)
+        if level or roles:
+            links.append({"companyInn": c["inn"], "level": level or "registry", "roles": roles})
     return {"personInn": person["inn"], "fio": " ".join(person["fio"]), "snils": snils(person["inn"][1:10]),
-            "kycStatus": "VERIFIED", "key": key}
+            "kycStatus": "VERIFIED", "key": key, "companies": links}
 
 
 def girbo_search(c: dict) -> dict:
@@ -367,10 +492,12 @@ def _series(avg: float, cv: float, trend: float) -> list[int]:
 
 
 def custom(spec: dict, number: int, today: date) -> tuple[dict, dict]:
-    """Компания и люди из краткого описания — для песочницы («собрать свою персону») и pairwise-тестов.
+    """Компания и люди из краткого описания — для симулятора («своя компания») и pairwise-тестов.
 
     spec: kind (IP | LLC | JSC), okved [код, название], age_months, headcount, inflow_avg, inflow_cv, inflow_trend,
-    debt_load, overdue_days, bki_requests, tax_debt, participants (число), profit_margin, flags, contract_price.
+    debt_load, overdue_days, bki_requests, tax_debt, participants (число), profit_margin, flags, contract_price,
+    assets_share (активы / годовая выручка, по умолчанию 0,6 — от него порог крупной сделки),
+    owner_fio [фамилия, имя, отчество], company_name (без ОПФ) и inn — если не заданы, придумываем.
     ИНН, ОГРН и люди генерируются детерминированно по number.
     """
     kind = spec.get("kind", "LLC")
@@ -380,31 +507,33 @@ def custom(spec: dict, number: int, today: date) -> tuple[dict, dict]:
     people = {f"p{number}_{i}": {"fio": [head if i == 0 else _SURNAMES[(number + i) % len(_SURNAMES)], "Иван", "Петрович"],
                                  "inn": inn_fl(f"7705{number:04d}{i:02d}")} for i in range(max(1, spec.get("participants", 1)))}
     keys = list(people)
+    if spec.get("owner_fio"):
+        people[keys[0]]["fio"] = list(spec["owner_fio"])
     avg = spec.get("inflow_avg", 3_000_000)
     inflows = _series(avg, spec.get("inflow_cv", 0.3), spec.get("inflow_trend", 0.0))
     payment = spec.get("debt_load", 0.15) * avg
     factor = float(annuity_payment(1_000_000, 20, 36)) / 1_000_000              # платёж на рубль долга: 20% на 36 мес.
     loan = [] if payment <= 0 else [[max(100_000, round(payment / factor, -5)), 20, 36, 10, spec.get("overdue_days", 0)]]
-    c = {"key": f"custom{number}", "name": f"{'ИП' if kind == 'IP' else 'ООО'} «Персона {number}»",
+    title = spec.get("company_name") or f"Персона {number}"
+    c = {"key": f"custom{number}", "name": f"{'АО' if kind == 'JSC' else 'ООО'} «{title}»",
          "registered": registered, "okved": spec.get("okved", ["62.01", "Разработка компьютерного программного обеспечения"]),
          "headcount": spec.get("headcount", 12), "tax": {"regime": "OSN", "debt": spec.get("tax_debt", 0)},
-         "inflows": inflows, "balance": round(avg * 0.3, -3), "bki": {"credits": loan, "requests": spec.get("bki_requests", 1)},
+         "inflows": inflows, "bki": {"credits": loan, "requests": spec.get("bki_requests", 1)},
          "flags": spec.get("flags", [])}
     if kind == "IP":
-        c.update(inn=inn_fl(f"7706{number:06d}"), owner=keys[0], access=[[keys[0], "owner"]])
-        c["name"] = f"ИП {' '.join(people[keys[0]]['fio'])}"
+        c.update(inn=spec.get("inn") or inn_fl(f"7706{number:06d}"), owner=keys[0], access=[[keys[0], "owner"]])
+        c["name"] = "ИП " + " ".join(part for part in people[keys[0]]["fio"] if part)
         people[keys[0]]["inn"] = c["inn"]                                        # ИНН ИП = ИНН человека
     else:
         revenue = round(sum(inflows) / 1000)
         n = len(keys)
         shares = [100 // n + (1 if i < 100 % n else 0) for i in range(n)]
-        c.update(inn=inn_ul(f"7707{number:05d}"), opf="JSC" if kind == "JSC" else "LLC", eio=[[keys[0], "Генеральный директор"]],
+        c.update(inn=spec.get("inn") or inn_ul(f"7707{number:05d}"), opf="JSC" if kind == "JSC" else "LLC",
+                 eio=[[keys[0], "Генеральный директор"]],
                  participants=[] if kind == "JSC" else [[k, s] for k, s in zip(keys, shares, strict=True)],
                  charter={"decisionMethod": "protocol"}, access=[[keys[0], "owner"]],
-                 girbo={"assets": round(revenue * 0.6), "revenue": revenue,
+                 girbo={"assets": round(revenue * spec.get("assets_share", 0.6)), "revenue": revenue,
                         "profit": round(revenue * spec.get("profit_margin", 0.05))})
-        if kind == "JSC":
-            c["name"] = c["name"].replace("ООО", "АО")
     c["ogrn"] = ogrn(reg_year, c["inn"][:2], number, ip=kind == "IP")
     if spec.get("contract_price"):
         c["eis"] = [{"regNum": f"27707{number:014d}", "customer": "ГБУ «Городской заказчик № 7»",

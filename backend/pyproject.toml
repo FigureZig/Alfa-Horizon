@@ -25,6 +25,8 @@ package = false
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+markers = ["e2e: сквозные сценарии на живых Postgres и WireMock (uv run pytest -m e2e)"]
+addopts = "-m 'not e2e'"
 
 [tool.ruff]
 line-length = 130

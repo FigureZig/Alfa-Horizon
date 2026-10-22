@@ -18,6 +18,113 @@ people:
   kotov:     { fio: [Котов, Дмитрий, Романович], inn: "770100000142" }
   polyakova: { fio: [Полякова, Мария, Игоревна], inn: "770100001273" }
   gusev:     { fio: [Гусев, Артём, Ильич], inn: "770100001347" }
+  novikova:  { fio: [Новикова, Наталья, Сергеевна], inn: "770100001410" }
+  kuznetsova: { fio: [Кузнецова, Ольга, Андреевна], inn: "770100001594" }
+
+# Пользователи симулятора (docs/08 §2): человек + сценарий. Права, профиль и состояние реестров на карточке бэкенд
+# считает из мира сам (seed/world.py → app/domain/rights.py); здесь — название сценария, что в нём видно, и сбои
+# интеграций, которые включаются при входе. company — с какой компанией человек входит. Людей без сценария
+# (участники, директор без ДБО и т. п.) бэкенд добавляет в список сам — по их связям с компаниями.
+bank: { name: "Fino Банк", name_en: "Fino Bank", inn: "7701000097" }
+
+staff:
+  sokolova: { fio: [Соколова, Мария, Андреевна], role: loan_officer, title: { ru: "Кредитный специалист", en: "Loan officer" } }
+  vetrov:   { fio: [Ветров, Олег, Игоревич], role: risk_manager, title: { ru: "Риск-менеджер", en: "Risk manager" } }
+
+presets:
+  - id: s7
+    code: S7
+    person: smirnova
+    company: smirnova
+    title: { ru: "Кассовый разрыв в кофейне", en: "Cash gap at a coffee shop" }
+    preview: { ru: "Предодобренный овердрафт ещё до согласия на кредитную историю, заявка, оферта, подпись и выдача",
+               en: "An overdraft pre-approved before credit bureau consent, application, offer, signing and disbursement" }
+  - id: s3
+    code: S3
+    person: orlov
+    company: vector
+    title: { ru: "Хочу больше, чем позволяет нагрузка", en: "I want more than my debt load allows" }
+    preview: { ru: "Расчёт нагрузки и встречное предложение: меньшая сумма сейчас или полная на больший срок",
+               en: "Debt load check and a counteroffer: a smaller amount now or the full amount over a longer term" }
+  - id: s2
+    code: S2
+    person: kravets
+    company: masterstroy
+    title: { ru: "Крупная сделка: нужно решение участников", en: "Major transaction: members must approve" }
+    preview: { ru: "Дозапрос решения участников, ответ, повторная проверка и оферта",
+               en: "Request for the members' decision, the answer, a repeat check and the offer" }
+  - id: s4
+    code: S4
+    person: belov
+    company: romashka
+    title: { ru: "Налоговая недоимка", en: "Tax arrears" }
+    preview: { ru: "Устранимый стоп-фактор: отказ с объяснением, что погасить и когда вернуться",
+               en: "A fixable stop factor: a decline that explains what to pay off and when to come back" }
+  - id: s5
+    code: S5
+    person: ivanov
+    company: hleb
+    title: { ru: "Сумма выше порога автоматического решения", en: "Amount above the automatic approval limit" }
+    preview: { ru: "Заявка уходит кредитному специалисту: досье, скоринг с вкладами, решение и оферта",
+               en: "The application goes to a loan officer: dossier, scorecard contributions, decision and offer" }
+  - id: s8
+    code: S8
+    person: gusev
+    company: cloud
+    title: { ru: "Инвестиционный кредит для ИТ", en: "Investment loan for an IT company" }
+    preview: { ru: "Продукт не для отрасли — банк предлагает экспресс-кредит под ту же цель",
+               en: "The product does not fit the industry, so the bank offers an express loan for the same goal" }
+  - id: agro
+    code: AGRO
+    person: polyakova
+    company: pole
+    title: { ru: "Сезонный кредит аграрию", en: "Seasonal loan for a farm" }
+    preview: { ru: "Лимит от годовых поступлений, погашение после урожая",
+               en: "A limit based on annual inflows, repaid after the harvest" }
+  - id: r8
+    code: R8
+    person: ivanov
+    company: hleb
+    title: { ru: "Один человек — три компании", en: "One person, three companies" }
+    preview: { ru: "Переключение компаний: в каждой свои права — подпись, подготовка заявки, только просмотр",
+               en: "Switching companies with different rights in each: signing, preparing an application, view only" }
+  - id: r12
+    code: R12
+    person: zakharov
+    company: lenta
+    title: { ru: "Смена директора во время подписи", en: "Director changes during signing" }
+    preview: { ru: "Договор ждёт подписи, а в ЕГРЮЛ — новый директор: банк останавливает подпись, перепроверяет полномочия, подписывает новый руководитель",
+               en: "The agreement awaits signing when the register shows a new director: the bank stops signing, rechecks authority, and the new director signs" }
+  - id: n1
+    code: N1
+    person: smirnova
+    company: smirnova
+    faults: [{ source: bki, mode: timeout }]
+    title: { ru: "БКИ не отвечает во время проверки", en: "Credit bureau times out during the check" }
+    preview: { ru: "Предварительная оферта до 3 млн ₽: подпись — после проверки кредитной истории",
+               en: "A provisional offer up to ₽3M: signing only after the credit history check" }
+  - id: n2
+    code: N2
+    person: kotov
+    company: kotov
+    faults: [{ source: bki, mode: timeout }]
+    title: { ru: "БКИ недоступно, сумма больше 3 млн ₽", en: "Credit bureau down, amount above ₽3M" }
+    preview: { ru: "Заявка ждёт кредитную историю у специалиста; источник вернулся — пересчёт",
+               en: "The application waits for the credit history with a loan officer; the source is back — recalculation" }
+  - id: bank
+    code: { ru: "Банк", en: "Bank" }
+    kind: bank
+    staff: sokolova
+    title: { ru: "Очередь исключений и досье", en: "Exception queue and dossiers" }
+    preview: { ru: "Заявки на ручном рассмотрении: причины, факты с источниками, скоринг с вкладами, решение",
+               en: "Applications under manual review: reasons, facts with sources, scorecard contributions, decision" }
+  - id: risk
+    code: { ru: "Риск", en: "Risk" }
+    kind: bank
+    staff: vetrov
+    title: { ru: "Второй ключ: решения выше полномочий специалиста", en: "Second key: decisions above the loan officer's limit" }
+    preview: { ru: "Подтверждает или возвращает одобрения кредитного специалиста на суммы выше его порога",
+               en: "Confirms or returns the loan officer's approvals above their limit" }
 
 # inflows — поступления за 12 полных месяцев до today (2025-10 … 2026-09), от старого к новому.
 # outflows — регулярные платежи [назначение, день месяца, сумма, категория]; если не заданы — генерируются от оборотов.
@@ -28,7 +135,6 @@ people:
 # scenario.expect — golden-результат движка в режиме commit при работающих источниках.
 companies:
   - key: smirnova
-    preset: S7
     name: "ИП Смирнова Анна Сергеевна"
     inn: "770100000079"
     ogrn: "324774600000013"
@@ -55,7 +161,6 @@ companies:
       expect: { outcome: APPROVE, risk_class: B, score: 695, rate: "17.00", amount: "400000.00" }
 
   - key: vector
-    preset: S3
     name: "ООО «Вектор-Трейд»"
     inn: "7701000019"
     ogrn: "1227746000020"
@@ -69,7 +174,9 @@ companies:
     tax: { regime: OSN, debt: 0 }
     inflows: [1300000, 3200000, 1100000, 2700000, 1000000, 2900000, 1400000, 3300000, 1100000, 1900000, 1600000, 2500000]
     balance: 900000
-    access: [[orlov, owner]]
+    access: [[orlov, owner], [kuznetsova, prepare]]
+    poa:                           # МЧД (R5): финансовый директор подписывает кредитный договор по доверенности
+      - { person: kuznetsova, status: ACTIVE, valid_from: "2026-01-15", valid_to: "2027-06-30", powers: [CREDIT_AGREEMENT_SIGN] }
     bki: { credits: [[4600000, 21, 24, 6, 0], [2500000, 20, 18, 4, 0]], requests: 3 }
     scenario:
       request: { product: WORKING_CAPITAL, amount: 5000000, term_months: 24, goal: stock }
@@ -77,7 +184,6 @@ companies:
                 alternative: { amount: "4400000.00", term_months: 36 } }
 
   - key: masterstroy
-    preset: S2
     name: "ООО «Мастер-Строй»"
     inn: "7701000026"
     ogrn: "1197746000033"
@@ -101,7 +207,6 @@ companies:
       expect: { outcome: REQUEST_INFO, asks: [REQ_CORP_APPROVAL], risk_class: A, score: 785 }
 
   - key: romashka
-    preset: S4
     name: "ООО «Ромашка-Сервис»"
     inn: "7701000033"
     ogrn: "1217746000064"
@@ -122,7 +227,6 @@ companies:
       expect: { outcome: REJECT, kind: STOP_FIXABLE, reasons_include: [STOP_TAX_DEBT] }
 
   - key: hleb
-    preset: S5
     name: "ООО «Северный Хлеб»"
     inn: "7701000040"
     ogrn: "1177746000046"
@@ -144,7 +248,6 @@ companies:
                 rate: "18.40", amount: "12000000.00" }
 
   - key: kotov
-    preset: N2
     name: "ИП Котов Дмитрий Романович"
     inn: "770100000142"
     ogrn: "322774600000029"
@@ -163,7 +266,6 @@ companies:
       expect_without_bki: { outcome: MANUAL_REVIEW, reasons_include: [DATA_SOURCE_UNAVAILABLE] }
 
   - key: sklad
-    preset: R8
     name: "ООО «Склад-Логистик»"
     inn: "7701000058"
     ogrn: "1187746000056"
@@ -185,7 +287,6 @@ companies:
       expect: { outcome: MANUAL_REVIEW, reasons_include: [DATA_CONFLICT, POL_PRODUCT_REVIEW] }
 
   - key: lenta
-    preset: R8
     name: "ООО «Лента-Опт»"
     inn: "7701000065"
     ogrn: "1167746000070"
@@ -199,11 +300,11 @@ companies:
     tax: { regime: OSN, debt: 0 }
     inflows: [5200000, 5600000, 5100000, 5900000, 4800000, 5400000, 5500000, 6000000, 5300000, 5700000, 5600000, 5900000]
     balance: 1800000
-    access: [[zakharov, owner], [ivanov, prepare]]
+    access: [[zakharov, owner], [ivanov, prepare], [novikova, view]]
+    successor: novikova            # событие egrul.director_changed (R12): новый директор по ЕГРЮЛ
     bki: { credits: [[5000000, 19, 48, 24, 0]], requests: 1 }
 
   - key: pole
-    preset: AGRO
     name: "ООО «Зелёное Поле»"
     inn: "7701000072"
     ogrn: "1207746000087"
@@ -224,7 +325,6 @@ companies:
       expect: { outcome: APPROVE, risk_class: A, score: 740, rate: "16.00", amount: "8000000.00" }
 
   - key: cloud
-    preset: S8
     name: "ООО «Код и Облако»"
     inn: "7701000080"
     ogrn: "1237746000095"

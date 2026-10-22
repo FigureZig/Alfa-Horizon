@@ -13,7 +13,7 @@ from .domain.okved import section_of
 
 OPF = {"12300": "LLC", "12267": "JSC", "12247": "JSC", "12200": "JSC"}   # ОКОПФ: ООО, непубличное АО, ПАО, АО
 LIQUIDATION_STATUS = {"101"}                                              # ЕГРЮЛ СвСтатус@КодСтатусЮЛ: в стадии ликвидации
-INFLOW_SKIP = {"loan", "own_transfer"}                                    # не выручка: кредиты и свои переводы
+INFLOW_SKIP = {"loan", "own_transfer", "deposit"}                         # не выручка: кредиты, свои переводы, депозит
 
 
 def months_between(start: date, end: date) -> int:
@@ -43,6 +43,7 @@ def _registry(f: dict, egrul: dict | None, egrip: dict | None) -> None:
             ogrn=ul["@ОГРН"],
             registered=ul["@ДатаОГРН"],
             okved=ul["СвОКВЭД"]["СвОКВЭДОсн"]["@КодОКВЭД"],
+            okved_name=ul["СвОКВЭД"]["СвОКВЭДОсн"].get("@НаимОКВЭД"),
             liquidation=status.get("@КодСтатусЮЛ") in LIQUIDATION_STATUS,
             eio_mode="joint" if (ul.get("СвПолном") or {}).get("@ВидПолном") == "1" else "independent",
             eio=[{"inn": p["СвФЛ"]["@ИННФЛ"], "fio": _fio(p["СвФЛ"]), "title": p["СвДолжн"]["@НаимДолжн"],
@@ -56,7 +57,8 @@ def _registry(f: dict, egrul: dict | None, egrip: dict | None) -> None:
         ip = egrip["СвИП"]
         fio = _fio(ip["СвФЛ"]["ФИОРус"])
         f.update(segment="IP", name=f"ИП {fio}", ogrn=ip["@ОГРНИП"], registered=ip["@ДатаОГРНИП"],
-                 okved=ip["СвОКВЭД"]["СвОКВЭДОсн"]["@КодОКВЭД"], liquidation=False, eio_mode="independent",
+                 okved=ip["СвОКВЭД"]["СвОКВЭДОсн"]["@КодОКВЭД"], okved_name=ip["СвОКВЭД"]["СвОКВЭДОсн"].get("@НаимОКВЭД"),
+                 liquidation=False, eio_mode="independent",
                  eio=[{"inn": ip["@ИННФЛ"], "fio": fio, "title": "Индивидуальный предприниматель"}], participants=[])
 
 
@@ -119,12 +121,50 @@ def _bki(f: dict, bki: dict | None, info: dict | None) -> None:
     credits = (report.get("Credits") or {}).get("Credit", [])
     active = [c for c in credits if dec(c.get("PrincipalDebt", 0)) > 0]
     f.update(
+        active_credits=len(active),
         debt_payments=sum((dec(c.get("AvgMonthPaymentSum", 0)) for c in active), Decimal(0)),
         max_overdue_days=max((int(c.get("PastDepthOfDelayInDay", 0)) for c in credits), default=0),
         two_payments_skipped=any(c.get("TwoPaymentsSkipped") for c in credits),
         bki_requests_30d=int((report.get("RequestsStatistic") or {}).get("NumberOfRequests", 0)),
         bankruptcy=bool((report.get("Subject") or {}).get("Bankruptcy")) or f.get("bankruptcy", False),
     )
+
+
+def account_operations(tx: dict | None) -> list[dict]:
+    """Выписка → операции со знаком: приход +, расход −."""
+    return [{"date": date.fromisoformat(t["bookingDate"]), "amount": dec(t["amount"]) * (1 if t["direction"] == "in" else -1),
+             "purpose": t["purpose"], "category": t.get("category")} for t in (tx or {}).get("items", [])]
+
+
+def cash_flow(tx: dict | None, today: date, months: int = 6) -> dict | None:
+    """Выписка → остаток, обороты по месяцам (приход без кредитов и своих переводов), текущий месяц, последние операции."""
+    if not tx:
+        return None
+    keys, current = month_keys(today, months), f"{today.year:04d}-{today.month:02d}"
+    sums = {k: {"income": Decimal(0), "expenses": Decimal(0)} for k in [*keys, current]}
+    for item in tx["items"]:
+        month = item["bookingDate"][:7]
+        if month not in sums:
+            continue
+        if item["direction"] == "out":
+            sums[month]["expenses"] += dec(item["amount"])
+        elif item.get("category") not in INFLOW_SKIP:
+            sums[month]["income"] += dec(item["amount"])
+    latest = sorted(enumerate(tx["items"]), key=lambda x: (x[1]["bookingDate"], x[0]), reverse=True)[:10]
+    return {
+        "balance": dec(tx["balance"]["amount"]) if tx.get("balance") else None,
+        "as_of": (tx.get("balance") or {}).get("asOf"),
+        "months": [{"month": k, **sums[k]} for k in keys],
+        "current": {"month": current, **sums[current]},
+        "recent": [{"id": f"{t['bookingDate']}:{i}", "date": t["bookingDate"], "title": t["purpose"],
+                    "amount": dec(t["amount"]) * (-1 if t["direction"] == "out" else 1), "direction": t["direction"],
+                    "category": t.get("category"), "counterparty_inn": t.get("counterpartyInn")} for i, t in latest],
+    }
+
+
+def person_links(card: dict | None) -> list[dict]:
+    """Карточка клиента в банке → компании, к которым у человека доступ в ДБО."""
+    return [{"inn": c["companyInn"], "level": c["level"]} for c in (card or {}).get("companies", [])]
 
 
 def company_facts(inn: str, snaps: dict, today: date) -> dict:
@@ -148,7 +188,7 @@ def company_facts(inn: str, snaps: dict, today: date) -> dict:
         f["bank_share"] = round(min(1.0, float(sum(f["inflows_monthly"]) / f["revenue"])), 4)
 
     if access := snaps.get("bank_access"):
-        f["bank_access"] = access["persons"]
+        f["bank_access"] = [{"inn": p["personInn"], "fio": p["fio"], "level": p["level"]} for p in access["persons"]]
         kyc_director = access.get("kycDirectorInn")
         if kyc_director and f["eio"] and kyc_director not in {e["inn"] for e in f["eio"]}:
             f["conflicts"].append("руководитель в ЕГРЮЛ и в анкете банка разный")
@@ -156,4 +196,9 @@ def company_facts(inn: str, snaps: dict, today: date) -> dict:
         f["charter"] = {"decisionMethod": charter.get("decisionMethod"), "limits": charter.get("limits", [])}
     if eis := snaps.get("eis"):
         f["contracts"] = [c for c in eis.get("contracts", []) if c["endDate"] >= today.isoformat()]
+    if mchd := snaps.get("mchd"):                     # доверенности компании: кто и что вправе подписывать
+        f["poa"] = [{"guid": p["guid"], "representative_inn": p["representative"]["inn"], "fio": p["representative"]["fio"],
+                     "status": p["status"], "powers": [x["code"] for x in p["powers"]], "valid_to": p["validTo"],
+                     "active": p["status"] == "ACTIVE" and p["validFrom"] <= today.isoformat() <= p["validTo"]}
+                    for p in mchd.get("items", [])]
     return f

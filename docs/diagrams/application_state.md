@@ -36,6 +36,7 @@ stateDiagram-v2
     SIGNING --> CHECKING: пересмотр — новые данные (RECHECK)
     SIGNED --> DISBURSING: перепроверка по свежим данным пройдена
     SIGNED --> REJECTED: всплыл стоп-фактор (ГК 821 п. 1)
+    SIGNED --> UNDER_REVIEW: финальная проверка невозможна до дедлайна (N6)
     DISBURSING --> ISSUED: зачислено (сверка по ключу)
     DISBURSING --> UNDER_REVIEW: сбой АБС до дедлайна (DISBURSE_ERROR)
 

@@ -16,7 +16,7 @@ Ground truth по внешним контрактам (21.10.2026). Визуал
 3. **Формат моков — JSON**, даже там, где оригинал XML (ЕГРЮЛ, БКИ): ключи повторяют имена элементов и атрибутов XML. **[упрощение]**
    Один стаб на ручку, тело выбирается по ИНН из `__files/<источник>/<ИНН>.json` шаблоном WireMock; тела генерирует скрипт из пресетов (06 §12).
 4. **Сбои реестров воспроизводимы на лету:** стабы отказов с приоритетом 1, задержки, Scenarios WireMock — без перезапуска (`07_resilience.md` §7).
-5. **Песочница** меняет «реестры» через WireMock admin API → событие `registry.changed` → Worker обновляет снапшот → `parties` пересчитывает права.
+5. **Симулятор** меняет «реестры» через WireMock admin API → событие `registry.changed` → Worker обновляет снапшот → `parties` пересчитывает права.
 
 ---
 
@@ -40,7 +40,7 @@ Ground truth по внешним контрактам (21.10.2026). Визуал
 | **Банк: ядро** | `GET /bank-core/v1/persons/{id}` · `/companies/{inn}/access` · `/companies/{inn}/charter` · `/accounts/{inn}/transactions?from&to` | KYC-статус · доступы ДБО (`view` / `prepare`) · устав (`limits[]`, `decisionMethod: notary / protocol / tech_means`) · транзакции (`bookingDate, amount, direction, counterpartyInn, purpose, category`) | внутренний контракт банка **[наш дизайн]** | 1 ч | Person, BankAccess, CharterLimit, Turnover |
 | **АБС** | `POST /abs/v1/loans` · `POST /abs/v1/loans/{id}/disburse` (заголовок `Idempotency-Key`) | `loanAccount`, `status` (OPENED / DISBURSED / FAILED), `schedule[]` | внутренний контракт **[наш дизайн]** | — | Loan |
 | **ЕИС (K5)** | `GET /eis/v1/contracts?supplierInn=` | `regNum, customer, price, signDate, endDate, advancePercent, treasurySupport` | сокращённый контракт **[упрощение]** | 1 дн. | Signal TENDER_WON |
-| **WireMock admin** (только демо) | `POST /__admin/mappings` · `POST /__admin/scenarios/reset` | — | WireMock | — | песочница |
+| **WireMock admin** (только симулятор) | `POST /__admin/mappings` · `POST /__admin/scenarios/reset` | — | WireMock | — | симулятор |
 | **LLM** (опционально) | `POST /v1/chat/completions` | OpenAI-compatible | — | — | не в пути решения |
 
 ### Пример: ответ мока ЕГРЮЛ (JSON-зеркало XML 4.06), сценарий R6 — два директора совместно

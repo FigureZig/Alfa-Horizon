@@ -10,4 +10,6 @@
 - Юнит-тесты на каждое правило не пишем: правило должно держаться инвариантами `qa/invariants.py` на pairwise-персонах.
   Нашёл класс ошибки — добавь инвариант, а не отдельный тест на случай.
 - Поменял логику, политику или мир — пересобери `docs/test-scenarios.md`: `uv run python -m qa.report`.
-- Перед PR: `uv run ruff check . && uv run pytest`.
+- Ответы API — через `ok()` (`{"data": …}`), ошибки — `Problem(status, code, detail)`; поля snake_case. Права — `deps.require` до команды.
+- Новый переход или действие с заявкой — команда в `app/lifecycle.py` и действие в `tests/e2e/test_routes.py` (`ACTIONS`).
+- Перед PR: `uv run ruff check . && uv run pytest`; если трогал API, заявку или worker — ещё `uv run pytest -m e2e`.

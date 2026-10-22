@@ -3,5 +3,15 @@
   "fio": "Полякова Мария Игоревна",
   "snils": "70100001274",
   "kycStatus": "VERIFIED",
-  "key": "polyakova"
+  "key": "polyakova",
+  "companies": [
+    {
+      "companyInn": "7701000072",
+      "level": "owner",
+      "roles": [
+        "eio",
+        "participant"
+      ]
+    }
+  ]
 }

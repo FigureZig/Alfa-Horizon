@@ -114,7 +114,9 @@ def decide(facts: dict, request: dict, pol: dict, mode: str = "simulate", *, all
         log.step("outcome", outcome="MANUAL_REVIEW", manual=manual)
         return _result("MANUAL_REVIEW", **res, risk=risk, flags=flags)
     security = cat.security_for(product, segment)
-    if class_policy == "conditional":
+    if request.get("guarantor") and security != "collateral":    # клиент сразу привёл поручителя (ГК ст. 361)
+        security = "guarantor"
+    elif class_policy == "conditional":
         security = "guarantor"
         conditions.append("GUARANTEE")
         log.reason("REQ_GUARANTOR", "condition")
@@ -160,6 +162,23 @@ def decide(facts: dict, request: dict, pol: dict, mode: str = "simulate", *, all
     log.step("outcome", outcome=outcome, asks=asks, manual=manual, conditions=conditions, counter=counter)
     return _result(outcome, **res, risk=risk, offer=offer, alternatives=alternatives, counter=counter,
                    conditions=conditions, asks=asks, flags=flags, caps=quote["caps"])
+
+
+def stop_factors(facts: dict, pol: dict) -> list[dict]:
+    """Стоп-факторы на текущих фактах — финальная проверка перед выдачей (ГК ст. 821 п. 1, docs/07 N6, N17)."""
+    log = _Log(pol)
+    _stops(facts, pol["params"], pol, log)
+    return log.reasons
+
+
+def manual_terms(code: str, amount, term_months, facts: dict, pol: dict, risk_class: str | None = None) -> dict:
+    """Условия, которые ставит специалист (сумма и срок — его решение), по той же цене риска: КС + отрасль + риск."""
+    product = pol["products"][code]
+    term = _clamp_term(term_months, product)
+    risk_class = risk_class or score(facts, facts.get("segment"), pol["scorecard"])["class"]
+    quote = {"term": term, "rate": cat.rate(pol, facts.get("section"), term, risk_class,
+                                           cat.security_for(product, facts.get("segment"))), "binding": None}
+    return _terms(code, product, dec(amount), quote)
 
 
 def preapprove(facts: dict, pol: dict, goal: str, amount, term_months: int | None = None) -> list[dict]:
@@ -253,7 +272,7 @@ def _product_counter(alt: dict, log: _Log, request: dict) -> dict:
     alt["trace"] = log.trace + alt["trace"]
     alt["counter"] = ["PRODUCT", *[c for c in alt["counter"] if c != "PRODUCT"]]
     if alt["outcome"] in ("APPROVE", "COUNTER_OFFER"):
-        alt["outcome"], alt["offerKind"], alt["status"] = "COUNTER_OFFER", "COUNTER", OUTCOME_STATUS["COUNTER_OFFER"]
+        alt["outcome"], alt["offer_kind"], alt["status"] = "COUNTER_OFFER", "COUNTER", OUTCOME_STATUS["COUNTER_OFFER"]
     return alt
 
 
@@ -287,10 +306,10 @@ def _quote(product: dict, facts: dict, term: int, risk_class: str, security: str
 
 def _terms(code: str, product: dict, amount: Decimal, quote: dict) -> dict:
     r = quote["rate"]
-    return {"product": code, "productName": product["name"], "amount": money(amount), "termMonths": quote["term"],
+    return {"product": code, "product_name": product["name"], "amount": money(amount), "term_months": quote["term"],
             "repayment": product["repayment"], "rate": r,
             "payment": payment(product["repayment"], amount, r["total"], quote["term"]),
-            "bindingCap": quote["binding"]}
+            "binding_cap": quote["binding"]}
 
 
 def _offer(code, product, facts, amount, term, risk_class, security, section, pol, request, quote, log):
@@ -329,7 +348,7 @@ def _hints(pol: dict, section) -> list[str]:
 
 
 def _request_view(request: dict) -> dict:
-    return {"product": request["product"], "amount": money(request["amount"]), "termMonths": request.get("term_months"),
+    return {"product": request["product"], "amount": money(request["amount"]), "term_months": request.get("term_months"),
             "goal": request.get("goal")}
 
 
@@ -337,11 +356,11 @@ def _result(outcome: str, *, log: _Log, pol: dict, mode: str, request: dict, kin
             alternatives=(), counter=(), conditions=(), asks=(), flags=(), caps=None, hints=()) -> dict:
     return {
         "mode": mode,
-        "policyVersion": pol["version"],
+        "policy_version": pol["version"],
         "outcome": outcome,
         "kind": kind,                                   # REJECT: STOP_FIXABLE · STOP_FINAL · POLICY
         "status": OUTCOME_STATUS[outcome],
-        "offerKind": OFFER_KIND.get(outcome),
+        "offer_kind": OFFER_KIND.get(outcome),
         "counter": list(counter),                       # PRODUCT · TERM · AMOUNT
         "conditions": list(conditions),                 # GUARANTEE · COLLATERAL
         "asks": list(asks),

@@ -11,6 +11,15 @@ def _points(value, bins: list[dict]) -> int:
     raise ValueError("последний бин должен быть без условия")
 
 
+def explain_factor(contribution: dict, card: dict, reasons: dict, lang: str = "ru") -> dict:
+    """Вклад фактора для людей: название всегда, текст причины — только если фактор снижает балл (иначе он вводит в заблуждение:
+    «бизнесу меньше года» у бизнеса двух лет)."""
+    spec = card["factors"][contribution["factor"]]
+    title = (spec.get("title") or {}).get(lang) or contribution["factor"]
+    text = reasons.get(contribution["reason"], contribution["reason"]) if contribution.get("effect") == "minus" else None
+    return {**contribution, "title": title, "text": text}
+
+
 def score(facts: dict, segment: str, card: dict, *, skip_sources: tuple[str, ...] = ()) -> dict:
     """skip_sources: источники, чьи факты неизвестны (например, БКИ без согласия) — их факторы дают 0 баллов."""
     total, contributions, missing = card["base"], [], []
@@ -20,13 +29,14 @@ def score(facts: dict, segment: str, card: dict, *, skip_sources: tuple[str, ...
         value = None if f.get("source") in skip_sources else facts.get(f["fact"])
         if value is None:
             missing.append(factor)
-            contributions.append({"factor": factor, "value": None, "points": 0, "reason": f["reason"]})
+            contributions.append({"factor": factor, "value": None, "points": 0, "reason": f["reason"], "effect": "unknown"})
             continue
         points = _points(value, f["bins"])
         if "two_payments_skipped" in f and facts.get("two_payments_skipped"):
             points = min(points, f["two_payments_skipped"])
         total += points
-        contributions.append({"factor": factor, "value": value, "points": points, "reason": f["reason"]})
+        contributions.append({"factor": factor, "value": value, "points": points, "reason": f["reason"],
+                              "effect": "minus" if points < 0 else "plus" if points > 0 else "neutral"})
 
     # лучший случай для неизвестных источников: их факторы дали бы максимум — решение «нет» не должно от них зависеть
     best = total + sum(max(b["points"] for b in f["bins"]) for f in card["factors"].values()

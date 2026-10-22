@@ -1,4 +1,4 @@
-"""Генератор моков WireMock из демо-мира: uv run python -m seed.gen_mocks
+"""Генератор моков WireMock из мира симулятора: uv run python -m seed.gen_mocks
 
 seed/personas.yaml → seed/world.py (проверка + ответы источников) → wiremock/__files/<источник>/<ключ>.json
 и wiremock/mappings/*.json (по файлу стабов на ручку: тело выбирается по ИНН шаблоном, незнакомый ИНН → 404).
@@ -54,7 +54,8 @@ def post_stub(name: str, path: str, keys: list[str], body: str) -> dict:
          "response": NOT_FOUND}]}
 
 
-def mappings(out: Path, ul: list[str], ip: list[str], msp: list[str], persons: list[str], suppliers: list[str]) -> None:
+def mappings(out: Path, ul: list[str], ip: list[str], msp: list[str], persons: list[str], suppliers: list[str],
+             principals: list[str]) -> None:
     everyone, seg = ul + ip, "{{request.pathSegments.[3]}}"
     stubs = {
         "egrul": get_stub("ЕГРЮЛ", "/egrul/v1/legal-entities/{keys}", ul, f"egrul/{seg}.json", "/egrul/v1/legal-entities/[^/]+"),
@@ -81,8 +82,8 @@ def mappings(out: Path, ul: list[str], ip: list[str], msp: list[str], persons: l
         "eis": query_stub("ЕИС: контракты", "/eis/v1/contracts", "supplierInn", suppliers,
                           "eis/{{request.query.supplierInn}}.json", {"contracts": []}),
         "mchd": {"mappings": [
-            {"name": "МЧД: поиск", "priority": 5, "request": {"method": "GET", "urlPath": "/mchd/v1/poa"},
-             "response": {"status": 200, "headers": JSON_HEADERS, "jsonBody": {"items": []}}},
+            *query_stub("МЧД: поиск по доверителю", "/mchd/v1/poa", "principalInn", principals,
+                        "mchd/{{request.query.principalInn}}.json", {"items": []})["mappings"],
             {"name": "МЧД: не найдена", "priority": 9, "request": {"method": "GET", "urlPathPattern": "/mchd/v1/poa/[^/]+"},
              "response": NOT_FOUND}]},
         "abs": {"mappings": [   # выдача: ключ идемпотентности = id заявки (docs/07 §7)
@@ -112,11 +113,11 @@ def main(out: Path = OUT) -> None:
     today, people = date.fromisoformat(data["today"]), data["people"]
     errors = {c["key"]: e for c in data["companies"] if (e := world.validate(c, people, today))}
     if errors:
-        sys.exit("демо-мир некорректен:\n" + "\n".join(f"  {k}: {'; '.join(v)}" for k, v in errors.items()))
+        sys.exit("мир симулятора некорректен:\n" + "\n".join(f"  {k}: {'; '.join(v)}" for k, v in errors.items()))
     for sub in ("__files", "mappings"):
         shutil.rmtree(out / sub, ignore_errors=True)
 
-    ul, ip, msp, suppliers = [], [], [], []
+    ul, ip, msp, suppliers, principals = [], [], [], [], []
     for c in data["companies"]:
         inn = c["inn"]
         (ul if world.is_ul(c) else ip).append(inn)
@@ -127,11 +128,13 @@ def main(out: Path = OUT) -> None:
             msp.append(inn)
         if "eis" in bodies:
             suppliers.append(inn)
+        if "mchd" in bodies:
+            principals.append(inn)
         if world.is_ul(c):
             write(out, f"__files/girbo/search/{inn}.json", world.girbo_search(c))
     for key, person in people.items():
-        write(out, f"__files/bank/persons/{person['inn']}.json", world.person_card(key, person))
-    mappings(out, ul, ip, msp, [p["inn"] for p in people.values()], suppliers)
+        write(out, f"__files/bank/persons/{person['inn']}.json", world.person_card(key, person, data["companies"]))
+    mappings(out, ul, ip, msp, [p["inn"] for p in people.values()], suppliers, principals)
     print(f"wiremock: {len(data['companies'])} компаний, {len(people)} человек → {out}")
 
 

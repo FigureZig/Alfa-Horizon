@@ -3,5 +3,14 @@
   "fio": "Ли Алексей Николаевич",
   "snils": "70100000474",
   "kycStatus": "VERIFIED",
-  "key": "li"
+  "key": "li",
+  "companies": [
+    {
+      "companyInn": "7701000026",
+      "level": "registry",
+      "roles": [
+        "participant"
+      ]
+    }
+  ]
 }

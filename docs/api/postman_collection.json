@@ -1,0 +1,4956 @@
+{
+  "info": {
+    "_postman_id": "e0a3ea10-fbbc-56b2-b4d6-48a5f0d730dd",
+    "name": "Alfa Horizon — кредитный кабинет",
+    "description": "Сгенерировано: `cd backend && uv run python -m qa.postman`. Стенд — `cd infra && docker compose up --build`, `base` = http://localhost:8080/api/v1 (через nginx фронта) или http://localhost:8000/api/v1 (напрямую). Запускать папки по порядку в Collection Runner или `newman run`: шаги конвейера ждут статус опросом. Сценарии ролей — те же, что в docs/15_roles.md §4 и tests/e2e/test_flows.py.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base",
+      "value": "http://localhost:8080/api/v1"
+    },
+    {
+      "key": "app_id",
+      "value": ""
+    },
+    {
+      "key": "tries",
+      "value": "0"
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Вход и мир симулятора",
+      "description": "Вход по ID → токен в переменную token_<id>. Перелогин — тот же вход другим пользователем.",
+      "item": [
+        {
+          "name": "0.0 продукты для главной страницы",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/catalog/products?lang=ru",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "catalog",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "lang",
+                  "value": "ru"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "0.1 сбросить мир",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/reset",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "reset"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "0.2 кто есть: пользователи",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas?lang=ru",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas"
+              ],
+              "query": [
+                {
+                  "key": "lang",
+                  "value": "ru"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "0.3 войти по ID: s7",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/auth/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"s7\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_s7\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "0.4 мои компании и права",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s7}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/me",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "me"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "0.5 своя компания: параметры и флаги",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/persona-options?lang=ru",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "persona-options"
+              ],
+              "query": [
+                {
+                  "key": "lang",
+                  "value": "ru"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "0.5a гид: сценарии по ролям",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/scenarios?lang=ru",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "scenarios"
+              ],
+              "query": [
+                {
+                  "key": "lang",
+                  "value": "ru"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "0.6 своя компания с недоимкой",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/sandbox/personas",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Олег Петров\",\n  \"organization\": \"ООО «Пекарня у дома»\",\n  \"okved\": \"10.71\",\n  \"flags\": [\n    \"tax_debt\"\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"сценарий из флага\", () => pm.expect(pm.response.json().data.scenario).to.include(\"недоимка\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1. Кабинет компании (S7, ИП Смирнова)",
+      "description": "",
+      "item": [
+        {
+          "name": "1.1 кто работает в кабинете",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s7}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/demo-personas/770100000079",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "demo-personas",
+                "770100000079"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.2 карточки главной",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s7}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/demo-personas/770100000079/dashboard/summary",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "demo-personas",
+                "770100000079",
+                "dashboard",
+                "summary"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.3 K1 прогноз остатка и K2 предложение",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s7}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/companies/770100000079/insights",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "companies",
+                "770100000079",
+                "insights"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"разрыв 28.10\", () => pm.expect(pm.response.json().data.cash_forecast.cash_gap.date).to.eql(\"2026-10-28\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.4 предодобренные продукты",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s7}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/companies/770100000079/products",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "companies",
+                "770100000079",
+                "products"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.5 кредитное здоровье: балл и рычаги",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s7}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/companies/770100000079/score",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "companies",
+                "770100000079",
+                "score"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.5a как гасить: график или доля поступлений",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s7}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/companies/770100000079/repayment?amount=400000&term_months=12",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "companies",
+                "770100000079",
+                "repayment"
+              ],
+              "query": [
+                {
+                  "key": "amount",
+                  "value": "400000"
+                },
+                {
+                  "key": "term_months",
+                  "value": "12"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.6 что банк знает о компании",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s7}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/companies/770100000079/profile",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "companies",
+                "770100000079",
+                "profile"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.7 заявки и задачи на главной",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s7}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/companies/770100000079/applications/summary",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "companies",
+                "770100000079",
+                "applications",
+                "summary"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.8 входящие пользователя",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s7}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/tasks",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "tasks"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1a. Рабочее место специалиста",
+      "description": "ИНН банка открывает рабочее место сотрудника — тот же кабинет, что у клиента, но с очередью.",
+      "item": [
+        {
+          "name": "1a.1 войти по ID: bank",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/auth/login?wait_s=0",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "0"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"bank\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_bank\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1a.2 карточки: очередь, второй ключ, выдачи",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_bank}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/demo-personas/7701000097/dashboard/summary",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "demo-personas",
+                "7701000097",
+                "dashboard",
+                "summary"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1a.3 очередь заявок",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_bank}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/bank/queue",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "bank",
+                "queue"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1a.4 метрики конвейера: STP и время решения",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_bank}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/bank/metrics",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "bank",
+                "metrics"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1a.5 журнал аудита: цепочка хэшей цела",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_bank}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/bank/audit",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "bank",
+                "audit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"цепочка цела\", () => pm.expect(pm.response.json().data.intact).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Заявка от подачи до выдачи (S7, овердрафт)",
+      "description": "",
+      "item": [
+        {
+          "name": "2.1 создать заявку",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s7}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inn\": \"770100000079\",\n  \"product\": \"OVERDRAFT\",\n  \"amount\": 400000,\n  \"goal\": \"cash_gap\",\n  \"consent_bki\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"app_id\", pm.response.json().data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.2 подать",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s7}}"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{app_id}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/submit",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "submit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SUBMITTED\", () => pm.expect(pm.response.json().data.status).to.eql(\"SUBMITTED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.3 ждём решение → OFFERED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s7}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"OFFERED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус OFFERED\", () => pm.expect(got).to.eql(\"OFFERED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.4 почему так",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s7}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/explain",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "explain"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.5 принять оферту",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s7}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/offer/accept",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "offer",
+                "accept"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"variant\": 0\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SIGNING\", () => pm.expect(pm.response.json().data.status).to.eql(\"SIGNING\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.6 подписать",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s7}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/signatures",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "signatures"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SIGNED\", () => pm.expect(pm.response.json().data.status).to.eql(\"SIGNED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.7 ждём выдачу → ISSUED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s7}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"ISSUED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус ISSUED\", () => pm.expect(got).to.eql(\"ISSUED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.8 история заявки",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s7}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/events",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "events"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Крупная сделка: участники голосуют «за»",
+      "description": "ООО из трёх участников просит 6 млн ₽ — больше 25% активов, согласие даёт общее собрание (14-ФЗ ст. 46 п. 3). Устав позволяет электронные бюллетени (ст. 38 п. 2), голос — по доле (ст. 32 п. 1), нужно больше половины голосов всех участников (ст. 37 п. 7).",
+      "item": [
+        {
+          "name": "3.0.1 войти: s2",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/s2/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "s2",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_s2\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.0.2 войти: u-li",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/u-li/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "u-li",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_u-li\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.1 s2: создаёт заявку → DRAFT",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s2}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inn\": \"7701000026\",\n  \"product\": \"WORKING_CAPITAL\",\n  \"amount\": 6000000,\n  \"term_months\": 24,\n  \"goal\": \"stock\",\n  \"consent_bki\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"app_id\", pm.response.json().data.id);",
+                  "pm.test(\"статус DRAFT\", () => pm.expect(pm.response.json().data.status).to.eql(\"DRAFT\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.2 s2: подаёт → SUBMITTED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/submit",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "submit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SUBMITTED\", () => pm.expect(pm.response.json().data.status).to.eql(\"SUBMITTED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.3 конвейер: конвейер / выдача → INFO_REQUESTED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"INFO_REQUESTED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус INFO_REQUESTED\", () => pm.expect(got).to.eql(\"INFO_REQUESTED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.4 u-li: голосует «за» → INFO_REQUESTED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-li}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/approvals/vote",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "approvals",
+                "vote"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vote\": \"for\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус INFO_REQUESTED\", () => pm.expect(pm.response.json().data.status).to.eql(\"INFO_REQUESTED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.5 s2: голосует «за» → CHECKING",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s2}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/approvals/vote",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "approvals",
+                "vote"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vote\": \"for\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус CHECKING\", () => pm.expect(pm.response.json().data.status).to.eql(\"CHECKING\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.6 конвейер: конвейер / выдача → OFFERED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"OFFERED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус OFFERED\", () => pm.expect(got).to.eql(\"OFFERED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.7 s2: принимает оферту → SIGNING",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s2}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/offer/accept",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "offer",
+                "accept"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"variant\": 0\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SIGNING\", () => pm.expect(pm.response.json().data.status).to.eql(\"SIGNING\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.8 s2: подписывает → SIGNED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/signatures",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "signatures"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SIGNED\", () => pm.expect(pm.response.json().data.status).to.eql(\"SIGNED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.9 конвейер: конвейер / выдача → ISSUED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"ISSUED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус ISSUED\", () => pm.expect(got).to.eql(\"ISSUED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Крупная сделка: участники против",
+      "description": "Те же 6 млн ₽, но двое участников голосуют «против» — согласие уже недостижимо, банк заявку закрывает: сделка без согласия была бы оспоримой (ГК ст. 173.1).",
+      "item": [
+        {
+          "name": "4.0.1 войти: s2",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/s2/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "s2",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_s2\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.0.2 войти: u-li",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/u-li/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "u-li",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_u-li\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.0.3 войти: u-morozov",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/u-morozov/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "u-morozov",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_u-morozov\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.1 s2: создаёт заявку → DRAFT",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s2}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inn\": \"7701000026\",\n  \"product\": \"WORKING_CAPITAL\",\n  \"amount\": 6000000,\n  \"term_months\": 24,\n  \"goal\": \"stock\",\n  \"consent_bki\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"app_id\", pm.response.json().data.id);",
+                  "pm.test(\"статус DRAFT\", () => pm.expect(pm.response.json().data.status).to.eql(\"DRAFT\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.2 s2: подаёт → SUBMITTED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/submit",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "submit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SUBMITTED\", () => pm.expect(pm.response.json().data.status).to.eql(\"SUBMITTED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.3 конвейер: конвейер / выдача → INFO_REQUESTED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"INFO_REQUESTED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус INFO_REQUESTED\", () => pm.expect(got).to.eql(\"INFO_REQUESTED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.4 u-li: голосует «против» → INFO_REQUESTED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-li}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/approvals/vote",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "approvals",
+                "vote"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vote\": \"against\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус INFO_REQUESTED\", () => pm.expect(pm.response.json().data.status).to.eql(\"INFO_REQUESTED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.5 u-morozov: голосует «против» → WITHDRAWN",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-morozov}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/approvals/vote",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "approvals",
+                "vote"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vote\": \"against\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус WITHDRAWN\", () => pm.expect(pm.response.json().data.status).to.eql(\"WITHDRAWN\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Бухгалтер готовит, директор подписывает",
+      "description": "У Иванова в «Лента-Опт» доступ в ДБО с правом подготовки: он подаёт заявку и принимает оферту, но подписать не вправе — подписывает директор по ЕГРЮЛ (14-ФЗ ст. 40 п. 3, ГК ст. 53).",
+      "item": [
+        {
+          "name": "5.0.1 войти: r8",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/r8/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "r8",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_r8\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.0.2 войти: r12",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/r12/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "r12",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_r12\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.1 r8: создаёт заявку → DRAFT",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_r8}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inn\": \"7701000065\",\n  \"product\": \"WORKING_CAPITAL\",\n  \"amount\": 3000000,\n  \"term_months\": 24,\n  \"goal\": \"stock\",\n  \"consent_bki\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"app_id\", pm.response.json().data.id);",
+                  "pm.test(\"статус DRAFT\", () => pm.expect(pm.response.json().data.status).to.eql(\"DRAFT\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.2 r8: подаёт → SUBMITTED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_r8}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/submit",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "submit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SUBMITTED\", () => pm.expect(pm.response.json().data.status).to.eql(\"SUBMITTED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.3 конвейер: конвейер / выдача → OFFERED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_r8}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"OFFERED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус OFFERED\", () => pm.expect(got).to.eql(\"OFFERED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.4 r8: принимает оферту → SIGNING",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_r8}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/offer/accept",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "offer",
+                "accept"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"variant\": 0\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SIGNING\", () => pm.expect(pm.response.json().data.status).to.eql(\"SIGNING\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.5 r8: пробует подписать → SIGNING",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_r8}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/signatures",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "signatures"
+              ]
+            },
+            "description": "подписать сам не может — 403"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.6 r12: подписывает → SIGNED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_r12}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/signatures",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "signatures"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SIGNED\", () => pm.expect(pm.response.json().data.status).to.eql(\"SIGNED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.7 конвейер: конвейер / выдача → ISSUED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_r8}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"ISSUED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус ISSUED\", () => pm.expect(got).to.eql(\"ISSUED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6. Выше полномочий специалиста: второй ключ",
+      "description": "Инвестиционный кредит идёт к специалисту: в ЕГРЮЛ директор Никитин, а в анкете банка — Фомин. Специалист одобряет 18 млн ₽ — это выше его порога 15 млн, решение подтверждает риск-менеджер. Подписывает директор по реестру.",
+      "item": [
+        {
+          "name": "6.0.1 войти: r8",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/r8/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "r8",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_r8\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.0.2 войти: u-fomin",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/u-fomin/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "u-fomin",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_u-fomin\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.0.3 войти: bank",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/bank/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "bank",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_bank\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.0.4 войти: risk",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/risk/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "risk",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_risk\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.0.5 войти: u-nikitin",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/u-nikitin/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "u-nikitin",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_u-nikitin\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.1 r8: пробует подать заявку",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_r8}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inn\": \"7701000058\",\n  \"product\": \"INVESTMENT\",\n  \"amount\": 25000000,\n  \"term_months\": 60,\n  \"goal\": \"equipment\",\n  \"collateral_value\": 36000000\n}"
+            },
+            "description": "Иванов здесь только участник с просмотром в ДБО — заявку не подаёт"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.2 u-fomin: создаёт заявку → DRAFT",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-fomin}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inn\": \"7701000058\",\n  \"product\": \"INVESTMENT\",\n  \"amount\": 25000000,\n  \"term_months\": 60,\n  \"goal\": \"equipment\",\n  \"collateral_value\": 36000000,\n  \"consent_bki\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"app_id\", pm.response.json().data.id);",
+                  "pm.test(\"статус DRAFT\", () => pm.expect(pm.response.json().data.status).to.eql(\"DRAFT\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.3 u-fomin: подаёт → SUBMITTED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-fomin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/submit",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "submit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SUBMITTED\", () => pm.expect(pm.response.json().data.status).to.eql(\"SUBMITTED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.4 конвейер: конвейер / выдача → UNDER_REVIEW",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-fomin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"UNDER_REVIEW\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус UNDER_REVIEW\", () => pm.expect(got).to.eql(\"UNDER_REVIEW\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.5 bank: решение специалиста одобрить → UNDER_REVIEW",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_bank}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/bank/applications/{{app_id}}/decision",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "bank",
+                "applications",
+                "{{app_id}}",
+                "decision"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"approve\",\n  \"comment\": \"решение специалиста\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус UNDER_REVIEW\", () => pm.expect(pm.response.json().data.status).to.eql(\"UNDER_REVIEW\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.6 bank: пробует подтвердить → UNDER_REVIEW",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_bank}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/bank/applications/{{app_id}}/decision/confirm",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "bank",
+                "applications",
+                "{{app_id}}",
+                "decision",
+                "confirm"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approve\": true\n}"
+            },
+            "description": "подтвердить своё же решение нельзя"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.7 risk: второй ключ подтвердить → OFFERED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_risk}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/bank/applications/{{app_id}}/decision/confirm",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "bank",
+                "applications",
+                "{{app_id}}",
+                "decision",
+                "confirm"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approve\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус OFFERED\", () => pm.expect(pm.response.json().data.status).to.eql(\"OFFERED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.8 u-fomin: принимает оферту → SIGNING",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-fomin}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/offer/accept",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "offer",
+                "accept"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"variant\": 0\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SIGNING\", () => pm.expect(pm.response.json().data.status).to.eql(\"SIGNING\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.9 u-fomin: пробует подписать → SIGNING",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-fomin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/signatures",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "signatures"
+              ]
+            },
+            "description": "Фомин не директор по ЕГРЮЛ — 403"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.10 u-nikitin: подписывает → SIGNED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-nikitin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/signatures",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "signatures"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SIGNED\", () => pm.expect(pm.response.json().data.status).to.eql(\"SIGNED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.11 конвейер: конвейер / выдача → ISSUED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-fomin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"ISSUED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус ISSUED\", () => pm.expect(got).to.eql(\"ISSUED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "7. Специалист запрашивает документы",
+      "description": "12 млн ₽ — выше порога автоматического решения 10 млн: заявка у специалиста. Он просит пояснения, клиент отвечает, специалист одобряет сам — сумма в пределах его полномочий.",
+      "item": [
+        {
+          "name": "7.0.1 войти: s5",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/s5/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "s5",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_s5\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7.0.2 войти: bank",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/bank/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "bank",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_bank\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7.1 s5: создаёт заявку → DRAFT",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s5}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inn\": \"7701000040\",\n  \"product\": \"WORKING_CAPITAL\",\n  \"amount\": 12000000,\n  \"term_months\": 24,\n  \"goal\": \"stock\",\n  \"corporate_approval\": true,\n  \"consent_bki\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"app_id\", pm.response.json().data.id);",
+                  "pm.test(\"статус DRAFT\", () => pm.expect(pm.response.json().data.status).to.eql(\"DRAFT\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7.2 s5: подаёт → SUBMITTED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s5}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/submit",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "submit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SUBMITTED\", () => pm.expect(pm.response.json().data.status).to.eql(\"SUBMITTED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7.3 конвейер: конвейер / выдача → UNDER_REVIEW",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s5}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"UNDER_REVIEW\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус UNDER_REVIEW\", () => pm.expect(got).to.eql(\"UNDER_REVIEW\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7.4 bank: решение специалиста дозапрос → INFO_REQUESTED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_bank}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/bank/applications/{{app_id}}/decision",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "bank",
+                "applications",
+                "{{app_id}}",
+                "decision"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"request_info\",\n  \"comment\": \"решение специалиста\",\n  \"asks\": [\n    \"REQ_DOCUMENTS\"\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус INFO_REQUESTED\", () => pm.expect(pm.response.json().data.status).to.eql(\"INFO_REQUESTED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7.5 s5: отвечает на запрос документами → UNDER_REVIEW",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s5}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/info-requests/answer",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "info-requests",
+                "answer"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documents\": [\n    \"Пояснения к отчётности.pdf\"\n  ],\n  \"comment\": \"Пояснения по запросу специалиста\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус UNDER_REVIEW\", () => pm.expect(pm.response.json().data.status).to.eql(\"UNDER_REVIEW\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7.6 bank: решение специалиста одобрить → OFFERED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_bank}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/bank/applications/{{app_id}}/decision",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "bank",
+                "applications",
+                "{{app_id}}",
+                "decision"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"approve\",\n  \"comment\": \"решение специалиста\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус OFFERED\", () => pm.expect(pm.response.json().data.status).to.eql(\"OFFERED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7.7 s5: принимает оферту → SIGNING",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s5}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/offer/accept",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "offer",
+                "accept"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"variant\": 0\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SIGNING\", () => pm.expect(pm.response.json().data.status).to.eql(\"SIGNING\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7.8 s5: подписывает → SIGNED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s5}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/signatures",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "signatures"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SIGNED\", () => pm.expect(pm.response.json().data.status).to.eql(\"SIGNED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7.9 конвейер: конвейер / выдача → ISSUED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s5}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"ISSUED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус ISSUED\", () => pm.expect(got).to.eql(\"ISSUED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "8. Смена директора во время подписи",
+      "description": "Директор принял оферту, договор ждёт подписи — и в ЕГРЮЛ появляется запись о новом руководителе. Банк узнаёт об этом из реестра, останавливает подпись и пересматривает заявку: подписывает тот, кто вправе действовать без доверенности по ЕГРЮЛ сейчас (14-ФЗ ст. 40 п. 3, ГК ст. 53). Прежний директор подписать уже не может.",
+      "item": [
+        {
+          "name": "8.0.1 войти: r12",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/r12/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "r12",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_r12\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8.0.2 войти: u-novikova",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/u-novikova/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "u-novikova",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_u-novikova\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8.1 r12: создаёт заявку → DRAFT",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_r12}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inn\": \"7701000065\",\n  \"product\": \"WORKING_CAPITAL\",\n  \"amount\": 3000000,\n  \"term_months\": 24,\n  \"goal\": \"stock\",\n  \"consent_bki\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"app_id\", pm.response.json().data.id);",
+                  "pm.test(\"статус DRAFT\", () => pm.expect(pm.response.json().data.status).to.eql(\"DRAFT\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8.2 r12: подаёт → SUBMITTED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_r12}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/submit",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "submit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SUBMITTED\", () => pm.expect(pm.response.json().data.status).to.eql(\"SUBMITTED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8.3 конвейер: конвейер / выдача → OFFERED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_r12}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"OFFERED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус OFFERED\", () => pm.expect(got).to.eql(\"OFFERED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8.4 r12: принимает оферту → SIGNING",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_r12}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/offer/accept",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "offer",
+                "accept"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"variant\": 0\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SIGNING\", () => pm.expect(pm.response.json().data.status).to.eql(\"SIGNING\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8.5 конвейер: событие в реестре новый директор",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/sandbox/events",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "events"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"egrul.director_changed\",\n  \"inn\": \"7701000065\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 202\", () => pm.response.to.have.status(202));",
+                  "setTimeout(() => {}, 3000);      // worker обновляет данные компании"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8.5a ждём статус OFFERED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_r12}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"OFFERED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус OFFERED\", () => pm.expect(got).to.eql(\"OFFERED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8.6 u-novikova: принимает оферту → SIGNING",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-novikova}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/offer/accept",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "offer",
+                "accept"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"variant\": 0\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SIGNING\", () => pm.expect(pm.response.json().data.status).to.eql(\"SIGNING\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8.7 r12: пробует подписать → SIGNING",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_r12}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/signatures",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "signatures"
+              ]
+            },
+            "description": "Захаров больше не директор по ЕГРЮЛ — 403"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8.8 u-novikova: подписывает → SIGNED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-novikova}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/signatures",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "signatures"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SIGNED\", () => pm.expect(pm.response.json().data.status).to.eql(\"SIGNED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8.9 конвейер: конвейер / выдача → ISSUED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_r12}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"ISSUED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус ISSUED\", () => pm.expect(got).to.eql(\"ISSUED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "9. Подпись по доверенности (МЧД)",
+      "description": "Финансовый директор Кузнецова не руководитель по ЕГРЮЛ, но у неё действующая машиночитаемая доверенность с полномочием подписать кредитный договор (ГК ст. 185.1, 63-ФЗ ст. 17.2). Банк проверяет МЧД в реестре ФНС перед подписью; когда доверенность отзывают, подписать по ней уже нельзя — подписывает директор.",
+      "item": [
+        {
+          "name": "9.0.1 войти: u-kuznetsova",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/u-kuznetsova/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "u-kuznetsova",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_u-kuznetsova\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "9.0.2 войти: s3",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/s3/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "s3",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_s3\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "9.1 u-kuznetsova: создаёт заявку → DRAFT",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-kuznetsova}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inn\": \"7701000019\",\n  \"product\": \"WORKING_CAPITAL\",\n  \"amount\": 2000000,\n  \"term_months\": 24,\n  \"goal\": \"stock\",\n  \"consent_bki\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"app_id\", pm.response.json().data.id);",
+                  "pm.test(\"статус DRAFT\", () => pm.expect(pm.response.json().data.status).to.eql(\"DRAFT\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "9.2 u-kuznetsova: подаёт → SUBMITTED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-kuznetsova}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/submit",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "submit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SUBMITTED\", () => pm.expect(pm.response.json().data.status).to.eql(\"SUBMITTED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "9.3 конвейер: конвейер / выдача → OFFERED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-kuznetsova}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"OFFERED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус OFFERED\", () => pm.expect(got).to.eql(\"OFFERED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "9.4 u-kuznetsova: принимает оферту → SIGNING",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-kuznetsova}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/offer/accept",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "offer",
+                "accept"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"variant\": 0\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SIGNING\", () => pm.expect(pm.response.json().data.status).to.eql(\"SIGNING\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "9.5 конвейер: событие в реестре МЧД отозвана",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/sandbox/events",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "events"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"mchd.revoked\",\n  \"inn\": \"7701000019\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 202\", () => pm.response.to.have.status(202));",
+                  "setTimeout(() => {}, 3000);      // worker обновляет данные компании"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "9.5a ждём статус OFFERED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-kuznetsova}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"OFFERED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус OFFERED\", () => pm.expect(got).to.eql(\"OFFERED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "9.6 u-kuznetsova: принимает оферту → SIGNING",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-kuznetsova}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/offer/accept",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "offer",
+                "accept"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"variant\": 0\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SIGNING\", () => pm.expect(pm.response.json().data.status).to.eql(\"SIGNING\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "9.7 u-kuznetsova: пробует подписать → SIGNING",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-kuznetsova}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/signatures",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "signatures"
+              ]
+            },
+            "description": "МЧД отозвана — подписать нельзя, 403"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "9.8 s3: подписывает → SIGNED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s3}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/signatures",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "signatures"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SIGNED\", () => pm.expect(pm.response.json().data.status).to.eql(\"SIGNED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "9.9 конвейер: конвейер / выдача → ISSUED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-kuznetsova}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"ISSUED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус ISSUED\", () => pm.expect(got).to.eql(\"ISSUED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "10. Подписывает представитель по МЧД",
+      "description": "Та же компания: доверенность действует — финансовый директор подписывает кредитный договор сама, без директора.",
+      "item": [
+        {
+          "name": "10.0.1 войти: u-kuznetsova",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/u-kuznetsova/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "u-kuznetsova",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_u-kuznetsova\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10.1 u-kuznetsova: создаёт заявку → DRAFT",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-kuznetsova}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inn\": \"7701000019\",\n  \"product\": \"WORKING_CAPITAL\",\n  \"amount\": 2000000,\n  \"term_months\": 24,\n  \"goal\": \"stock\",\n  \"consent_bki\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"app_id\", pm.response.json().data.id);",
+                  "pm.test(\"статус DRAFT\", () => pm.expect(pm.response.json().data.status).to.eql(\"DRAFT\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10.2 u-kuznetsova: подаёт → SUBMITTED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-kuznetsova}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/submit",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "submit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SUBMITTED\", () => pm.expect(pm.response.json().data.status).to.eql(\"SUBMITTED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10.3 конвейер: конвейер / выдача → OFFERED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-kuznetsova}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"OFFERED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус OFFERED\", () => pm.expect(got).to.eql(\"OFFERED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10.4 u-kuznetsova: принимает оферту → SIGNING",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-kuznetsova}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/offer/accept",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "offer",
+                "accept"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"variant\": 0\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SIGNING\", () => pm.expect(pm.response.json().data.status).to.eql(\"SIGNING\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10.5 u-kuznetsova: подписывает → SIGNED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-kuznetsova}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/signatures",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "signatures"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SIGNED\", () => pm.expect(pm.response.json().data.status).to.eql(\"SIGNED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10.6 конвейер: конвейер / выдача → ISSUED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_u-kuznetsova}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"ISSUED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус ISSUED\", () => pm.expect(got).to.eql(\"ISSUED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "11. Устранимый отказ и путь к одобрению",
+      "description": "Недоимка 72 тыс. ₽ выше порога политики — отказ с объяснением, что исправить. Компания гасит недоимку (событие в реестре ФНС), подаёт снова — и получает оферту.",
+      "item": [
+        {
+          "name": "11.0.1 войти: s4",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/s4/login?wait_s=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "s4",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "wait_s",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_s4\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11.1 s4: создаёт заявку → DRAFT",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s4}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inn\": \"7701000033\",\n  \"product\": \"EXPRESS\",\n  \"amount\": 2000000,\n  \"term_months\": 18,\n  \"goal\": \"cash_gap\",\n  \"consent_bki\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"app_id\", pm.response.json().data.id);",
+                  "pm.test(\"статус DRAFT\", () => pm.expect(pm.response.json().data.status).to.eql(\"DRAFT\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11.2 s4: подаёт → SUBMITTED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s4}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/submit",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "submit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SUBMITTED\", () => pm.expect(pm.response.json().data.status).to.eql(\"SUBMITTED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11.3 конвейер: конвейер / выдача → REJECTED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s4}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"REJECTED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус REJECTED\", () => pm.expect(got).to.eql(\"REJECTED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11.4 конвейер: событие в реестре недоимка погашена",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/sandbox/events",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "events"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"fns.tax_debt_paid\",\n  \"inn\": \"7701000033\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 202\", () => pm.response.to.have.status(202));",
+                  "setTimeout(() => {}, 3000);      // worker обновляет данные компании"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11.4a ждём статус REJECTED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s4}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"REJECTED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус REJECTED\", () => pm.expect(got).to.eql(\"REJECTED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11.5 s4: создаёт заявку → DRAFT",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s4}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inn\": \"7701000033\",\n  \"product\": \"EXPRESS\",\n  \"amount\": 2000000,\n  \"term_months\": 18,\n  \"goal\": \"cash_gap\",\n  \"consent_bki\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"app_id\", pm.response.json().data.id);",
+                  "pm.test(\"статус DRAFT\", () => pm.expect(pm.response.json().data.status).to.eql(\"DRAFT\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11.6 s4: подаёт → SUBMITTED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s4}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}/submit",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}",
+                "submit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"статус SUBMITTED\", () => pm.expect(pm.response.json().data.status).to.eql(\"SUBMITTED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11.7 конвейер: конвейер / выдача → OFFERED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s4}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/applications/{{app_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const got = pm.response.json().data.status;",
+                  "const tries = Number(pm.collectionVariables.get(\"tries\") || 0);",
+                  "if (got !== \"OFFERED\" && tries < 30) {",
+                  "    pm.collectionVariables.set(\"tries\", tries + 1);",
+                  "    setTimeout(() => {}, 1000);",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"tries\", 0);",
+                  "    pm.test(\"статус OFFERED\", () => pm.expect(got).to.eql(\"OFFERED\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

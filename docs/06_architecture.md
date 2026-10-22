@@ -21,8 +21,8 @@ C4 с потоками данных — `diagrams/c4-data-flows.drawio`: L2 (к�
                                                                          │ единственный, кто вызывает внешние ручки
                                                                          ▼
                                               wiremock: ЕГРЮЛ, ЕГРИП, ФНС, ГИР БО, БКИ, МЧД, юр. проверки, банк, АБС, ЕИС
-                                              (штатные стабы по реальным форматам + стабы отказов из песочницы)
-   migrate (one-shot: alembic upgrade + seed) · (опционально, вне Docker) Ollama — OpenAI-compatible, не в пути решения
+                                              (штатные стабы по реальным форматам + стабы отказов из симулятора)
+   migrate (one-shot: SQL-миграции) · (опционально, вне Docker) Ollama — OpenAI-compatible, не в пути решения
 ```
 | Компонент | Решение | Почему |
 |---|---|---|
@@ -43,24 +43,34 @@ backend/
       catalog.py     продукты × отрасли, ставка из частей, ограничения суммы и лимит (13 §2–6)
       scoring.py     балльная карта (12)
       engine.py      решение: стоп-факторы → продукт → требования → скоринг → ставка и лимит → контрпредложение → исход + трасса
-      state.py       таблица переходов, флаги, исход → статус; диаграмма генерируется из неё
+      state.py       таблица переходов с инициатором (клиент, конвейер, таймер, банк), флаги, исход → статус
+      rights.py      права «человек × компания» из ЕГРЮЛ/ЕГРИП и ДБО, кто должен подписать (05 §2–3)
       okved.py       раздел ОКВЭД 2 по коду
-      (дальше: rights.py — права «человек × компания», forecast.py — K1)
-    features.py      анти-коррупционный слой: ответы реестров (форматы 09) → факты движка
-    sources.py       один http-клиент на все источники: таймаут, ретраи с jitter, breaker в kv, снапшоты
+      (дальше: forecast.py — K1)
+    features.py      анти-коррупционный слой: ответы реестров и банка (форматы 09) → факты движка, выписка → обороты
+    sources.py       один http-клиент на все источники: таймаут, ретраи с jitter, breaker в kv, снапшоты; scope company/person
     store.py         5 таблиц (asyncpg + SQL, JSONB); переход статуса + событие + задача в одной транзакции
     company.py       факты о компании из снапшотов с происхождением (STALE_OK, БКИ — только свежий)
-    api/             FastAPI: client.py, bank.py, sandbox.py (только DEMO_MODE); sse.py — дальше
-    worker.py        цикл задач: обновление снапшотов, конвейер заявки, ретраи
+    lifecycle.py     команды заявки: подача, оферта, подпись, выдача в АБС, дозапрос, решение специалиста, отзыв,
+                     пересмотр (RECHECK), сроки — по таблице state.py
+    personas.py      персоны «Кто я» из seed/personas.yaml и свои из симулятора; карточка считается из мира
+    auth.py, clock.py JWT пользователя; часы симулятора (сдвиг времени для сроков)
+    api/             FastAPI: client.py, bank.py, sandbox.py (только DEMO_MODE); deps.py — кто вошёл и права,
+                     http.py — конверт {data} и ошибки RFC 9457, views.py — вид заявки; sse.py — дальше
+    worker.py        цикл задач: снапшоты, конвейер заявки (два шага-чекпоинта), выдача, догоняющая проверка КИ,
+                     между задачами — sweeper сроков
   policy/            policy-2026.10-1.yaml (пороги, скоринг, цена риска, тексты причин) · products.yaml (продукты, отрасли, цели) ·
-                     market.yaml (КС и ставки ЦБ с источником) · sources.yaml (ручки, TTL, таймауты, отказы песочницы)
+                     market.yaml (КС и ставки ЦБ с источником) · sources.yaml (ручки, TTL, таймауты, отказы симулятора)
   migrations/        SQL-миграции (001_init.sql — 5 таблиц)
-  seed/              personas.yaml — демо-мир; gen_mocks.py — генератор моков
+  seed/              personas.yaml — мир симулятора и персоны; world.py — правила мира и ответы источников; gen_mocks.py — моки
   wiremock/          mappings + __files — генерируются из seed, руками не правим
-  tests/             табличные, golden по демо-миру; дальше — отказы N1–N17
+  qa/                граф статусов и минимальные прогоны, pairwise-персоны, инварианты, отчёт docs/test-scenarios.md
+  tests/             golden, граф, механика, права, флаги, скоринг, архитектура, контракт API; tests/e2e — прогоны графа,
+                     сценарии ролей, гид, кабинет, моки, SSE на живом стенде
 ```
-Правила: `domain/` не импортирует IO — единственный контракт import-linter; всё про K лежит в `domain/` отдельными функциями и вызывается только при включённом флаге;
-песочница регистрируется только при `DEMO_MODE`. Логические модули с C4 (parties, applications, decisioning, insights, tasks, signing, loans, audit) — это функции этих файлов,
+Правила: `domain/` не импортирует IO, ядро решения не зависит от умного слоя K, HTTP знают только `api/` и `main.py` — это проверяет
+`tests/test_architecture.py` по импортам; всё про K лежит в `domain/` отдельными функциями и вызывается только при включённом флаге;
+симулятор регистрируется только при `DEMO_MODE`. Логические модули с C4 (parties, applications, decisioning, insights, tasks, signing, loans, audit) — это функции этих файлов,
 а не отдельные пакеты и таблицы.
 
 ## 3. Паттерны и где они
@@ -87,13 +97,15 @@ backend/
 Осознанно не берём: микросервисы, event sourcing, CQRS, service mesh, GraphQL — на отборе это сложность без выигрыша.
 
 ## 4. Модель данных: 5 таблиц
+ER-диаграммы — таблицы PostgreSQL и документ заявки — в [`diagrams/data_model.md`](diagrams/data_model.md) (собраны из миграций и схем API).
+
 | Таблица | Что хранит | Ключевые поля |
 |---|---|---|
 | `applications` | заявка целиком: запрос, текущая оферта и варианты, открытые дозапросы, подписи, решения органов, выдача и график после ISSUED | id, company_inn, status, flags[], data jsonb, version, updated_at |
-| `events` | история и аудит: переходы, решения с трассой, подписи, согласия, действия песочницы; только добавление; после вставки NOTIFY → SSE | id, at, application_id, type, actor, payload jsonb, idempotency_key (unique), prev_hash, hash |
+| `events` | история и аудит: переходы, решения с трассой, подписи, согласия, действия симулятора; только добавление; после вставки NOTIFY → SSE | id, at, application_id, type, actor, payload jsonb, idempotency_key (unique), prev_hash, hash |
 | `jobs` | очередь и таймеры: шаги конвейера, ретраи, сроки, дедлайны, выдача | id, kind, application_id, payload jsonb, status, attempts, run_at, lease_until, last_error |
 | `snapshots` | ответы реестров и банка с происхождением; при сбое источника последний удачный ответ сохраняется | source, key, payload jsonb, fetched_at, status, error, hash |
-| `kv` | операционные мелочи: breaker по источникам, персона демо, часы песочницы, пауза воркера | key, value jsonb, updated_at |
+| `kv` | операционные мелочи: breaker по источникам, активный пользователь симулятора, часы симулятора, пауза воркера | key, value jsonb, updated_at |
 
 Отдельных таблиц нет, потому что это вычисляется или лежит в YAML:
 - права — из снапшотов на лету; inbox задач — запрос по заявкам в статусах ожидания + права;
@@ -101,26 +113,30 @@ backend/
 - продукты, правила, скоринг, параметры — `policy/*.yaml` в git; версия политики = имя файла + hash, пишется в каждое решение;
 - согласия, подписи, решения движка — события; последнее решение и оферта дублируются в `applications.data` для быстрого чтения;
 - кредит после выдачи — `applications.data.loan`; ключ идемпотентности выдачи = id заявки;
-- отказы песочницы — метаданные стабов в самом WireMock.
+- отказы симулятора — метаданные стабов в самом WireMock.
 
 Миграции — SQL-файлы в `backend/migrations/`, применяются по порядку (`python -m app.migrate`); ORM нет: asyncpg + SQL, Pydantic — только для входа API.
 Деньги — `Decimal`, в JSON — строка; даты — ISO 8601 с часовым поясом.
 
 ## 5. API (контракт для фронта; OpenAPI 3.1 генерирует FastAPI)
-REST `/api/v1`, действия — подресурсами, ошибки RFC 9457, заголовки `Idempotency-Key`, `X-Request-Id`, cursor-пагинация.
-| Группа | Ручки |
+REST `/api/v1`. Успех — `{"data": …}` (у списков `data` — массив), ошибка — RFC 9457 `application/problem+json` с машинным `code`
+и `errors[]` у 422. Поля — snake_case, деньги — строкой (Decimal без потерь), даты — ISO 8601. Вход — JWT пользователя
+(`Authorization: Bearer`), без токена в симуляторе — активный пользователь. CORS — для фронта на другом порту, `X-Request-Id` у каждого
+ответа, `Idempotency-Key` на подаче. Контракт — `api/openapi.json`, как им пользоваться фронту — `api/README.md`; живая документация —
+Swagger `/api/docs` и ReDoc `/api/redoc`: русские названия ручек, схемы ответов (`app/api/schemas.py`), ошибки RFC 9457, вход Bearer.
+Что ответы совпадают со схемами, проверяет каждый сквозной тест (`tests/e2e/conftest.py`).
+| Группа | Ручки (✅ есть · дальше — план) |
 |---|---|
-| Персона и компании | `GET /me` · `GET /me/companies` (с правами) · `GET /companies/{inn}/capabilities` (с «почему» и нормой) · `GET /companies/{inn}/profile` (что банк знает: факты, источники, даты) |
-| Подбор и офферы | `GET /companies/{inn}/products?goal=&amount=&term=` · `GET /companies/{inn}/insights` (K1, K2, K5 по флагам) · `POST /insights/offers/{id}/accept` |
-| Заявка | `POST /applications` · `PATCH /applications/{id}` · `POST …/{id}/submit` · `POST …/{id}/withdraw` · `GET …/{id}` · `GET …/{id}/timeline` (шаги и флаги) · `GET …/{id}/events` (SSE) · `GET …/{id}/explain` |
-| Согласия и дозапросы | `POST …/{id}/consents` · `GET …/{id}/info-requests` · `POST …/info-requests/{rid}/answer` |
-| Корпоративные решения | `GET …/{id}/approvals` · `POST /approvals/{aid}/vote` (если устав допускает технические средства) |
-| Оферта и подпись | `GET …/{id}/offer` (варианты, K4-симуляция, K3) · `POST …/{id}/offer/accept` · `POST …/{id}/offer/decline` · `POST …/{id}/signatures` |
-| Задачи | `GET /tasks` · `POST /tasks/{tid}/complete` |
-| Кредит | `GET /loans/{id}` |
-| Система | `GET /system/integrations` (здоровье источников для баннеров) · `/health/live` · `/health/ready` |
-| Банк (кредитный специалист, Must) | `GET /bank/queue` · `GET /bank/applications/{id}/dossier` · `POST /bank/applications/{id}/decision` · `POST /bank/decisions/{did}/confirm` (второй ключ) |
-| Песочница (`DEMO_MODE`) | `GET /sandbox/presets` · `POST /sandbox/personas` · `POST /sandbox/events` · `POST /sandbox/faults` · `DELETE /sandbox/faults/{id}` · `POST /sandbox/worker/pause` · `POST /sandbox/worker/resume` · `POST /sandbox/clock` · `POST /sandbox/reset` |
+| Вход | ✅ `POST /auth/login {login}` (ID пользователя, ИНН человека или компании) · `POST /auth/logout` — в режиме симулятора |
+| Кто я и компании | ✅ `GET /me` (пользователь, компании с правами, активная) · `PUT /me/company` · `GET /companies/{inn}/capabilities` (права с «почему» и нормой) · `GET /companies/{inn}/profile` (форма, регистрация, деятельность, режим, обороты, источники; все факты с происхождением) · `POST /companies/{inn}/refresh` · `GET /tasks` (входящие по всем компаниям; у банка — очередь) |
+| Витрина без входа | ✅ `GET /catalog/products` (карточки для главной: ставка «от» из политики, сумма, срок, кто решает) · `GET /catalog` · `POST /calc/loan` |
+| Главная и подбор | ✅ `GET /dashboard` (остаток, приход и расход, кредиты, поток за 6 мес., операции, предложение в 1 клик) · `GET /companies/{inn}/insights` (K1: прогноз остатка на 30 дней, разрыв и платежи к нему; K2: предложение, которое его закрывает) · `GET /companies/{inn}/products` (предодобренные продукты, рекомендован закрывающий разрыв) · `GET /companies/{inn}/score` (балл, PD, класс, вклад факторов и до какого значения их подтянуть) · `GET /companies/{inn}/repayment` (K4: фиксированный график или доля поступлений, стресс-тест) · `GET /companies/{inn}/applications/summary` · витрина фронта `GET /demo-personas/{inn}`, `GET /demo-personas/{inn}/dashboard/summary`; ИНН банка открывает рабочее место сотрудника |
+| Заявка | ✅ `GET /applications?company_inn=` · `POST /applications` · `GET …/{id}` (с `available_actions`) · `POST …/{id}/submit` · `POST …/{id}/withdraw` · `GET …/{id}/events` · `GET …/{id}/explain` («почему так»: скоринг с вкладами, ставка из частей, лимит из ограничений, путь к одобрению K3) · `GET …/{id}/stream` — живой таймлайн (SSE: события сразу после записи, `Last-Event-ID` для переподключения) |
+| Дозапросы и согласия | ✅ `POST …/{id}/info-requests/answer` (решение участников, стоимость залога, документы) · `POST …/{id}/approvals/vote {vote: for\|against}` (голос участника ООО по доле, 14-ФЗ ст. 46 п. 3, ст. 37 п. 7) |
+| Оферта и подпись | ✅ `POST …/{id}/offer/accept` (вариант) · `POST …/{id}/offer/decline` · `POST …/{id}/signatures` (совместные ЕИО — все) |
+| Система | ✅ `/health/live` · `/health/ready` · дальше `GET /system/integrations` (здоровье источников для баннеров) |
+| Банк (кредитный специалист, Must) | ✅ `GET /bank/queue` (с `pending_decision` и `available_actions`) · `GET /bank/metrics` (STP, время решения и ручного рассмотрения против целей, исходы, выдачи) · `GET /bank/audit` (цепочка хэшей журнала цела или с какой записи правили) · `GET /bank/applications/{id}/dossier` · `POST /bank/applications/{id}/decision` (одобрить с другой суммой и сроком, отказать, дозапросить) · `POST /bank/applications/{id}/decision/confirm {approve, comment}` (второй ключ риск-менеджера выше полномочий специалиста) |
+| Симулятор (`DEMO_MODE`) | ✅ `GET /sandbox/personas` · `GET /sandbox/persona-options` (параметры и флаги своей компании) · `POST /sandbox/personas` · `POST /sandbox/personas/{id}/login` · `GET /sandbox/presets` · `POST /sandbox/events` · `POST/GET /sandbox/faults` · `DELETE /sandbox/faults/{id}` · `GET/POST /sandbox/clock` · `POST /sandbox/worker/{pause,resume}` · `POST /sandbox/reset` · `POST /sandbox/decision` («что если») |
 
 ## 6. События и задачи
 - **Типы событий** (`events.type`): `application.status_changed` · `decision.made` (исход, вид оферты, причины, трасса, версия политики) · `step.changed` · `consent.given` ·
@@ -130,7 +146,10 @@ REST `/api/v1`, действия — подресурсами, ошибки RFC 
 - Outbox — это и есть `events` + `jobs`: пишутся в одной транзакции с изменением заявки [P1].
 
 ## 7. Запуск и деплой
-- `docker compose up --build` — одна команда, работает без правки `.env`. Сервисы: `postgres`, `migrate`, `api`, `worker`, `wiremock`, `web`; healthchecks и `depends_on: service_healthy`.
+- `cd infra && docker compose up --build` — весь стенд одной командой, без правки `.env`: `postgres`, `migrate`, `api`, `worker`, `wiremock`,
+  `web` (nginx: собранный фронт + прокси `/api` на `api`); healthchecks и `depends_on: service_healthy`. `infra/docker-compose.yml` подключает
+  `backend/docker-compose.yml` через `include` (Compose ≥ 2.20) — бэкенд поднимается и отдельно; фронт собирается из `frontend/`
+  без правок в нём (Dockerfile в `infra/`).
 - Профили: по умолчанию prod-подобный; `dev` (hot-reload); `test` (прогон автотестов, включая тесты отказов).
 - Env: `DEMO_MODE`, `FEATURE_K1…K5`, `LLM_ENABLED`, `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, таймауты и SLO-дедлайны интеграций.
 - WireMock: `--global-response-templating`; `mappings/` — по одному стабу на ручку, `__files/<источник>/<ИНН>.json` — тела (§12).
@@ -139,17 +158,20 @@ REST `/api/v1`, действия — подресурсами, ошибки RFC 
 - Страховка: VM + тот же compose + Caddy (HTTPS); CI собирает образы в GHCR.
 
 ## 8. Репозиторий и процесс
-Монорепо без сабмодулей: `backend/` — всё бэковое (api + worker, `policy/`, `migrations/`, `seed/`, `wiremock/` — моки генерируются из `seed/`), `frontend/`, `deploy/`, `docs/` (`openapi.json`), ``.
+Монорепо без сабмодулей: `backend/` — всё бэковое (api + worker, `policy/`, `migrations/`, `seed/`, `wiremock/` — моки генерируются из `seed/`), `frontend/`, `infra/` (общий compose стенда), `docs/` (`api/openapi.json`).
 Trunk-based, короткие ветки, PR + ревью + зелёный CI, merge без squash (история коммитов видна жюри), Conventional Commits, CODEOWNERS, тег версии на дедлайн.
-CI: ruff, mypy (по возможности), pytest (движок, state machine, сценарии, отказы, идемпотентность), import-linter, OpenAPI drift check, `likec4 validate`.
+CI (`.github/workflows/backend.yml`): ruff; pytest — движок, state machine, сценарии, права, флаги, скоринг, границы модулей, полнота
+документации API; моки и документы из кода совпадают с кодом (сценарии, роли, проверка скоринга, ER, коллекция, OpenAPI); линтер
+Redocly для контракта; сквозные тесты на Postgres и WireMock со сверкой каждого ответа со схемой; весь стенд в Docker и коллекция
+запросов через `newman`.
 
 ## 9. Стек
 Python 3.13 · FastAPI · Pydantic v2 · asyncpg + SQL-миграции · uv + `uv.lock` · httpx · PyYAML · pytest · ruff · PostgreSQL 17 · WireMock 3.9 (Apache-2.0) · nginx.
 Фронт — Vue 3 + PrimeVue + Tailwind (команда фронта). Всё перечисляем в `THIRD_PARTY_NOTICES` вместе со списком смоделированных интеграций.
 
 ## 10. Безопасность и сопровождение (минимум для enterprise)
-Демо-JWT от мок-SSO; права вычисляются из снапшотов (`rights`) в каждой команде; tenant scoping; аудит всех решений и переходов; ПДн только синтетические; секретов в репо нет;
-`DEMO_MODE` выключает песочницу целиком (эндпоинты не регистрируются). Логи JSON с `X-Request-Id`; здоровье интеграций — в API и песочнице; метрики (доля STP,
+JWT при входе пользователем (HS256, секрет из окружения); права вычисляются из снапшотов (`rights`) в каждой команде; tenant scoping; аудит всех решений и переходов; ПДн только синтетические; секретов в репо нет;
+`DEMO_MODE` выключает симулятор целиком (эндпоинты не регистрируются). Логи JSON с `X-Request-Id`; здоровье интеграций — в API и симуляторе; метрики (доля STP,
 время решения, срабатывания политик фактов, состояние breaker) — Should.
 
 ## 11. Путь роста (потенциал развития)

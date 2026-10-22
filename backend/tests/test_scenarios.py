@@ -39,7 +39,7 @@ def check(decision: dict, expect: dict) -> None:
                 assert offer["product"] == value
             case "alternative":
                 alt = decision["alternatives"][0]
-                assert (alt["amount"], alt["termMonths"]) == (Decimal(value["amount"]), value["term_months"])
+                assert (alt["amount"], alt["term_months"]) == (Decimal(value["amount"]), value["term_months"])
             case _:
                 raise AssertionError(f"неизвестное поле expect: {key}")
 

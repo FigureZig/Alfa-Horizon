@@ -3,5 +3,27 @@
   "fio": "Иванов Иван Иванович",
   "snils": "70100000777",
   "kycStatus": "VERIFIED",
-  "key": "ivanov"
+  "key": "ivanov",
+  "companies": [
+    {
+      "companyInn": "7701000040",
+      "level": "owner",
+      "roles": [
+        "eio",
+        "participant"
+      ]
+    },
+    {
+      "companyInn": "7701000058",
+      "level": "view",
+      "roles": [
+        "participant"
+      ]
+    },
+    {
+      "companyInn": "7701000065",
+      "level": "prepare",
+      "roles": []
+    }
+  ]
 }

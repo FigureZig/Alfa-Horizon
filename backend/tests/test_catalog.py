@@ -40,7 +40,7 @@ def test_risk_spread_from_expected_loss(pol, risk_class, security, spread):
 
 def test_rate_is_sum_of_parts(pol):
     r = catalog.rate(pol, "I", 12, "B", "none")
-    assert r["total"] == r["keyRate"] + r["industry"] + r["risk"] == Decimal("17.0")
+    assert r["total"] == r["key_rate"] + r["industry"] + r["risk"] == Decimal("17.0")
 
 
 def test_products_depend_on_industry(pol):

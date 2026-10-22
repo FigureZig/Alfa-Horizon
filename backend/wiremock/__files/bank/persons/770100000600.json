@@ -3,5 +3,15 @@
   "fio": "Белов Игорь Андреевич",
   "snils": "70100000676",
   "kycStatus": "VERIFIED",
-  "key": "belov"
+  "key": "belov",
+  "companies": [
+    {
+      "companyInn": "7701000033",
+      "level": "owner",
+      "roles": [
+        "eio",
+        "participant"
+      ]
+    }
+  ]
 }

@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "guid": "6cf372de-a7b8-59eb-a170-21922ef926e4",
+      "status": "ACTIVE",
+      "principal": {
+        "inn": "7701000019",
+        "ogrn": "1227746000020"
+      },
+      "representative": {
+        "inn": "770100001594",
+        "snils": "70100001577",
+        "fio": "Кузнецова Ольга Андреевна"
+      },
+      "powers": [
+        {
+          "code": "CREDIT_AGREEMENT_SIGN",
+          "name": "Подписание кредитного договора"
+        }
+      ],
+      "validFrom": "2026-01-15",
+      "validTo": "2027-06-30"
+    }
+  ]
+}

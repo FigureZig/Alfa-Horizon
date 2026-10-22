@@ -3,5 +3,14 @@
   "fio": "Смирнова Анна Сергеевна",
   "snils": "70100000070",
   "kycStatus": "VERIFIED",
-  "key": "smirnova"
+  "key": "smirnova",
+  "companies": [
+    {
+      "companyInn": "770100000079",
+      "level": "owner",
+      "roles": [
+        "owner"
+      ]
+    }
+  ]
 }

@@ -3,5 +3,14 @@
   "fio": "Котов Дмитрий Романович",
   "snils": "70100000171",
   "kycStatus": "VERIFIED",
-  "key": "kotov"
+  "key": "kotov",
+  "companies": [
+    {
+      "companyInn": "770100000142",
+      "level": "owner",
+      "roles": [
+        "owner"
+      ]
+    }
+  ]
 }

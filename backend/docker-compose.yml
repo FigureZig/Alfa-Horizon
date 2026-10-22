@@ -12,11 +12,14 @@ x-app: &app
     WIREMOCK_URL: http://wiremock:8080
     DEMO_MODE: ${DEMO_MODE:-true}
     DEMO_TODAY: ${DEMO_TODAY:-2026-10-21}
+    DEMO_TOKEN_SECRET: ${DEMO_TOKEN_SECRET:-dev-only-not-a-secret}
+    DEFAULT_PERSONA: ${DEFAULT_PERSONA:-s7}
+    CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://localhost:8080}
     FEATURE_K1: ${FEATURE_K1:-true}
     FEATURE_K2: ${FEATURE_K2:-true}
     FEATURE_K3: ${FEATURE_K3:-true}
-    FEATURE_K4: ${FEATURE_K4:-false}
-    FEATURE_K5: ${FEATURE_K5:-false}
+    FEATURE_K4: ${FEATURE_K4:-true}
+    FEATURE_K5: ${FEATURE_K5:-true}
     LLM_ENABLED: ${LLM_ENABLED:-false}
   depends_on:
     migrate:

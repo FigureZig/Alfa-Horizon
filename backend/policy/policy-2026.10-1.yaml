@@ -8,6 +8,11 @@ params:                              # docs/04 §9 — наш дизайн, кр
   overdue_stop_days: 90
   large_deal_share: 0.25             # крупная сделка: 14-ФЗ ст. 46 п. 1, 208-ФЗ ст. 78
   auto_authority_max: 10000000       # выше — кредитный специалист
+  k4_share: 0.12                     # K4: доля каждого поступления в погашение (docs/03)
+  k4_min_payment: 20000              # K4: не меньше этого в месяц, ₽
+  k4_stress_max: 0.5                 # K4: фиксированный платёж больше половины поступлений худших месяцев — неудобен
+  specialist_authority_max: 15000000 # выше — одобрение специалиста подтверждает риск-менеджер (второй ключ)
+  approval_majority_pct: 50          # согласие участников: «за» больше половины голосов всех участников (14-ФЗ ст. 37 п. 7)
   provisional_max: 3000000           # до этой суммы при недоступном БКИ — предварительная оферта
   k_overdraft: 0.4                   # лимит овердрафта ≤ 40% среднемесячных поступлений
   p_payment: 0.3                     # все платежи по кредитам ≤ 30% среднемесячных поступлений
@@ -15,6 +20,14 @@ params:                              # docs/04 §9 — наш дизайн, кр
   term_search_step_months: 6         # шаг поиска срока в контрпредложении
   amount_step_small: 10000           # округление лимита вниз: до 1 млн — до 10 тыс.
   amount_step_large: 100000          # от 1 млн — до 100 тыс.
+
+timers:                              # docs/04 §9: сроки, секунды (демо ускорено / бой)
+  draft:       { demo: 2592000, prod: 2592000 }   # черновик без подачи: 30 дн.
+  offer:       { demo: 600, prod: 864000 }        # оферта: 10 мин / 10 дн.
+  info:        { demo: 300, prod: 604800 }        # дозапрос: 5 мин / 7 дн.
+  signing:     { demo: 300, prod: 432000 }        # подпись: 5 мин / 5 дн.
+  manual_sla:  { demo: 900, prod: 14400 }         # ручное рассмотрение: 15 мин / 4 ч (docs/07 §9)
+  fresh_before_signing: { demo: 3600, prod: 3600 }  # полномочия по ЕГРЮЛ не старше 1 ч (docs/07 §4, BLOCK)
 
 scorecard:                           # docs/12: балльная карта, шкала P23
   base: 600
@@ -24,43 +37,52 @@ scorecard:                           # docs/12: балльная карта, ш�
   classes: [ { class: A, min: 700 }, { class: B, min: 640 }, { class: C, min: 560 }, { class: D, min: 0 } ]
   factors:                           # bins: первый подходящий; lt — меньше, le — не больше; без условия — остальное
     F1_business_age:
+      title: { ru: "Возраст бизнеса", en: "Business age" }
       fact: age_months
       bins: [ { lt: 12, points: -40 }, { lt: 36, points: 0 }, { lt: 60, points: 20 }, { points: 35 } ]
       reason: SC_YOUNG_BUSINESS
     F2_inflow_stability:
+      title: { ru: "Стабильность поступлений", en: "Inflow stability" }
       fact: inflow_cv                # коэффициент вариации месячных поступлений за 12 мес.
       bins: [ { lt: 0.2, points: 40 }, { lt: 0.4, points: 15 }, { lt: 0.7, points: -15 }, { points: -45 } ]
       reason: SC_UNSTABLE_INFLOWS
     F3_inflow_trend:
+      title: { ru: "Динамика поступлений", en: "Inflow trend" }
       fact: inflow_trend             # среднее за 3 мес. / среднее за предыдущие 9 − 1
       bins: [ { lt: -0.30, points: -50 }, { lt: -0.10, points: -20 }, { le: 0.10, points: 0 }, { points: 15 } ]
       reason: SC_DECLINING_INFLOWS
     F4_debt_load:
+      title: { ru: "Долговая нагрузка", en: "Debt load" }
       fact: debt_load                # текущие платежи по БКИ / средние поступления — до новой сделки (docs/13 §5)
       source: bki
       bins: [ { lt: 0.15, points: 30 }, { lt: 0.30, points: 10 }, { lt: 0.45, points: -25 }, { points: -60 } ]
       reason: SC_HIGH_DEBT_LOAD
     F5_delinquency:
+      title: { ru: "Просрочки по кредитам", en: "Loan delinquency" }
       fact: max_overdue_days
       source: bki
       bins: [ { le: 0, points: 40 }, { le: 5, points: 10 }, { le: 30, points: -30 }, { points: -80 } ]
       two_payments_skipped: -60      # «пропуск двух платежей» — не лучше −60
       reason: SC_DELINQUENCY
     F6_credit_hunger:
+      title: { ru: "Запросы в БКИ за 30 дней", en: "Credit bureau inquiries, 30 days" }
       fact: bki_requests_30d
       source: bki_info               # есть и в информационной части КИ — без согласия (218-ФЗ ст. 6 ч. 9.1)
       bins: [ { le: 1, points: 10 }, { le: 4, points: 0 }, { points: -30 } ]
       reason: SC_CREDIT_HUNGER
     F7_tax_discipline:
+      title: { ru: "Налоговая дисциплина", en: "Tax discipline" }
       fact: tax_debt
       bins: [ { le: 0, points: 20 }, { points: -10 } ]
       reason: SC_TAX_DEBT
     F8_profitability:
+      title: { ru: "Прибыльность по отчётности", en: "Profitability" }
       fact: net_profit
       segments: [LLC, JSC]           # у ИП нет бухотчётности (402-ФЗ ст. 6 ч. 2 п. 1)
       bins: [ { le: 0, points: -25 }, { points: 20 } ]
       reason: SC_LOSS
     F9_bank_share:
+      title: { ru: "Доля оборотов через банк", en: "Share of turnover through the bank" }
       fact: bank_share               # поступления на наш счёт / выручка; у ИП выручки в источниках нет → неизвестно
       bins: [ { lt: 0.30, points: -10 }, { le: 0.70, points: 5 }, { points: 15 } ]
       reason: SC_LOW_BANK_SHARE

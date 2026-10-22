@@ -29,8 +29,8 @@ def rate(pol: dict, section: str | None, term_months: int, risk_class: str, secu
     key = dec(pol["market"]["key_rate"]["value"])
     industry = industry_spread(pol["market"], section, bucket)
     risk = risk_spread(pol["risk_pricing"], risk_class, security)
-    return {"total": key + industry + risk, "keyRate": key, "industry": industry, "risk": risk,
-            "section": section, "bucket": bucket, "riskClass": risk_class, "security": security}
+    return {"total": key + industry + risk, "key_rate": key, "industry": industry, "risk": risk,
+            "section": section, "bucket": bucket, "risk_class": risk_class, "security": security}
 
 
 def section_check(pol: dict, okved: str | None, section: str | None) -> tuple[bool, str | None]:

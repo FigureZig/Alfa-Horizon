@@ -3,5 +3,12 @@
   "fio": "Фомин Андрей Петрович",
   "snils": "70100001072",
   "kycStatus": "VERIFIED",
-  "key": "fomin"
+  "key": "fomin",
+  "companies": [
+    {
+      "companyInn": "7701000058",
+      "level": "owner",
+      "roles": []
+    }
+  ]
 }

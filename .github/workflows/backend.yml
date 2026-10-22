@@ -2,10 +2,14 @@ name: backend
 
 on:
   pull_request:
-    paths: ["backend/**", "docs/test-scenarios.md", ".github/workflows/backend.yml"]
+    paths: ["backend/**", "infra/**", "docs/test-scenarios.md", "docs/15_roles.md", "docs/scoring_validation.md", "docs/api/postman_collection.json",
+            "docs/diagrams/application_state.md", "docs/diagrams/data_model.md", "docs/api/openapi.json",
+            ".github/workflows/backend.yml"]
   push:
     branches: [main]
-    paths: ["backend/**", "docs/test-scenarios.md", ".github/workflows/backend.yml"]
+    paths: ["backend/**", "infra/**", "docs/test-scenarios.md", "docs/15_roles.md", "docs/scoring_validation.md", "docs/api/postman_collection.json",
+            "docs/diagrams/application_state.md", "docs/diagrams/data_model.md", "docs/api/openapi.json",
+            ".github/workflows/backend.yml"]
 
 jobs:
   test:
@@ -18,8 +22,51 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - run: uv sync --frozen
       - run: uv run ruff check .
-      - name: Моки совпадают с демо-миром
+      - name: Моки совпадают с миром симулятора
         run: uv run python -m seed.gen_mocks && git diff --exit-code -- wiremock
       - run: uv run pytest -q
-      - name: Сводка тестовых сценариев актуальна
-        run: uv run python -m qa.report && git diff --exit-code -- ../docs/test-scenarios.md
+      - name: Документы из кода актуальны — сценарии, роли, проверка скоринга
+        run: |
+          uv run python -m qa.report && uv run python -m qa.roles && uv run python -m qa.scoring && uv run python -m qa.postman
+          uv run python -m qa.er && uv run python -m app.openapi > ../docs/api/openapi.json
+          git diff --exit-code -- ../docs/test-scenarios.md ../docs/15_roles.md ../docs/scoring_validation.md \
+            ../docs/api/postman_collection.json ../docs/diagrams/data_model.md ../docs/api/openapi.json
+      - name: Контракт OpenAPI проходит линтер Redocly — без ошибок
+        run: docker run --rm -v "$PWD/../docs/api:/spec:ro" redocly/cli:1.25.11 lint /spec/openapi.json --format=summary
+
+  e2e:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --frozen
+      - name: Postgres и WireMock на портах из docker-compose.yml
+        run: |
+          docker run -d --name pg -e POSTGRES_USER=app -e POSTGRES_PASSWORD=app -e POSTGRES_DB=credit -p 55432:5432 postgres:17-alpine
+          docker run -d --name wm -p 8081:8080 -v "$PWD/wiremock:/home/wiremock:ro" wiremock/wiremock:3.9.1 \
+            --global-response-templating --disable-banner
+          for i in $(seq 1 40); do
+            docker exec pg pg_isready -U app -d credit && curl -sf http://localhost:8081/__admin/mappings > /dev/null && break
+            sleep 1
+          done
+      - name: 16 прогонов графа, 9 сценариев ролей, гид, SSE, кабинет и рабочее место банка, флаги, моки как мир, схемы OpenAPI, вход, N1
+        run: uv run pytest -m e2e -q
+
+  stack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Весь стенд в Docker — фронт, API, worker, Postgres, WireMock
+        run: |
+          docker compose -f infra/docker-compose.yml up -d --build
+          for i in $(seq 1 60); do curl -sf http://localhost:8080/api/v1/health/ready && break; sleep 2; done
+      - name: Коллекция запросов проходит на стенде через nginx фронта
+        run: |
+          docker run --rm --network host -v "$PWD/docs/api:/etc/newman:ro" postman/newman:6-alpine \
+            run postman_collection.json --reporters cli
+      - name: Логи стенда при падении
+        if: failure()
+        run: docker compose -f infra/docker-compose.yml logs --tail 200

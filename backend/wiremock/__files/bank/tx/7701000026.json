@@ -1,7 +1,12 @@
 {
   "accountInn": "7701000026",
-  "account": "40702810007701000026",
+  "account": "40702810407701000026",
+  "bik": "044525777",
   "currency": "RUB",
+  "openingBalance": {
+    "amount": "1299904.18",
+    "asOf": "2025-10-01"
+  },
   "balance": {
     "amount": "1500000.00",
     "asOf": "2026-10-21"
@@ -13,7 +18,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1768366.18"
     },
     {
       "bookingDate": "2025-10-02",
@@ -21,7 +27,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2136951.18"
     },
     {
       "bookingDate": "2025-10-06",
@@ -29,7 +36,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2385861.18"
     },
     {
       "bookingDate": "2025-10-06",
@@ -37,7 +45,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 1",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "2115861.18"
     },
     {
       "bookingDate": "2025-10-10",
@@ -45,7 +54,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "1755861.18"
     },
     {
       "bookingDate": "2025-10-13",
@@ -53,7 +63,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 2",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1485861.18"
     },
     {
       "bookingDate": "2025-10-15",
@@ -61,7 +72,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "1155957.00"
     },
     {
       "bookingDate": "2025-10-19",
@@ -69,7 +81,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1491272.00"
     },
     {
       "bookingDate": "2025-10-20",
@@ -77,7 +90,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 3",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1221272.00"
     },
     {
       "bookingDate": "2025-10-23",
@@ -85,7 +99,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1620338.00"
     },
     {
       "bookingDate": "2025-10-25",
@@ -93,7 +108,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2000000.00"
     },
     {
       "bookingDate": "2025-10-25",
@@ -101,7 +117,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "1640000.00"
     },
     {
       "bookingDate": "2025-10-25",
@@ -109,7 +126,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "1460000.00"
     },
     {
       "bookingDate": "2025-10-27",
@@ -117,7 +135,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 4",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1190000.00"
     },
     {
       "bookingDate": "2025-10-28",
@@ -125,7 +144,17 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Налоги и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "950000.00"
+    },
+    {
+      "bookingDate": "2025-10-31",
+      "amount": "349904.18",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возврат депозита на расчётный счёт",
+      "category": "deposit",
+      "balanceAfter": "1299904.18"
     },
     {
       "bookingDate": "2025-11-03",
@@ -133,7 +162,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2098013.18"
     },
     {
       "bookingDate": "2025-11-06",
@@ -141,7 +171,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 1",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1828013.18"
     },
     {
       "bookingDate": "2025-11-10",
@@ -149,7 +180,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "1468013.18"
     },
     {
       "bookingDate": "2025-11-13",
@@ -157,7 +189,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1967901.18"
     },
     {
       "bookingDate": "2025-11-13",
@@ -165,7 +198,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 2",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1697901.18"
     },
     {
       "bookingDate": "2025-11-15",
@@ -173,7 +207,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "1367997.00"
     },
     {
       "bookingDate": "2025-11-18",
@@ -181,7 +216,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1971500.00"
     },
     {
       "bookingDate": "2025-11-20",
@@ -189,7 +225,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 3",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1701500.00"
     },
     {
       "bookingDate": "2025-11-23",
@@ -197,7 +234,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2502612.00"
     },
     {
       "bookingDate": "2025-11-24",
@@ -205,7 +243,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2965002.00"
     },
     {
       "bookingDate": "2025-11-25",
@@ -213,7 +252,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "2605002.00"
     },
     {
       "bookingDate": "2025-11-25",
@@ -221,7 +261,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "2425002.00"
     },
     {
       "bookingDate": "2025-11-27",
@@ -229,7 +270,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2860000.00"
     },
     {
       "bookingDate": "2025-11-27",
@@ -237,7 +279,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 4",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "2590000.00"
     },
     {
       "bookingDate": "2025-11-28",
@@ -245,7 +288,17 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Налоги и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "2350000.00"
+    },
+    {
+      "bookingDate": "2025-11-30",
+      "amount": "1050095.82",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Размещение свободного остатка на депозите",
+      "category": "deposit",
+      "balanceAfter": "1299904.18"
     },
     {
       "bookingDate": "2025-12-02",
@@ -253,7 +306,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1620952.18"
     },
     {
       "bookingDate": "2025-12-03",
@@ -261,7 +315,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1896731.18"
     },
     {
       "bookingDate": "2025-12-06",
@@ -269,7 +324,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 1",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1626731.18"
     },
     {
       "bookingDate": "2025-12-09",
@@ -277,7 +333,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2022714.18"
     },
     {
       "bookingDate": "2025-12-10",
@@ -285,7 +342,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "1662714.18"
     },
     {
       "bookingDate": "2025-12-13",
@@ -293,7 +351,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 2",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1392714.18"
     },
     {
       "bookingDate": "2025-12-15",
@@ -301,7 +360,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "1062810.00"
     },
     {
       "bookingDate": "2025-12-17",
@@ -309,7 +369,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1363719.00"
     },
     {
       "bookingDate": "2025-12-20",
@@ -317,7 +378,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 3",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1093719.00"
     },
     {
       "bookingDate": "2025-12-23",
@@ -325,7 +387,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1418262.00"
     },
     {
       "bookingDate": "2025-12-25",
@@ -333,7 +396,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "1058262.00"
     },
     {
       "bookingDate": "2025-12-25",
@@ -341,7 +405,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "878262.00"
     },
     {
       "bookingDate": "2025-12-26",
@@ -349,7 +414,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1304566.00"
     },
     {
       "bookingDate": "2025-12-27",
@@ -357,7 +423,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 4",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1034566.00"
     },
     {
       "bookingDate": "2025-12-28",
@@ -365,7 +432,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Налоги и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "794566.00"
     },
     {
       "bookingDate": "2025-12-31",
@@ -373,7 +441,17 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1150000.00"
+    },
+    {
+      "bookingDate": "2025-12-31",
+      "amount": "149904.18",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возврат депозита на расчётный счёт",
+      "category": "deposit",
+      "balanceAfter": "1299904.18"
     },
     {
       "bookingDate": "2026-01-02",
@@ -381,7 +459,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1783217.18"
     },
     {
       "bookingDate": "2026-01-05",
@@ -389,7 +468,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2323274.18"
     },
     {
       "bookingDate": "2026-01-06",
@@ -397,7 +477,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 1",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "2053274.18"
     },
     {
       "bookingDate": "2026-01-09",
@@ -405,7 +486,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2745323.18"
     },
     {
       "bookingDate": "2026-01-10",
@@ -413,7 +495,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "2385323.18"
     },
     {
       "bookingDate": "2026-01-13",
@@ -421,7 +504,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2977729.18"
     },
     {
       "bookingDate": "2026-01-13",
@@ -429,7 +513,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 2",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "2707729.18"
     },
     {
       "bookingDate": "2026-01-14",
@@ -437,7 +522,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "3174955.18"
     },
     {
       "bookingDate": "2026-01-15",
@@ -445,7 +531,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "2845051.00"
     },
     {
       "bookingDate": "2026-01-16",
@@ -453,7 +540,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "3420834.00"
     },
     {
       "bookingDate": "2026-01-20",
@@ -461,7 +549,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 3",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "3150834.00"
     },
     {
       "bookingDate": "2026-01-25",
@@ -469,7 +558,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "2790834.00"
     },
     {
       "bookingDate": "2026-01-25",
@@ -477,7 +567,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "2610834.00"
     },
     {
       "bookingDate": "2026-01-26",
@@ -485,7 +576,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "3160000.00"
     },
     {
       "bookingDate": "2026-01-27",
@@ -493,7 +585,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 4",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "2890000.00"
     },
     {
       "bookingDate": "2026-01-28",
@@ -501,7 +594,17 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Налоги и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "2650000.00"
+    },
+    {
+      "bookingDate": "2026-01-31",
+      "amount": "1350095.82",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Размещение свободного остатка на депозите",
+      "category": "deposit",
+      "balanceAfter": "1299904.18"
     },
     {
       "bookingDate": "2026-02-06",
@@ -509,7 +612,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1689483.18"
     },
     {
       "bookingDate": "2026-02-06",
@@ -517,7 +621,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 1",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1419483.18"
     },
     {
       "bookingDate": "2026-02-07",
@@ -525,7 +630,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1976377.18"
     },
     {
       "bookingDate": "2026-02-10",
@@ -533,7 +639,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "1616377.18"
     },
     {
       "bookingDate": "2026-02-12",
@@ -541,7 +648,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1985789.18"
     },
     {
       "bookingDate": "2026-02-13",
@@ -549,7 +657,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 2",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1715789.18"
     },
     {
       "bookingDate": "2026-02-15",
@@ -557,7 +666,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "1385885.00"
     },
     {
       "bookingDate": "2026-02-20",
@@ -565,7 +675,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 3",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1115885.00"
     },
     {
       "bookingDate": "2026-02-21",
@@ -573,7 +684,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1390326.00"
     },
     {
       "bookingDate": "2026-02-22",
@@ -581,7 +693,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1800000.00"
     },
     {
       "bookingDate": "2026-02-25",
@@ -589,7 +702,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "1440000.00"
     },
     {
       "bookingDate": "2026-02-25",
@@ -597,7 +711,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "1260000.00"
     },
     {
       "bookingDate": "2026-02-27",
@@ -605,7 +720,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 4",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "990000.00"
     },
     {
       "bookingDate": "2026-02-28",
@@ -613,7 +729,17 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Налоги и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "750000.00"
+    },
+    {
+      "bookingDate": "2026-02-28",
+      "amount": "549904.18",
+      "direction": "in",
+      "counterpartyInn": null,
+      "purpose": "Возврат депозита на расчётный счёт",
+      "category": "deposit",
+      "balanceAfter": "1299904.18"
     },
     {
       "bookingDate": "2026-03-01",
@@ -621,7 +747,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1633471.18"
     },
     {
       "bookingDate": "2026-03-02",
@@ -629,7 +756,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2056456.18"
     },
     {
       "bookingDate": "2026-03-05",
@@ -637,7 +765,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2604179.18"
     },
     {
       "bookingDate": "2026-03-06",
@@ -645,7 +774,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 1",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "2334179.18"
     },
     {
       "bookingDate": "2026-03-07",
@@ -653,7 +783,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2679832.18"
     },
     {
       "bookingDate": "2026-03-10",
@@ -661,7 +792,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "2319832.18"
     },
     {
       "bookingDate": "2026-03-11",
@@ -669,7 +801,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2838646.18"
     },
     {
       "bookingDate": "2026-03-13",
@@ -677,7 +810,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 2",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "2568646.18"
     },
     {
       "bookingDate": "2026-03-14",
@@ -685,7 +819,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "3148935.18"
     },
     {
       "bookingDate": "2026-03-15",
@@ -693,7 +828,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "2819031.00"
     },
     {
       "bookingDate": "2026-03-20",
@@ -701,7 +837,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 3",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "2549031.00"
     },
     {
       "bookingDate": "2026-03-25",
@@ -709,7 +846,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "2189031.00"
     },
     {
       "bookingDate": "2026-03-25",
@@ -717,7 +855,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "2009031.00"
     },
     {
       "bookingDate": "2026-03-27",
@@ -725,7 +864,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 4",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1739031.00"
     },
     {
       "bookingDate": "2026-03-28",
@@ -733,7 +873,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Налоги и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "1499031.00"
     },
     {
       "bookingDate": "2026-03-31",
@@ -741,7 +882,17 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2050000.00"
+    },
+    {
+      "bookingDate": "2026-03-31",
+      "amount": "750095.82",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Размещение свободного остатка на депозите",
+      "category": "deposit",
+      "balanceAfter": "1299904.18"
     },
     {
       "bookingDate": "2026-04-06",
@@ -749,7 +900,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 1",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1029904.18"
     },
     {
       "bookingDate": "2026-04-07",
@@ -757,7 +909,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1319523.18"
     },
     {
       "bookingDate": "2026-04-10",
@@ -765,7 +918,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "959523.18"
     },
     {
       "bookingDate": "2026-04-12",
@@ -773,7 +927,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1284971.18"
     },
     {
       "bookingDate": "2026-04-13",
@@ -781,7 +936,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 2",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1014971.18"
     },
     {
       "bookingDate": "2026-04-15",
@@ -789,7 +945,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1395343.18"
     },
     {
       "bookingDate": "2026-04-15",
@@ -797,7 +954,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "1065439.00"
     },
     {
       "bookingDate": "2026-04-17",
@@ -805,7 +963,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1562029.00"
     },
     {
       "bookingDate": "2026-04-20",
@@ -813,7 +972,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 3",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1292029.00"
     },
     {
       "bookingDate": "2026-04-23",
@@ -821,7 +981,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1756235.00"
     },
     {
       "bookingDate": "2026-04-25",
@@ -829,7 +990,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "1396235.00"
     },
     {
       "bookingDate": "2026-04-25",
@@ -837,7 +999,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "1216235.00"
     },
     {
       "bookingDate": "2026-04-26",
@@ -845,7 +1008,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1589037.00"
     },
     {
       "bookingDate": "2026-04-27",
@@ -853,7 +1017,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 4",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1319037.00"
     },
     {
       "bookingDate": "2026-04-28",
@@ -861,7 +1026,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Налоги и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "1079037.00"
     },
     {
       "bookingDate": "2026-04-30",
@@ -869,7 +1035,17 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1650000.00"
+    },
+    {
+      "bookingDate": "2026-04-30",
+      "amount": "350095.82",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Размещение свободного остатка на депозите",
+      "category": "deposit",
+      "balanceAfter": "1299904.18"
     },
     {
       "bookingDate": "2026-05-03",
@@ -877,7 +1053,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1886765.18"
     },
     {
       "bookingDate": "2026-05-06",
@@ -885,7 +1062,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 1",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1616765.18"
     },
     {
       "bookingDate": "2026-05-10",
@@ -893,7 +1071,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "1256765.18"
     },
     {
       "bookingDate": "2026-05-13",
@@ -901,7 +1080,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 2",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "986765.18"
     },
     {
       "bookingDate": "2026-05-15",
@@ -909,7 +1089,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "656861.00"
     },
     {
       "bookingDate": "2026-05-16",
@@ -917,7 +1098,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1267787.00"
     },
     {
       "bookingDate": "2026-05-20",
@@ -925,7 +1107,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 3",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "997787.00"
     },
     {
       "bookingDate": "2026-05-25",
@@ -933,7 +1116,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "637787.00"
     },
     {
       "bookingDate": "2026-05-25",
@@ -941,7 +1125,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "457787.00"
     },
     {
       "bookingDate": "2026-05-26",
@@ -949,7 +1134,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1451154.00"
     },
     {
       "bookingDate": "2026-05-27",
@@ -957,7 +1143,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 4",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1181154.00"
     },
     {
       "bookingDate": "2026-05-28",
@@ -965,7 +1152,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1754352.00"
     },
     {
       "bookingDate": "2026-05-28",
@@ -973,7 +1161,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Налоги и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "1514352.00"
     },
     {
       "bookingDate": "2026-05-30",
@@ -981,7 +1170,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2354358.00"
     },
     {
       "bookingDate": "2026-05-31",
@@ -989,7 +1179,17 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2850000.00"
+    },
+    {
+      "bookingDate": "2026-05-31",
+      "amount": "1550095.82",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Размещение свободного остатка на депозите",
+      "category": "deposit",
+      "balanceAfter": "1299904.18"
     },
     {
       "bookingDate": "2026-06-03",
@@ -997,7 +1197,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1637147.18"
     },
     {
       "bookingDate": "2026-06-04",
@@ -1005,7 +1206,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1900813.18"
     },
     {
       "bookingDate": "2026-06-06",
@@ -1013,7 +1215,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 1",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1630813.18"
     },
     {
       "bookingDate": "2026-06-10",
@@ -1021,7 +1224,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1962670.18"
     },
     {
       "bookingDate": "2026-06-10",
@@ -1029,7 +1233,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "1602670.18"
     },
     {
       "bookingDate": "2026-06-12",
@@ -1037,7 +1242,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1940397.18"
     },
     {
       "bookingDate": "2026-06-13",
@@ -1045,7 +1251,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 2",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1670397.18"
     },
     {
       "bookingDate": "2026-06-14",
@@ -1053,7 +1260,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2122659.18"
     },
     {
       "bookingDate": "2026-06-15",
@@ -1061,7 +1269,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "1792755.00"
     },
     {
       "bookingDate": "2026-06-20",
@@ -1069,7 +1278,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 3",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1522755.00"
     },
     {
       "bookingDate": "2026-06-23",
@@ -1077,7 +1287,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1991844.00"
     },
     {
       "bookingDate": "2026-06-25",
@@ -1085,7 +1296,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "1631844.00"
     },
     {
       "bookingDate": "2026-06-25",
@@ -1093,7 +1305,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "1451844.00"
     },
     {
       "bookingDate": "2026-06-27",
@@ -1101,7 +1314,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 4",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1181844.00"
     },
     {
       "bookingDate": "2026-06-28",
@@ -1109,7 +1323,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1590000.00"
     },
     {
       "bookingDate": "2026-06-28",
@@ -1117,7 +1332,17 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Налоги и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "1350000.00"
+    },
+    {
+      "bookingDate": "2026-06-30",
+      "amount": "50095.82",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Размещение свободного остатка на депозите",
+      "category": "deposit",
+      "balanceAfter": "1299904.18"
     },
     {
       "bookingDate": "2026-07-01",
@@ -1125,7 +1350,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1551205.18"
     },
     {
       "bookingDate": "2026-07-06",
@@ -1133,7 +1359,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 1",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1281205.18"
     },
     {
       "bookingDate": "2026-07-10",
@@ -1141,7 +1368,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "921205.18"
     },
     {
       "bookingDate": "2026-07-13",
@@ -1149,7 +1377,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 2",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "651205.18"
     },
     {
       "bookingDate": "2026-07-14",
@@ -1157,7 +1386,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1047234.18"
     },
     {
       "bookingDate": "2026-07-15",
@@ -1165,7 +1395,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "717330.00"
     },
     {
       "bookingDate": "2026-07-17",
@@ -1173,7 +1404,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1140677.00"
     },
     {
       "bookingDate": "2026-07-18",
@@ -1181,7 +1413,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1602351.00"
     },
     {
       "bookingDate": "2026-07-20",
@@ -1189,7 +1422,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 3",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1332351.00"
     },
     {
       "bookingDate": "2026-07-22",
@@ -1197,7 +1431,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1716258.00"
     },
     {
       "bookingDate": "2026-07-24",
@@ -1205,7 +1440,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2065646.00"
     },
     {
       "bookingDate": "2026-07-25",
@@ -1213,7 +1449,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "1705646.00"
     },
     {
       "bookingDate": "2026-07-25",
@@ -1221,7 +1458,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "1525646.00"
     },
     {
       "bookingDate": "2026-07-27",
@@ -1229,7 +1467,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1948570.00"
     },
     {
       "bookingDate": "2026-07-27",
@@ -1237,7 +1476,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 4",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1678570.00"
     },
     {
       "bookingDate": "2026-07-28",
@@ -1245,7 +1485,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Налоги и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "1438570.00"
     },
     {
       "bookingDate": "2026-07-31",
@@ -1253,7 +1494,17 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1750000.00"
+    },
+    {
+      "bookingDate": "2026-07-31",
+      "amount": "450095.82",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Размещение свободного остатка на депозите",
+      "category": "deposit",
+      "balanceAfter": "1299904.18"
     },
     {
       "bookingDate": "2026-08-05",
@@ -1261,7 +1512,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1541589.18"
     },
     {
       "bookingDate": "2026-08-06",
@@ -1269,7 +1521,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 1",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1271589.18"
     },
     {
       "bookingDate": "2026-08-10",
@@ -1277,7 +1530,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "911589.18"
     },
     {
       "bookingDate": "2026-08-11",
@@ -1285,7 +1539,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1270613.18"
     },
     {
       "bookingDate": "2026-08-13",
@@ -1293,7 +1548,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1515605.18"
     },
     {
       "bookingDate": "2026-08-13",
@@ -1301,7 +1557,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 2",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1245605.18"
     },
     {
       "bookingDate": "2026-08-15",
@@ -1309,7 +1566,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "915701.00"
     },
     {
       "bookingDate": "2026-08-18",
@@ -1317,7 +1575,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1320239.00"
     },
     {
       "bookingDate": "2026-08-20",
@@ -1325,7 +1584,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 3",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1050239.00"
     },
     {
       "bookingDate": "2026-08-25",
@@ -1333,7 +1593,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "690239.00"
     },
     {
       "bookingDate": "2026-08-25",
@@ -1341,7 +1602,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "510239.00"
     },
     {
       "bookingDate": "2026-08-26",
@@ -1349,7 +1611,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "825099.00"
     },
     {
       "bookingDate": "2026-08-27",
@@ -1357,7 +1620,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1157921.00"
     },
     {
       "bookingDate": "2026-08-27",
@@ -1365,7 +1629,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 4",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "887921.00"
     },
     {
       "bookingDate": "2026-08-28",
@@ -1373,7 +1638,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Налоги и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "647921.00"
     },
     {
       "bookingDate": "2026-08-30",
@@ -1381,7 +1647,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1142431.00"
     },
     {
       "bookingDate": "2026-08-31",
@@ -1389,7 +1656,17 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1550000.00"
+    },
+    {
+      "bookingDate": "2026-08-31",
+      "amount": "250095.82",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Размещение свободного остатка на депозите",
+      "category": "deposit",
+      "balanceAfter": "1299904.18"
     },
     {
       "bookingDate": "2026-09-05",
@@ -1397,7 +1674,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1976682.18"
     },
     {
       "bookingDate": "2026-09-06",
@@ -1405,7 +1683,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 1",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1706682.18"
     },
     {
       "bookingDate": "2026-09-10",
@@ -1413,7 +1692,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2456009.18"
     },
     {
       "bookingDate": "2026-09-10",
@@ -1421,7 +1701,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "2096009.18"
     },
     {
       "bookingDate": "2026-09-13",
@@ -1429,7 +1710,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 2",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1826009.18"
     },
     {
       "bookingDate": "2026-09-14",
@@ -1437,7 +1719,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2210586.18"
     },
     {
       "bookingDate": "2026-09-15",
@@ -1445,7 +1728,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "1880682.00"
     },
     {
       "bookingDate": "2026-09-20",
@@ -1453,7 +1737,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 3",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1610682.00"
     },
     {
       "bookingDate": "2026-09-21",
@@ -1461,7 +1746,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2248331.00"
     },
     {
       "bookingDate": "2026-09-22",
@@ -1469,7 +1755,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2616940.00"
     },
     {
       "bookingDate": "2026-09-23",
@@ -1477,7 +1764,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "3000000.00"
     },
     {
       "bookingDate": "2026-09-25",
@@ -1485,7 +1773,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, вторая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "2640000.00"
     },
     {
       "bookingDate": "2026-09-25",
@@ -1493,7 +1782,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Аренда",
-      "category": "rent"
+      "category": "rent",
+      "balanceAfter": "2460000.00"
     },
     {
       "bookingDate": "2026-09-27",
@@ -1501,7 +1791,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 4",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "2190000.00"
     },
     {
       "bookingDate": "2026-09-28",
@@ -1509,7 +1800,17 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Налоги и страховые взносы",
-      "category": "taxes"
+      "category": "taxes",
+      "balanceAfter": "1950000.00"
+    },
+    {
+      "bookingDate": "2026-09-30",
+      "amount": "650095.82",
+      "direction": "out",
+      "counterpartyInn": null,
+      "purpose": "Размещение свободного остатка на депозите",
+      "category": "deposit",
+      "balanceAfter": "1299904.18"
     },
     {
       "bookingDate": "2026-10-01",
@@ -1517,7 +1818,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1671283.18"
     },
     {
       "bookingDate": "2026-10-03",
@@ -1525,7 +1827,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "2018885.18"
     },
     {
       "bookingDate": "2026-10-06",
@@ -1533,7 +1836,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 1",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1748885.18"
     },
     {
       "bookingDate": "2026-10-08",
@@ -1541,7 +1845,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1954758.18"
     },
     {
       "bookingDate": "2026-10-10",
@@ -1549,7 +1854,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Зарплата, первая половина",
-      "category": "salary"
+      "category": "salary",
+      "balanceAfter": "1594758.18"
     },
     {
       "bookingDate": "2026-10-13",
@@ -1557,7 +1863,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 2",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1324758.18"
     },
     {
       "bookingDate": "2026-10-15",
@@ -1565,7 +1872,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Платежи по кредитам",
-      "category": "loan_payment"
+      "category": "loan_payment",
+      "balanceAfter": "994854.00"
     },
     {
       "bookingDate": "2026-10-16",
@@ -1573,7 +1881,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1358909.00"
     },
     {
       "bookingDate": "2026-10-19",
@@ -1581,7 +1890,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1563776.00"
     },
     {
       "bookingDate": "2026-10-20",
@@ -1589,7 +1899,8 @@
       "direction": "in",
       "counterpartyInn": "7700000000",
       "purpose": "Оплата по договору поставки",
-      "category": "customer_payment"
+      "category": "customer_payment",
+      "balanceAfter": "1770000.00"
     },
     {
       "bookingDate": "2026-10-20",
@@ -1597,7 +1908,8 @@
       "direction": "out",
       "counterpartyInn": null,
       "purpose": "Оплата поставщикам, неделя 3",
-      "category": "suppliers"
+      "category": "suppliers",
+      "balanceAfter": "1500000.00"
     }
   ]
 }

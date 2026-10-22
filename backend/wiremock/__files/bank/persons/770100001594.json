@@ -1,0 +1,14 @@
+{
+  "personInn": "770100001594",
+  "fio": "Кузнецова Ольга Андреевна",
+  "snils": "70100001577",
+  "kycStatus": "VERIFIED",
+  "key": "kuznetsova",
+  "companies": [
+    {
+      "companyInn": "7701000019",
+      "level": "prepare",
+      "roles": []
+    }
+  ]
+}

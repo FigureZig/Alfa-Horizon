@@ -17,6 +17,14 @@ from . import graph, invariants, pairwise
 
 OUT = Path(__file__).resolve().parents[2] / "docs" / "test-scenarios.md"
 KIND = {"client": "клиент", "system": "конвейер", "timer": "таймер", "bank": "специалист"}
+PER = ("переход", "перехода", "переходов")
+
+
+def _n(count: int, forms: tuple[str, str, str]) -> str:
+    """16 прогонов, 32 перехода, 83 шага."""
+    tail = count % 100
+    form = forms[2] if 11 <= tail <= 14 else forms[0] if count % 10 == 1 else forms[1] if 2 <= count % 10 <= 4 else forms[2]
+    return f"{count} {form}"
 
 
 def _money(x) -> str:
@@ -31,7 +39,7 @@ def _offer(d: dict) -> str:
     o = d["offer"]
     if not o:
         return "—"
-    return f"{o['product']} {_money(o['amount'])} ₽ · {o['termMonths']} мес. · {_rate(o['rate']['total'])}%"
+    return f"{o['product']} {_money(o['amount'])} ₽ · {o['term_months']} мес. · {_rate(o['rate']['total'])}%"
 
 
 def _codes(d: dict) -> str:
@@ -49,7 +57,7 @@ def _section_graph(g) -> list[str]:
     return [
         "## 1. Жизненный цикл заявки как граф",
         "",
-        f"Статусов {g.number_of_nodes()}, переходов {g.number_of_edges()}; инициаторы переходов: "
+        f"Статусов {g.number_of_nodes()}, переходов {g.number_of_edges()}; кто запускает переходы: "
         + ", ".join(f"{KIND[k]} — {n}" for k, n in sorted(kinds.items())) + ". Таблица — `app/domain/state.py`.",
         "",
         "| Проверка | Результат |",
@@ -71,10 +79,13 @@ def _section_routes(g) -> list[str]:
     lines = [
         "## 2. Минимальный набор сквозных прогонов",
         "",
-        f"{len(routes)} прогонов проходят все {g.number_of_edges()} переходов, всего {sum(len(r) - 1 for r in routes)} шагов. "
-        f"Меньше нельзя: каждый прогон кончается одним из {into_terminal} переходов в терминал. Поиск — задача китайского "
+        f"{_n(len(routes), ('прогон', 'прогона', 'прогонов'))} проходят все {_n(g.number_of_edges(), PER)}, всего "
+        f"{_n(sum(len(r) - 1 for r in routes), ('шаг', 'шага', 'шагов'))}. Меньше нельзя: каждый прогон кончается одним из "
+        f"{into_terminal} переходов в терминал. Поиск — задача китайского "
         "почтальона: циркуляция минимальной стоимости с нижней границей 1 на переходе, затем разложение на кратчайшие пути "
-        "и циклы, каждый цикл встроен в самый короткий подходящий прогон (`qa/graph.py`).",
+        "и циклы, каждый цикл встроен в самый короткий подходящий прогон (`qa/graph.py`). Каждый прогон выполняется "
+        "сквозным тестом `tests/e2e/test_routes.py` через HTTP API на живых Postgres и WireMock: переход вызывает тот, "
+        "кто его делает в жизни, — клиент, конвейер, таймер (часы симулятора), специалист банка или событие мира.",
         "",
         "| # | Итог | Маршрут (кто запускает шаг) | Шагов |",
         "|---|---|---|---|",
@@ -82,7 +93,7 @@ def _section_routes(g) -> list[str]:
     for i, route in enumerate(routes, 1):
         steps = " ".join(f"→ _{'/'.join(KIND[k] for k in sorted(kinds))}_ → {b}" for _, b, kinds in graph.route_steps(g, route))
         lines.append(f"| {i} | {route[-1]} | DRAFT {steps} | {len(route) - 1} |")
-    lines += ["", "Как вызвать каждый переход в демо:", "", "| Переход | Кто | Как |", "|---|---|---|"]
+    lines += ["", "Как вызвать каждый переход в симуляторе:", "", "| Переход | Кто | Как |", "|---|---|---|"]
     lines += [f"| {a} → {b} | {', '.join(KIND[k] for k in sorted(state.EDGES[a, b]))} | {how} |"
               for (a, b), how in graph.HOW.items()]
     return lines + [""]
@@ -105,7 +116,7 @@ def _section_pairwise(cases: dict, pol: dict) -> list[str]:
     lines = [
         "## 3. Свои персоны: pairwise",
         "",
-        "Персона строится из осей тем же `seed/world.py`, что демо-мир: ИНН и ОГРН с контрольными цифрами, выписка, "
+        "Персона строится из осей тем же `seed/world.py`, что и мир симулятора: ИНН и ОГРН с контрольными цифрами, выписка, "
         "кредиты в БКИ, отчётность — согласованы между собой. Ответы источников проходят через JSON, как из WireMock. "
         "Набор векторов — IPOG (allpairspy): каждая пара значений любых двух осей встречается хотя бы раз.",
         "",
@@ -194,7 +205,7 @@ def render(today: date | None = None) -> str:
         "# Тестовые сценарии ядра",
         "",
         "Сгенерировано из кода: `cd backend && uv run python -m qa.report`. Руками не править — источник правды: "
-        "`app/domain/state.py`, `policy/`, `seed/world.py`, `qa/`. Конкретные числа демо-мира держат golden-сценарии "
+        "`app/domain/state.py`, `policy/`, `seed/world.py`, `qa/`. Конкретные числа мира симулятора держат golden-сценарии "
         f"(`tests/test_scenarios.py`, `seed/personas.yaml`). Политика {pol['version']}, дата мира {today.isoformat()}.",
         "",
         *_section_graph(g),

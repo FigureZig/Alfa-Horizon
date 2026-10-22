@@ -61,10 +61,16 @@ async def call(client: httpx.AsyncClient, name: str, inn: str) -> tuple[str, dic
     raise SourceUnavailable(f"{name}: {last_error}")
 
 
-async def refresh(conn, client: httpx.AsyncClient, inn: str, *, with_bki: bool = False) -> dict[str, str]:
-    """Обновить снапшоты компании по всем подходящим источникам. БКИ — только при согласии (218-ФЗ ст. 6 ч. 9)."""
+def in_scope(src: dict, scope: str) -> bool:
+    return src.get("scope", "company") == scope
+
+
+async def refresh(conn, client: httpx.AsyncClient, inn: str, *, with_bki: bool = False, scope: str = "company",
+                  only: tuple[str, ...] = ()) -> dict[str, str]:
+    """Обновить снапшоты по всем подходящим источникам (или только по only). БКИ — только при согласии (218-ФЗ ст. 6 ч. 9)."""
     cfg = source_config()
-    names = [n for n, s in cfg["sources"].items() if applies(s, inn) and (with_bki or not s.get("needs_consent"))]
+    names = [n for n, s in cfg["sources"].items() if in_scope(s, scope) and applies(s, inn)
+             and (with_bki or not s.get("needs_consent")) and (not only or n in only)]
     breaker = cfg["defaults"]["breaker"]
     states = {n: await store.kv_get(conn, f"breaker:{n}", {"failures": 0, "open_until": 0}) for n in names}
     now = time.time()

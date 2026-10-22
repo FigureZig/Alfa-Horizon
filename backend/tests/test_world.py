@@ -4,6 +4,7 @@ import copy
 import filecmp
 import json
 import re
+from decimal import Decimal
 from pathlib import Path
 
 import pytest
@@ -110,3 +111,17 @@ def test_custom_persona_answers_every_request_of_the_worker(kind):
         hits = [s for s in stubs if _hits(s, src["method"], path, dict([query.split("=")]) if query else {},
                                           render(src.get("body", {}), company["inn"]))]
         assert [h["response"]["jsonBody"] for h in hits] == [served[name]], name
+
+
+@pytest.mark.parametrize("company", [*COMPANIES.values(), world.custom({"kind": "IP", "inflow_cv": 0.9}, 41, TODAY)[0],
+                                     world.custom({"kind": "LLC", "debt_load": 0.6, "inflow_trend": -0.5}, 42, TODAY)[0]],
+                         ids=lambda c: c["key"])
+def test_statement_adds_up_and_never_goes_negative(company):
+    """Выписка как у настоящего счёта: входящий + обороты = сегодняшний, остаток не уходит в минус, счёт с верным ключом."""
+    tx = world.transactions(company, TODAY)
+    running = Decimal(tx["openingBalance"]["amount"])
+    for t in tx["items"]:
+        running += Decimal(t["amount"]) if t["direction"] == "in" else -Decimal(t["amount"])
+        assert Decimal(t["balanceAfter"]) == running >= 0, t
+    assert running == Decimal(tx["balance"]["amount"])
+    assert world.account_valid(tx["account"]) and tx["account"][:5] == ("40702" if world.is_ul(company) else "40802")

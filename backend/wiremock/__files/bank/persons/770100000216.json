@@ -3,5 +3,15 @@
   "fio": "Орлов Павел Дмитриевич",
   "snils": "70100000272",
   "kycStatus": "VERIFIED",
-  "key": "orlov"
+  "key": "orlov",
+  "companies": [
+    {
+      "companyInn": "7701000019",
+      "level": "owner",
+      "roles": [
+        "eio",
+        "participant"
+      ]
+    }
+  ]
 }

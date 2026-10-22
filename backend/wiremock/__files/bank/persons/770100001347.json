@@ -3,5 +3,15 @@
   "fio": "Гусев Артём Ильич",
   "snils": "70100001375",
   "kycStatus": "VERIFIED",
-  "key": "gusev"
+  "key": "gusev",
+  "companies": [
+    {
+      "companyInn": "7701000080",
+      "level": "owner",
+      "roles": [
+        "eio",
+        "participant"
+      ]
+    }
+  ]
 }

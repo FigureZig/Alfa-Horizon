@@ -1,10 +1,10 @@
 # Тестовые сценарии ядра
 
-Сгенерировано из кода: `cd backend && uv run python -m qa.report`. Руками не править — источник правды: `app/domain/state.py`, `policy/`, `seed/world.py`, `qa/`. Конкретные числа демо-мира держат golden-сценарии (`tests/test_scenarios.py`, `seed/personas.yaml`). Политика 2026.10-1+a7c55e27, дата мира 2026-10-21.
+Сгенерировано из кода: `cd backend && uv run python -m qa.report`. Руками не править — источник правды: `app/domain/state.py`, `policy/`, `seed/world.py`, `qa/`. Конкретные числа мира симулятора держат golden-сценарии (`tests/test_scenarios.py`, `seed/personas.yaml`). Политика 2026.10-1+396c9761, дата мира 2026-10-21.
 
 ## 1. Жизненный цикл заявки как граф
 
-Статусов 14, переходов 31; инициаторы переходов: специалист — 3, клиент — 14, конвейер — 11, таймер — 6. Таблица — `app/domain/state.py`.
+Статусов 14, переходов 32; кто запускает переходы: специалист — 3, клиент — 14, конвейер — 12, таймер — 7. Таблица — `app/domain/state.py`.
 
 | Проверка | Результат |
 |---|---|
@@ -45,6 +45,7 @@ stateDiagram-v2
     SIGNING --> WITHDRAWN: client
     SIGNED --> DISBURSING: system
     SIGNED --> REJECTED: system
+    SIGNED --> UNDER_REVIEW: system / timer
     SIGNED --> WITHDRAWN: client
     DISBURSING --> ISSUED: system
     DISBURSING --> UNDER_REVIEW: system / timer
@@ -57,28 +58,28 @@ stateDiagram-v2
 
 ## 2. Минимальный набор сквозных прогонов
 
-16 прогонов проходят все 31 переходов, всего 80 шагов. Меньше нельзя: каждый прогон кончается одним из 16 переходов в терминал. Поиск — задача китайского почтальона: циркуляция минимальной стоимости с нижней границей 1 на переходе, затем разложение на кратчайшие пути и циклы, каждый цикл встроен в самый короткий подходящий прогон (`qa/graph.py`).
+16 прогонов проходят все 32 перехода, всего 83 шага. Меньше нельзя: каждый прогон кончается одним из 16 переходов в терминал. Поиск — задача китайского почтальона: циркуляция минимальной стоимости с нижней границей 1 на переходе, затем разложение на кратчайшие пути и циклы, каждый цикл встроен в самый короткий подходящий прогон (`qa/graph.py`). Каждый прогон выполняется сквозным тестом `tests/e2e/test_routes.py` через HTTP API на живых Postgres и WireMock: переход вызывает тот, кто его делает в жизни, — клиент, конвейер, таймер (часы симулятора), специалист банка или событие мира.
 
 | # | Итог | Маршрут (кто запускает шаг) | Шагов |
 |---|---|---|---|
 | 1 | ISSUED | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер_ → OFFERED → _клиент_ → SIGNING → _клиент_ → SIGNED → _конвейер_ → DISBURSING → _конвейер_ → ISSUED | 7 |
 | 2 | REJECTED | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер/таймер_ → UNDER_REVIEW → _специалист_ → REJECTED | 4 |
 | 3 | REJECTED | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер_ → OFFERED → _клиент_ → SIGNING → _клиент_ → SIGNED → _конвейер_ → REJECTED | 6 |
-| 4 | REJECTED | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер_ → OFFERED → _клиент_ → SIGNING → _клиент_ → SIGNED → _конвейер_ → DISBURSING → _конвейер/таймер_ → UNDER_REVIEW → _специалист_ → OFFERED → _клиент_ → SIGNING → _конвейер_ → CHECKING → _конвейер_ → REJECTED | 11 |
-| 5 | DECLINED | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер_ → INFO_REQUESTED → _клиент_ → CHECKING → _конвейер_ → OFFERED → _клиент_ → DECLINED | 6 |
+| 4 | REJECTED | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер_ → OFFERED → _клиент_ → SIGNING → _клиент_ → SIGNED → _конвейер_ → DISBURSING → _конвейер/таймер_ → UNDER_REVIEW → _специалист_ → OFFERED → _клиент_ → SIGNING → _клиент_ → SIGNED → _конвейер/таймер_ → UNDER_REVIEW → _специалист_ → INFO_REQUESTED → _клиент_ → CHECKING → _конвейер_ → REJECTED | 14 |
+| 5 | DECLINED | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер_ → OFFERED → _конвейер_ → CHECKING → _конвейер_ → OFFERED → _клиент_ → DECLINED | 6 |
 | 6 | WITHDRAWN | DRAFT → _клиент/таймер_ → WITHDRAWN | 1 |
 | 7 | WITHDRAWN | DRAFT → _клиент_ → SUBMITTED → _клиент_ → WITHDRAWN | 2 |
 | 8 | WITHDRAWN | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер_ → OFFERED → _клиент_ → WITHDRAWN | 4 |
 | 9 | WITHDRAWN | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер_ → INFO_REQUESTED → _клиент_ → WITHDRAWN | 4 |
-| 10 | WITHDRAWN | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер/таймер_ → UNDER_REVIEW → _клиент_ → WITHDRAWN | 4 |
-| 11 | WITHDRAWN | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер_ → OFFERED → _конвейер_ → CHECKING → _клиент_ → WITHDRAWN | 5 |
-| 12 | WITHDRAWN | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер_ → OFFERED → _клиент_ → SIGNING → _клиент_ → WITHDRAWN | 5 |
+| 10 | WITHDRAWN | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер_ → OFFERED → _клиент_ → SIGNING → _клиент_ → WITHDRAWN | 5 |
+| 11 | WITHDRAWN | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер_ → INFO_REQUESTED → _клиент_ → UNDER_REVIEW → _клиент_ → WITHDRAWN | 5 |
+| 12 | WITHDRAWN | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер_ → OFFERED → _клиент_ → SIGNING → _конвейер_ → CHECKING → _клиент_ → WITHDRAWN | 6 |
 | 13 | WITHDRAWN | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер_ → OFFERED → _клиент_ → SIGNING → _клиент_ → SIGNED → _клиент_ → WITHDRAWN | 6 |
 | 14 | EXPIRED | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер_ → OFFERED → _таймер_ → EXPIRED | 4 |
-| 15 | EXPIRED | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер_ → OFFERED → _клиент_ → SIGNING → _таймер_ → EXPIRED | 5 |
-| 16 | EXPIRED | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер_ → INFO_REQUESTED → _клиент_ → UNDER_REVIEW → _специалист_ → INFO_REQUESTED → _таймер_ → EXPIRED | 6 |
+| 15 | EXPIRED | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер_ → INFO_REQUESTED → _таймер_ → EXPIRED | 4 |
+| 16 | EXPIRED | DRAFT → _клиент_ → SUBMITTED → _конвейер_ → CHECKING → _конвейер_ → OFFERED → _клиент_ → SIGNING → _таймер_ → EXPIRED | 5 |
 
-Как вызвать каждый переход в демо:
+Как вызвать каждый переход в симуляторе:
 
 | Переход | Кто | Как |
 |---|---|---|
@@ -93,7 +94,7 @@ stateDiagram-v2
 | CHECKING → WITHDRAWN | клиент | клиент отзывает во время проверки (воркер на паузе) |
 | INFO_REQUESTED → CHECKING | клиент | клиент отвечает на системный дозапрос — конвейер заново |
 | INFO_REQUESTED → UNDER_REVIEW | клиент | клиент отвечает на дозапрос специалиста |
-| INFO_REQUESTED → EXPIRED | таймер | срок ответа истёк (сдвиг часов песочницы) |
+| INFO_REQUESTED → EXPIRED | таймер | срок ответа истёк (сдвиг часов симулятора) |
 | INFO_REQUESTED → WITHDRAWN | клиент | клиент отзывает |
 | UNDER_REVIEW → OFFERED | специалист | специалист одобряет на экране банка |
 | UNDER_REVIEW → INFO_REQUESTED | специалист | специалист запрашивает документ |
@@ -110,13 +111,14 @@ stateDiagram-v2
 | SIGNING → WITHDRAWN | клиент | клиент отзывает |
 | SIGNED → DISBURSING | конвейер | перепроверка по свежим данным пройдена |
 | SIGNED → REJECTED | конвейер | при перепроверке всплыл стоп-фактор (ГК ст. 821 п. 1) |
+| SIGNED → UNDER_REVIEW | конвейер, таймер | юр. проверки не отвечают перед выдачей до дедлайна (отказ legal в симуляторе, N6) |
 | SIGNED → WITHDRAWN | клиент | клиент отказывается от получения (ГК ст. 821 п. 2) |
 | DISBURSING → ISSUED | конвейер | АБС подтвердила зачисление |
-| DISBURSING → UNDER_REVIEW | конвейер, таймер | сбой АБС до дедлайна (отказ abs в песочнице, N7) |
+| DISBURSING → UNDER_REVIEW | конвейер, таймер | сбой АБС до дедлайна (отказ abs в симуляторе, N7) |
 
 ## 3. Свои персоны: pairwise
 
-Персона строится из осей тем же `seed/world.py`, что демо-мир: ИНН и ОГРН с контрольными цифрами, выписка, кредиты в БКИ, отчётность — согласованы между собой. Ответы источников проходят через JSON, как из WireMock. Набор векторов — IPOG (allpairspy): каждая пара значений любых двух осей встречается хотя бы раз.
+Персона строится из осей тем же `seed/world.py`, что и мир симулятора: ИНН и ОГРН с контрольными цифрами, выписка, кредиты в БКИ, отчётность — согласованы между собой. Ответы источников проходят через JSON, как из WireMock. Набор векторов — IPOG (allpairspy): каждая пара значений любых двух осей встречается хотя бы раз.
 
 Профили: strong — класс A, average — B, weak — C, risky — D (`qa/pairwise.py`). Суммы: below_min — половина минимума продукта, at_min — минимум, fits — посильная, large — около трети активов (крупная сделка), above_authority — 12 000 000 ₽.
 

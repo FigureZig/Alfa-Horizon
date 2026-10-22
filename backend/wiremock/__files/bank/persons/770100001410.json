@@ -1,0 +1,14 @@
+{
+  "personInn": "770100001410",
+  "fio": "Новикова Наталья Сергеевна",
+  "snils": "70100001476",
+  "kycStatus": "VERIFIED",
+  "key": "novikova",
+  "companies": [
+    {
+      "companyInn": "7701000065",
+      "level": "view",
+      "roles": []
+    }
+  ]
+}
