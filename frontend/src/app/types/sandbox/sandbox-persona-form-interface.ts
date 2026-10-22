@@ -21,11 +21,4 @@ export interface SandboxPersonaFormInterface {
   profitMargin: Nullable<number>
   contractPrice: Nullable<number>
   flags: string[]
-  code: string
-  scenario: string
-  permissions: string
-  profile: string
-  registries: string
-  preview: string
-  loginLabel: string
 }

@@ -719,8 +719,6 @@ export default {
                 financeHint: 'The bank builds the account statement from these: balance, regular payments and the 30-day forecast.',
                 flags: 'What is wrong with the company',
                 flagsHint: 'Optional. A flag overrides the fields above and changes the bank’s decision.',
-                card: 'Card appearance',
-                cardHint: 'Optional: the bank writes any empty texts itself from the company parameters.',
             },
             units: {
                 months: ' mo.',
@@ -749,13 +747,6 @@ export default {
                 form: { label: 'Legal form' },
                 okved: { label: 'OKVED', placeholder: '56.30' },
                 okvedName: { label: 'Line of business', placeholder: 'Beverage service' },
-                code: { label: 'Scenario code', placeholder: 'S7' },
-                loginLabel: { label: 'Login button label', placeholder: 'Enter as Anna' },
-                scenario: { label: 'Scenario', placeholder: 'The bank spotted a cash gap' },
-                permissions: { label: 'Permissions', placeholder: 'Sole proprietor — full rights, signs herself' },
-                profile: { label: 'Profile', placeholder: 'Inflows ≈ ₽1.5M per month, business is 2 years old' },
-                registries: { label: 'Registries', placeholder: 'All sources respond' },
-                preview: { label: 'What you will see', placeholder: 'Balance forecast, one-click offer, signing, and disbursement' },
             },
         },
         details: {

@@ -6,8 +6,9 @@ const { t } = useI18n({ useScope: 'global' })
 
 <template>
   <aside
-    class="relative flex min-h-full flex-col justify-between gap-8 overflow-hidden
-           rounded-3xl bg-primary p-6 text-primary-contrast shadow-sm"
+    class="relative flex flex-col-reverse items-center gap-6 overflow-hidden rounded-3xl
+           bg-primary p-6 text-primary-contrast shadow-sm sm:flex-row-reverse
+           sm:justify-between sm:px-10 sm:py-7"
   >
     <!-- Фоновые круги -->
     <div
@@ -21,7 +22,7 @@ const { t } = useI18n({ useScope: 'global' })
 
     <!-- Иллюстрация: карточка персоны -->
     <svg
-      class="relative mx-auto w-full max-w-72"
+      class="relative w-36 shrink-0 sm:w-48 lg:w-56"
       viewBox="0 0 320 240"
       fill="none"
       role="img"
@@ -129,8 +130,8 @@ const { t } = useI18n({ useScope: 'global' })
       />
     </svg>
 
-    <div class="relative">
-      <p class="text-2xl font-bold leading-tight tracking-tight">
+    <div class="relative min-w-0 flex-1 text-center sm:text-left">
+      <p class="text-2xl font-bold leading-tight tracking-tight sm:text-3xl">
         {{ t('sandbox.builder.promoTitle') }}
       </p>
 

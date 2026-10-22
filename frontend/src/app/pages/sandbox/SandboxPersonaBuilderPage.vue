@@ -7,9 +7,7 @@ import Button from 'primevue/button'
 import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
 import Message from 'primevue/message'
-import Panel from 'primevue/panel'
 import SelectButton from 'primevue/selectbutton'
-import Textarea from 'primevue/textarea'
 import AppErrorState from '@/app/components/AppErrorState.vue'
 import AppHeader from '@/app/components/layout/AppHeader.vue'
 import SandboxPersonaBuilderPromo from '@/app/features/sandbox/components/SandboxPersonaBuilderPromo.vue'
@@ -32,8 +30,6 @@ type NumberFieldKey =
   | 'ageMonths' | 'headcount' | 'inflowAvg' | 'inflowCv' | 'inflowTrend' | 'debtLoad'
   | 'overdueDays' | 'bkiRequests' | 'taxDebt' | 'participants' | 'profitMargin' | 'contractPrice'
 
-type TextFieldKey = 'code' | 'scenario' | 'loginLabel' | 'permissions' | 'profile' | 'registries' | 'preview'
-
 type FormErrorKey = 'fullName' | 'inn' | 'okved' | 'okvedName' | NumberFieldKey
 
 interface NumberFieldInterface {
@@ -43,12 +39,6 @@ interface NumberFieldInterface {
   fractionDigits: number
   unit?: 'months' | 'people' | 'rub' | 'days'
   forms?: LegalFormEnum[]
-}
-
-interface TextFieldInterface {
-  key: TextFieldKey
-  maxLength: number
-  isMultiline: boolean
 }
 
 // Те же ограничения, что у бэкенда (PersonaIn)
@@ -74,16 +64,6 @@ const NUMBER_FIELDS: NumberFieldInterface[] = [
   { paramId: 'participants', key: 'participants', fractionDigits: 0, forms: [LegalFormEnum.Llc] },
   { paramId: 'profit_margin', key: 'profitMargin', fractionDigits: 2 },
   { paramId: 'contract_price', key: 'contractPrice', fractionDigits: 0, unit: 'rub' },
-]
-
-const TEXT_FIELDS: TextFieldInterface[] = [
-  { key: 'code', maxLength: 20, isMultiline: false },
-  { key: 'loginLabel', maxLength: 60, isMultiline: false },
-  { key: 'scenario', maxLength: 200, isMultiline: false },
-  { key: 'permissions', maxLength: 300, isMultiline: true },
-  { key: 'profile', maxLength: 300, isMultiline: true },
-  { key: 'registries', maxLength: 300, isMultiline: true },
-  { key: 'preview', maxLength: 300, isMultiline: true },
 ]
 
 const { t, locale } = useI18n({ useScope: 'global' })
@@ -115,13 +95,6 @@ const form = reactive<SandboxPersonaFormInterface>({
   profitMargin: null,
   contractPrice: null,
   flags: [],
-  code: '',
-  scenario: '',
-  permissions: '',
-  profile: '',
-  registries: '',
-  preview: '',
-  loginLabel: '',
 })
 
 const isSubmitting = ref(false)
@@ -156,14 +129,6 @@ const numberFields = computed(() =>
         suffix: field.unit ? t(`sandbox.builder.units.${field.unit}`) : undefined,
       }
     }),
-)
-
-const textFields = computed(() =>
-  TEXT_FIELDS.map((field) => ({
-    ...field,
-    label: t(`sandbox.builder.fields.${field.key}.label`),
-    placeholder: t(`sandbox.builder.fields.${field.key}.placeholder`),
-  })),
 )
 
 function getErrors(): Partial<Record<FormErrorKey, string>> {
@@ -357,7 +322,7 @@ onMounted(loadOptions)
       </template>
     </AppHeader>
 
-    <main class="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6">
+    <main class="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
       <!-- Заголовок -->
       <div>
         <RouterLink
@@ -381,10 +346,12 @@ onMounted(loadOptions)
         </p>
       </div>
 
-      <div class="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+      <SandboxPersonaBuilderPromo />
+
+      <div class="grid grid-cols-1">
         <div
-          class="flex min-w-0 flex-col gap-5 rounded-3xl border border-fino-border
-                 bg-fino-surface p-5 shadow-sm sm:p-6"
+          class="min-w-0 rounded-3xl border border-fino-border bg-fino-surface
+                 p-5 shadow-sm sm:p-8"
         >
           <SandboxPersonaBuilderSkeleton v-if="isOptionsLoading && !isOptionsReady" />
 
@@ -404,7 +371,7 @@ onMounted(loadOptions)
           >
             <!-- Пользователь и компания -->
             <section
-              class="flex flex-col gap-4"
+              class="flex flex-col gap-4 border-b border-fino-border pb-8"
               :aria-label="t('sandbox.builder.sections.company')"
             >
               <h2 class="text-base font-bold text-fino-text">
@@ -520,7 +487,7 @@ onMounted(loadOptions)
 
             <!-- Финансы и кредитная история: от них зависят остаток, прогноз и решение банка -->
             <section
-              class="flex flex-col gap-4"
+              class="flex flex-col gap-4 border-b border-fino-border pb-8"
               :aria-label="t('sandbox.builder.sections.finance')"
             >
               <div>
@@ -584,49 +551,6 @@ onMounted(loadOptions)
               />
             </section>
 
-            <!-- Оформление карточки на /sandbox: необязательно, бэкенд соберёт тексты сам -->
-            <Panel
-              :header="t('sandbox.builder.sections.card')"
-              toggleable
-              collapsed
-            >
-              <p class="mb-4 text-sm text-fino-text-muted">
-                {{ t('sandbox.builder.sections.cardHint') }}
-              </p>
-
-              <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <SandboxPersonaField
-                  v-for="field in textFields"
-                  :key="field.key"
-                  :input-id="`persona-${field.key}`"
-                  :label="field.label"
-                  :error="null"
-                >
-                  <Textarea
-                    v-if="field.isMultiline"
-                    :id="`persona-${field.key}`"
-                    v-model="form[field.key]"
-                    :placeholder="field.placeholder"
-                    :maxlength="field.maxLength"
-                    :disabled="isSubmitting"
-                    rows="2"
-                    auto-resize
-                    fluid
-                  />
-
-                  <InputText
-                    v-else
-                    :id="`persona-${field.key}`"
-                    v-model="form[field.key]"
-                    :placeholder="field.placeholder"
-                    :maxlength="field.maxLength"
-                    :disabled="isSubmitting"
-                    fluid
-                  />
-                </SandboxPersonaField>
-              </div>
-            </Panel>
-
             <Message
               v-if="personaServerError"
               severity="error"
@@ -654,8 +578,6 @@ onMounted(loadOptions)
             </div>
           </form>
         </div>
-
-        <SandboxPersonaBuilderPromo class="hidden xl:sticky xl:top-28 xl:flex" />
       </div>
     </main>
   </div>
