@@ -1,3 +1,5 @@
+import type { DemoPersonaRoleEnum } from '@/app/types/demo-persona/demo-persona-role-enum'
+
 export interface DemoPersonaInterface {
   inn: string
   firstName: string
@@ -5,4 +7,7 @@ export interface DemoPersonaInterface {
   fullName: string
   initials: string
   organizationName: string
+  role: DemoPersonaRoleEnum
+  // Сотрудник банка (специалист или риск-менеджер): у него рабочее место банка, а не кабинет компании
+  isBankStaff: boolean
 }

@@ -5,7 +5,7 @@ import type { Nullable } from '@/app/types/nullable'
 
 export interface CompanyActivityInterface {
   okvedCode: string
-  name: string
+  name: Nullable<string>
 }
 
 export interface CompanyProfileInterface {
@@ -17,4 +17,6 @@ export interface CompanyProfileInterface {
   currency: string
   sources: DataSourceEnum[]
   updatedAt: Nullable<string>
+  // Раздел ОКВЭД (буква): от него зависит отраслевой спред ставки
+  section: Nullable<string>
 }

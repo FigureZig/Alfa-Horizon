@@ -28,7 +28,7 @@ function isItemActive(exact: boolean, isActive: boolean, isExactActive: boolean)
            lg:hidden"
     :aria-label="t('nav.menu')"
   >
-    <div class="mx-auto grid max-w-lg grid-cols-3 gap-1">
+    <div class="mx-auto grid max-w-lg grid-flow-col auto-cols-fr gap-1">
       <RouterLink
         v-for="item in navigation"
         :key="item.name"
@@ -45,7 +45,7 @@ function isItemActive(exact: boolean, isActive: boolean, isExactActive: boolean)
                  focus-visible:outline-2
                  focus-visible:outline-primary"
           :class="
-            isActive
+            isItemActive(item.exact, isActive, isExactActive)
               ? 'text-primary'
               : 'text-fino-text-muted hover:text-fino-text'
           "

@@ -1,0 +1,16 @@
+export enum ApplicationDetailStatusEnum {
+  Draft = 'DRAFT',
+  Submitted = 'SUBMITTED',
+  Checking = 'CHECKING',
+  InfoRequested = 'INFO_REQUESTED',
+  UnderReview = 'UNDER_REVIEW',
+  Offered = 'OFFERED',
+  Signing = 'SIGNING',
+  Signed = 'SIGNED',
+  Disbursing = 'DISBURSING',
+  Issued = 'ISSUED',
+  Rejected = 'REJECTED',
+  Declined = 'DECLINED',
+  Withdrawn = 'WITHDRAWN',
+  Expired = 'EXPIRED',
+}

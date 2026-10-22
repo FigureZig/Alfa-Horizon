@@ -11,12 +11,14 @@ const route = useRoute()
 
 const isDark = computed(() => theme.value === 'dark')
 
-// В кабинете логотип ведёт на главную текущей демо-персоны, вне кабинета — к выбору персоны
-const homeRoute = computed(() =>
-  route.params.inn
-    ? { name: 'dashboard', params: { inn: route.params.inn } }
-    : { name: 'sandbox' },
-)
+// В кабинете логотип ведёт на главную текущей демо-персоны (у сотрудника банка — в очередь), вне кабинета — к выбору персоны
+const homeRoute = computed(() => {
+  if (!route.params.inn) return { name: 'sandbox' }
+
+  const isBankRoute = String(route.name ?? '').startsWith('bank-')
+
+  return { name: isBankRoute ? 'bank-queue' : 'dashboard', params: { inn: route.params.inn } }
+})
 
 function toggleLocale() {
   locale.value = locale.value === 'ru' ? 'en' : 'ru'
