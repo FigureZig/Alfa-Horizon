@@ -16,10 +16,8 @@ const props = defineProps<{
   today: Nullable<string>
 }>()
 
-const MS_IN_DAY = 24 * 60 * 60 * 1000
-
 const { t } = useI18n({ useScope: 'global' })
-const { formatCurrency } = useFormatters()
+const { formatCurrency, getDaysLeft } = useFormatters()
 
 const approval = computed(() => props.item.application.approval)
 
@@ -55,15 +53,7 @@ const forWidth = computed(() => ({ width: `${Math.min(approval.value?.forPercent
 const againstWidth = computed(() => ({ width: `${Math.min(approval.value?.againstPercent ?? 0, 100)}%` }))
 
 // Сколько дней осталось до срока голосования
-const daysLeft = computed(() => {
-  if (!props.today) return null
-
-  const [year, month, day] = props.today.split('-').map(Number)
-  const due = new Date(props.item.task.dueDate)
-  const dueDay = new Date(due.getFullYear(), due.getMonth(), due.getDate())
-
-  return Math.max(Math.round((dueDay.getTime() - new Date(year, month - 1, day).getTime()) / MS_IN_DAY), 0)
-})
+const daysLeft = computed(() => (props.today ? getDaysLeft(props.item.task.dueDate, props.today) : null))
 
 const isForVote = computed(() => myVote.value === ApplicationVoteEnum.For)
 </script>

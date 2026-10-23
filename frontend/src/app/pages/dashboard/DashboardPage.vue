@@ -115,6 +115,7 @@ watch(() => props.inn, reloadDemoPersona, { immediate: true })
       <ApplicationsAndTasksCard
         :inn="inn"
         :summary="applicationsSummary"
+        :today="demoPersona?.today ?? null"
         :is-loading="isApplicationsLoading"
         :has-error="applicationsError"
         @retry="loadApplicationsSummary"

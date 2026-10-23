@@ -11,6 +11,8 @@ function parseIsoDate(isoDate: string): Date {
   return new Date(year, month - 1, day)
 }
 
+const MS_IN_DAY = 24 * 60 * 60 * 1000
+
 export function useFormatters() {
   const { locale } = useI18n({ useScope: 'global' })
 
@@ -57,5 +59,14 @@ export function useFormatters() {
     }).format(isMinutes ? seconds / 60 : seconds)
   }
 
-  return { formatCurrency, formatPercent, formatDate, formatDateTime, formatList, formatDuration }
+  // Сколько дней осталось до срока: по датам, а не по времени суток («оферта на 10 дней» — «осталось 10 дней»);
+  // «сегодня» — дата мира из API (YYYY-MM-DD), а не часы браузера
+  function getDaysLeft(dueIsoDateTime: string, today: string): number {
+    const due = new Date(dueIsoDateTime)
+    const dueDay = new Date(due.getFullYear(), due.getMonth(), due.getDate())
+
+    return Math.max(Math.round((dueDay.getTime() - parseIsoDate(today).getTime()) / MS_IN_DAY), 0)
+  }
+
+  return { getDaysLeft, formatCurrency, formatPercent, formatDate, formatDateTime, formatList, formatDuration }
 }

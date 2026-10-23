@@ -14,9 +14,8 @@ function getInitialLocale(): AppLocale {
         return saved
     }
 
-    return navigator.language.toLowerCase().startsWith('ru')
-        ? 'ru'
-        : 'en'
+    // По умолчанию русский: продукт для российского бизнеса; переключатель языка остаётся в шапке
+    return 'ru'
 }
 
 // Русские формы множественного числа: 1 день | 2 дня | 5 дней
@@ -31,13 +30,18 @@ function getRussianPluralIndex(choice: number): number {
     return 2
 }
 
+const initialLocale = getInitialLocale()
+
+// Язык документа совпадает с языком интерфейса с первого кадра
+document.documentElement.lang = initialLocale
+
 export const i18n = createI18n({
     legacy: false,
     pluralRules: {
         ru: getRussianPluralIndex,
     },
     globalInjection: true,
-    locale: getInitialLocale(),
+    locale: initialLocale,
     fallbackLocale: 'ru',
     messages: {
         ru,

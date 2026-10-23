@@ -272,6 +272,7 @@ export default {
         noTasksHint: 'Signatures and bank requests will appear here',
         tasksCount: '{n} task | {n} tasks',
         dueDate: 'due {date}',
+        daysLeft: '{n} day left | {n} days left',
         loadError: 'Failed to load applications and tasks.',
         status: {
             DRAFT: 'Draft',
@@ -948,7 +949,7 @@ export default {
             description: 'An error occurred on our side. Please try again later.',
         },
         goHome: 'Back to home',
-        openAssistant: 'AI assistant',
+        goLogin: 'Sign in',
         footer: 'Finance for business',
     },
     sandbox: {

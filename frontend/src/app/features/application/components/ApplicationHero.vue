@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ApplicationProgress from './ApplicationProgress.vue'
+import { useFormatters } from '@/app/composables/useFormatters'
 import { ApplicationDetailStatusEnum } from '@/app/types/application/application-detail-status-enum'
 import type { ApplicationInterface } from '@/app/types/application/application-interface'
 import type { Nullable } from '@/app/types/nullable'
@@ -12,7 +13,6 @@ interface ToneInterface {
   isBusy?: boolean
 }
 
-const MS_IN_DAY = 24 * 60 * 60 * 1000
 const URGENT_DAYS = 1
 
 const NEUTRAL = 'bg-fino-surface-secondary text-fino-text-muted'
@@ -45,6 +45,7 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
+const { getDaysLeft } = useFormatters()
 
 const status = computed(() => props.application.status)
 const tone = computed(() => TONES[status.value])
@@ -80,15 +81,7 @@ const now = computed(() =>
 const daysLeft = computed(() => {
   const at = props.application.deadline?.at
 
-  if (!at || !props.today) return null
-
-  const [year, month, day] = props.today.split('-').map(Number)
-
-  // Считаем по датам, а не по времени суток: оферта на 10 дней — это «осталось 10 дней»
-  const due = new Date(at)
-  const dueDay = new Date(due.getFullYear(), due.getMonth(), due.getDate())
-
-  return Math.max(Math.round((dueDay.getTime() - new Date(year, month - 1, day).getTime()) / MS_IN_DAY), 0)
+  return at && props.today ? getDaysLeft(at, props.today) : null
 })
 
 const deadlineText = computed(() => {

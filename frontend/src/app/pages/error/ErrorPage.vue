@@ -105,14 +105,14 @@ const errorDescription = computed(() =>
           </RouterLink>
 
           <RouterLink
-            to="/assistant"
+            :to="{ name: 'login' }"
             class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-fino-border bg-fino-surface px-6 text-sm font-semibold text-fino-text transition-colors hover:bg-fino-surface-hover"
           >
             <i
-              class="pi pi-sparkles text-primary"
+              class="pi pi-sign-in text-primary"
               aria-hidden="true"
             />
-            {{ t('errors.openAssistant') }}
+            {{ t('errors.goLogin') }}
           </RouterLink>
         </div>
       </div>
