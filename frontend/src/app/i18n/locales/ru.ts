@@ -98,6 +98,10 @@ export default {
             delete: 'Удалить',
         },
         enter: 'Войти',
+        byId: {
+            label: 'Войти по ID или ИНН',
+            placeholder: 'Например, s7 или 7701000026',
+        },
         enterAs: 'Войти как {name}',
         deleteDialog: {
             title: 'Удалить компанию?',

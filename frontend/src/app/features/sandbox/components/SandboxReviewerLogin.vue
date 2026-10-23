@@ -1,51 +1,24 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import InputText from 'primevue/inputtext'
 import Message from 'primevue/message'
-import { getApiErrorCode } from '@/app/composables/useApiFetch'
-import { useSession } from '@/app/composables/useSession'
-import type { Nullable } from '@/app/types/nullable'
+import { useLoginById } from '@/app/composables/useLoginById'
 
 const EXAMPLES = ['s7', 's2', 'bank', 'risk']
-const ERROR_USER_NOT_FOUND = 'USER_NOT_FOUND'
 
 const emit = defineEmits<{
   navigated: []
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
-const { enterCabinetByLogin } = useSession()
-
-const login = ref('')
-const isSubmitting = ref(false)
-const errorMessage = ref<Nullable<string>>(null)
+const { login, isSubmitting, errorMessage, submit } = useLoginById()
 
 function selectExample(example: string) {
   login.value = example
 }
 
-async function submit() {
-  const value = login.value.trim()
-
-  if (!value || isSubmitting.value) return
-
-  isSubmitting.value = true
-  errorMessage.value = null
-
-  try {
-    await enterCabinetByLogin(value)
-
-    emit('navigated')
-  } catch (err: unknown) {
-    console.error('Reviewer login by ID failed:', err)
-
-    errorMessage.value = getApiErrorCode(err) === ERROR_USER_NOT_FOUND
-      ? t('reviewer.login.notFound')
-      : t('reviewer.login.error')
-  } finally {
-    isSubmitting.value = false
-  }
+async function handleSubmit() {
+  if (await submit()) emit('navigated')
 }
 </script>
 
@@ -53,7 +26,7 @@ async function submit() {
   <form
     class="flex flex-col gap-4"
     novalidate
-    @submit.prevent="submit"
+    @submit.prevent="handleSubmit"
   >
     <p class="text-sm leading-relaxed text-fino-text-muted">
       {{ t('reviewer.login.description') }}

@@ -98,6 +98,10 @@ export default {
             delete: 'Delete',
         },
         enter: 'Sign in',
+        byId: {
+            label: 'Sign in by ID or TIN',
+            placeholder: 'For example, s7 or 7701000026',
+        },
         enterAs: 'Sign in as {name}',
         deleteDialog: {
             title: 'Delete the company?',
