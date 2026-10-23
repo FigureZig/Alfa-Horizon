@@ -17,6 +17,7 @@ export default {
 
     landing: {
         nav: {
+            login: 'Войти',
         },
         hero: {
             eyebrow: 'Кредитный кабинет для бизнеса',
@@ -148,7 +149,6 @@ export default {
         tabs: {
             scenarios: 'Сценарии',
             world: 'Мир',
-            login: 'Вход по ID',
             why: 'Почему',
         },
         scenarios: {

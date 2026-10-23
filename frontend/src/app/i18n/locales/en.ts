@@ -17,6 +17,7 @@ export default {
 
     landing: {
         nav: {
+            login: 'Sign in',
         },
         hero: {
             eyebrow: 'Credit workspace for business',
@@ -148,7 +149,6 @@ export default {
         tabs: {
             scenarios: 'Scenarios',
             world: 'World',
-            login: 'Sign in by ID',
             why: 'Why',
         },
         scenarios: {
