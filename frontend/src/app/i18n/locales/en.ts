@@ -19,6 +19,7 @@ export default {
 
     landing: {
         nav: {
+            login: 'Sign in',
         },
         hero: {
             eyebrow: 'Credit workspace for business',
@@ -84,7 +85,7 @@ export default {
     },
     login: {
         title: 'Sign in to Fino Business',
-        description: 'You are already a bank client — choose who to sign in as. No login or password needed.',
+        description: 'You are already a bank client — choose a company and who to sign in as. No login or password needed.',
         listLabel: 'Users',
         ownCompany: {
             title: 'Your own company',
@@ -99,6 +100,12 @@ export default {
             delete: 'Delete',
         },
         enter: 'Sign in',
+        enterAsLabel: 'Sign in as',
+        moreCompanies: '{n} more company | {n} more companies',
+        bankTile: {
+            title: 'Fino Bank',
+            about: 'Bank workplace: application queue, dossiers and specialist decisions',
+        },
         enterAs: 'Sign in as {name}',
         deleteDialog: {
             title: 'Delete the company?',
@@ -150,7 +157,6 @@ export default {
         tabs: {
             scenarios: 'Scenarios',
             world: 'World',
-            login: 'Sign in by ID',
             why: 'Why',
         },
         scenarios: {
@@ -1176,13 +1182,19 @@ export default {
             loadError: 'Could not load scenarios.',
             empty: 'No scenarios yet.',
             company: 'Company: {name}',
-            roles: 'Participants',
+            roles: 'Who acts in turn',
             expectedStatus: 'Expected status',
             expectedForbidden: 'Expected refusal: this role is not allowed to do this',
-            system: 'System',
+            system: 'The bank',
             loginAs: 'Sign in as {name}',
             applyEvent: 'Apply event',
-            eventApplied: 'Event applied — the bank will re-check the company’s applications',
+            eventApplied: 'Event applied. The bank will refresh the company data and review unfinished applications',
+            reset: 'Start from a clean world',
+            resetDone: 'The world is clean — you can run the scenario',
+            expected: {
+                voting: 'Waiting for the members\' decision',
+                info: 'The bank needs more data',
+            },
             eventError: 'Could not apply the event. Please try again.',
         },
         world: {
@@ -1198,13 +1210,16 @@ export default {
                 restore: 'Restore',
                 advanced: 'Time moved forward',
                 restored: 'Time restored',
+                toDeadline: 'Jump to this step\'s deadline',
+                toDeadlineHint: 'Due {date}: the bank will close the step by itself',
+                toDeadlineDone: 'Time moved to the deadline — the bank will close the step in a few seconds',
             },
             events: {
                 title: 'Registry event',
                 typePlaceholder: 'What happened',
                 amountPlaceholder: 'Amount',
                 apply: 'Apply event',
-                applied: 'Event applied — the bank will re-check the company’s applications',
+                applied: 'Event applied. The bank will refresh the company data and review unfinished applications',
             },
             faults: {
                 title: 'Source failure',
@@ -1220,18 +1235,18 @@ export default {
             },
             worker: {
                 title: 'Application processing',
-                runningHint: 'The worker picks up applications.',
-                pausedHint: 'The worker is paused: applications do not move, the API still responds.',
+                runningHint: 'Running: the bank checks applications, decides and pays out by itself.',
+                pausedHint: 'Paused: applications stay where they are, everything else works.',
                 pause: 'Pause',
                 resume: 'Resume',
                 paused: 'Application processing paused',
                 resumed: 'Application processing resumed',
             },
             reset: {
-                hint: 'Returns the world to its initial state: removes failures and events, resets time and the pause, deletes your personas. Applications stay.',
+                hint: 'Reset the world: removes events and faults, restores the time, deletes your builder companies. Applications stay.',
                 action: 'Reset world',
                 confirmTitle: 'Reset the world?',
-                confirmText: 'Failures, events, your own personas and the time shift will be reset. Signing in as a deleted persona will no longer be possible.',
+                confirmText: 'Registry events, source faults and the time shift will be removed, your builder companies deleted. You will not be able to sign in as them.',
                 cancel: 'Cancel',
                 confirm: 'Reset',
                 done: 'The world is back to its initial state',
