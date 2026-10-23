@@ -7,4 +7,8 @@ export interface DemoPersonaDto {
   initials: string
   organization_name: string
   role: DemoPersonaRoleEnum
+  // Сегодняшняя дата мира (YYYY-MM-DD): по ней считаются прогноз, сроки и история
+  today: string
+  // Id пользователя в мире: у создателя своей компании вида c12
+  user_id: string
 }

@@ -4,6 +4,7 @@ import type { ApiResponse } from '@/app/types/api-response'
 import type { SandboxPersonaCreateDto } from '@/app/types/sandbox/sandbox-persona-create-dto'
 import type { SandboxLoginDto } from '@/app/types/sandbox/sandbox-login-dto'
 import type { SandboxPersonaDto } from '@/app/types/sandbox/sandbox-persona-dto'
+import type { SandboxPersonaPreviewDto } from '@/app/types/sandbox/sandbox-persona-preview-dto'
 import type { SandboxScenarioDto } from '@/app/types/sandbox/sandbox-scenario-dto'
 import type { SandboxPersonaOptionsDto } from '@/app/types/sandbox/sandbox-persona-options-dto'
 import type {
@@ -63,6 +64,30 @@ export const sandboxService = {
       `${ROUTE_PREFIX_SANDBOX}/personas`,
       payload,
     )
+  },
+
+  // Что банк скажет о такой компании: ничего не сохраняет. При правке — `personaId` своей компании
+  async previewPersona($fetch: AxiosInstance, payload: SandboxPersonaCreateDto, locale: AppLocale, personaId?: string) {
+    return await $fetch.post<ApiResponse<SandboxPersonaPreviewDto>>(
+      `${ROUTE_PREFIX_SANDBOX}/personas/preview`,
+      payload,
+      {
+        params: { lang: locale, persona_id: personaId },
+      },
+    )
+  },
+
+  // Правка своей компании: ИНН тот же, люди и реестры пересобираются, заявки уходят на пересмотр
+  async updatePersona($fetch: AxiosInstance, personaId: string, payload: SandboxPersonaCreateDto) {
+    return await $fetch.put<ApiResponse<SandboxPersonaDto>>(
+      `${ROUTE_PREFIX_SANDBOX}/personas/${encodeURIComponent(personaId)}`,
+      payload,
+    )
+  },
+
+  // Удаляет свою компанию со всеми её людьми; заявки остаются в истории банка
+  async deletePersona($fetch: AxiosInstance, personaId: string) {
+    return await $fetch.delete(`${ROUTE_PREFIX_SANDBOX}/personas/${encodeURIComponent(personaId)}`)
   },
 
   // ── Мир симулятора: часы, события реестров, отказы источников, воркер ─────────

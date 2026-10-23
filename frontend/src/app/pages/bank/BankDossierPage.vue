@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import AppErrorState from '@/app/components/AppErrorState.vue'
 import ApplicationExplanationCard from '@/app/features/application/components/ApplicationExplanationCard.vue'
 import ApplicationFlags from '@/app/features/application/components/ApplicationFlags.vue'
@@ -29,6 +30,7 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
+const route = useRoute()
 const { formatCurrency } = useFormatters()
 const { getCompanyName } = useCompanyNames()
 
@@ -105,6 +107,14 @@ function handleDecide(form: Parameters<typeof decide>[0]) {
 function handleConfirm(form: Parameters<typeof confirm>[0]) {
   confirm(form)
 }
+const isFromApplications = computed(() => route.query.from === 'applications')
+
+const backRoute = computed(() => ({
+  name: isFromApplications.value ? 'bank-applications' : 'bank-queue',
+  params: { inn: props.inn },
+}))
+
+const backLabel = computed(() => (isFromApplications.value ? t('bank.dossier.backToApplications') : t('bank.dossier.back')))
 </script>
 
 <template>
@@ -128,10 +138,10 @@ function handleConfirm(form: Parameters<typeof confirm>[0]) {
       </p>
 
       <RouterLink
-        :to="{ name: 'bank-queue', params: { inn } }"
+        :to="backRoute"
         class="mt-3 text-sm font-semibold text-primary transition-opacity hover:opacity-80"
       >
-        {{ t('bank.dossier.back') }}
+        {{ backLabel }}
       </RouterLink>
     </div>
 
@@ -145,14 +155,14 @@ function handleConfirm(form: Parameters<typeof confirm>[0]) {
       <!-- Заголовок -->
       <div>
         <RouterLink
-          :to="{ name: 'bank-queue', params: { inn } }"
+          :to="backRoute"
           class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-opacity hover:opacity-80"
         >
           <i
             class="pi pi-arrow-left text-xs"
             aria-hidden="true"
           />
-          {{ t('bank.dossier.back') }}
+          {{ backLabel }}
         </RouterLink>
 
         <div class="mt-3 flex flex-wrap items-start justify-between gap-3">
@@ -184,6 +194,65 @@ function handleConfirm(form: Parameters<typeof confirm>[0]) {
 
       <div class="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
         <div class="flex min-w-0 flex-col gap-6">
+          <!-- Сначала читаем: почему нужен человек и что просил клиент -->
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <article class="flex min-w-0 flex-col gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
+              <h2 class="text-sm font-semibold text-fino-text">
+                {{ t('bank.dossier.request') }}
+              </h2>
+
+              <dl class="flex flex-col gap-1.5 text-sm">
+                <div
+                  v-for="row in requestRows"
+                  :key="row.key"
+                  class="flex justify-between gap-3"
+                >
+                  <dt class="shrink-0 text-fino-text-muted">
+                    {{ row.label }}
+                  </dt>
+                  <dd class="min-w-0 break-words text-right font-semibold text-fino-text">
+                    {{ row.value }}
+                  </dd>
+                </div>
+              </dl>
+            </article>
+
+            <article class="flex min-w-0 flex-col gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
+              <h2 class="text-sm font-semibold text-fino-text">
+                {{ t('bank.dossier.reasons') }}
+              </h2>
+
+              <p
+                v-if="!reasons.length"
+                class="text-sm text-fino-text-muted"
+              >
+                {{ t('bank.dossier.noReasons') }}
+              </p>
+
+              <ul
+                v-else
+                class="flex flex-col gap-2"
+              >
+                <li
+                  v-for="reason in reasons"
+                  :key="reason.code"
+                  class="rounded-xl px-3 py-2 text-sm"
+                  :class="reason.isManual ? 'bg-fino-accent text-fino-text' : 'bg-fino-surface-secondary text-fino-text'"
+                >
+                  <p
+                    class="text-[11px] font-semibold uppercase tracking-wide"
+                    :class="reason.isManual ? 'text-primary' : 'text-fino-text-muted'"
+                  >
+                    {{ reason.kind }}
+                  </p>
+
+                  <p class="mt-0.5 break-words">
+                    {{ reason.text }}
+                  </p>
+                </li>
+              </ul>
+            </article>
+          </div>
           <!-- Решение: набор элементов зависит от того, что бэкенд разрешил сотруднику -->
           <section
             class="flex min-w-0 flex-col gap-5 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm sm:p-6"
@@ -249,72 +318,13 @@ function handleConfirm(form: Parameters<typeof confirm>[0]) {
               />
             </div>
           </section>
-
-          <!-- Запрос клиента и причины ручного рассмотрения -->
-          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <article class="flex min-w-0 flex-col gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
-              <h2 class="text-sm font-semibold text-fino-text">
-                {{ t('bank.dossier.request') }}
-              </h2>
-
-              <dl class="flex flex-col gap-1.5 text-sm">
-                <div
-                  v-for="row in requestRows"
-                  :key="row.key"
-                  class="flex justify-between gap-3"
-                >
-                  <dt class="shrink-0 text-fino-text-muted">
-                    {{ row.label }}
-                  </dt>
-                  <dd class="min-w-0 break-words text-right font-semibold text-fino-text">
-                    {{ row.value }}
-                  </dd>
-                </div>
-              </dl>
-            </article>
-
-            <article class="flex min-w-0 flex-col gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
-              <h2 class="text-sm font-semibold text-fino-text">
-                {{ t('bank.dossier.reasons') }}
-              </h2>
-
-              <p
-                v-if="!reasons.length"
-                class="text-sm text-fino-text-muted"
-              >
-                {{ t('bank.dossier.noReasons') }}
-              </p>
-
-              <ul
-                v-else
-                class="flex flex-col gap-2"
-              >
-                <li
-                  v-for="reason in reasons"
-                  :key="reason.code"
-                  class="rounded-xl px-3 py-2 text-sm"
-                  :class="reason.isManual ? 'bg-fino-accent text-fino-text' : 'bg-fino-surface-secondary text-fino-text'"
-                >
-                  <p
-                    class="text-[11px] font-semibold uppercase tracking-wide"
-                    :class="reason.isManual ? 'text-primary' : 'text-fino-text-muted'"
-                  >
-                    {{ reason.kind }}
-                  </p>
-
-                  <p class="mt-0.5 break-words">
-                    {{ reason.text }}
-                  </p>
-                </li>
-              </ul>
-            </article>
-          </div>
         </div>
 
         <aside class="flex min-w-0 flex-col gap-6">
           <ApplicationExplanationCard
             v-if="application.decision"
             :explanation="explanation"
+            is-path-hidden
             :is-loading="isExplanationLoading"
             :has-error="explanationError"
             @retry="loadExplanation"

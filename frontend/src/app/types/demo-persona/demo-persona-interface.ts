@@ -8,6 +8,8 @@ export interface DemoPersonaInterface {
   initials: string
   organizationName: string
   role: DemoPersonaRoleEnum
+  today: string
+  userId: string
   // Сотрудник банка (специалист или риск-менеджер): у него рабочее место банка, а не кабинет компании
   isBankStaff: boolean
 }

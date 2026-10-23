@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import SelectButton from 'primevue/selectbutton'
 import AppErrorState from '@/app/components/AppErrorState.vue'
 import CreditHealthCard from '@/app/features/credits/components/CreditHealthCard.vue'
@@ -54,7 +55,9 @@ const {
 const calculatorRef = useTemplateRef<HTMLElement>('calculator')
 
 const selectedCode = ref<Nullable<CreditProductCodeEnum>>(null)
-const goalFilter = ref<string>(ALL_GOALS)
+// Цель может прийти из адреса: например, с главной по карточке госконтракта
+const route = useRoute()
+const goalFilter = ref<string>(typeof route.query.goal === 'string' ? route.query.goal : ALL_GOALS)
 
 const isCatalogEmpty = computed(() => !isCatalogLoading.value && !catalogError.value && !catalogProducts.value.length)
 

@@ -19,6 +19,7 @@ export function useFormatters() {
       style: 'currency',
       currency,
       notation: isCompact ? 'compact' : 'standard',
+      minimumFractionDigits: 0,
       maximumFractionDigits: isCompact ? 1 : 0,
     }).format(value)
   }

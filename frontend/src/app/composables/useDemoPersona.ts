@@ -65,7 +65,7 @@ export function useDemoPersona() {
         })
 
         resetDemoPersona()
-        await router.replace({ name: 'sandbox' })
+        await router.replace({ name: 'login' })
 
         return
       }

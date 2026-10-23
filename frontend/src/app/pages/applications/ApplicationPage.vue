@@ -1,22 +1,22 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
 import Dialog from 'primevue/dialog'
 import AppErrorState from '@/app/components/AppErrorState.vue'
 import ApplicationExplanationCard from '@/app/features/application/components/ApplicationExplanationCard.vue'
+import ApplicationHero from '@/app/features/application/components/ApplicationHero.vue'
 import ApplicationFlags from '@/app/features/application/components/ApplicationFlags.vue'
 import ApplicationInfoRequestPanel from '@/app/features/application/components/ApplicationInfoRequestPanel.vue'
 import ApplicationLoanCard from '@/app/features/application/components/ApplicationLoanCard.vue'
 import ApplicationOffersPanel from '@/app/features/application/components/ApplicationOffersPanel.vue'
 import ApplicationPageSkeleton from '@/app/features/application/components/ApplicationPageSkeleton.vue'
-import ApplicationProgress from '@/app/features/application/components/ApplicationProgress.vue'
+import ApplicationSignDialog from '@/app/features/application/components/ApplicationSignDialog.vue'
 import ApplicationSigningPanel from '@/app/features/application/components/ApplicationSigningPanel.vue'
-import ApplicationStatusBadge from '@/app/features/application/components/ApplicationStatusBadge.vue'
 import ApplicationStatusPanel from '@/app/features/application/components/ApplicationStatusPanel.vue'
 import ApplicationTimeline from '@/app/features/application/components/ApplicationTimeline.vue'
 import { useApplication } from '@/app/composables/useApplication'
 import { useApplicationExplanation } from '@/app/composables/useApplicationExplanation'
+import { useDemoPersona } from '@/app/composables/useDemoPersona'
 import { useFormatters } from '@/app/composables/useFormatters'
 import { ApplicationActionEnum } from '@/app/types/application/application-action-enum'
 import { ApplicationDetailStatusEnum } from '@/app/types/application/application-detail-status-enum'
@@ -37,7 +37,7 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
-const route = useRoute()
+const { demoPersona } = useDemoPersona()
 const { formatCurrency, formatDateTime } = useFormatters()
 
 const {
@@ -68,6 +68,7 @@ const {
 } = useApplicationExplanation(() => props.applicationId, explanationKey)
 
 const confirmKind = ref<Nullable<ConfirmKind>>(null)
+const isSignVisible = ref(false)
 
 const isConfirmVisible = computed({
   get: () => confirmKind.value !== null,
@@ -79,6 +80,9 @@ const isConfirmVisible = computed({
 })
 
 const status = computed(() => application.value?.status ?? null)
+
+// Условия, которые человек подписывает: принятое предложение
+const signOffer = computed(() => application.value?.offer ?? application.value?.offers[0] ?? null)
 
 const title = computed(() => {
   const current = application.value
@@ -123,8 +127,19 @@ function handleAccept(variant: number) {
   acceptOffer(variant)
 }
 
+// Подпись в два шага: сначала «Проверьте условия», потом сама подпись
 function handleSign() {
-  sign()
+  isSignVisible.value = true
+}
+
+function handleSignVisibleChange(visible: boolean) {
+  isSignVisible.value = visible
+}
+
+async function confirmSign() {
+  await sign()
+
+  isSignVisible.value = false
 }
 
 function askWithdraw() {
@@ -200,48 +215,36 @@ async function confirmAction() {
           {{ t('application.back') }}
         </RouterLink>
 
-        <div class="mt-3 flex flex-wrap items-start justify-between gap-3">
-          <div class="min-w-0">
-            <h1 class="break-words text-2xl font-bold tracking-tight text-fino-text sm:text-3xl">
-              {{ title }}
-            </h1>
+        <div class="mt-3 min-w-0">
+          <h1 class="break-words text-2xl font-bold tracking-tight text-fino-text sm:text-3xl">
+            {{ title }}
+          </h1>
 
-            <p class="mt-1 text-sm text-fino-text-muted">
-              {{ amount }} · {{ t('application.createdAt', { date: createdAt }) }}
-            </p>
-          </div>
-
-          <ApplicationStatusBadge :status="status" />
+          <p class="mt-1 text-sm text-fino-text-muted">
+            {{ amount }} · {{ t('application.createdAt', { date: createdAt }) }}
+          </p>
         </div>
 
         <ApplicationFlags
           class="mt-3"
           :flags="application.flags"
         />
-
-        <RouterLink
-          v-if="application.approval || route.query.guide === inn"
-          :to="{ name: 'sandbox-scenario-guide', params: { inn }, query: { applicationId } }"
-          class="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-fino-accent px-4
-                 text-sm font-semibold text-primary hover:opacity-80"
-        >
-          <i
-            class="pi pi-map text-sm"
-            aria-hidden="true"
-          />
-          {{ t('sandbox.guide.openGuide') }}
-        </RouterLink>
       </div>
+
+      <!-- Где заявка, кто сейчас действует и сколько осталось -->
+      <ApplicationHero
+        :application="application"
+        :today="demoPersona?.today ?? null"
+      />
 
       <div class="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
         <div class="flex min-w-0 flex-col gap-6">
           <div class="flex min-w-0 flex-col gap-6 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm sm:p-6">
-            <ApplicationProgress :status="status" />
-
             <!-- Содержимое зависит от статуса; кнопки — только те, что вернул бэкенд -->
             <ApplicationOffersPanel
               v-if="status === ApplicationDetailStatusEnum.Offered"
               :offers="application.offers"
+              :request="application.request"
               :decision="application.decision"
               :can-accept="hasAction(ApplicationActionEnum.AcceptOffer)"
               :can-decline="hasAction(ApplicationActionEnum.DeclineOffer)"
@@ -366,6 +369,15 @@ async function confirmAction() {
           </div>
         </aside>
       </div>
+
+      <ApplicationSignDialog
+        v-if="signOffer"
+        :visible="isSignVisible"
+        :offer="signOffer"
+        :is-submitting="pendingAction === ApplicationActionEnum.Sign"
+        @update:visible="handleSignVisibleChange"
+        @confirm="confirmSign"
+      />
 
       <Dialog
         v-model:visible="isConfirmVisible"

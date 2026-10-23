@@ -4,10 +4,12 @@ import { useI18n } from 'vue-i18n'
 import AppErrorState from '@/app/components/AppErrorState.vue'
 import PreApprovedProductsCardSkeleton from './PreApprovedProductsCardSkeleton.vue'
 import { useFormatters } from '@/app/composables/useFormatters'
+import type { CompanyBlockerInterface } from '@/app/types/company/company-blocker-interface'
 import type { CreditProductInterface } from '@/app/types/company/credit-product-interface'
 
 const props = defineProps<{
   products: CreditProductInterface[]
+  blockers: CompanyBlockerInterface[]
   isLoading: boolean
   hasError: boolean
 }>()
@@ -67,12 +69,31 @@ function handleRetry() {
       @retry="handleRetry"
     />
 
-    <p
+    <div
       v-else-if="!productRows.length"
-      class="text-sm text-fino-text-muted"
+      class="flex flex-col gap-3"
     >
-      {{ t('preApproved.empty') }}
-    </p>
+      <p class="text-sm text-fino-text-muted">
+        {{ blockers.length ? t('preApproved.blocked') : t('preApproved.empty') }}
+      </p>
+
+      <ul
+        v-if="blockers.length"
+        class="flex flex-col gap-2"
+      >
+        <li
+          v-for="blocker in blockers"
+          :key="blocker.code"
+          class="flex items-start gap-2 rounded-2xl bg-fino-surface-secondary px-3 py-2.5 text-sm text-fino-text"
+        >
+          <i
+            class="pi pi-exclamation-circle mt-0.5 text-xs text-amber-600 dark:text-amber-400"
+            aria-hidden="true"
+          />
+          <span class="min-w-0 break-words">{{ blocker.text }}</span>
+        </li>
+      </ul>
+    </div>
 
     <template v-else>
       <ul class="flex flex-col divide-y divide-fino-border">

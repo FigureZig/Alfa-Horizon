@@ -124,7 +124,7 @@ function handleSubmit() {
 
     <p class="flex items-start gap-2 rounded-2xl bg-fino-surface-secondary p-3 text-sm text-fino-text">
       <i
-        class="pi pi-microchip-ai mt-0.5 text-primary"
+        class="pi pi-cog mt-0.5 text-primary"
         aria-hidden="true"
       />
       <span class="min-w-0 break-words">{{ proposalText }}</span>

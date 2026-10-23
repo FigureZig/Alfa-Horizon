@@ -99,6 +99,10 @@ export interface ApplicationApprovalDto {
 }
 
 export interface ApplicationLoanDto {
+  // limit — лимит овердрафта подключён к счёту; loan — деньги зачислены
+  kind?: 'limit' | 'loan'
+  // Номер договора вида КД-2026/XXXXXX
+  number?: string
   loan_id: string
   amount: string
   rate: string

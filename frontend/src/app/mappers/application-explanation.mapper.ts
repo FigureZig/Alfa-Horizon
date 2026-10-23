@@ -26,7 +26,12 @@ export class ApplicationExplanationMapper {
         value: Number(part.value),
         text: part.text,
       })),
-      limitTexts: (data.limit?.caps ?? []).map((cap) => cap.text),
+      caps: (data.limit?.caps ?? []).map((cap) => ({
+        code: cap.code,
+        text: cap.text,
+        isBinding: cap.binding ?? cap.code === data.limit?.binding,
+      })),
+      pathTitle: data.path_to_approval.title ?? null,
       pathBlocked: !data.path_to_approval.changeable,
       pathOptions: data.path_to_approval.options.map((option) => ({
         title: option.title,

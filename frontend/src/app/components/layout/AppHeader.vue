@@ -11,11 +11,15 @@ const route = useRoute()
 
 const isDark = computed(() => theme.value === 'dark')
 
-// В кабинете логотип ведёт на главную текущей демо-персоны (у сотрудника банка — в очередь), вне кабинета — к выбору персоны
+// В кабинете логотип ведёт на главную текущего пользователя (у сотрудника банка — в очередь), вне кабинета — на главную продукта
 const homeRoute = computed(() => {
-  if (!route.params.inn) return { name: 'sandbox' }
+  if (!route.params.inn) return { name: 'landing' }
 
-  const isBankRoute = String(route.name ?? '').startsWith('bank-')
+  const routeName = String(route.name ?? '')
+  const isBankRoute = routeName.startsWith('bank-')
+  const isVotesRoute = routeName === 'votes' || routeName === 'vote'
+
+  if (isVotesRoute) return { name: 'votes', params: { inn: route.params.inn } }
 
   return { name: isBankRoute ? 'bank-queue' : 'dashboard', params: { inn: route.params.inn } }
 })
@@ -35,7 +39,7 @@ function changeTheme() {
 <template>
   <header
     class="sticky top-0 z-50 px-4 pt-4 sm:px-6
-           motion-safe:animate-[header-appear_450ms_ease-out_both]"
+           motion-safe:animate-header-appear"
   >
     <div
       class="mx-auto flex h-19 max-w-[1600px] items-center
@@ -117,20 +121,8 @@ function changeTheme() {
           />
         </button>
 
-        <!-- Профиль (страницы могут заменить своим содержимым) -->
-        <slot name="profile">
-          <div
-            class="flex size-10 items-center justify-center
-                   rounded-xl bg-fino-accent text-primary"
-            role="img"
-            :aria-label="t('common.profile')"
-          >
-            <i
-              class="pi pi-user"
-              aria-hidden="true"
-            />
-          </div>
-        </slot>
+        <!-- Профиль: страница подставляет своё содержимое; без него справа остаются язык и тема -->
+        <slot name="profile" />
       </div>
     </div>
   </header>

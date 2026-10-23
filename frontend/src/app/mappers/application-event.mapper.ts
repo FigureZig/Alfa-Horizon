@@ -13,6 +13,9 @@ export class ApplicationEventMapper {
       type: data.type,
       actor: data.actor,
       payload: data.payload,
+      author: data.by
+        ? { kind: data.by.kind, name: data.by.name, caption: data.by.title ?? data.by.detail ?? data.by.role ?? null }
+        : null,
     }
   }
 }

@@ -14,7 +14,7 @@ const { logout: endSession } = useSession()
 async function logout() {
   await endSession()
   resetDemoPersona()
-  await router.push({ name: 'sandbox' })
+  await router.push({ name: 'login' })
 }
 </script>
 

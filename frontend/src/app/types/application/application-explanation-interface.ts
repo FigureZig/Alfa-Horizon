@@ -25,6 +25,13 @@ export interface ExplanationPathOptionInterface {
   rate: Nullable<number>
 }
 
+export interface ExplanationCapInterface {
+  code: string
+  text: string
+  // Сработавший лимит: выделяется в списке
+  isBinding: boolean
+}
+
 export interface ApplicationExplanationInterface {
   outcome: DecisionOutcomeEnum
   reasons: ApplicationReasonInterface[]
@@ -33,7 +40,8 @@ export interface ApplicationExplanationInterface {
   factors: ExplanationFactorInterface[]
   rate: Nullable<number>
   priceParts: ExplanationPricePartInterface[]
-  limitTexts: string[]
+  caps: ExplanationCapInterface[]
+  pathTitle: Nullable<string>
   pathBlocked: boolean
   pathOptions: ExplanationPathOptionInterface[]
 }

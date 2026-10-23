@@ -9,6 +9,8 @@ export interface RepaymentParams {
   amount: number
   termMonths: number
   rate: number
+  // Бэкенд отвечает 422 для продуктов без графика платежей — по продукту можно не звать заранее
+  product?: string
 }
 
 export const companyRepaymentService = {
@@ -16,7 +18,7 @@ export const companyRepaymentService = {
     return await $fetch.get<ApiResponse<RepaymentDto>>(
       `${ROUTE_PREFIX_COMPANIES}/${encodeURIComponent(inn)}/repayment`,
       {
-        params: { amount: params.amount, term_months: params.termMonths, rate: params.rate, lang: locale },
+        params: { amount: params.amount, term_months: params.termMonths, rate: params.rate, product: params.product, lang: locale },
       },
     )
   },

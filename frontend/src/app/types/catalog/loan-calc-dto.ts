@@ -35,11 +35,20 @@ export interface LoanCalcScheduleRowDto {
   balance: string
 }
 
+export interface LoanCalcUsageExampleDto {
+  amount: string
+  days: number
+  interest: string
+  text: string
+}
+
 export interface LoanCalcDto {
   rate: string
   rate_parts: Nullable<LoanCalcRatePartsDto>
   repayment: RepaymentKindEnum
   payment: string
-  overpayment: string
+  // У овердрафта (лимита) переплаты нет: вместо неё — пример цены использования
+  overpayment: Nullable<string>
+  usage_example?: Nullable<LoanCalcUsageExampleDto>
   schedule: LoanCalcScheduleRowDto[]
 }

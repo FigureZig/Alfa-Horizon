@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import AppErrorState from '@/app/components/AppErrorState.vue'
 import ApplicationExplanationCardSkeleton from './ApplicationExplanationCardSkeleton.vue'
 import { useFormatters } from '@/app/composables/useFormatters'
+import { DecisionOutcomeEnum } from '@/app/types/application/decision-outcome-enum'
 import type { ApplicationExplanationInterface } from '@/app/types/application/application-explanation-interface'
 import type { Nullable } from '@/app/types/nullable'
 
@@ -13,6 +14,8 @@ const props = defineProps<{
   explanation: Nullable<ApplicationExplanationInterface>
   isLoading: boolean
   hasError: boolean
+  // Специалисту путь к одобрению не нужен: это совет клиенту
+  isPathHidden?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -21,6 +24,9 @@ const emit = defineEmits<{
 
 const { t } = useI18n({ useScope: 'global' })
 const { formatCurrency, formatPercent } = useFormatters()
+
+// Свёрнуто по умолчанию; при отказе путь к одобрению важнее всего — раскрываем сразу
+const isOpenByDefault = computed(() => props.explanation?.outcome === DecisionOutcomeEnum.Reject)
 
 const isSkeletonVisible = computed(() => props.isLoading && !props.explanation)
 
@@ -63,149 +69,183 @@ function handleRetry() {
 </script>
 
 <template>
-  <article
-    class="flex min-w-0 flex-col gap-5 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm"
-    :aria-label="t('application.explanation.title')"
+  <details
+    class="group min-w-0 rounded-3xl border border-fino-border bg-fino-surface shadow-sm"
+    :open="isOpenByDefault"
   >
-    <h2 class="text-sm font-semibold text-fino-text">
-      {{ t('application.explanation.title') }}
-    </h2>
+    <summary
+      class="flex cursor-pointer items-center justify-between gap-3 rounded-3xl px-5 py-4 marker:content-none
+             focus-visible:outline-2 focus-visible:outline-primary"
+    >
+      <span class="flex min-w-0 items-center gap-3">
+        <span class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-fino-accent text-primary">
+          <i
+            class="pi pi-question-circle"
+            aria-hidden="true"
+          />
+        </span>
 
-    <ApplicationExplanationCardSkeleton v-if="isSkeletonVisible" />
-
-    <AppErrorState
-      v-else-if="hasError"
-      :message="t('application.explanation.loadError')"
-      is-inline
-      @retry="handleRetry"
-    />
-
-    <template v-else-if="explanation">
-      <!-- Скоринг -->
-      <div
-        v-if="explanation.score !== null"
-        class="flex items-center gap-4"
-      >
-        <p class="text-4xl font-bold tracking-tight text-fino-text">
-          {{ explanation.score }}
-        </p>
-
-        <div>
-          <p class="text-sm font-semibold text-fino-text">
-            {{ t('application.explanation.score') }}
-          </p>
-
-          <p
-            v-if="explanation.riskClass"
-            class="text-xs text-fino-text-muted"
+        <span class="min-w-0">
+          <span class="block text-sm font-semibold text-fino-text">{{ t('application.explanation.title') }}</span>
+          <span
+            v-if="explanation?.score !== null && explanation?.riskClass"
+            class="block text-xs text-fino-text-muted"
           >
-            {{ t('application.explanation.riskClass', { riskClass: explanation.riskClass }) }}
-          </p>
-        </div>
-      </div>
+            {{ t('application.explanation.summary', { score: explanation?.score, riskClass: explanation?.riskClass }) }}
+          </span>
+        </span>
+      </span>
 
-      <ul
-        v-if="factors.length"
-        class="flex flex-col divide-y divide-fino-border"
-      >
-        <li
-          v-for="factor in factors"
-          :key="factor.factor"
-          class="flex items-start justify-between gap-3 py-2 first:pt-0 last:pb-0"
+      <i
+        class="pi pi-chevron-down shrink-0 text-xs text-fino-text-muted transition-transform duration-200
+               group-open:rotate-180 motion-reduce:transition-none"
+        aria-hidden="true"
+      />
+    </summary>
+
+    <div class="flex flex-col gap-5 px-5 pb-5">
+      <ApplicationExplanationCardSkeleton v-if="isSkeletonVisible" />
+
+      <AppErrorState
+        v-else-if="hasError"
+        :message="t('application.explanation.loadError')"
+        is-inline
+        @retry="handleRetry"
+      />
+
+      <template v-else-if="explanation">
+        <!-- Скоринг -->
+        <div
+          v-if="explanation.score !== null"
+          class="flex items-center gap-4"
         >
-          <div class="min-w-0">
-            <p class="break-words text-sm text-fino-text">
-              {{ factor.title }}
+          <p class="text-4xl font-bold tracking-tight text-fino-text">
+            {{ explanation.score }}
+          </p>
+
+          <div>
+            <p class="text-sm font-semibold text-fino-text">
+              {{ t('application.explanation.score') }}
             </p>
 
             <p
-              v-if="factor.text || factor.gain"
-              class="mt-0.5 break-words text-xs text-fino-text-muted"
+              v-if="explanation.riskClass"
+              class="text-xs text-fino-text-muted"
             >
-              {{ factor.text }} {{ factor.gain }}
+              {{ t('application.explanation.riskClass', { riskClass: explanation.riskClass }) }}
             </p>
           </div>
-
-          <span
-            class="shrink-0 text-sm font-semibold"
-            :class="factor.isMinus ? 'text-red-700 dark:text-red-400' : 'text-green-700 dark:text-green-400'"
-          >
-            {{ factor.points }}
-          </span>
-        </li>
-      </ul>
-
-      <!-- Ставка из частей -->
-      <div v-if="priceParts.length">
-        <p class="text-xs font-semibold uppercase tracking-wide text-fino-text-muted">
-          {{ t('application.explanation.price') }}
-        </p>
-
-        <dl class="mt-2 flex flex-col gap-1.5 text-sm">
-          <div
-            v-for="part in priceParts"
-            :key="part.part"
-            class="flex justify-between gap-3"
-          >
-            <dt class="text-fino-text-muted">
-              {{ part.label }}
-            </dt>
-            <dd class="font-semibold text-fino-text">
-              {{ part.value }}
-            </dd>
-          </div>
-        </dl>
-      </div>
-
-      <!-- Чем ограничена сумма -->
-      <div v-if="explanation.limitTexts.length">
-        <p class="text-xs font-semibold uppercase tracking-wide text-fino-text-muted">
-          {{ t('application.explanation.limit') }}
-        </p>
-
-        <ul class="mt-2 flex flex-col gap-1 text-sm text-fino-text">
-          <li
-            v-for="text in explanation.limitTexts"
-            :key="text"
-            class="break-words"
-          >
-            {{ text }}
-          </li>
-        </ul>
-      </div>
-
-      <!-- Путь к одобрению -->
-      <div v-if="pathOptions.length || explanation.pathBlocked">
-        <p class="text-xs font-semibold uppercase tracking-wide text-fino-text-muted">
-          {{ t('application.explanation.path') }}
-        </p>
-
-        <p
-          v-if="explanation.pathBlocked"
-          class="mt-2 text-sm text-fino-text-muted"
-        >
-          {{ t('application.explanation.pathBlocked') }}
-        </p>
+        </div>
 
         <ul
-          v-else
-          class="mt-2 flex flex-col gap-2"
+          v-if="factors.length"
+          class="flex flex-col divide-y divide-fino-border"
         >
           <li
-            v-for="option in pathOptions"
-            :key="option.title"
-            class="rounded-xl bg-fino-surface-secondary p-3 text-sm"
+            v-for="factor in factors"
+            :key="factor.factor"
+            class="flex items-start justify-between gap-3 py-2 first:pt-0 last:pb-0"
           >
-            <p class="break-words font-semibold text-fino-text">
-              {{ option.title }}
-            </p>
+            <div class="min-w-0">
+              <p class="break-words text-sm text-fino-text">
+                {{ factor.title }}
+              </p>
 
-            <p class="mt-0.5 text-xs text-fino-text-muted">
-              {{ option.summary }}
-            </p>
+              <p
+                v-if="factor.text || factor.gain"
+                class="mt-0.5 break-words text-xs text-fino-text-muted"
+              >
+                {{ factor.text }} {{ factor.gain }}
+              </p>
+            </div>
+
+            <span
+              class="shrink-0 text-sm font-semibold"
+              :class="factor.isMinus ? 'text-red-700 dark:text-red-400' : 'text-green-700 dark:text-green-400'"
+            >
+              {{ factor.points }}
+            </span>
           </li>
         </ul>
-      </div>
-    </template>
-  </article>
+
+        <!-- Ставка из частей -->
+        <div v-if="priceParts.length">
+          <p class="text-xs font-semibold uppercase tracking-wide text-fino-text-muted">
+            {{ t('application.explanation.price') }}
+          </p>
+
+          <dl class="mt-2 flex flex-col gap-1.5 text-sm">
+            <div
+              v-for="part in priceParts"
+              :key="part.part"
+              class="flex justify-between gap-3"
+            >
+              <dt class="text-fino-text-muted">
+                {{ part.label }}
+              </dt>
+              <dd class="font-semibold text-fino-text">
+                {{ part.value }}
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- Чем ограничена сумма: сработавший лимит выделен -->
+        <div v-if="explanation.caps.length">
+          <p class="text-xs font-semibold uppercase tracking-wide text-fino-text-muted">
+            {{ t('application.explanation.limit') }}
+          </p>
+
+          <ul class="mt-2 flex flex-col gap-1.5 text-sm text-fino-text">
+            <li
+              v-for="cap in explanation.caps"
+              :key="cap.code"
+              class="flex items-start gap-2 break-words rounded-xl px-3 py-2"
+              :class="cap.isBinding ? 'bg-fino-accent font-semibold text-primary' : 'text-fino-text-muted'"
+            >
+              <i
+                :class="cap.isBinding ? 'pi pi-lock' : 'pi pi-minus'"
+                class="mt-0.5 text-xs"
+                aria-hidden="true"
+              />
+              <span class="min-w-0">{{ cap.text }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Путь к одобрению -->
+        <div v-if="!isPathHidden && (pathOptions.length || explanation.pathBlocked)">
+          <p class="text-xs font-semibold uppercase tracking-wide text-fino-text-muted">
+            {{ explanation.pathTitle ?? t('application.explanation.path') }}
+          </p>
+
+          <p
+            v-if="explanation.pathBlocked"
+            class="mt-2 text-sm text-fino-text-muted"
+          >
+            {{ t('application.explanation.pathBlocked') }}
+          </p>
+
+          <ul
+            v-else
+            class="mt-2 flex flex-col gap-2"
+          >
+            <li
+              v-for="option in pathOptions"
+              :key="option.title"
+              class="rounded-xl bg-fino-surface-secondary p-3 text-sm"
+            >
+              <p class="break-words font-semibold text-fino-text">
+                {{ option.title }}
+              </p>
+
+              <p class="mt-0.5 text-xs text-fino-text-muted">
+                {{ option.summary }}
+              </p>
+            </li>
+          </ul>
+        </div>
+      </template>
+    </div>
+  </details>
 </template>

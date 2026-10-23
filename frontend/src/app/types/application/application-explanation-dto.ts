@@ -37,7 +37,10 @@ export interface ExplanationPriceDto {
 
 export interface ExplanationCapDto {
   code: string
+  title?: string
   text: string
+  // Лимит, который ограничил сумму
+  binding?: boolean
 }
 
 export interface ExplanationLimitDto {
@@ -58,6 +61,9 @@ export interface ExplanationPathDto {
   changeable: boolean
   blocked_by: string[]
   options: ExplanationPathOptionDto[]
+  // approval · full_amount · better_terms; title — заголовок блока по исходу
+  kind?: string
+  title?: string
 }
 
 /** Ответ GET v1/applications/{id}/explain — «почему такое решение и как получить одобрение». */

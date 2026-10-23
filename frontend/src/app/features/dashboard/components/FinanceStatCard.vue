@@ -9,7 +9,7 @@ defineProps<{
 
 <template>
   <article
-    class="group flex min-w-0 flex-col justify-between gap-5
+    class="group flex min-w-0 flex-col gap-6
            rounded-3xl border border-fino-border bg-fino-surface
            p-5 shadow-sm transition-all duration-300
            hover:-translate-y-1 hover:shadow-md sm:p-6

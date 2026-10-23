@@ -1,6 +1,8 @@
 import type { AxiosInstance } from 'axios'
 import type { ApiResponse } from '@/app/types/api-response'
 import type { ApplicationDto } from '@/app/types/application/application-dto'
+import type { BankApplicationDto } from '@/app/types/bank/bank-application-dto'
+import type { BankApplicationsFilterInterface } from '@/app/types/bank/bank-application-interface'
 import type { BankAuditDto } from '@/app/types/bank/bank-audit-dto'
 import type { BankConfirmDto, BankDecisionDto } from '@/app/types/bank/bank-decision-dto'
 import type { BankDossierDto } from '@/app/types/bank/bank-dossier-dto'
@@ -17,6 +19,17 @@ export const bankService = {
   // Очередь исключений: заявки, которые движок не смог решить сам
   async fetchQueue($fetch: AxiosInstance) {
     return await $fetch.get<ApiResponse<BankQueueItemDto[]>>(`${ROUTE_PREFIX_BANK}/queue`)
+  },
+
+  // Реестр всех заявок: и автоматические решения, и ручные; фильтры — по статусу, кто решил и поиск
+  async fetchApplications($fetch: AxiosInstance, filter: BankApplicationsFilterInterface) {
+    return await $fetch.get<ApiResponse<BankApplicationDto[]>>(`${ROUTE_PREFIX_BANK}/applications`, {
+      params: {
+        status: filter.status ?? undefined,
+        decided_by: filter.decidedBy ?? undefined,
+        q: filter.query.trim() || undefined,
+      },
+    })
   },
 
   async fetchMetrics($fetch: AxiosInstance) {

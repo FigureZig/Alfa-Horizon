@@ -6,13 +6,15 @@ import Skeleton from 'primevue/skeleton'
   <div class="flex flex-col gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5">
     <div class="flex items-start justify-between gap-3">
       <Skeleton
-        shape="circle"
-        size="3rem"
+        width="3rem"
+        height="3rem"
+        border-radius="1rem"
       />
 
       <Skeleton
-        width="2.5rem"
+        width="4.5rem"
         height="1.5rem"
+        border-radius="9999px"
       />
     </div>
 
@@ -29,11 +31,17 @@ import Skeleton from 'primevue/skeleton'
       />
     </div>
 
-    <div class="border-t border-fino-border pt-4">
+    <div class="flex flex-col gap-2">
+      <Skeleton height="0.75rem" />
       <Skeleton
-        width="70%"
-        height="0.875rem"
+        width="85%"
+        height="0.75rem"
       />
     </div>
+
+    <Skeleton
+      height="2.75rem"
+      border-radius="0.75rem"
+    />
   </div>
 </template>
