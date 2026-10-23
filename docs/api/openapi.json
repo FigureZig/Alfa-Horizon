@@ -3720,6 +3720,257 @@
         "security": []
       }
     },
+    "/api/v1/sandbox/personas/{persona_id}": {
+      "put": {
+        "tags": [
+          "simulator"
+        ],
+        "summary": "Изменить свою компанию или своего сотрудника банка",
+        "description": "Поменять ответы своей компании: банк пересоберёт её реестры, выписку и людей с тем же ИНН — как событие мира.\nПользователи компании пересчитываются (убрали бухгалтера — его входа больше нет), заявки остаются и уходят на\nпересмотр. Своему сотруднику банка — имя и должность. Готовых пользователей мира не меняем (409 PERSONA_READONLY),\nчеловека своей компании меняют через её создателя (409 PERSON_IN_COMPANY).",
+        "operationId": "update_persona_api_v1_sandbox_personas__persona_id__put",
+        "parameters": [
+          {
+            "name": "persona_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Persona Id"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "ru",
+                "en"
+              ],
+              "type": "string",
+              "description": "язык текстов карточек",
+              "default": "ru",
+              "title": "Lang"
+            },
+            "description": "язык текстов карточек"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonaIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "успех",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaCardResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Действие недоступно сейчас: статус (INVALID_STATUS с app_status), данные компании ещё собираются (COMPANY_NOT_LOADED), ждём свежий реестр (SOURCE_WAIT), кредитную историю (BKI_PENDING), второй ключ (AWAITING_SECOND_KEY)…",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Ошибка в данных запроса (VALIDATION_ERROR с errors[], INN_INVALID с suggested_inn, FLAG_UNKNOWN…)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      },
+      "delete": {
+        "tags": [
+          "simulator"
+        ],
+        "summary": "Удалить свою компанию или своего сотрудника банка",
+        "description": "Убрать свою компанию со всеми её людьми или своего сотрудника банка. Моки компании снимаются, заявки остаются\nв истории банка. Готовых пользователей мира не удаляем (409 PERSONA_READONLY): вернуть мир как был — сброс.",
+        "operationId": "delete_persona_api_v1_sandbox_personas__persona_id__delete",
+        "parameters": [
+          {
+            "name": "persona_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Persona Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "успех",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaDeletedResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Действие недоступно сейчас: статус (INVALID_STATUS с app_status), данные компании ещё собираются (COMPANY_NOT_LOADED), ждём свежий реестр (SOURCE_WAIT), кредитную историю (BKI_PENDING), второй ключ (AWAITING_SECOND_KEY)…",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Ошибка в данных запроса (VALIDATION_ERROR с errors[])",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/sandbox/personas/preview": {
+      "post": {
+        "tags": [
+          "simulator"
+        ],
+        "summary": "Своя компания вживую: что банк скажет до создания",
+        "description": "Конструктор вживую: те же ответы, что для создания, — и сразу видно, что банк предложит такой компании, кто в ней\nподписывает и одобряет, какой у неё класс риска и почему. Ничего не сохраняется. Генератор, факты, скоринг и подбор —\nте же, что у созданной компании, поэтому предпросмотр совпадает с кабинетом после создания. У каждой причины —\n`fields`: ответы конструктора, от которых она зависит. Поменяли ответ — картина меняется сразу: так видно, почему.",
+        "operationId": "preview_persona_api_v1_sandbox_personas_preview_post",
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "ru",
+                "en"
+              ],
+              "type": "string",
+              "description": "язык текстов карточек",
+              "default": "ru",
+              "title": "Lang"
+            },
+            "description": "язык текстов карточек"
+          },
+          {
+            "name": "persona_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "правка своей компании: её id — тот же ИНН и люди",
+              "title": "Persona Id"
+            },
+            "description": "правка своей компании: её id — тот же ИНН и люди"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonaIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "успех",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaPreviewResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Действие недоступно сейчас: статус (INVALID_STATUS с app_status), данные компании ещё собираются (COMPANY_NOT_LOADED), ждём свежий реестр (SOURCE_WAIT), кредитную историю (BKI_PENDING), второй ключ (AWAITING_SECOND_KEY)…",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Ошибка в данных запроса (VALIDATION_ERROR с errors[], INN_INVALID с suggested_inn, FLAG_UNKNOWN…)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
     "/api/v1/sandbox/personas/{persona_id}/login": {
       "post": {
         "tags": [
@@ -7756,6 +8007,15 @@
             "title": "Why",
             "description": "почему нет или почему так — тексты причин"
           },
+          "causes": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Causes",
+            "description": "те же причины с кодом: code, kind (stop · policy · cap · score · manual), text — для иконок и подсветки"
+          },
           "recommended": {
             "type": "boolean",
             "title": "Recommended"
@@ -7775,6 +8035,7 @@
           "counter",
           "needs",
           "why",
+          "causes",
           "recommended"
         ],
         "title": "MatchOption",
@@ -8482,6 +8743,49 @@
         "title": "PersonaCardsResponse",
         "description": "Built-in mutable sequence.\n\nIf no argument is given, the constructor creates a new empty list.\nThe argument must be an iterable if specified."
       },
+      "PersonaDeleted": {
+        "properties": {
+          "deleted": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Deleted",
+            "description": "id пользователей, которых больше нет: своя компания уходит со всеми её людьми"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "deleted"
+        ],
+        "title": "PersonaDeleted"
+      },
+      "PersonaDeletedResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/PersonaDeleted"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "служебные сведения, например дата мира симулятора"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "PersonaDeletedResponse"
+      },
       "PersonaIn": {
         "properties": {
           "kind": {
@@ -9101,6 +9405,112 @@
         "title": "PersonaOptionsResponse",
         "description": "Вопросы конструктора своей компании простым языком и что значит каждый ответ."
       },
+      "PersonaPreview": {
+        "properties": {
+          "form": {
+            "type": "string",
+            "title": "Form"
+          },
+          "company": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Company",
+            "description": "name, about, okved, okved_name, inflow_avg, debt_load, age_months, headcount"
+          },
+          "path": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Path",
+            "description": "structure, sign_mode (self · independent · joint) и means — кто подписывает и кто одобряет крупную сделку, с нормой"
+          },
+          "people": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "People",
+            "description": "люди компании, как они появятся на экране входа: badge, full_name, role_title, permissions"
+          },
+          "score": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Score",
+            "description": "score, class и factors[] {factor, title, effect, points, fields}"
+          },
+          "blockers": {
+            "items": {
+              "$ref": "#/components/schemas/PreviewCause"
+            },
+            "type": "array",
+            "title": "Blockers"
+          },
+          "products": {
+            "items": {
+              "$ref": "#/components/schemas/PreviewProduct"
+            },
+            "type": "array",
+            "title": "Products"
+          },
+          "recommended": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recommended"
+          },
+          "assumes": {
+            "type": "string",
+            "title": "Assumes",
+            "description": "consent_bki — картина как при подаче заявки, с согласием на запрос кредитной истории"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "form",
+          "company",
+          "path",
+          "people",
+          "score",
+          "blockers",
+          "products",
+          "recommended",
+          "assumes"
+        ],
+        "title": "PersonaPreview",
+        "description": "Что банк скажет о такой компании до создания или правки: тот же генератор, те же факты, скоринг и подбор, что\nу созданной компании, только без сохранения. Меняется ответ — меняется картина, причины указывают на ответы."
+      },
+      "PersonaPreviewResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/PersonaPreview"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "служебные сведения, например дата мира симулятора"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "PersonaPreviewResponse",
+        "description": "Что банк скажет о такой компании до создания или правки: тот же генератор, те же факты, скоринг и подбор, что\nу созданной компании, только без сохранения. Меняется ответ — меняется картина, причины указывают на ответы."
+      },
       "Preset": {
         "properties": {
           "key": {
@@ -9175,6 +9585,146 @@
         ],
         "title": "PresetsResponse",
         "description": "Built-in mutable sequence.\n\nIf no argument is given, the constructor creates a new empty list.\nThe argument must be an iterable if specified."
+      },
+      "PreviewCause": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Fields",
+            "description": "ответы конструктора, от которых зависит причина: industry, loans, delays, flags.tax_debt… — фронт подсвечивает сам ответ, а не пишет текст"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "code",
+          "text",
+          "fields"
+        ],
+        "title": "PreviewCause"
+      },
+      "PreviewProduct": {
+        "properties": {
+          "product": {
+            "type": "string",
+            "enum": [
+              "OVERDRAFT",
+              "EXPRESS",
+              "WORKING_CAPITAL",
+              "INVESTMENT",
+              "CONTRACT",
+              "AGRO_SEASONAL"
+            ],
+            "title": "Product"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "available": {
+            "type": "boolean",
+            "title": "Available"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "description": "PREAPPROVED · CONDITIONAL · REVIEW · UNAVAILABLE"
+          },
+          "max_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Amount",
+            "description": "сколько максимум по данным банка, ₽ (числом — для экрана)"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate",
+            "description": "личная ставка, % годовых"
+          },
+          "payment": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payment",
+            "description": "платёж в месяц на максимальную сумму, ₽"
+          },
+          "why": {
+            "items": {
+              "$ref": "#/components/schemas/PreviewCause"
+            },
+            "type": "array",
+            "title": "Why"
+          },
+          "needs": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Needs"
+          },
+          "recommended": {
+            "type": "boolean",
+            "title": "Recommended"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "product",
+          "name",
+          "available",
+          "label",
+          "max_amount",
+          "rate",
+          "payment",
+          "why",
+          "needs",
+          "recommended"
+        ],
+        "title": "PreviewProduct"
       },
       "ProblemDetails": {
         "properties": {

@@ -94,10 +94,13 @@ def actions(app: dict, can: dict | None = None, *, role: str = "client", person_
 # ── команды клиента ──────────────────────────────────────────────────────────────────────────────────────────────
 
 
-async def create(conn, inn: str, request: dict, consent_bki: bool, actor: str, created_by: dict) -> dict:
+async def create(conn, inn: str, request: dict, consent_bki: bool, actor: str, created_by: dict,
+                 company_name: str | None = None) -> dict:
+    """company_name — название на момент подачи: реестр банка покажет его, даже если свою компанию потом удалили."""
     now = await clock.now(conn)
     deadline = {"status": "DRAFT", "at": (now + timedelta(seconds=timer_s("draft"))).isoformat(), "then": "WITHDRAWN"}
-    data = {"request": request, "consent_bki": consent_bki, "created_by": created_by, "deadline": deadline}
+    data = {"request": request, "consent_bki": consent_bki, "created_by": created_by, "deadline": deadline,
+            "company_name": company_name}
     return await store.create_application(conn, inn, data, actor)
 
 

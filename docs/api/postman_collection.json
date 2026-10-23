@@ -265,6 +265,51 @@
           ]
         },
         {
+          "name": "0.5b своя компания вживую: что банк скажет до создания",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/preview?lang=ru",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "preview"
+              ],
+              "query": [
+                {
+                  "key": "lang",
+                  "value": "ru"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Олег Петров\",\n  \"organization\": \"Пекарня у дома\",\n  \"industry\": \"bakery\",\n  \"structure\": \"partners\",\n  \"accountant\": true,\n  \"flags\": [\n    \"tax_debt\"\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"недоимка — стоп, и видно, какой ответ к нему привёл\", () => { const d = pm.response.json().data; pm.expect(d.blockers[0].code).to.eql(\"STOP_TAX_DEBT\"); pm.expect(d.blockers[0].fields).to.include(\"flags.tax_debt\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "0.6 своя компания простыми ответами: пекарня, партнёры, бухгалтер, недоимка",
           "request": {
             "method": "POST",
@@ -296,7 +341,111 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"custom_id\", pm.response.json().data.id);",
                   "pm.test(\"карточка — кто это, без исхода\", () => { const c = pm.response.json().data; pm.expect(c.badge).to.eql(\"Директор\"); pm.expect(c.role_title).to.include(\"Пекарня у дома\"); pm.expect(JSON.stringify(c)).to.not.include(\"недоимк\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "0.6a изменить свою компанию: недоимку погасили",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/{{custom_id}}?lang=ru",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "{{custom_id}}"
+              ],
+              "query": [
+                {
+                  "key": "lang",
+                  "value": "ru"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Олег Петров\",\n  \"organization\": \"Пекарня у дома\",\n  \"industry\": \"bakery\",\n  \"structure\": \"partners\",\n  \"accountant\": true,\n  \"flags\": []\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "0.6b готового пользователя мира не удалить",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/s7",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "s7"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"PERSONA_READONLY\", () => pm.expect(pm.response.json().code).to.eql(\"PERSONA_READONLY\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "0.6c удалить свою компанию со всеми её людьми",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/sandbox/personas/{{custom_id}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "sandbox",
+                "personas",
+                "{{custom_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
                 ]
               }
             }

@@ -443,7 +443,50 @@ class MatchOption(Schema):
     counter: list[str] = Field(description="что пришлось изменить: AMOUNT · TERM · PRODUCT")
     needs: list[dict[str, str]] = Field(description="что понадобится: code и текст")
     why: list[str] = Field(description="почему нет или почему так — тексты причин")
+    causes: list[dict[str, Any]] = Field(description="те же причины с кодом: code, kind (stop · policy · cap · score · manual), "
+                                                     "text — для иконок и подсветки")
     recommended: bool
+
+
+class PreviewCause(Schema):
+    code: str
+    kind: str | None = None
+    text: str
+    fields: list[str] = Field(description="ответы конструктора, от которых зависит причина: industry, loans, delays, "
+                                          "flags.tax_debt… — фронт подсвечивает сам ответ, а не пишет текст")
+
+
+class PreviewProduct(Schema):
+    product: Product
+    name: str
+    available: bool
+    label: str = Field(description="PREAPPROVED · CONDITIONAL · REVIEW · UNAVAILABLE")
+    max_amount: float | None = Field(description="сколько максимум по данным банка, ₽ (числом — для экрана)")
+    rate: float | None = Field(description="личная ставка, % годовых")
+    payment: float | None = Field(description="платёж в месяц на максимальную сумму, ₽")
+    why: list[PreviewCause]
+    needs: list[dict[str, str]]
+    recommended: bool
+
+
+class PersonaPreview(Schema):
+    """Что банк скажет о такой компании до создания или правки: тот же генератор, те же факты, скоринг и подбор, что
+    у созданной компании, только без сохранения. Меняется ответ — меняется картина, причины указывают на ответы."""
+    form: str
+    company: dict[str, Any] = Field(description="name, about, okved, okved_name, inflow_avg, debt_load, age_months, headcount")
+    path: dict[str, Any] = Field(description="structure, sign_mode (self · independent · joint) и means — кто подписывает "
+                                             "и кто одобряет крупную сделку, с нормой")
+    people: list[dict[str, Any]] = Field(description="люди компании, как они появятся на экране входа: badge, full_name, "
+                                                     "role_title, permissions")
+    score: dict[str, Any] = Field(description="score, class и factors[] {factor, title, effect, points, fields}")
+    blockers: list[PreviewCause]
+    products: list[PreviewProduct]
+    recommended: str | None
+    assumes: str = Field(description="consent_bki — картина как при подаче заявки, с согласием на запрос кредитной истории")
+
+
+class PersonaDeleted(Schema):
+    deleted: list[str] = Field(description="id пользователей, которых больше нет: своя компания уходит со всеми её людьми")
 
 
 class Offers(Schema):
@@ -761,6 +804,8 @@ def _named(name: str, model) -> type[Envelope]:
 
 PersonaCardsResponse = _named("PersonaCardsResponse", list[PersonaCard])
 PersonaCardResponse = _named("PersonaCardResponse", PersonaCard)
+PersonaPreviewResponse = _named("PersonaPreviewResponse", PersonaPreview)
+PersonaDeletedResponse = _named("PersonaDeletedResponse", PersonaDeleted)
 LoginResponse = _named("LoginResponse", LoginResult)
 MeResponse = _named("MeResponse", Me)
 RightsResponse = _named("RightsResponse", Rights)

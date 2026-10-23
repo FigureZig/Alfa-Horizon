@@ -20,10 +20,14 @@ from seed.flows import ACTION_TEXT, ACTION_TEXT_EN, ARG_TEXT, ARG_TEXT_EN, EN, F
 
 from .. import auth, clock, company, personas, store
 from ..config import settings
-from ..domain import engine
+from ..domain import engine, levers, matching
+from ..domain.rights import signers
+from ..domain.scoring import explain_factor
+from ..features import company_facts
 from ..policy import load as load_policy
 from ..policy import sources as source_config
 from . import schemas as S
+from .cabinet import NEEDS
 from .client import my_companies
 from .deps import actor_of
 from .http import Problem, ok
@@ -322,6 +326,69 @@ def company_title(organization: str | None) -> str | None:
     return text or None
 
 
+def _form(body: PersonaIn, inn: str | None) -> str:
+    return ("IP" if len(inn) == 12 else ("JSC" if body.form == "JSC" else "LLC")) if inn else body.form
+
+
+def _check_client(body: PersonaIn, form: str) -> None:
+    """Правила конструктора: флаги — из каталога и для этой формы, устройство компании — по форме."""
+    if bad := flags.unknown(body.flags):
+        raise Problem(422, "FLAG_UNKNOWN", f"нет таких флагов: {', '.join(bad)}", flags=bad,
+                      known=sorted(flags.catalog()["flags"]))
+    if bad := flags.not_applicable(form, body.flags):
+        raise Problem(422, "FLAG_NOT_APPLICABLE", f"для формы {form} не бывает: {', '.join(bad)}", flags=bad, form=form)
+    if form == "IP" and (body.structure not in (None, "owner_director") or body.representative):
+        raise Problem(422, "STRUCTURE_NOT_APPLICABLE", "у ИП нет участников и директоров, а доверенность ИП не моделируем — "
+                      "предприниматель действует сам (ГК ст. 23)", form=form)
+    if form != "IP" and body.structure and form not in STRUCTURE_FORMS[body.structure]:
+        raise Problem(422, "STRUCTURE_NOT_APPLICABLE", "у АО акционеров ведёт реестродержатель, а не ЕГРЮЛ: участников и "
+                      "одобрение сделки по ним не моделируем — для АО только «Владелец и директор — один человек»",
+                      form=form, structure=body.structure)
+
+
+def _build(body: PersonaIn, form: str, inn: str | None, number: int, today: date) -> tuple[dict, dict, list[dict]]:
+    """Ответы → компания и её люди тем же генератором, что и мир симулятора; противоречивые ответы — 422."""
+    spec, faults = flags.apply(_spec(body, form, inn), body.flags)
+    if spec.get("structure") in ("owner_director", "hired_director") and spec.get("participants", 1) > 1 \
+            or spec.get("structure") == "partners" and spec.get("participants", 2) < 2:
+        raise Problem(422, "STRUCTURE_CONFLICT", "устройство компании и число участников противоречат друг другу: при "
+                      "одном владельце участник один, у «нескольких участников» — от двух", structure=spec["structure"],
+                      participants=spec.get("participants"), flags=body.flags)
+    if spec.get("overdue_days") and spec.get("debt_load", 0.15) <= 0:
+        raise Problem(422, "ANSWERS_CONFLICT", "просрочка бывает только по кредиту: при «Кредитов нет» просрочки быть не "
+                      "может — выберите, что кредит есть, или уберите просрочку", fields=["loans", "delays"])
+    company, people = world.custom(spec, number, today)
+    if errors := world.validate(company, people, today):
+        raise Problem(422, "PERSONA_INVALID", "такой компании не бывает: " + "; ".join(errors), errors=errors)
+    return company, people, faults
+
+
+def _base(body: PersonaIn, seq: int) -> dict:
+    texts = {k: getattr(body, k) for k in TEXT_FIELDS if getattr(body, k)}
+    titles = [flags.catalog()["flags"][f]["title"] for f in body.flags] if body.kind == "client" else []
+    return {"code": body.code or f"C{seq}", "faults": [], "texts": texts, "custom": True,
+            "title": {"ru": body.scenario or ("Своя компания: " + ", ".join(t["ru"].lower() for t in titles) if titles
+                                              else "Своя персона"),
+                      "en": body.scenario or ("Your company: " + ", ".join(t["en"].lower() for t in titles) if titles
+                                              else "Custom persona")},
+            "preview": {"ru": body.preview or "Своя компания: подбор, заявка, решение и подпись",
+                        "en": body.preview or "Your own company: matching, application, decision and signing"}}
+
+
+def _bank_persona(body: PersonaIn, base: dict, seq: int) -> dict:
+    fio = parse_fio(body.full_name) or ["Соколова", "Мария", "Андреевна"]
+    title = body.organization or "Кредитный специалист"
+    role = "risk_manager" if "риск" in title.lower() or "risk" in title.lower() else "loan_officer"   # роль — код
+    return {**base, "id": f"b{seq}", "kind": "bank", "staff": {"key": f"staff{seq}", "fio": fio, "role": role,
+                                                              "title": {"ru": title, "en": title}}}
+
+
+def _client_persona(base: dict, seq: int, company: dict, people: dict) -> dict:
+    owner = company.get("owner") or company["eio"][0][0]
+    return {**base, "id": f"c{seq}", "kind": "client", "person": {"key": owner, **people[owner]},
+            "companies": [company], "people": people}
+
+
 @router.post("/personas", status_code=201,
              **doc(S.PersonaCardResponse, 409, 422, status=201, summary="Создать свою компанию и её пользователя"))
 async def create_persona(body: PersonaIn, lang: Lang = "ru"):
@@ -332,57 +399,217 @@ async def create_persona(body: PersonaIn, lang: Lang = "ru"):
         seq = await store.kv_get(conn, "users:custom_seq", 0) + 1
         await store.kv_set(conn, "users:custom_seq", seq)
         today = await clock.today(conn)
-    form = ("IP" if len(inn) == 12 else ("JSC" if body.form == "JSC" else "LLC")) if inn else body.form
-    if body.kind == "client" and (bad := flags.unknown(body.flags)):
-        raise Problem(422, "FLAG_UNKNOWN", f"нет таких флагов: {', '.join(bad)}", flags=bad,
-                      known=sorted(flags.catalog()["flags"]))
-    if body.kind == "client" and (bad := flags.not_applicable(form, body.flags)):
-        raise Problem(422, "FLAG_NOT_APPLICABLE", f"для формы {form} не бывает: {', '.join(bad)}", flags=bad, form=form)
-    if body.kind == "client" and form == "IP" and (body.structure not in (None, "owner_director") or body.representative):
-        raise Problem(422, "STRUCTURE_NOT_APPLICABLE", "у ИП нет участников и директоров, а доверенность ИП не моделируем — "
-                      "предприниматель действует сам (ГК ст. 23)", form=form)
-    if body.kind == "client" and form != "IP" and body.structure and form not in STRUCTURE_FORMS[body.structure]:
-        raise Problem(422, "STRUCTURE_NOT_APPLICABLE", "у АО акционеров ведёт реестродержатель, а не ЕГРЮЛ: участников и "
-                      "одобрение сделки по ним не моделируем — для АО только «Владелец и директор — один человек»",
-                      form=form, structure=body.structure)
-    number = PERSONA_BASE + seq % 1000
-    texts = {k: getattr(body, k) for k in TEXT_FIELDS if getattr(body, k)}
-    titles = [flags.catalog()["flags"][f]["title"] for f in body.flags] if body.kind == "client" else []
-    base = {"code": body.code or f"C{seq}", "faults": [], "texts": texts, "custom": True,
-            "title": {"ru": body.scenario or ("Своя компания: " + ", ".join(t["ru"].lower() for t in titles) if titles
-                                              else "Своя персона"),
-                      "en": body.scenario or ("Your company: " + ", ".join(t["en"].lower() for t in titles) if titles
-                                              else "Custom persona")},
-            "preview": {"ru": body.preview or "Своя компания: подбор, заявка, решение и подпись",
-                        "en": body.preview or "Your own company: matching, application, decision and signing"}}
+    form, base = _form(body, inn), _base(body, seq)
     if body.kind == "bank":
-        fio = parse_fio(body.full_name) or ["Соколова", "Мария", "Андреевна"]
-        title = body.organization or "Кредитный специалист"
-        role = "risk_manager" if "риск" in title.lower() or "risk" in title.lower() else "loan_officer"   # роль — код
-        persona = {**base, "id": f"b{seq}", "kind": "bank", "staff": {"key": f"staff{seq}", "fio": fio, "role": role,
-                                                                       "title": {"ru": title, "en": title}}}
-        created_personas = [persona]
+        created = [_bank_persona(body, base, seq)]
     else:
-        spec, base["faults"] = flags.apply(_spec(body, form, inn), body.flags)
-        if spec.get("structure") in ("owner_director", "hired_director") and spec.get("participants", 1) > 1 \
-                or spec.get("structure") == "partners" and spec.get("participants", 2) < 2:
-            raise Problem(422, "STRUCTURE_CONFLICT", "устройство компании и число участников противоречат друг другу: при "
-                          "одном владельце участник один, у «нескольких участников» — от двух", structure=spec["structure"],
-                          participants=spec.get("participants"), flags=body.flags)
-        company, people = world.custom(spec, number, today)
-        errors = world.validate(company, people, today)
-        if errors:
-            raise Problem(422, "PERSONA_INVALID", "такой компании не бывает: " + "; ".join(errors), errors=errors)
+        _check_client(body, form)
+        company, people, base["faults"] = _build(body, form, inn, PERSONA_BASE + seq % 1000, today)
         await _import(persona_stubs(company, people, today))
-        owner = company.get("owner") or company["eio"][0][0]
-        persona = {**base, "id": f"c{seq}", "kind": "client", "person": {"key": owner, **people[owner]},
-                   "companies": [company], "people": people}
-        created_personas = [persona, *personas.company_personas(persona)]
+        persona = _client_persona(base, seq, company, people)
+        created = [persona, *personas.company_personas(persona)]
     async with pool.acquire() as conn:
-        await personas.add_many(conn, created_personas)
+        await personas.add_many(conn, created)
+        if created[0]["kind"] == "client":
+            await store.enqueue(conn, "refresh_company", {"inn": created[0]["companies"][0]["inn"]})
+    return ok(personas.card(created[0], lang))
+
+
+async def _own(conn, persona_id: str) -> dict:
+    """Что можно менять и удалять: свою компанию (через её создателя) и своего сотрудника банка."""
+    persona = await personas.get(conn, persona_id)
+    if persona is None:
+        raise Problem(404, "PERSONA_NOT_FOUND", f"персоны {persona_id} нет")
+    if not persona["custom"]:
+        raise Problem(409, "PERSONA_READONLY", "готовых пользователей мира не меняем и не удаляем: на них держатся сценарии "
+                      "проверки — вернуть мир как был можно сбросом (POST /sandbox/reset)", persona_id=persona_id)
+    if persona.get("derived"):
+        owner = persona_id.split("-p", 1)[0]
+        raise Problem(409, "PERSON_IN_COMPANY", "человек — часть устройства своей компании: уберите его, изменив компанию "
+                      f"(PUT /sandbox/personas/{owner}), или удалите компанию целиком", owner=owner)
+    return persona
+
+
+def _team(everyone: list[dict], persona: dict) -> set[str]:
+    """Своя компания — это её создатель и все её люди; сотрудник банка — он один."""
+    if persona["kind"] == "bank":
+        return {persona["id"]}
+    inn = persona["companies"][0]["inn"]
+    return {p["id"] for p in everyone if p["custom"] and p["kind"] == "client" and p["companies"][0]["inn"] == inn}
+
+
+def _number(company: dict) -> int:
+    return int(company["key"].removeprefix("custom"))
+
+
+async def _drop_company(inn: str) -> None:
+    """Снять моки своей компании: ответы источников и карточки её людей (события мира и отказы снимет сброс)."""
+    async with _client() as client:
+        resp = await client.post(f"{ADMIN}/mappings/find-by-metadata",
+                                 json={"matchesJsonPath": {"expression": "$.inn", "equalTo": inn}})
+        resp.raise_for_status()
+        for m in resp.json().get("mappings", []):
+            if m.get("metadata", {}).get("createdBy") == "sandbox-persona":
+                await client.delete(f"{ADMIN}/mappings/{m['id']}")
+
+
+@router.put("/personas/{persona_id}",
+            **doc(S.PersonaCardResponse, 404, 409, 422, summary="Изменить свою компанию или своего сотрудника банка"))
+async def update_persona(persona_id: str, body: PersonaIn, lang: Lang = "ru"):
+    """Поменять ответы своей компании: банк пересоберёт её реестры, выписку и людей с тем же ИНН — как событие мира.
+    Пользователи компании пересчитываются (убрали бухгалтера — его входа больше нет), заявки остаются и уходят на
+    пересмотр. Своему сотруднику банка — имя и должность. Готовых пользователей мира не меняем (409 PERSONA_READONLY),
+    человека своей компании меняют через её создателя (409 PERSON_IN_COMPANY)."""
+    pool = await store.pool()
+    async with pool.acquire() as conn:
+        persona = await _own(conn, persona_id)
+        team = _team(await personas.all_personas(conn), persona)
+        today = await clock.today(conn)
+    if body.kind != persona["kind"]:
+        raise Problem(422, "KIND_CHANGE", "клиента не превратить в сотрудника банка и наоборот — создайте нового",
+                      kind=persona["kind"])
+    seq = int(persona_id[1:])
+    base = {**_base(body, seq), "code": persona["code"]}
+    if persona["kind"] == "bank":
+        updated = [_bank_persona(body, base, seq)]
+    else:
+        old = persona["companies"][0]
+        inn = old["inn"]
+        if len(inn) == 10 and body.form == "IP":
+            raise Problem(422, "FORM_CHANGE", "ООО или АО не превратить в ИП: у ИП другой ИНН — создайте новую компанию",
+                          inn=inn)
+        form = _form(body, inn)
+        _check_client(body, form)
+        company, people, base["faults"] = _build(body, form, inn, _number(old), today)
+        await _drop_company(inn)
+        await _import(persona_stubs(company, people, today))
+        fresh = _client_persona(base, seq, company, people)
+        updated = [fresh, *personas.company_personas(fresh)]
+    async with pool.acquire() as conn:
+        await personas.replace(conn, team, updated)
+        if await store.kv_get(conn, personas.ACTIVE_KEY) in team - {p["id"] for p in updated}:
+            await store.kv_delete(conn, personas.ACTIVE_KEY)
         if persona["kind"] == "client":
-            await store.enqueue(conn, "refresh_company", {"inn": persona["companies"][0]["inn"]})
-    return ok(personas.card(persona, lang))
+            await store.enqueue(conn, "refresh_company", {"inn": inn, "recheck": True,
+                                                          "reason": "компанию изменили в конструкторе"})
+    return ok(personas.card(updated[0], lang))
+
+
+@router.delete("/personas/{persona_id}",
+               **doc(S.PersonaDeletedResponse, 404, 409, summary="Удалить свою компанию или своего сотрудника банка"))
+async def delete_persona(persona_id: str):
+    """Убрать свою компанию со всеми её людьми или своего сотрудника банка. Моки компании снимаются, заявки остаются
+    в истории банка. Готовых пользователей мира не удаляем (409 PERSONA_READONLY): вернуть мир как был — сброс."""
+    pool = await store.pool()
+    async with pool.acquire() as conn:
+        persona = await _own(conn, persona_id)
+        team = _team(await personas.all_personas(conn), persona)
+        await personas.replace(conn, team, [])
+        if await store.kv_get(conn, personas.ACTIVE_KEY) in team:
+            await store.kv_delete(conn, personas.ACTIVE_KEY)
+    if persona["kind"] == "client":
+        await _drop_company(persona["companies"][0]["inn"])
+    return ok({"deleted": sorted(team)})
+
+
+# ── предпросмотр конструктора: что банк скажет о такой компании ──────────────────────────────────────────────────
+
+IP_MEANS = "Предприниматель действует сам: подписывает и решает без чьих-либо согласий (ГК ст. 23)"
+REASON_FIELDS = {   # причина решения → ответы конструктора, от которых она зависит: фронт подсвечивает сам ответ
+    "STOP_TAX_DEBT": ["flags.tax_debt", "tax_debt"], "SC_TAX_DEBT": ["flags.tax_debt", "tax_debt"],
+    "STOP_LIQUIDATION": ["flags.liquidation"], "STOP_BANKRUPTCY": ["flags.bankruptcy"],
+    "STOP_EIO_DISQUALIFIED": ["flags.disqualified_eio"], "STOP_EIO_UNRELIABLE": ["flags.unreliable_eio"],
+    "STOP_DELINQUENCY": ["delays", "flags.overdue_serious", "overdue_days"],
+    "SC_DELINQUENCY": ["delays", "flags.overdue_recent", "flags.overdue_serious", "overdue_days"],
+    "POL_BUSINESS_AGE": ["age_months", "flags.young_business"], "SC_YOUNG_BUSINESS": ["age_months", "flags.young_business"],
+    "POL_NO_TURNOVER": ["age_months", "flags.young_business"],
+    "POL_INDUSTRY": ["industry"], "POL_INDUSTRY_REVIEW": ["industry"], "POL_PRODUCT_FIT": ["industry", "form"],
+    "POL_NO_CONTRACT": ["channel", "flags.gov_contract", "contract_price"],
+    "CAP_CONTRACT": ["contract_price", "flags.gov_contract"],
+    "POL_AMOUNT_MIN": ["inflow_avg", "loans"], "CAP_TURNOVER": ["inflow_avg"],
+    "CAP_PAYMENT_CAPACITY": ["loans", "inflow_avg", "flags.high_debt_load"], "CAP_INTEREST_CAPACITY": ["loans", "inflow_avg"],
+    "CAP_SEASONAL_INFLOWS": ["inflow_avg", "seasonality"],
+    "SC_UNSTABLE_INFLOWS": ["stability", "flags.unstable_inflows"], "SC_DECLINING_INFLOWS": ["trend", "flags.declining_inflows"],
+    "SC_HIGH_DEBT_LOAD": ["loans", "flags.high_debt_load"], "SC_CREDIT_HUNGER": ["flags.credit_hunger", "bki_requests"],
+    "SC_LOSS": ["flags.loss", "profit_margin"], "REQ_CORP_APPROVAL": ["structure", "flags.large_deal"],
+    "DATA_SOURCE_UNAVAILABLE": ["flags.bki_down"],
+}
+
+
+def _structure(company: dict) -> str:
+    """Как устроена компания на деле — по её реестру: так предпросмотр называет и то, что выведено из флагов."""
+    if not world.is_ul(company):
+        return "owner"
+    if len(company.get("eio", [])) > 1:
+        return f"two_directors_{company['eio_mode']}"
+    if "Владелец" in (company.get("titles") or {}).values():
+        return "hired_director"
+    return "partners" if len(company.get("participants", [])) > 1 else "owner_director"
+
+
+def _causes(items: list[dict], score_fields: list[str]) -> list[dict]:
+    return [{"code": c["code"], "kind": c.get("kind"), "text": c["text"],
+             "fields": score_fields if c["code"] == "POL_RISK_CLASS" else REASON_FIELDS.get(c["code"], [])} for c in items]
+
+
+@router.post("/personas/preview",
+             **doc(S.PersonaPreviewResponse, 404, 409, 422, summary="Своя компания вживую: что банк скажет до создания"))
+async def preview_persona(body: PersonaIn, lang: Lang = "ru",
+                          persona_id: Annotated[str | None, Query(description="правка своей компании: её id — тот же "
+                                                                               "ИНН и люди")] = None):
+    """Конструктор вживую: те же ответы, что для создания, — и сразу видно, что банк предложит такой компании, кто в ней
+    подписывает и одобряет, какой у неё класс риска и почему. Ничего не сохраняется. Генератор, факты, скоринг и подбор —
+    те же, что у созданной компании, поэтому предпросмотр совпадает с кабинетом после создания. У каждой причины —
+    `fields`: ответы конструктора, от которых она зависит. Поменяли ответ — картина меняется сразу: так видно, почему."""
+    if body.kind != "client":
+        raise Problem(422, "PREVIEW_CLIENT_ONLY", "предпросмотр — для своей компании: у сотрудника банка решений нет")
+    pool = await store.pool()
+    async with pool.acquire() as conn:
+        today = await clock.today(conn)
+        if persona_id:
+            persona = await _own(conn, persona_id)
+            if persona["kind"] != "client":
+                raise Problem(422, "PREVIEW_CLIENT_ONLY", "предпросмотр — для своей компании: у сотрудника банка решений нет")
+            inn, number = persona["companies"][0]["inn"], _number(persona["companies"][0])
+        else:                                   # номер, который получит компания при создании: те же люди и цифры
+            inn, number = None, PERSONA_BASE + (await store.kv_get(conn, "users:custom_seq", 0) + 1) % 1000
+    form = _form(body, inn)
+    _check_client(body, form)
+    company, people, _ = _build(body, form, inn, number, today)
+    # картина как при подаче заявки — с согласием на запрос кредитной истории: иначе ответы про кредиты и просрочки
+    # в предпросмотре ничего бы не меняли (до согласия банк видит только информационную часть КИ)
+    facts, pol = company_facts(company["inn"], world.served(company, people, today), today), load_policy()
+    found = matching.match(facts, pol)
+    risk = levers.summary(facts, facts.get("segment"), pol["scorecard"])
+    factors = [{"factor": c["factor"], "title": c["title"], "effect": c["effect"], "points": c["points"],
+                "fields": REASON_FIELDS.get(c["reason"], [])}
+               for c in (explain_factor(c, pol["scorecard"], pol["reasons"], lang) for c in risk["contributions"])]
+    score_fields = sorted({f for c in factors if c["effect"] == "minus" for f in c["fields"]})
+    owner = _client_persona({"code": "preview", "faults": [], "texts": {}, "custom": True}, 0, company, people)
+    cards = [personas.card(p, lang) for p in (owner, *personas.company_personas(owner))]
+    structure = _structure(company)
+    return ok({
+        "form": form,
+        "company": {"name": company["name"], "about": cards[0]["about"], "okved": facts.get("okved"),
+                    "okved_name": facts.get("okved_name"), "inflow_avg": _float(facts.get("inflow_avg")),
+                    "debt_load": facts.get("debt_load"), "age_months": facts.get("age_months"),
+                    "headcount": facts.get("headcount")},
+        "path": {"structure": structure, "sign_mode": signers(facts)["mode"],
+                 "means": IP_MEANS if structure == "owner" else STRUCTURE_TEXTS[structure][2]},
+        "people": [{k: c[k] for k in ("badge", "full_name", "role_title", "permissions")} for c in cards],
+        "score": {"score": risk["score"], "class": risk["class"], "factors": factors},
+        "blockers": _causes(found["blockers"], score_fields),
+        "products": [{"product": o["product"], "name": o["name"], "available": o["available"], "label": o["label"],
+                      "max_amount": _float(o["max_amount"]), "rate": _float((o["offer"] or {}).get("rate")),
+                      "payment": _float((o["offer"] or {}).get("payment")), "why": _causes(o["causes"], score_fields),
+                      "needs": [{"code": n, "text": NEEDS[lang][n]} for n in o["needs"]],
+                      "recommended": o["product"] == found["recommended"]} for o in found["options"]],
+        "recommended": found["recommended"], "assumes": "consent_bki",
+    })
+
+
+def _float(x) -> float | None:
+    return None if x is None else float(x)
 
 
 async def _apply_faults(faults: list[dict]) -> None:

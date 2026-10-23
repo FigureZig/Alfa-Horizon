@@ -196,8 +196,12 @@ async def company_names(conn, lang: str = "ru") -> dict[str, str]:
 
 
 async def add_many(conn, new_personas: list[dict]) -> None:
-    ids = {persona["id"] for persona in new_personas}
-    await store.kv_set(conn, CUSTOM_KEY, [p for p in await customs(conn) if p["id"] not in ids] + new_personas)
+    await replace(conn, {persona["id"] for persona in new_personas}, new_personas)
+
+
+async def replace(conn, old_ids: set[str], new_personas: list[dict]) -> None:
+    """Свои пользователи: убрать old_ids и добавить новых — создание, правка компании (её люди меняются) и удаление."""
+    await store.kv_set(conn, CUSTOM_KEY, [p for p in await customs(conn) if p["id"] not in old_ids] + new_personas)
 
 
 async def active_id(conn) -> str:
@@ -387,16 +391,18 @@ def _demo_facts(inn: str) -> dict:
 
 @lru_cache(maxsize=256)
 def _custom_facts(blob: str) -> dict:
-    """Своя компания неизменна после создания: выписку и факты считаем один раз на все её входы (ключ — содержимое,
-    а не ИНН: после сброса мира тот же номер может получить другая компания)."""
     company, people = json.loads(blob)
     return company_facts(company["inn"], world.served(company, people, _world_today()), _world_today())
 
 
+def custom_facts(company: dict, people: dict) -> dict:
+    """Факты своей компании из её описания. Считаем один раз на все её входы и на предпросмотр конструктора: ключ —
+    содержимое, а не ИНН (после правки или сброса мира тот же ИНН может получить другая компания). Не изменять."""
+    return _custom_facts(json.dumps([company, people], sort_keys=True, ensure_ascii=False))
+
+
 def _facts(persona: dict, company: dict) -> dict:
-    if not persona["custom"]:
-        return _demo_facts(company["inn"])
-    return _custom_facts(json.dumps([company, persona["people"]], sort_keys=True, ensure_ascii=False))
+    return custom_facts(company, persona["people"]) if persona["custom"] else _demo_facts(company["inn"])
 
 
 def card(persona: dict, lang: str = "ru") -> dict:

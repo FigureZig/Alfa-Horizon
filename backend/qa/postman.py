@@ -97,11 +97,21 @@ def _simulator() -> dict:
         _item("0.4 мои компании и права", "GET", "/me", user="s7", tests=_expect(200)),
         _item("0.5 своя компания: параметры и флаги", "GET", "/sandbox/persona-options?lang=ru", tests=_expect(200)),
         _item("0.5a гид: сценарии по ролям", "GET", "/sandbox/scenarios?lang=ru", tests=_expect(200)),
+        _item("0.5b своя компания вживую: что банк скажет до создания", "POST", "/sandbox/personas/preview?lang=ru",
+              body=flagged, tests=[*_expect(200), _js(
+                  'pm.test("недоимка — стоп, и видно, какой ответ к нему привёл", () => { const d = pm.response.json().data; '
+                  'pm.expect(d.blockers[0].code).to.eql("STOP_TAX_DEBT"); '
+                  'pm.expect(d.blockers[0].fields).to.include("flags.tax_debt"); });')[0]]),
         _item("0.6 своя компания простыми ответами: пекарня, партнёры, бухгалтер, недоимка", "POST", "/sandbox/personas",
-              body=flagged, tests=[*_expect(201), _js(
+              body=flagged, tests=[*_expect(201), *_save("custom_id", "id"), _js(
                   'pm.test("карточка — кто это, без исхода", () => { const c = pm.response.json().data; '
                   'pm.expect(c.badge).to.eql("Директор"); pm.expect(c.role_title).to.include("Пекарня у дома"); '
                   'pm.expect(JSON.stringify(c)).to.not.include("недоимк"); });')[0]]),
+        _item("0.6a изменить свою компанию: недоимку погасили", "PUT", "/sandbox/personas/{{custom_id}}?lang=ru",
+              body={**flagged, "flags": []}, tests=_expect(200)),
+        _item("0.6b готового пользователя мира не удалить", "DELETE", "/sandbox/personas/s7", tests=[*_expect(409), _js(
+            'pm.test("PERSONA_READONLY", () => pm.expect(pm.response.json().code).to.eql("PERSONA_READONLY"));')[0]]),
+        _item("0.6c удалить свою компанию со всеми её людьми", "DELETE", "/sandbox/personas/{{custom_id}}", tests=_expect(200)),
     ], "Вход по ID → токен в переменную token_<id>. Перелогин — тот же вход другим пользователем.")
 
 
