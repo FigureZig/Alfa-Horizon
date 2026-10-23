@@ -9,7 +9,6 @@ import TabPanel from 'primevue/tabpanel'
 import TabPanels from 'primevue/tabpanels'
 import Tabs from 'primevue/tabs'
 import SandboxReviewerGuide from './SandboxReviewerGuide.vue'
-import SandboxReviewerLogin from './SandboxReviewerLogin.vue'
 import SandboxReviewerScenarios from './SandboxReviewerScenarios.vue'
 import SandboxWorldControls from './SandboxWorldControls.vue'
 import { useApiFetch } from '@/app/composables/useApiFetch'
@@ -166,9 +165,6 @@ watch([isVisible, applicationId], ([visible]) => {
         <Tab value="world">
           {{ t('reviewer.tabs.world') }}
         </Tab>
-        <Tab value="login">
-          {{ t('reviewer.tabs.login') }}
-        </Tab>
         <Tab value="why">
           {{ t('reviewer.tabs.why') }}
         </Tab>
@@ -185,10 +181,6 @@ watch([isVisible, applicationId], ([visible]) => {
 
         <TabPanel value="world">
           <SandboxWorldControls :inn="eventInn" />
-        </TabPanel>
-
-        <TabPanel value="login">
-          <SandboxReviewerLogin @navigated="closePanel" />
         </TabPanel>
 
         <TabPanel value="why">

@@ -19,7 +19,6 @@ export default {
 
     landing: {
         nav: {
-            login: 'Sign in',
         },
         hero: {
             eyebrow: 'Credit workspace for business',
@@ -100,10 +99,6 @@ export default {
             delete: 'Delete',
         },
         enter: 'Sign in',
-        byId: {
-            label: 'Sign in by ID or TIN',
-            placeholder: 'For example, s7 or 7701000026',
-        },
         enterAs: 'Sign in as {name}',
         deleteDialog: {
             title: 'Delete the company?',
@@ -160,14 +155,6 @@ export default {
         },
         scenarios: {
             pick: 'Scenario',
-        },
-        login: {
-            description: 'Sign in without picking a card: by user ID, a person TIN or a company TIN.',
-            label: 'ID or TIN',
-            examples: 'For example:',
-            submit: 'Sign in',
-            notFound: 'No such user. Pick a ready one on the sign-in screen or create your own company.',
-            error: 'Could not sign in. Please try again.',
         },
         guide: {
             description: 'Every product decision can be checked on screen — here is where to look.',
