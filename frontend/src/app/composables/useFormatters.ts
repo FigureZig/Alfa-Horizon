@@ -12,9 +12,10 @@ function parseIsoDate(isoDate: string): Date {
 }
 
 const MS_IN_DAY = 24 * 60 * 60 * 1000
+const COMPACT_MONEY_FROM = 1_000_000
 
 export function useFormatters() {
-  const { locale } = useI18n({ useScope: 'global' })
+  const { t, locale } = useI18n({ useScope: 'global' })
 
   function formatCurrency(value: number, currency: string, isCompact = false): string {
     return new Intl.NumberFormat(locale.value, {
@@ -24,6 +25,16 @@ export function useFormatters() {
       minimumFractionDigits: 0,
       maximumFractionDigits: isCompact ? 1 : 0,
     }).format(value)
+  }
+
+  // Деньги в тексте: от миллиона — коротко («4,4 млн ₽»), меньше — целиком («36 196 ₽»)
+  function formatMoney(value: number): string {
+    return formatCurrency(value, 'RUB', value >= COMPACT_MONEY_FROM)
+  }
+
+  // Срок кредита: «2 года», а не «24 месяца»; некратный году — в месяцах
+  function formatTerm(months: number): string {
+    return months % 12 === 0 ? t('common.years', months / 12) : t('common.months', months)
   }
 
   function formatPercent(value: number): string {
@@ -40,6 +51,13 @@ export function useFormatters() {
   // Для меток времени с часами (ISO 8601 с временем)
   function formatDateTime(isoDateTime: string, options: Intl.DateTimeFormatOptions): string {
     return new Intl.DateTimeFormat(locale.value, options).format(new Date(isoDateTime))
+  }
+
+  // «Фамилия Имя Отчество» → «Фамилия И. О.»; другие написания оставляем как есть
+  function formatShortName(fullName: string): string {
+    const parts = fullName.trim().split(/\s+/)
+
+    return parts.length === 3 ? `${parts[0]} ${parts[1][0]}. ${parts[2][0]}.` : fullName
   }
 
   // «ЕГРЮЛ, ФНС и счёт в банке»
@@ -68,5 +86,16 @@ export function useFormatters() {
     return Math.max(Math.round((dueDay.getTime() - parseIsoDate(today).getTime()) / MS_IN_DAY), 0)
   }
 
-  return { getDaysLeft, formatCurrency, formatPercent, formatDate, formatDateTime, formatList, formatDuration }
+  return {
+    getDaysLeft,
+    formatCurrency,
+    formatMoney,
+    formatTerm,
+    formatPercent,
+    formatDate,
+    formatDateTime,
+    formatList,
+    formatShortName,
+    formatDuration,
+  }
 }

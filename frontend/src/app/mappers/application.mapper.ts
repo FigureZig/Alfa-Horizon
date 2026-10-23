@@ -1,5 +1,6 @@
 import { BankNoteMapper } from '@/app/mappers/bank-note.mapper'
 import { ApplicationProductChoiceEnum } from '@/app/types/application/application-product-choice-enum'
+import { CreditProductCodeEnum } from '@/app/types/application/credit-product-code-enum'
 import type {
   ApplicationDecisionDto,
   ApplicationDto,
@@ -29,6 +30,7 @@ export class ApplicationMapper {
       flags: data.flags,
       createdAt: data.created_at,
       updatedAt: data.updated_at,
+      createdBy: data.created_by ? { inn: data.created_by.inn, name: data.created_by.name } : null,
       request: {
         product: data.request.product,
         amount: Number(data.request.amount),
@@ -67,8 +69,9 @@ export class ApplicationMapper {
         : null,
       loan: data.loan
         ? {
-          isLimit: data.loan.kind === 'limit',
-          number: data.loan.number ?? data.loan.loan_id,
+          // Вид выдачи пришёл с бэкенда; у старых выдач его нет — овердрафт подключает лимит
+          isLimit: data.loan.kind ? data.loan.kind === 'limit' : data.offer?.product === CreditProductCodeEnum.Overdraft,
+          number: data.loan.number ?? null,
           loanId: data.loan.loan_id,
           amount: Number(data.loan.amount),
           rate: Number(data.loan.rate),
@@ -127,6 +130,7 @@ export class ApplicationMapper {
   private static toDecision(decision: ApplicationDecisionDto): ApplicationDecisionInterface {
     return {
       outcome: decision.outcome,
+      kind: decision.kind ?? null,
       offerKind: decision.offer_kind,
       counter: decision.counter,
       conditions: decision.conditions,

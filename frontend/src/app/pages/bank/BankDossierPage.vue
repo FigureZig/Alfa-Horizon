@@ -338,7 +338,10 @@ const backLabel = computed(() => (isFromApplications.value ? t('bank.dossier.bac
           />
 
           <div class="rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
-            <ApplicationTimeline :events="events" />
+            <ApplicationTimeline
+              :events="events"
+              :is-limit="application?.loan?.isLimit ?? false"
+            />
           </div>
         </aside>
       </div>

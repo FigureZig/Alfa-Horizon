@@ -265,12 +265,5 @@ function handleVote(choice: ApplicationVoteEnum) {
         {{ t('application.infoRequest.send') }}
       </button>
     </form>
-
-    <p
-      v-else-if="!approval"
-      class="rounded-2xl bg-fino-surface-secondary p-3 text-sm text-fino-text-muted"
-    >
-      {{ t('application.infoRequest.noRight') }}
-    </p>
   </section>
 </template>

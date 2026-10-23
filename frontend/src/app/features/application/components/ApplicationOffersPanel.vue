@@ -231,13 +231,6 @@ function handleDecline() {
       </li>
     </ul>
 
-    <p
-      v-if="!canAccept"
-      class="rounded-2xl bg-fino-surface-secondary p-3 text-sm text-fino-text-muted"
-    >
-      {{ t('application.offers.noRight') }}
-    </p>
-
     <div class="flex flex-wrap items-center justify-between gap-3 border-t border-fino-border pt-4">
       <p class="text-xs text-fino-text-muted">
         {{ deadlineText }}
