@@ -79,8 +79,8 @@ def rights(person_inn: str, facts: dict) -> dict:
         why.append({"right": "prepare", "allowed": LEVELS.get(level, 0) >= LEVELS["prepare"],
                     "because": f"доступ в ДБО: {level}", "norm": NORMS["bank_access"]})
 
-    can = {
-        "view": bool(roles),
+    can = {   # счёт и кабинет компании видит тот, кому компания дала доступ: руководитель, ИП, пользователь ДБО, представитель
+        "view": owner or eio is not None or level is not None or poa is not None,   # участник — только своё голосование
         "prepare": owner or (eio is not None and not block) or LEVELS.get(level, 0) >= LEVELS["prepare"],
         "sign": owner or (eio is not None and not block) or poa_sign,
         "approve": share is not None and segment == "LLC",

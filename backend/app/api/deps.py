@@ -17,8 +17,10 @@ from .http import Problem
 
 BANK_RIGHTS = {"roles": [{"role": "bank_officer"}], "can": {"view": True, "prepare": False, "sign": False, "approve": False},
                "sign_mode": None, "why": []}
-NO_RIGHT = {"view": "у вас нет связи с этой компанией", "prepare": "готовить и подавать заявки может руководитель или "
-            "пользователь ДБО с правом подготовки", "sign": "подписывать может руководитель без блокировок или ИП",
+NO_RIGHT = {"view": "кабинет и счёт компании видят руководитель и те, кому компания дала доступ в интернет-банк; участник "
+                    "общества голосует по крупной сделке в самой заявке",
+            "prepare": "готовить и подавать заявки может руководитель или пользователь ДБО с правом подготовки",
+            "sign": "подписывать может руководитель без блокировок или ИП",
             "approve": "голосовать за крупную сделку могут участники ООО"}
 
 
@@ -91,6 +93,12 @@ async def require(conn, who: Actor, inn: str, right: str) -> tuple[dict, dict]:
     if not granted["can"][right]:
         raise Problem(403, "FORBIDDEN", NO_RIGHT[right], right=right, roles=granted["roles"], why=granted["why"])
     return granted, facts
+
+
+def voter(app: dict, who: Actor, granted: dict) -> bool:
+    """Участник, которого заявка просит проголосовать за крупную сделку: эту заявку он видит и без доступа к счёту."""
+    approval = app["data"].get("approval") or {}
+    return bool(granted["can"].get("approve")) and who.inn in {p["inn"] for p in approval.get("participants", [])}
 
 
 def require_feature(code: str) -> None:

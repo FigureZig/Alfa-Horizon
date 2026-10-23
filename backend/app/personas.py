@@ -7,9 +7,10 @@
 и тому, что лежит в источниках. Тексты на ru и en (`?lang=`).
 """
 
+import json
 from datetime import date
 from decimal import Decimal
-from functools import cache
+from functools import cache, lru_cache
 
 from seed import world
 
@@ -17,6 +18,7 @@ from . import store
 from .config import settings
 from .domain.rights import rights
 from .features import company_facts
+from .policy import load as load_policy
 from .policy import sources as source_config
 
 CUSTOM_KEY = "users:custom"
@@ -31,9 +33,6 @@ T = {
         "all_ok": "Все источники отвечают", "others_ok": "остальные отвечают",
         "fault": {"timeout": "не отвечает", "error503": "ошибка 503", "reset": "обрыв соединения", "garbage": "битый ответ",
                   "empty": "пустой ответ"},
-        "tax_debt": "ФНС: недоимка {amount}", "liquidation": "ЕГРЮЛ: ликвидация", "bankruptcy": "банкротство",
-        "unreliable": "ЕГРЮЛ: сведения о руководителе недостоверны", "disqualified": "ЕГРЮЛ: руководитель дисквалифицирован",
-        "conflict": "ЕГРЮЛ и анкета банка: разные руководители", "contract": "ЕИС: контракт на {amount}",
         "owner": "все права, подписывает без доверенности", "eio": "{title} — подписывает без доверенности",
         "eio_joint": "{title} — подписывает вместе с другими руководителями", "eio_blocked": "{title} — подпись заблокирована",
         "poa": "подписывает по МЧД до {date}", "poa_off": "МЧД {status} — подписи нет",
@@ -43,14 +42,17 @@ T = {
         "staff": {"loan_officer": ("Досье и решения по исключениям до {limit}", "Войти как кредитный специалист"),
                   "risk_manager": ("Второй ключ: решения выше {limit}", "Войти как риск-менеджер")},
         "bank_profile": "Отдел кредитования малого бизнеса", "bank_registries": "Все источники по заявке",
-        "derived": {
-            "participant": ("Участник {company} с долей {share}%",
-                            "Голосует за крупную сделку, когда банк просит согласие участников", "Участник"),
-            "eio": ("Директор {company}", "Подписывает договоры, которые подготовили другие пользователи компании", "Директор"),
-            "poa": ("Представитель {company} по МЧД", "Готовит заявки и подписывает кредитный договор по доверенности", "МЧД"),
-            "prepare": ("Пользователь ДБО {company}", "Готовит и подаёт заявки, но подписывать не вправе", "ДБО"),
-            "view": ("Наблюдатель в ДБО {company}", "Видит компанию и заявки, но ничего не меняет", "Просмотр"),
-        },
+        "badge": {"owner": "ИП", "eio": "Директор", "poa": "По доверенности", "participant": "Участник", "prepare": "Сотрудник",
+                  "view": "Просмотр", "loan_officer": "Специалист банка", "risk_manager": "Риск-менеджер",
+                  "accountant": "Бухгалтер", "owner_member": "Владелец"},
+        "role": {"poa_tail": " по доверенности", "share_tail": ", доля {share}%",
+                 "owner": "Индивидуальный предприниматель", "eio": "{title} {company}",
+                 "eio_share": "{title} {company}, доля {share}%", "poa": "Представитель {company} по доверенности",
+                 "participant": "Участник {company}, доля {share}%",
+                 "prepare": "Сотрудник {company} с доступом в интернет-банк", "view": "Наблюдатель в интернет-банке {company}"},
+        "also": " · ещё {more}", "companies": ("компания", "компании", "компаний"),
+        "people": ("сотрудник", "сотрудника", "сотрудников"),
+        "about": "{industry}: {staff}, бизнесу {age}", "about_short": "{staff}, бизнесу {age}",
     },
     "en": {
         "login": "Enter as {name}", "more": " and {n} more",
@@ -58,10 +60,6 @@ T = {
         "all_ok": "All sources respond", "others_ok": "others respond",
         "fault": {"timeout": "times out", "error503": "returns 503", "reset": "drops the connection",
                   "garbage": "returns garbage", "empty": "returns nothing"},
-        "tax_debt": "Tax arrears of {amount}", "liquidation": "Company register: liquidation", "bankruptcy": "bankruptcy",
-        "unreliable": "Company register: director data marked unreliable",
-        "disqualified": "Company register: director disqualified",
-        "conflict": "Register and bank records name different directors", "contract": "Public contract for {amount}",
         "owner": "full rights, signs without a power of attorney", "eio": "{title} — signs without a power of attorney",
         "eio_joint": "{title} — signs together with other directors", "eio_blocked": "{title} — signing blocked",
         "poa": "signs by power of attorney until {date}", "poa_off": "power of attorney {status} — cannot sign",
@@ -72,19 +70,20 @@ T = {
         "staff": {"loan_officer": ("Dossiers and decisions on exceptions up to {limit}", "Enter as loan officer"),
                   "risk_manager": ("Second key: decisions above {limit}", "Enter as risk manager")},
         "bank_profile": "Small business lending", "bank_registries": "All sources for an application",
-        "derived": {
-            "participant": ("Member of {company} with a {share}% share", "Votes on a major transaction when the bank asks "
-                            "for the members' consent", "Member"),
-            "eio": ("Director of {company}", "Signs agreements prepared by other company users", "Director"),
-            "poa": ("Representative of {company} by power of attorney",
-                    "Prepares applications and signs the loan agreement by power of attorney", "POA"),
-            "prepare": ("Online banking user of {company}", "Prepares and submits applications but may not sign", "Banking"),
-            "view": ("Viewer in online banking of {company}", "Sees the company and applications, changes nothing", "Viewer"),
-        },
+        "badge": {"owner": "Sole trader", "eio": "Director", "poa": "By POA", "participant": "Member", "prepare": "Staff",
+                  "view": "Viewer", "loan_officer": "Loan officer", "risk_manager": "Risk manager",
+                  "accountant": "Accountant", "owner_member": "Owner"},
+        "role": {"poa_tail": " by power of attorney", "share_tail": ", {share}% share",
+                 "owner": "Sole proprietor", "eio": "{title}, {company}", "eio_share": "{title}, {company}, {share}% share",
+                 "poa": "Representative of {company} by power of attorney", "participant": "Member of {company}, {share}% share",
+                 "prepare": "{company} staff with online banking access", "view": "Online banking viewer at {company}"},
+        "also": " · {more} more", "companies": ("company", "companies", "companies"), "people": ("person", "people", "people"),
+        "about": "{industry}: {staff} on staff, {age} in business", "about_short": "{staff} on staff, {age} in business",
     },
 }
 _EN_TITLES = {"Генеральный директор": "CEO", "Директор": "Director", "Президент": "President",
-              "Управляющий": "Managing director", "Индивидуальный предприниматель": "Sole proprietor"}
+              "Управляющий": "Managing director", "Индивидуальный предприниматель": "Sole proprietor",
+              "Главный бухгалтер": "Chief accountant", "Финансовый директор": "Finance director", "Владелец": "Owner"}
 _TRANSLIT = dict(zip("абвгдеёжзийклмнопрстуфхцчшщъыьэюя",
                      ["a", "b", "v", "g", "d", "e", "e", "zh", "z", "i", "y", "k", "l", "m", "n", "o", "p", "r", "s", "t", "u",
                       "f", "kh", "ts", "ch", "sh", "shch", "", "y", "", "e", "yu", "ya"], strict=True))
@@ -130,13 +129,14 @@ def presets() -> list[dict]:
     by_key = {c["key"]: c for c in companies}
     out, covered = [], set()
     for p in data["presets"]:
-        base = {"id": p["id"], "code": p["code"], "title": p["title"], "preview": p["preview"],
-                "faults": p.get("faults", []), "texts": {}, "custom": False}
+        base = {"id": p["id"], "code": p["code"], "title": p["title"], "preview": p["preview"], "about": p.get("about"),
+                "listed": p.get("listed", True), "faults": p.get("faults", []), "texts": {}, "custom": False}
         if p.get("kind") == "bank":
             out.append({**base, "kind": "bank", "staff": {"key": p["staff"], **data["staff"][p["staff"]]}})
             continue
         primary = by_key[p["company"]]
-        covered.add(p["person"])
+        if base["listed"]:                    # человек из скрытого сценария всё равно есть в списке — обычным пользователем
+            covered.add(p["person"])
         out.append({**base, "kind": "client", "person": {"key": p["person"], **people[p["person"]]},
                     "companies": [primary, *[c for c in _linked(companies, p["person"]) if c is not primary]], "people": people})
     for key, person in people.items():
@@ -144,20 +144,21 @@ def presets() -> list[dict]:
         if key in covered or not linked:
             continue
         out.append({"id": f"u-{key}", "kind": "client", "person": {"key": key, **person}, "companies": linked, "people": people,
-                    "faults": [], "texts": {}, "custom": False, "derived": True, "title": None, "preview": None, "code": None})
+                    "faults": [], "texts": {}, "custom": False, "derived": True, "title": None, "preview": None, "code": None,
+                    "about": None, "listed": True})
     return out
 
 
-def participant_personas(owner: dict) -> list[dict]:
+def company_personas(owner: dict) -> list[dict]:
+    """Все люди своей компании, кроме того, кто её собрал: участники, второй директор, владелец при наёмном директоре,
+    бухгалтер, представитель по МЧД — каждый входит под своей карточкой, права у каждого свои."""
     if owner["kind"] != "client" or owner.get("derived"):
         return []
-    company = owner["companies"][0]
-    people = owner["people"]
-    owner_key = owner["person"]["key"]
-    return [{**owner, "id": f"{owner['id']}-p{index}",
-             "person": {"key": person_key, **people[person_key]}, "derived": True, "texts": {}}
-            for index, (person_key, _) in enumerate(company.get("participants", []), 1)
-            if person_key != owner_key]
+    company, people, main = owner["companies"][0], owner["people"], owner["person"]["key"]
+    linked = {key for key, _ in company.get("access", [])} | {poa["person"] for poa in company.get("poa", [])}
+    others = [key for key in people if key != main and (key in linked or world.registry_roles(company, key))]
+    return [{**owner, "id": f"{owner['id']}-p{index}", "person": {"key": key, **people[key]}, "derived": True, "texts": {}}
+            for index, key in enumerate(others, 1)]
 
 
 async def customs(conn) -> list[dict]:
@@ -166,7 +167,7 @@ async def customs(conn) -> list[dict]:
     result = []
     for persona in saved:
         result.append(persona)
-        result.extend(member for member in participant_personas(persona) if member["id"] not in ids)
+        result.extend(member for member in company_personas(persona) if member["id"] not in ids)
     return result
 
 
@@ -188,6 +189,12 @@ async def for_company(conn, inn: str) -> dict | None:
         next((p for p in clients if any(c["inn"] == inn for c in p["companies"])), None)
 
 
+async def company_names(conn, lang: str = "ru") -> dict[str, str]:
+    """ИНН → короткое название всех компаний мира и своих: для реестра заявок банка."""
+    return {c["inn"]: (c["name"] if world.is_ul(c) and lang == "ru" else short_name(c, lang))
+            for p in await all_personas(conn) for c in p.get("companies", [])}
+
+
 async def add_many(conn, new_personas: list[dict]) -> None:
     ids = {persona["id"] for persona in new_personas}
     await store.kv_set(conn, CUSTOM_KEY, [p for p in await customs(conn) if p["id"] not in ids] + new_personas)
@@ -195,6 +202,35 @@ async def add_many(conn, new_personas: list[dict]) -> None:
 
 async def active_id(conn) -> str:
     return await store.kv_get(conn, ACTIVE_KEY, None) or settings.default_persona
+
+
+# ── кто есть кто в истории заявки ────────────────────────────────────────────────────────────────────────────────
+
+SYSTEM = {"ru": "Банк", "en": "Bank"}
+SYSTEM_DETAIL = {"worker": ("проверка данных", "data check"), "engine": ("автоматическое решение", "automatic decision"),
+                 "system": ("пересмотр по новым данным", "recheck on new data"), "timer": ("истёк срок", "deadline passed")}
+
+
+async def actor_index(conn, lang: str = "ru") -> dict[str, dict]:
+    """Метка автора события (client:<ИНН человека>, bank:<id пользователя>) → имя и роль — для истории заявки."""
+    index: dict[str, dict] = {}
+    for p in await all_personas(conn):
+        if p["kind"] == "bank":
+            staff = p["staff"]
+            index[f"bank:{p['id']}"] = {"kind": "bank", "name": _full_name(staff["fio"], lang), "role": staff["role"],
+                                         "title": _loc(staff.get("title") or staff["role"], lang)}
+            continue
+        for person in (p.get("people") or {}).values():
+            index.setdefault(f"client:{person['inn']}", {"kind": "client", "name": _full_name(person["fio"], lang)})
+    return index
+
+
+def actor_view(index: dict, label: str, lang: str = "ru") -> dict:
+    """Автор события для людей: клиент и сотрудник — по имени, шаги конвейера и таймер — «Банк» с пояснением."""
+    if label in index:
+        return index[label]
+    detail = SYSTEM_DETAIL.get(label.split(":", 1)[0])
+    return {"kind": "system", "name": SYSTEM[lang], "detail": detail[0 if lang == "ru" else 1] if detail else None}
 
 
 # ── карточка ─────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -282,23 +318,64 @@ def _permissions(companies: list[dict], rights_list: list[dict], lang: str) -> s
     return text[:1].upper() + text[1:]
 
 
-def _registries(faults: list[dict], facts_list: list[dict], companies: list[dict], lang: str) -> str:
+def _registries(faults: list[dict], lang: str) -> str:
+    """Какие источники отвечают. Что найдено в реестрах (недоимка, расхождения), на экране входа не раскрываем —
+    это банк покажет в кабинете и в решении, иначе карточка подсказывает исход."""
     t, names, notes = T[lang], source_config()["sources"], []
     for f in faults:
         name = names[f["source"]]["name"] if lang == "ru" else _EN_SOURCES.get(f["source"], f["source"])
         notes.append(f"{name}: {t['fault'][f['mode']]}")
     if faults:
         notes.append(t["others_ok"])
-    for c, f in zip(companies, facts_list, strict=True):
-        found = []
-        if f.get("tax_debt"):
-            found.append(t["tax_debt"].format(amount=_money(f["tax_debt"], lang)))
-        found += [t[k] for k in ("liquidation", "bankruptcy") if f.get(k)]
-        found += [t[k] for k in ("unreliable", "disqualified") if any(e.get(k) for e in f.get("eio", []))]
-        found += [t["conflict"]] * bool(f.get("conflicts"))
-        found += [t["contract"].format(amount=_money(k["price"], lang)) for k in f.get("contracts", [])]
-        notes += [f"{short_name(c, lang)}: {n}" if len(companies) > 1 else n for n in found]
     return "; ".join(notes) if notes else t["all_ok"]
+
+
+def _plural(n: int, forms: tuple[str, str, str], lang: str) -> str:
+    if lang == "en":
+        return f"{n} {forms[0] if n == 1 else forms[1]}"
+    k = 0 if n % 10 == 1 and n % 100 != 11 else 1 if n % 10 in (2, 3, 4) and n % 100 not in (12, 13, 14) else 2
+    return f"{n} {forms[k]}"
+
+
+def _about(facts: dict, lang: str) -> str:
+    """Чем занимается компания, простым языком: вид деятельности, сколько людей, сколько лет бизнесу."""
+    t = T[lang]
+    staff = _plural(facts.get("headcount") or 1, t["people"], lang)
+    age = _age(facts.get("age_months") or 0, lang)
+    industry = facts.get("okved_name") if lang == "ru" else None
+    return t["about"].format(industry=industry, staff=staff, age=age) if industry else t["about_short"].format(staff=staff,
+                                                                                                                age=age)
+
+
+def _role(persona: dict, main_rights: dict, lang: str) -> tuple[str, str]:
+    """Значок роли и кто этот человек в основной компании — из реестров и ДБО, как и права."""
+    t, roles = T[lang], {r["role"]: r for r in main_rights["roles"]}
+    companies = persona["companies"]
+    company = short_name(companies[0], lang)
+    share = roles.get("participant", {}).get("share")
+    if "owner" in roles:
+        key, text = "owner", t["role"]["owner"]
+    elif "eio" in roles:
+        title = roles["eio"]["title"] if lang == "ru" else _EN_TITLES.get(roles["eio"]["title"], roles["eio"]["title"])
+        key = "eio"
+        text = t["role"]["eio_share" if share is not None else "eio"].format(title=title, company=company,
+                                                                             share=f"{share:g}" if share else "")
+    elif "poa" in roles and main_rights["sign_mode"] == "poa":
+        key, text = "poa", t["role"]["poa"].format(company=company)
+    elif "participant" in roles:
+        key, text = "participant", t["role"]["participant"].format(company=company, share=f"{share:g}")
+    else:
+        key = "prepare" if main_rights["can"]["prepare"] else "view"
+        text = t["role"][key].format(company=company)
+    raw = (companies[0].get("titles") or {}).get(persona["person"]["key"])      # должность в своей компании
+    if raw and key in ("poa", "participant", "prepare", "view"):
+        key = {"Главный бухгалтер": "accountant", "Владелец": "owner_member"}.get(raw, key)
+        tail = t["role"]["poa_tail"] if "poa" in roles and main_rights["sign_mode"] == "poa" else ""
+        tail += t["role"]["share_tail"].format(share=f"{share:g}") if share is not None else ""
+        text = f"{raw if lang == 'ru' else _EN_TITLES.get(raw, raw)} {company}{tail}"
+    if len(companies) > 1:
+        text += t["also"].format(more=_plural(len(companies) - 1, t["companies"], lang))
+    return t["badge"][key], text
 
 
 @cache
@@ -308,29 +385,21 @@ def _demo_facts(inn: str) -> dict:
     return company_facts(inn, world.served(company, data["people"], _world_today()), _world_today())
 
 
+@lru_cache(maxsize=256)
+def _custom_facts(blob: str) -> dict:
+    """Своя компания неизменна после создания: выписку и факты считаем один раз на все её входы (ключ — содержимое,
+    а не ИНН: после сброса мира тот же номер может получить другая компания)."""
+    company, people = json.loads(blob)
+    return company_facts(company["inn"], world.served(company, people, _world_today()), _world_today())
+
+
 def _facts(persona: dict, company: dict) -> dict:
     if not persona["custom"]:
         return _demo_facts(company["inn"])
-    return company_facts(company["inn"], world.served(company, persona["people"], _world_today()), _world_today())
+    return _custom_facts(json.dumps([company, persona["people"]], sort_keys=True, ensure_ascii=False))
 
 
-def _derived_texts(persona: dict, main_rights: dict, lang: str) -> tuple[str, str, str]:
-    """Сценарий для человека без сценария — по его главной роли в основной компании."""
-    roles = {r["role"]: r for r in main_rights["roles"]}
-    company = short_name(persona["companies"][0], lang)
-    if "eio" in roles or "owner" in roles:
-        key, share = "eio", None
-    elif "participant" in roles:
-        key, share = "participant", roles["participant"]["share"]
-    elif "poa" in roles and main_rights["sign_mode"] == "poa":
-        key, share = "poa", None
-    else:
-        key, share = ("prepare" if main_rights["can"]["prepare"] else "view"), None
-    title, preview, code = T[lang]["derived"][key]
-    return title.format(company=company, share=f"{share:g}" if share is not None else ""), preview, code
-
-
-def card(persona: dict, lang: str = "ru", *, limit=None) -> dict:
+def card(persona: dict, lang: str = "ru") -> dict:
     """Карточка в контракте фронта (SandboxPersonaDto) плюс ИНН и компании для входа."""
     lang = lang if lang in LANGS else "ru"
     t = T[lang]
@@ -338,11 +407,13 @@ def card(persona: dict, lang: str = "ru", *, limit=None) -> dict:
     if persona["kind"] == "bank":
         staff = persona["staff"]
         permissions, login = t["staff"][staff["role"]]
+        permissions = permissions.format(limit=_money(load_policy()["params"]["specialist_authority_max"], lang))
         org = bank()["name"] if lang == "ru" else bank()["name_en"]
-        out.update(code=_loc(persona["code"], lang), scenario=_loc(persona["title"], lang),
-                   preview=_loc(persona["preview"], lang), full_name=_full_name(staff["fio"], lang),
-                   organization=f"{_loc(staff['title'], lang)} · {org}", role=staff["role"],
-                   permissions=permissions.format(limit=_money(limit, lang) if limit else "—"), profile=t["bank_profile"],
+        role_title = f"{_loc(staff.get('title') or staff['role'], lang)} · {org}"
+        about = _loc(persona["about"], lang) if persona.get("about") else permissions
+        out.update(badge=t["badge"][staff["role"]], role_title=role_title, about=about,
+                   full_name=_full_name(staff["fio"], lang), organization=role_title, role=staff["role"],
+                   permissions=permissions, profile=t["bank_profile"],
                    registries=t["bank_registries"], login_label=login, inn=bank()["inn"], person_inn=None,
                    company_inn=None, companies=[])
     else:
@@ -352,16 +423,16 @@ def card(persona: dict, lang: str = "ru", *, limit=None) -> dict:
         main = facts_list[0]
         profile = t["profile"].format(inflow=_money(main["inflow_avg"], lang), age=_age(main["age_months"], lang)) \
             if main.get("inflow_avg") else t["no_profile"]
-        if persona.get("derived"):
-            scenario, preview, code = _derived_texts(persona, rights_list[0], lang)
-        else:
-            scenario, preview, code = _loc(persona["title"], lang), _loc(persona["preview"], lang), _loc(persona["code"], lang)
-        out.update(code=code, scenario=scenario, preview=preview, role="client",
+        badge, role_title = _role(persona, rights_list[0], lang)
+        about = _loc(persona["about"], lang) if persona.get("about") else _about(main, lang)
+        out.update(badge=badge, role_title=role_title, about=about, role="client",
                    full_name=_full_name(person["fio"], lang), organization=_organization(companies, lang),
                    permissions=_permissions(companies, rights_list, lang), profile=profile,
-                   registries=_registries(persona["faults"], facts_list, companies, lang),
+                   registries=_registries(persona["faults"], lang),
                    login_label=t["login"].format(name=_first(person["fio"], lang)), inn=companies[0]["inn"],
                    person_inn=person["inn"], company_inn=companies[0]["inn"],
                    companies=[{"inn": c["inn"], "name": c["name"]} for c in companies])
+    # прежние поля контракта фронта (SandboxPersonaDto): code — значок роли, scenario — кто это, preview — о компании
+    out.update(code=out["badge"], scenario=out["role_title"], preview=out["about"])
     out.update({k: v for k, v in (persona.get("texts") or {}).items() if v})   # тексты из конструктора фронта важнее
     return out

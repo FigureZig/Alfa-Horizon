@@ -37,6 +37,8 @@ presets:
     person: smirnova
     company: smirnova
     title: { ru: "Кассовый разрыв в кофейне", en: "Cash gap at a coffee shop" }
+    about: { ru: "Кофейня: 9 сотрудников, гости платят картами, бизнесу 2 года",
+             en: "A coffee shop: 9 staff, guests pay by card, 2 years in business" }
     preview: { ru: "Предодобренный овердрафт ещё до согласия на кредитную историю, заявка, оферта, подпись и выдача",
                en: "An overdraft pre-approved before credit bureau consent, application, offer, signing and disbursement" }
   - id: s3
@@ -44,6 +46,8 @@ presets:
     person: orlov
     company: vector
     title: { ru: "Хочу больше, чем позволяет нагрузка", en: "I want more than my debt load allows" }
+    about: { ru: "Оптовая торговля: 25 сотрудников; единственный участник и директор, финансовый директор подписывает по доверенности",
+             en: "Wholesale trade: 25 staff; the sole member is the director, the finance director signs by power of attorney" }
     preview: { ru: "Расчёт нагрузки и встречное предложение: меньшая сумма сейчас или полная на больший срок",
                en: "Debt load check and a counteroffer: a smaller amount now or the full amount over a longer term" }
   - id: s2
@@ -51,6 +55,8 @@ presets:
     person: kravets
     company: masterstroy
     title: { ru: "Крупная сделка: нужно решение участников", en: "Major transaction: members must approve" }
+    about: { ru: "Строительная компания: 40 сотрудников, три участника — директор и два партнёра",
+             en: "A construction company: 40 staff, three members — the director and two partners" }
     preview: { ru: "Дозапрос решения участников, ответ, повторная проверка и оферта",
                en: "Request for the members' decision, the answer, a repeat check and the offer" }
   - id: s4
@@ -58,6 +64,8 @@ presets:
     person: belov
     company: romashka
     title: { ru: "Налоговая недоимка", en: "Tax arrears" }
+    about: { ru: "Клининговая компания: 30 сотрудников, единственный участник и директор",
+             en: "A cleaning company: 30 staff, the sole member is the director" }
     preview: { ru: "Устранимый стоп-фактор: отказ с объяснением, что погасить и когда вернуться",
                en: "A fixable stop factor: a decline that explains what to pay off and when to come back" }
   - id: s5
@@ -65,6 +73,8 @@ presets:
     person: ivanov
     company: hleb
     title: { ru: "Сумма выше порога автоматического решения", en: "Amount above the automatic approval limit" }
+    about: { ru: "Хлебозавод: 60 сотрудников; ещё участник логистической компании и готовит заявки в оптовой",
+             en: "A bakery: 60 staff; also a member of a logistics company and prepares applications for a wholesaler" }
     preview: { ru: "Заявка уходит кредитному специалисту: досье, скоринг с вкладами, решение и оферта",
                en: "The application goes to a loan officer: dossier, scorecard contributions, decision and offer" }
   - id: s8
@@ -72,6 +82,8 @@ presets:
     person: gusev
     company: cloud
     title: { ru: "Инвестиционный кредит для ИТ", en: "Investment loan for an IT company" }
+    about: { ru: "Разработка программ: 12 сотрудников, бизнесу 3 года, оплаты от заказчиков по договорам",
+             en: "Software development: 12 staff, 3 years in business, customers pay under contracts" }
     preview: { ru: "Продукт не для отрасли — банк предлагает экспресс-кредит под ту же цель",
                en: "The product does not fit the industry, so the bank offers an express loan for the same goal" }
   - id: agro
@@ -79,6 +91,8 @@ presets:
     person: polyakova
     company: pole
     title: { ru: "Сезонный кредит аграрию", en: "Seasonal loan for a farm" }
+    about: { ru: "Агрохозяйство: выращивает зерно, 35 сотрудников, выручка приходит после урожая",
+             en: "A farm: grows grain, 35 staff, revenue comes after the harvest" }
     preview: { ru: "Лимит от годовых поступлений, погашение после урожая",
                en: "A limit based on annual inflows, repaid after the harvest" }
   - id: r8
@@ -86,6 +100,9 @@ presets:
     person: ivanov
     company: hleb
     title: { ru: "Один человек — три компании", en: "One person, three companies" }
+    about: { ru: "Хлебозавод: 60 сотрудников; ещё участник логистической компании и готовит заявки в оптовой",
+             en: "A bakery: 60 staff; also a member of a logistics company and prepares applications for a wholesaler" }
+    listed: false                # вход по ID для документации и тестов; в списке входа не показываем
     preview: { ru: "Переключение компаний: в каждой свои права — подпись, подготовка заявки, только просмотр",
                en: "Switching companies with different rights in each: signing, preparing an application, view only" }
   - id: r12
@@ -93,6 +110,8 @@ presets:
     person: zakharov
     company: lenta
     title: { ru: "Смена директора во время подписи", en: "Director changes during signing" }
+    about: { ru: "Оптовая торговля продуктами: 20 сотрудников, единственный участник и директор",
+             en: "Food wholesale: 20 staff, the sole member is the director" }
     preview: { ru: "Договор ждёт подписи, а в ЕГРЮЛ — новый директор: банк останавливает подпись, перепроверяет полномочия, подписывает новый руководитель",
                en: "The agreement awaits signing when the register shows a new director: the bank stops signing, rechecks authority, and the new director signs" }
   - id: n1
@@ -101,6 +120,9 @@ presets:
     company: smirnova
     faults: [{ source: bki, mode: timeout }]
     title: { ru: "БКИ не отвечает во время проверки", en: "Credit bureau times out during the check" }
+    about: { ru: "Кофейня: 9 сотрудников, гости платят картами, бизнесу 2 года",
+             en: "A coffee shop: 9 staff, guests pay by card, 2 years in business" }
+    listed: false                # вход по ID для документации и тестов; в списке входа не показываем
     preview: { ru: "Предварительная оферта до 3 млн ₽: подпись — после проверки кредитной истории",
                en: "A provisional offer up to ₽3M: signing only after the credit history check" }
   - id: n2
@@ -109,6 +131,9 @@ presets:
     company: kotov
     faults: [{ source: bki, mode: timeout }]
     title: { ru: "БКИ недоступно, сумма больше 3 млн ₽", en: "Credit bureau down, amount above ₽3M" }
+    about: { ru: "Грузоперевозки: 3 сотрудника, свои машины, бизнесу 4 года",
+             en: "Trucking: 3 staff, own trucks, 4 years in business" }
+    listed: false                # вход по ID для документации и тестов; в списке входа не показываем
     preview: { ru: "Заявка ждёт кредитную историю у специалиста; источник вернулся — пересчёт",
                en: "The application waits for the credit history with a loan officer; the source is back — recalculation" }
   - id: bank
@@ -116,6 +141,8 @@ presets:
     kind: bank
     staff: sokolova
     title: { ru: "Очередь исключений и досье", en: "Exception queue and dossiers" }
+    about: { ru: "Рассматривает заявки, которые не решились автоматически: досье, причины, решение до 15 млн ₽",
+             en: "Reviews applications the system could not decide: dossier, reasons, decisions up to ₽15M" }
     preview: { ru: "Заявки на ручном рассмотрении: причины, факты с источниками, скоринг с вкладами, решение",
                en: "Applications under manual review: reasons, facts with sources, scorecard contributions, decision" }
   - id: risk
@@ -123,6 +150,8 @@ presets:
     kind: bank
     staff: vetrov
     title: { ru: "Второй ключ: решения выше полномочий специалиста", en: "Second key: decisions above the loan officer's limit" }
+    about: { ru: "Подтверждает или возвращает решения специалиста выше 15 млн ₽ — второй ключ",
+             en: "Confirms or returns the loan officer's decisions above ₽15M — the second key" }
     preview: { ru: "Подтверждает или возвращает одобрения кредитного специалиста на суммы выше его порога",
                en: "Confirms or returns the loan officer's approvals above their limit" }
 

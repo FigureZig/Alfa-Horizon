@@ -1,13 +1,13 @@
 """Сторона банка (Must по ответам организаторов 21.10): очередь исключений, досье заявки и решение специалиста."""
 
 from decimal import Decimal
-from typing import Literal
+from typing import Annotated, Literal
 from uuid import UUID
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from pydantic import BaseModel, ConfigDict, Field
 
-from .. import company, lifecycle, store
+from .. import company, lifecycle, personas, store
 from . import schemas as S
 from . import views
 from .deps import Me, require_bank
@@ -35,6 +35,40 @@ async def queue(who: Me):
                       "available_actions": lifecycle.actions(app, role=who.role),
                       "sla_until": app["data"].get("sla_until"), "updated_at": app["updated_at"]})
     return ok(items)
+
+
+FINAL = {"APPROVE", "APPROVE_WITH_CONDITIONS", "COUNTER_OFFER", "REJECT"}   # движок решил сам, а не передал человеку
+
+
+@router.get("/applications", **doc(S.BankApplicationsResponse, 401, 403, summary="Все заявки: и автоматические решения"))
+async def all_applications(who: Me,
+                           status: Annotated[list[S.Status] | None, Query(description="фильтр по статусам")] = None,
+                           decided_by: Annotated[Literal["engine", "bank"] | None,
+                                                 Query(description="кто принял решение: движок или специалист")] = None,
+                           q: Annotated[str | None, Query(max_length=100, description="ИНН или часть названия")] = None,
+                           limit: Annotated[int, Query(ge=1, le=500)] = 200):
+    """Реестр заявок банка: не только очередь исключений, но и всё, что движок решил сам, — открыть досье и «почему
+    так» можно по любой заявке. Новые и обновлённые сверху."""
+    require_bank(who)
+    pool = await store.pool()
+    async with pool.acquire() as conn:
+        rows = await store.all_applications(conn, status)
+        names = await personas.company_names(conn)
+    items = []
+    for app in rows:
+        data = app["data"]
+        decision = data.get("decision") or {}
+        by = "bank" if data.get("bank_decision") else "engine" if decision.get("outcome") in FINAL else None   # ещё решают
+        name = names.get(app["company_inn"], app["company_inn"])
+        if decided_by and by != decided_by or q and q.lower() not in f"{app['company_inn']} {name}".lower():
+            continue
+        offer = data.get("offer") or decision.get("offer")
+        risk = decision.get("risk") or {}
+        items.append({"id": app["id"], "inn": app["company_inn"], "company_name": name, "status": app["status"],
+                      "flags": app["flags"], "request": data.get("request"), "outcome": decision.get("outcome"),
+                      "decided_by": by, "offer": offer, "score": risk.get("score"), "risk_class": risk.get("class"),
+                      "loan": data.get("loan"), "created_at": app["created_at"], "updated_at": app["updated_at"]})
+    return ok(items[:limit])                    # лимит — после фильтров: старые совпадения не теряются
 
 
 FIRST_DECISION = {"OFFERED", "REJECTED", "INFO_REQUESTED", "UNDER_REVIEW"}

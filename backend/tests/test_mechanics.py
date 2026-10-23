@@ -10,7 +10,7 @@ from itertools import combinations
 
 import pytest
 
-from app.domain import catalog, engine
+from app.domain import catalog, engine, matching
 from qa import invariants, pairwise
 
 from .conftest import TODAY
@@ -59,6 +59,26 @@ def test_simulate_equals_commit_on_complete_data(cases, pol):
         committed = c["decision"]
         assert simulated["outcome"] == committed["outcome"], c["vector"]
         assert (simulated["offer"] or {}).get("amount") == (committed["offer"] or {}).get("amount"), c["vector"]
+
+
+def test_matching_agrees_with_the_decision_and_explains_every_no(cases, pol):
+    """Подбор от задачи = решение по заявке: доступное в подборе так же решит движок, недоступное — всегда с причиной,
+    рекомендованный продукт доступен, а стоп-фактор закрывает всё."""
+    for c in cases["healthy"] + cases["stops"]:
+        req = c["request"]
+        found = matching.match(c["facts"], pol, req.get("goal"), req["amount"], req.get("term_months"))
+        for option in found["options"]:
+            assert option["available"] or option["why"], (c["vector"], option["product"])
+            if option["available"] and option["offer"]:          # подбор знает только задачу, сумму и срок
+                same = {"product": option["product"], "goal": req.get("goal"),
+                        "amount": matching.limit_for(pol["products"][option["product"]], req["amount"]),
+                        "term_months": req.get("term_months") or matching.TERMS[option["product"]]}
+                again = engine.decide(c["facts"], same, pol, "simulate", allow_alternative=False)
+                assert again["outcome"] == option["outcome"], (c["vector"], option["product"])
+        if found["recommended"]:
+            assert next(o for o in found["options"] if o["product"] == found["recommended"])["available"], c["vector"]
+        if found["blockers"]:
+            assert not any(o["available"] for o in found["options"]), c["vector"]
 
 
 def _amount(d: dict, product: str) -> Decimal | None:

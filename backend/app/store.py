@@ -12,6 +12,18 @@ from .jsonutil import canonical, dumps, plain
 
 _pool: asyncpg.Pool | None = None
 
+CLOCK_ANCHOR_KEY = "sandbox:clock_anchor_s"   # часы мира (app/clock.py): мир минус реальное время при первом запуске
+CLOCK_OFFSET_KEY = "sandbox:clock_offset_s"   # перемотка вперёд
+
+
+def _kv_seconds(key: str) -> str:
+    return f"coalesce((SELECT (value #>> '{{}}')::float8 FROM kv WHERE key = '{key}'), 0)"
+
+
+# «Сейчас» по часам мира для отметок, которые ставит база (заявки, события), — то же, что clock.now()
+WORLD_NOW = (f"(now() + make_interval(secs => {_kv_seconds(CLOCK_ANCHOR_KEY)} + {_kv_seconds(CLOCK_OFFSET_KEY)}))"
+             if settings.demo_mode else "now()")
+
 
 async def _init_conn(conn: asyncpg.Connection) -> None:
     for kind in ("json", "jsonb"):
@@ -75,6 +87,12 @@ async def kv_set(conn, key: str, value) -> None:
                           ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = now()""", key, value)
 
 
+async def kv_setdefault(conn, key: str, value):
+    """Записать, только если ключа ещё нет (из нескольких процессов успевает первый), и вернуть то, что лежит."""
+    await conn.execute("INSERT INTO kv (key, value, updated_at) VALUES ($1, $2, now()) ON CONFLICT (key) DO NOTHING", key, value)
+    return await kv_get(conn, key)
+
+
 async def kv_delete(conn, key: str) -> None:
     await conn.execute("DELETE FROM kv WHERE key = $1", key)
 
@@ -104,8 +122,8 @@ async def add_event(conn, type_: str, actor: str, payload: dict, application_id=
     body = plain(payload)
     digest = _link(prev, type_, application_id, body)
     await conn.execute(
-        """INSERT INTO events (application_id, type, actor, payload, idempotency_key, prev_hash, hash)
-           VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (idempotency_key) DO NOTHING""",
+        f"""INSERT INTO events (application_id, type, actor, payload, idempotency_key, prev_hash, hash, at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, {WORLD_NOW}) ON CONFLICT (idempotency_key) DO NOTHING""",
         application_id, type_, actor, body, idempotency_key, prev, digest)
 
 
@@ -152,8 +170,9 @@ async def finish(conn, job_id: int, status: str = "DONE", error: str | None = No
 async def create_application(conn, company_inn: str, data: dict, actor: str) -> dict:
     app_id = uuid.uuid4()
     async with conn.transaction():
-        row = await conn.fetchrow("""INSERT INTO applications (id, company_inn, status, data)
-                                     VALUES ($1, $2, 'DRAFT', $3) RETURNING *""", app_id, company_inn, plain(data))
+        row = await conn.fetchrow(f"""INSERT INTO applications (id, company_inn, status, data, created_at, updated_at)
+                                      VALUES ($1, $2, 'DRAFT', $3, {WORLD_NOW}, {WORLD_NOW}) RETURNING *""",
+                                  app_id, company_inn, plain(data))
         await add_event(conn, "application.status_changed", actor, {"from": None, "to": "DRAFT"}, app_id)
     return dict(row)
 
@@ -170,8 +189,8 @@ async def move(conn, app: dict, to: str, actor: str, *, flags=None, data_patch: 
     data = {**app["data"], **plain(data_patch or {})}
     async with conn.transaction():
         row = await conn.fetchrow(
-            """UPDATE applications SET status = $3, flags = $4, data = $5, version = version + 1, updated_at = now()
-               WHERE id = $1 AND version = $2 RETURNING *""",
+            f"""UPDATE applications SET status = $3, flags = $4, data = $5, version = version + 1, updated_at = {WORLD_NOW}
+                WHERE id = $1 AND version = $2 RETURNING *""",
             app["id"], app["version"], to, list(flags if flags is not None else app["flags"]), data)
         if row is None:
             raise state.TransitionError("заявку изменили параллельно — повторите действие")
@@ -186,8 +205,8 @@ async def patch(conn, app: dict, actor: str, event: str, payload: dict, *, flags
     data = {**app["data"], **plain(data_patch or {})}
     async with conn.transaction():
         row = await conn.fetchrow(
-            """UPDATE applications SET flags = $3, data = $4, version = version + 1, updated_at = now()
-               WHERE id = $1 AND version = $2 RETURNING *""",
+            f"""UPDATE applications SET flags = $3, data = $4, version = version + 1, updated_at = {WORLD_NOW}
+                WHERE id = $1 AND version = $2 RETURNING *""",
             app["id"], app["version"], list(flags if flags is not None else app["flags"]), data)
         if row is None:
             raise state.TransitionError("заявку изменили параллельно — повторите действие")
@@ -198,6 +217,17 @@ async def patch(conn, app: dict, actor: str, event: str, payload: dict, *, flags
 async def queue(conn, statuses=("UNDER_REVIEW",)) -> list[dict]:
     rows = await conn.fetch("SELECT * FROM applications WHERE status = ANY($1) ORDER BY updated_at", list(statuses))
     return [dict(r) for r in rows]
+
+
+async def all_applications(conn, statuses: list[str] | None = None) -> list[dict]:
+    """Реестр заявок банка: все компании, свежие сверху."""
+    rows = await conn.fetch("""SELECT * FROM applications WHERE $1::text[] IS NULL OR status = ANY($1)
+                               ORDER BY updated_at DESC""", statuses)
+    return [dict(r) for r in rows]
+
+
+async def application_ids(conn, status: str) -> list[str]:
+    return [str(r["id"]) for r in await conn.fetch("SELECT id FROM applications WHERE status = $1 ORDER BY id", status)]
 
 
 async def applications(conn, company_inn: str) -> list[dict]:

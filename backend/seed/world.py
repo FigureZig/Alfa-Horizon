@@ -230,7 +230,9 @@ def egrul(c: dict, people: dict, today: date) -> dict:
           "@КодОПФ": code, "@ПолнНаимОПФ": opf_name,
           "СвНаимЮЛ": {"@НаимЮЛПолн": c["name"].replace("ООО ", "ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ "),
                        "@НаимЮЛСокр": c["name"]},
-          "СвОКВЭД": _okved(c), "СвПолном": {"@ВидПолном": "2"}, "СведДолжнФЛ": directors,
+          "СвОКВЭД": _okved(c), "СведДолжнФЛ": directors,
+          # несколько руководителей по уставу действуют совместно («1») или независимо («2») — ГК ст. 53 п. 1
+          "СвПолном": {"@ВидПолном": "1" if c.get("eio_mode") == "joint" else "2"},
           "СвУчредит": {"УчрФЛ": [{"СвФЛ": {**_fio(people[p]), "@ИННФЛ": people[p]["inn"]},
                                    "ДоляУстКап": {"@НоминСтоим": str(share * 100), "РазмерДоли": {"Процент": str(share)}}}
                                   for p, share in c.get("participants", [])]}}
@@ -320,18 +322,30 @@ def _month_flows(c: dict, today: date, rng: random.Random) -> list[tuple[int, in
         m, items = m0 + 1, []
         last_day = calendar.monthrange(y, m)[1] if i < 12 else today.day - 1
         total = c["inflows"][i] if i < 12 else int(sum(c["inflows"][-3:]) / 3 * last_day / 30 * 0.85)
-        if c.get("retail"):
+        channel, payers = c.get("channel") or ("cards" if c.get("retail") else None), None
+        if channel == "cards":                     # розница и общепит: эквайринг каждый день
             days = list(range(1, last_day + 1))
             purpose, counterparty, category = "Возмещение по операциям эквайринга", None, "acquiring"
+        elif channel == "marketplace":             # маркетплейс платит раз в неделю
+            days = list(range(3, last_day + 1, 7))
+            purpose, counterparty, category = f"Выплата маркетплейса {MARKETPLACE[0]} за проданные товары", MARKETPLACE[1], \
+                "marketplace"
         else:
             days = sorted(rng.sample(range(1, last_day + 1), min(last_day, rng.randint(5, 8))))
             purpose, counterparty, category = "Оплата по договору поставки", "7700000000", "customer_payment"
+            payers = c.get("customers") if channel in ("invoices", "government") else None   # свои: несколько заказчиков
         weights = [rng.uniform(0.6, 1.4) for _ in days]
         parts = [int(total * w / sum(weights)) for w in weights]
         parts[-1] += total - sum(parts)
-        for day, amount in zip(days, parts, strict=True):
-            items.append({"bookingDate": f"{y}-{m:02d}-{day:02d}", "amount": f"{amount:.2f}", "direction": "in",
-                          "counterpartyInn": counterparty, "purpose": purpose, "category": category})
+        for n, (day, amount) in enumerate(zip(days, parts, strict=True)):
+            item = {"bookingDate": f"{y}-{m:02d}-{day:02d}", "amount": f"{amount:.2f}", "direction": "in",
+                    "counterpartyInn": counterparty, "purpose": purpose, "category": category}
+            if payers:
+                name, inn = payers[(day + n) % len(payers)]
+                what = "по акту выполненных работ по контракту" if channel == "government" \
+                    else f"№ {m * 40 + day} за товары и услуги"
+                item.update(counterpartyInn=inn, counterpartyName=name, purpose=f"Оплата по счёту {what}")
+            items.append(item)
         for purpose_out, day, amount, category_out in outflows:
             if day <= last_day:
                 items.append({"bookingDate": f"{y}-{m:02d}-{day:02d}", "amount": f"{amount:.2f}", "direction": "out",
@@ -423,7 +437,8 @@ def payloads(c: dict, people: dict, today: date) -> dict:
                     "arbitration": {"asDefendantCount": 0, "claimsSum": "0.00"},
                     "enforcement": {"count": 0, "sum": "0.00"}, "sanctionsListHit": False}
     director = c.get("kyc_director") or (c["eio"][0][0] if is_ul(c) else c["owner"])
-    out["bank_access"] = {"companyInn": c["inn"], "kycDirectorInn": people[director]["inn"], "persons": [
+    out["bank_access"] = {"companyInn": c["inn"], "kycDirectorInn": people[director]["inn"],
+                          "kycDirectorFio": " ".join(people[director]["fio"]), "persons": [
         {"personInn": people[p]["inn"], "fio": " ".join(people[p]["fio"]), "level": level} for p, level in c["access"]]}
     out["bank_tx"] = transactions(c, today)
     out["bki"] = bki(c, today)
@@ -478,8 +493,137 @@ def served(c: dict, people: dict, today: date) -> dict:
 
 
 # ── «своя персона»: компания из краткого описания ─────────────────────────────────────────────────────────────────
+# Отрасли, профили и сезонность — допущения генератора симулятора (порядок величин, не статистика): из них строятся
+# выписка, отчётность и люди своей компании. Числа, которые влияют на решение, считает движок из этих данных, как в бою.
 
-_SURNAMES = ("Соколов", "Морозов", "Волков", "Зайцев", "Павлов", "Семёнов", "Голубев", "Виноградов", "Богданов", "Воробьёв")
+_LAST = ("Соколов", "Морозов", "Волков", "Лебедев", "Козлов", "Новиков", "Павлов", "Семёнов", "Голубев", "Виноградов",
+         "Богданов", "Воробьёв", "Фёдоров", "Михайлов", "Беляев", "Тарасов", "Комаров", "Киселёв", "Медведев", "Ершов")
+_FIRST = {"m": ("Алексей", "Дмитрий", "Сергей", "Андрей", "Максим", "Илья", "Роман", "Михаил", "Николай", "Олег", "Павел",
+                "Егор"),
+          "f": ("Анна", "Мария", "Елена", "Ольга", "Наталья", "Ирина", "Татьяна", "Светлана", "Юлия", "Екатерина", "Дарья",
+                "Виктория")}
+_PATRONYMIC = {"m": ("Александрович", "Сергеевич", "Дмитриевич", "Андреевич", "Игоревич", "Владимирович", "Олегович"),
+               "f": ("Александровна", "Сергеевна", "Дмитриевна", "Андреевна", "Игоревна", "Владимировна", "Олеговна")}
+_CUSTOMERS = ("ООО «ТехноСнаб»", "ООО «Городской рынок»", "АО «СеверСтрой»", "ООО «Ритейл Плюс»", "ООО «Восток-Логистик»",
+              "ООО «Профторг»", "ООО «Меридиан»", "ООО «СтройИнвест»", "ООО «Альтаир»", "ООО «Гранд Сервис»")
+_SUPPLIERS = ("ООО «ПромСырьё»", "ООО «ТоргОпт»", "ООО «Упаковка-М»", "ООО «Техноресурс»", "ООО «ЛогистикПро»",
+              "ООО «Агроснаб»", "ООО «Мельница»", "ООО «Офис-Комплект»")
+# отрасль конструктора → ОКВЭД и профиль
+INDUSTRIES = {
+    "coffee": ("56.30", "Подача напитков", "horeca"),
+    "restaurant": ("56.10", "Деятельность ресторанов и услуги по доставке продуктов питания", "horeca"),
+    "bakery": ("10.71", "Производство хлеба и мучных кондитерских изделий, тортов и пирожных недлительного хранения",
+               "manufacturing"),
+    "retail_food": ("47.11", "Торговля розничная преимущественно пищевыми продуктами в неспециализированных магазинах",
+                    "retail"),
+    "online_shop": ("47.91", "Торговля розничная по почте или по информационно-коммуникационной сети Интернет", "marketplace"),
+    "wholesale": ("46.90", "Торговля оптовая неспециализированная", "wholesale"),
+    "construction": ("41.20", "Строительство жилых и нежилых зданий", "construction"),
+    "renovation": ("43.39", "Производство прочих отделочных и завершающих работ", "construction"),
+    "it": ("62.01", "Разработка компьютерного программного обеспечения", "it"),
+    "trucking": ("49.41", "Деятельность автомобильного грузового транспорта", "logistics"),
+    "warehouse": ("52.10", "Деятельность по складированию и хранению", "logistics"),
+    "farm": ("01.11", "Выращивание зерновых (кроме риса), зернобобовых культур и семян масличных культур", "farm"),
+    "cleaning": ("81.21", "Деятельность по общей уборке зданий", "services"),
+    "beauty": ("96.02", "Предоставление услуг парикмахерскими и салонами красоты", "services_retail"),
+    "dental": ("86.23", "Стоматологическая практика", "services_retail"),
+    "education": ("85.41", "Образование дополнительное детей и взрослых", "services"),
+}
+# профиль: сезонность и канал по умолчанию, доли регулярных платежей от средних поступлений, маржа, активы / выручка
+PROFILES = {
+    "horeca": {"season": "summer", "channel": "cards", "payroll": .30, "rent": .12, "suppliers": .30, "taxes": .07,
+               "other": .05, "margin": .06, "assets": .35},
+    "manufacturing": {"season": "flat", "channel": "invoices", "payroll": .25, "rent": .05, "suppliers": .45, "taxes": .07,
+                      "other": .06, "margin": .05, "assets": .7},
+    "retail": {"season": "year_end", "channel": "cards", "payroll": .14, "rent": .10, "suppliers": .58, "taxes": .05,
+               "other": .04, "margin": .03, "assets": .5},
+    "marketplace": {"season": "year_end", "channel": "marketplace", "payroll": .10, "rent": .05, "suppliers": .60,
+                    "taxes": .05, "other": .08, "margin": .05, "assets": .4},
+    "wholesale": {"season": "flat", "channel": "invoices", "payroll": .07, "rent": .04, "suppliers": .75, "taxes": .04,
+                  "other": .03, "margin": .03, "assets": .45},
+    "construction": {"season": "summer", "channel": "invoices", "payroll": .30, "rent": .03, "suppliers": .45, "taxes": .07,
+                     "other": .05, "margin": .05, "assets": .8},
+    "it": {"season": "flat", "channel": "invoices", "payroll": .55, "rent": .06, "suppliers": .07, "taxes": .10, "other": .07,
+           "margin": .12, "assets": .3},
+    "logistics": {"season": "flat", "channel": "invoices", "payroll": .30, "rent": .08, "suppliers": .35, "taxes": .07,
+                  "other": .08, "margin": .05, "assets": .9},
+    "farm": {"season": "harvest", "channel": "invoices", "payroll": .20, "rent": .05, "suppliers": .45, "taxes": .03,
+             "other": .07, "margin": .08, "assets": 1.2},
+    "services": {"season": "flat", "channel": "invoices", "payroll": .55, "rent": .04, "suppliers": .15, "taxes": .08,
+                 "other": .05, "margin": .07, "assets": .25},
+    "services_retail": {"season": "flat", "channel": "cards", "payroll": .40, "rent": .15, "suppliers": .15, "taxes": .07,
+                        "other": .05, "margin": .08, "assets": .3},
+}
+SEASONS = {   # множитель месяца, январь…декабрь: лето у общепита и стройки, конец года у розницы, урожай у аграриев
+    "flat": (1,) * 12,
+    "summer": (0.78, 0.8, 0.9, 1.0, 1.1, 1.25, 1.3, 1.25, 1.05, 0.95, 0.82, 0.8),
+    "year_end": (0.8, 0.85, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 1.0, 1.05, 1.15, 1.45),
+    "harvest": (0.4, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0, 1.4, 2.0, 2.0, 1.4, 0.85),
+}
+NOISE = {"steady": 0.04, "uneven": 0.15, "volatile": 0.35}       # как сильно месяц отличается от сезонного
+MARKETPLACE = ("ООО «Онлайн Маркет»", "7718990011")              # условная площадка, ИНН с верной контрольной цифрой
+GOVERNMENT = ("ГБУ «Городской заказчик № 7»", "7718990029")
+STRUCTURES = ("owner_director", "hired_director", "partners", "two_directors_joint", "two_directors_independent")
+_PROFILE_BY_SECTION = {"A": "farm", "C": "manufacturing", "F": "construction", "H": "logistics", "I": "horeca", "J": "it"}
+
+
+def profile_for(okved: str) -> str:
+    """Отрасль не из каталога — профиль по разделу ОКВЭД; торговля: 46 — опт, 47 — розница."""
+    if okved.startswith("46"):
+        return "wholesale"
+    if okved.startswith("47"):
+        return "retail"
+    return _PROFILE_BY_SECTION.get(section_of(okved) or "", "services")
+
+
+def _name(number: int, i: int, used: set[str]) -> list[str]:
+    """ФИО человека своей компании: детерминированно по номеру, пол согласован, фамилии в компании не повторяются."""
+    rng = random.Random(number * 97 + i)
+    sex = "f" if rng.random() < 0.45 else "m"
+    last = next(x for x in rng.sample(_LAST, len(_LAST)) if x not in used)
+    used.add(last)
+    return [last + ("а" if sex == "f" else ""), rng.choice(_FIRST[sex]), rng.choice(_PATRONYMIC[sex])]
+
+
+def _shares(n: int) -> list[int]:
+    """Доли участников неравные, как в жизни: 60/40, 40/35/25, 40/25/20/15…; сумма — 100%."""
+    fixed = {1: [100], 2: [60, 40], 3: [40, 35, 25], 4: [40, 25, 20, 15], 5: [35, 25, 20, 12, 8]}
+    if n in fixed:
+        return fixed[n]
+    raw = [n - i for i in range(n)]
+    shares = [int(100 * r / sum(raw)) for r in raw]
+    shares[0] += 100 - sum(shares)
+    return shares
+
+
+def _seasonal(avg: float, season: str, noise: float, trend: float, today: date, number: int) -> list[int]:
+    """12 полных месяцев до сегодня: сезонный профиль отрасли, разброс и тренд последних трёх месяцев; среднее — avg."""
+    shape = SEASONS[season]
+    mean = sum(shape) / 12
+    rng = random.Random(number * 13 + 7)
+    months = [divmod(today.year * 12 + today.month - 1 - back, 12)[1] for back in range(12, 0, -1)]
+    values = [shape[m] / mean * (1 + rng.uniform(-noise, noise)) * (1 + trend if i >= 9 else 1) for i, m in enumerate(months)]
+    scale = avg * 12 / sum(values)
+    return [max(10_000, round(v * scale, -3)) for v in values]
+
+
+def _profile_outflows(avg: float, p: dict, suppliers: list[list]) -> list:
+    """Регулярные платежи из профиля: зарплата дважды в месяц (ТК ст. 136 ч. 6), аренда, единый налоговый платёж,
+    коммунальные и связь, поставщики по счетам раз в неделю."""
+    rows = [["Заработная плата за первую половину месяца", 10, p["payroll"] / 2 * avg, "salary"],
+            ["Заработная плата за вторую половину месяца", 25, p["payroll"] / 2 * avg, "salary"],
+            ["Аренда помещения по договору", 5, p["rent"] * avg, "rent"],
+            ["Единый налоговый платёж", 28, p["taxes"] * avg, "taxes"],
+            ["Коммунальные услуги и связь", 15, p["other"] * avg, "utilities"]]
+    rows += [[f"Оплата по счёту поставщику {suppliers[k % len(suppliers)][0]}", day, p["suppliers"] / 4 * avg, "suppliers"]
+             for k, day in enumerate((7, 14, 21, 27))]
+    return [[purpose, day, round(amount, -3), cat] for purpose, day, amount, cat in rows if round(amount, -3) > 0]
+
+
+def _companies(pool: tuple, number: int, k: int, prefix: str) -> list[list]:
+    """Контрагенты своей компании: название и ИНН с верной контрольной цифрой (не пересекаются с миром)."""
+    rng = random.Random(number * 7 + len(prefix))
+    return [[name, inn_ul(f"{prefix}{(number * 10 + i) % 100000:05d}")] for i, name in enumerate(rng.sample(pool, k))]
 
 
 def _series(avg: float, cv: float, trend: float) -> list[int]:
@@ -494,46 +638,91 @@ def _series(avg: float, cv: float, trend: float) -> list[int]:
 def custom(spec: dict, number: int, today: date) -> tuple[dict, dict]:
     """Компания и люди из краткого описания — для симулятора («своя компания») и pairwise-тестов.
 
-    spec: kind (IP | LLC | JSC), okved [код, название], age_months, headcount, inflow_avg, inflow_cv, inflow_trend,
-    debt_load, overdue_days, bki_requests, tax_debt, participants (число), profit_margin, flags, contract_price,
-    assets_share (активы / годовая выручка, по умолчанию 0,6 — от него порог крупной сделки),
-    owner_fio [фамилия, имя, отчество], company_name (без ОПФ) и inn — если не заданы, придумываем.
+    spec: kind (IP | LLC | JSC), okved [код, название], age_months, headcount, inflow_avg, debt_load, overdue_days,
+    bki_requests, tax_debt, participants (число), flags, contract_price, assets_share (активы / годовая выручка — от него
+    порог крупной сделки), profit_margin, owner_fio [фамилия, имя, отчество], company_name (без ОПФ) и inn.
+    Как устроена компания — structure: owner_director · hired_director · partners · two_directors_joint ·
+    two_directors_independent, плюс accountant (бухгалтер с подготовкой в ДБО) и representative (представитель по МЧД).
+    Простым языком — profile (отрасль, PROFILES), seasonality (SEASONS), stability (NOISE), channel (cards · invoices ·
+    marketplace · government): из них выписка с сезонностью, контрагенты, регулярные платежи и отчётность.
+    inflow_cv задан явно (флаг «нестабильные поступления», pairwise) — поступления по нему, без сезонности.
     ИНН, ОГРН и люди генерируются детерминированно по number.
     """
     kind = spec.get("kind", "LLC")
+    profile = PROFILES.get(spec.get("profile") or "")
     reg_year, reg_month = divmod(today.year * 12 + today.month - 1 - spec.get("age_months", 36), 12)
     registered = f"{reg_year}-{reg_month + 1:02d}-05"
-    head = _SURNAMES[number % len(_SURNAMES)]
-    people = {f"p{number}_{i}": {"fio": [head if i == 0 else _SURNAMES[(number + i) % len(_SURNAMES)], "Иван", "Петрович"],
-                                 "inn": inn_fl(f"7705{number:04d}{i:02d}")} for i in range(max(1, spec.get("participants", 1)))}
-    keys = list(people)
+    structure = "owner" if kind == "IP" else spec.get("structure") or (
+        "partners" if spec.get("participants", 1) > 1 else "owner_director")
+    shared = structure in ("partners", "two_directors_joint", "two_directors_independent")
+    n_partners = max(2, spec.get("participants", 2)) if shared else 1
+
+    people, used = {}, set()
+
+    def person() -> str:
+        key = f"p{number}_{len(people)}"
+        people[key] = {"fio": _name(number, len(people), used), "inn": inn_fl(f"7705{number:04d}{len(people):02d}")}
+        return key
+
+    partners = [person() for _ in range(n_partners)]                 # первый — владелец: ИП или участник
+    directors = [person()] if structure == "hired_director" else partners[:2] if structure.startswith("two_") \
+        else partners[:1]
+    main = directors[0]                                               # кто входит в кабинет: руководитель (у ИП — он сам)
+    accountant = person() if spec.get("accountant") else None
+    representative = person() if spec.get("representative") and kind != "IP" else None
     if spec.get("owner_fio"):
-        people[keys[0]]["fio"] = list(spec["owner_fio"])
+        people[main]["fio"] = list(spec["owner_fio"])
+
     avg = spec.get("inflow_avg", 3_000_000)
-    inflows = _series(avg, spec.get("inflow_cv", 0.3), spec.get("inflow_trend", 0.0))
+    if "inflow_cv" in spec or not (profile or spec.get("seasonality") or spec.get("stability")):
+        inflows = _series(avg, spec.get("inflow_cv", 0.3), spec.get("inflow_trend", 0.0))
+    else:
+        inflows = _seasonal(avg, spec.get("seasonality") or (profile or PROFILES["services"])["season"],
+                            NOISE[spec.get("stability") or "uneven"], spec.get("inflow_trend", 0.0), today, number)
     payment = spec.get("debt_load", 0.15) * avg
     factor = float(annuity_payment(1_000_000, 20, 36)) / 1_000_000              # платёж на рубль долга: 20% на 36 мес.
     loan = [] if payment <= 0 else [[max(100_000, round(payment / factor, -5)), 20, 36, 10, spec.get("overdue_days", 0)]]
     title = spec.get("company_name") or f"Персона {number}"
+    revenue = round(sum(inflows) / 1000)
+    small = (msp_category(spec.get("headcount", 12), revenue * 1000) or 3) <= 2
+    regime = spec.get("tax_regime") or ("ESHN" if profile is PROFILES["farm"] else "USN" if kind == "IP" or small else "OSN")
     c = {"key": f"custom{number}", "name": f"{'АО' if kind == 'JSC' else 'ООО'} «{title}»",
          "registered": registered, "okved": spec.get("okved", ["62.01", "Разработка компьютерного программного обеспечения"]),
-         "headcount": spec.get("headcount", 12), "tax": {"regime": "OSN", "debt": spec.get("tax_debt", 0)},
+         "headcount": spec.get("headcount", 12), "tax": {"regime": regime, "debt": spec.get("tax_debt", 0)},
          "inflows": inflows, "bki": {"credits": loan, "requests": spec.get("bki_requests", 1)},
-         "flags": spec.get("flags", [])}
+         "flags": spec.get("flags", []), "titles": {}}
+    if profile:                                       # выписка как у отрасли: контрагенты, канал оплат, регулярные платежи
+        suppliers, channel = _companies(_SUPPLIERS, number, 3, "7719"), spec.get("channel") or profile["channel"]
+        customers = [list(GOVERNMENT)] if channel == "government" else _companies(_CUSTOMERS, number, 4, "7718")
+        c.update(channel=channel, customers=customers, suppliers=suppliers,
+                 outflows=_profile_outflows(avg, profile, suppliers))
     if kind == "IP":
-        c.update(inn=spec.get("inn") or inn_fl(f"7706{number:06d}"), owner=keys[0], access=[[keys[0], "owner"]])
-        c["name"] = "ИП " + " ".join(part for part in people[keys[0]]["fio"] if part)
-        people[keys[0]]["inn"] = c["inn"]                                        # ИНН ИП = ИНН человека
+        owner = partners[0]
+        c.update(inn=spec.get("inn") or inn_fl(f"7706{number:06d}"), owner=owner, access=[[owner, "owner"]])
+        c["name"] = "ИП " + " ".join(part for part in people[owner]["fio"] if part)
+        people[owner]["inn"] = c["inn"]                                          # ИНН ИП = ИНН человека
     else:
-        revenue = round(sum(inflows) / 1000)
-        n = len(keys)
-        shares = [100 // n + (1 if i < 100 % n else 0) for i in range(n)]
+        margin, assets = (profile or {}).get("margin", 0.05), (profile or {}).get("assets", 0.6)
         c.update(inn=spec.get("inn") or inn_ul(f"7707{number:05d}"), opf="JSC" if kind == "JSC" else "LLC",
-                 eio=[[keys[0], "Генеральный директор"]],
-                 participants=[] if kind == "JSC" else [[k, s] for k, s in zip(keys, shares, strict=True)],
-                 charter={"decisionMethod": "protocol"}, access=[[keys[0], "owner"]],
-                 girbo={"assets": round(revenue * spec.get("assets_share", 0.6)), "revenue": revenue,
-                        "profit": round(revenue * spec.get("profit_margin", 0.05))})
+                 eio=[[d, "Генеральный директор" if i == 0 else "Директор"] for i, d in enumerate(directors)],
+                 eio_mode="joint" if structure == "two_directors_joint" else "independent",
+                 participants=[] if kind == "JSC" else [[k, s] for k, s in zip(partners, _shares(len(partners)),
+                                                                               strict=True)],
+                 charter={"decisionMethod": "protocol"},
+                 access=[[d, "owner"] for d in directors]       # владелец при наёмном директоре видит счёт в ДБО
+                 + [[partners[0], "view"]] * (structure == "hired_director"),
+                 girbo={"assets": round(revenue * spec.get("assets_share", assets)), "revenue": revenue,
+                        "profit": round(revenue * spec.get("profit_margin", margin))})
+        if structure == "hired_director":
+            c["titles"][partners[0]] = "Владелец"
+    if accountant:
+        c["access"].append([accountant, "prepare"])
+        c["titles"][accountant] = "Главный бухгалтер"
+    if representative:                                  # МЧД с правом подписать кредитный договор (ГК ст. 185.1)
+        c["access"].append([representative, "prepare"])
+        c["titles"][representative] = "Финансовый директор"
+        c["poa"] = [{"person": representative, "status": "ACTIVE", "powers": ["CREDIT_AGREEMENT_SIGN"],
+                     "valid_from": _months_ago(today, 3, 1), "valid_to": _months_ago(today, -12, 28)}]
     c["ogrn"] = ogrn(reg_year, c["inn"][:2], number, ip=kind == "IP")
     if spec.get("contract_price"):
         c["eis"] = [{"regNum": f"27707{number:014d}", "customer": "ГБУ «Городской заказчик № 7»",

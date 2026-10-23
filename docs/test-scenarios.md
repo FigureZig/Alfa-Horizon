@@ -1,6 +1,6 @@
 # Тестовые сценарии ядра
 
-Сгенерировано из кода: `cd backend && uv run python -m qa.report`. Руками не править — источник правды: `app/domain/state.py`, `policy/`, `seed/world.py`, `qa/`. Конкретные числа мира симулятора держат golden-сценарии (`tests/test_scenarios.py`, `seed/personas.yaml`). Политика 2026.10-1+396c9761, дата мира 2026-10-21.
+Сгенерировано из кода: `cd backend && uv run python -m qa.report`. Руками не править — источник правды: `app/domain/state.py`, `policy/`, `seed/world.py`, `qa/`. Конкретные числа мира симулятора держат golden-сценарии (`tests/test_scenarios.py`, `seed/personas.yaml`). Политика 2026.10-2+237edb58, дата мира 2026-10-21.
 
 ## 1. Жизненный цикл заявки как граф
 

@@ -65,8 +65,9 @@ def decide(facts: dict, request: dict, pol: dict, mode: str = "simulate", *, all
 
     misfit = _misfit(code, facts, pol, amount)
     if misfit:
+        held = sum((dec(x["amount"]) for x in facts.get("own_loans", []) if x["product"] == code), Decimal(0))
         log.reason(misfit, "policy", product_name=product["name"], months=product.get("requires", {}).get("turnover_months"),
-                   min=product["amount"]["min"])
+                   min=product["amount"]["min"], held_amount=held)
         alt = _alternative(facts, request, pol, mode) if allow_alternative else None
         if alt:
             return _product_counter(alt, log, res["request"])
@@ -243,6 +244,8 @@ def _misfit(code: str, facts: dict, pol: dict, amount: Decimal) -> str | None:
     """Продукт не предлагается этой отрасли или сегменту, сумма меньше минимальной, либо нет нужных данных."""
     if code not in cat.available_products(pol, facts.get("section"), facts.get("segment")):
         return "POL_PRODUCT_FIT"
+    if code in facts.get("held_products", []) and pol["products"][code]["repayment"] == "revolving":
+        return "POL_PRODUCT_HELD"                    # овердрафт к счёту — один: второй лимит не открываем
     if amount < dec(pol["products"][code]["amount"]["min"]):
         return "POL_AMOUNT_RANGE"
     requires = pol["products"][code].get("requires", {})

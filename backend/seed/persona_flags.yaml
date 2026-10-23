@@ -1,4 +1,5 @@
 # Флаги конструктора «своя компания» (POST /api/v1/sandbox/personas, поле flags; каталог — GET /api/v1/sandbox/persona-options).
+# Флаг — особенность компании фактом (effect): что она значит для кредита, объясняет решение банка, а не карточка.
 # Флаг задаёт параметры компании поверх полей запроса (spec — те же ключи, что у seed/world.py custom) и/или включает
 # отказ источника для этого пользователя (faults). expect — что флаг обязан изменить в решении на эталонной заявке;
 # это проверяет tests/test_persona_flags.py: флаг, который ни на что не влияет, тест не пропустит.
@@ -16,123 +17,127 @@ flags:
     group: registries
     forms: [IP, LLC, JSC]
     title: { ru: "Налоговая недоимка", en: "Tax arrears" }
-    effect: { ru: "Недоимка 150 тыс. ₽ в ФНС — выше порога политики 50 тыс. ₽: стоп-фактор, отказ с путём к одобрению «погасить недоимку»",
-              en: "₽150K tax arrears, above the ₽50K policy limit: a stop factor and a decline with a path to approval (pay off the arrears)" }
+    effect: { ru: "Недоимка 150 000 ₽ по данным ФНС",
+              en: "₽150K of tax arrears according to the tax service" }
     spec: { tax_debt: 150000 }
     expect: { reason: STOP_TAX_DEBT }
   bankruptcy:
     group: registries
     forms: [IP, LLC, JSC]
     title: { ru: "Банкротство", en: "Bankruptcy" }
-    effect: { ru: "Сообщение о банкротстве в ЕФРСБ: неустранимый стоп-фактор, кредит невозможен",
-              en: "A bankruptcy notice: an unfixable stop factor, no credit possible" }
+    effect: { ru: "Сообщение о банкротстве в ЕФРСБ",
+              en: "A bankruptcy notice in the federal register" }
     flags: [bankruptcy]
     expect: { reason: STOP_BANKRUPTCY }
   liquidation:
     group: registries
     forms: [LLC, JSC]
     title: { ru: "Ликвидация", en: "Liquidation" }
-    effect: { ru: "Запись о ликвидации в ЕГРЮЛ: неустранимый стоп-фактор", en: "A liquidation record in the register: an unfixable stop factor" }
+    effect: { ru: "Запись о ликвидации в ЕГРЮЛ",
+              en: "A liquidation record in the company register" }
     flags: [liquidation]
     expect: { reason: STOP_LIQUIDATION }
   unreliable_eio:
     group: registries
     forms: [LLC, JSC]
     title: { ru: "Недостоверные сведения о директоре", en: "Unreliable director record" }
-    effect: { ru: "Отметка ФНС о недостоверности сведений о руководителе: стоп-фактор до исправления записи",
-              en: "The tax service marked the director record as unreliable: a stop factor until it is corrected" }
+    effect: { ru: "Отметка ФНС о недостоверности сведений о руководителе",
+              en: "The tax service marked the director record as unreliable" }
     flags: [unreliable_eio]
     expect: { reason: STOP_EIO_UNRELIABLE }
   disqualified_eio:
     group: registries
     forms: [LLC, JSC]
     title: { ru: "Директор дисквалифицирован", en: "Disqualified director" }
-    effect: { ru: "Руководитель в реестре дисквалифицированных лиц: подписывать он не вправе, стоп-фактор",
-              en: "The director is in the disqualified persons register: may not sign, a stop factor" }
+    effect: { ru: "Руководитель в реестре дисквалифицированных лиц",
+              en: "The director is in the disqualified persons register" }
     flags: [disqualified_eio]
     expect: { reason: STOP_EIO_DISQUALIFIED }
   large_deal:
     group: registries
     forms: [LLC]
     title: { ru: "Крупная сделка, три участника", en: "Major transaction, three members" }
-    effect: { ru: "Три участника ООО и небольшие активы: кредит — крупная сделка (14-ФЗ ст. 46), нужно согласие участников голосованием",
-              en: "Three LLC members and small assets: the loan is a major transaction and needs the members' vote" }
+    effect: { ru: "Три участника ООО, активы по отчётности — около 10% годовой выручки: сделка больше 25% активов — крупная (14-ФЗ ст. 46 п. 1)",
+              en: "Three LLC members, assets of about 10% of annual revenue: a deal above 25% of assets is a major one" }
     spec: { participants: 3, assets_share: 0.1 }
     expect: { reason: REQ_CORP_APPROVAL }
   overdue_serious:
     group: credit_history
     forms: [IP, LLC, JSC]
     title: { ru: "Просрочка больше 90 дней", en: "Delinquency over 90 days" }
-    effect: { ru: "Просрочка 120 дней по действующему кредиту: стоп-фактор политики", en: "120 days past due on an active loan: a policy stop factor" }
+    effect: { ru: "Просрочка 120 дней по действующему кредиту",
+              en: "120 days past due on an active loan" }
     spec: { overdue_days: 120 }
     expect: { reason: STOP_DELINQUENCY }
   overdue_recent:
     group: credit_history
     forms: [IP, LLC, JSC]
     title: { ru: "Недавняя просрочка до 30 дней", en: "Recent delinquency up to 30 days" }
-    effect: { ru: "Просрочка 20 дней: минус 30 баллов скоринга вместо плюс 40, класс риска хуже, ставка выше",
-              en: "20 days past due: −30 score points instead of +40, a worse risk class and a higher rate" }
+    effect: { ru: "Просрочка 20 дней по кредиту",
+              en: "A 20-day delay on a loan" }
     spec: { overdue_days: 20 }
     expect: { reason: SC_DELINQUENCY }
   credit_hunger:
     group: credit_history
     forms: [IP, LLC, JSC]
     title: { ru: "Много запросов в БКИ", en: "Many credit bureau inquiries" }
-    effect: { ru: "9 запросов кредитной истории за 30 дней — признак кредитного голода: минус 30 баллов",
-              en: "9 credit history inquiries in 30 days, a sign of credit hunger: −30 points" }
+    effect: { ru: "9 запросов кредитной истории за последние 30 дней",
+              en: "9 credit history inquiries in the last 30 days" }
     spec: { bki_requests: 9 }
     expect: { reason: SC_CREDIT_HUNGER }
   high_debt_load:
     group: credit_history
     forms: [IP, LLC, JSC]
     title: { ru: "Высокая долговая нагрузка", en: "High debt load" }
-    effect: { ru: "Платежи по кредитам — половина поступлений: минус 60 баллов, лимит режет платёжеспособность — встречное предложение или отказ",
-              en: "Loan payments take half of the inflows: −60 points and a lower affordability limit, a counteroffer or decline" }
+    effect: { ru: "Платежи по кредитам — половина поступлений на счёт",
+              en: "Loan payments take half of the account inflows" }
     spec: { debt_load: 0.5 }
     expect: { reason: SC_HIGH_DEBT_LOAD }
   young_business:
     group: business
     forms: [IP, LLC, JSC]
     title: { ru: "Бизнесу 4 месяца", en: "Business is 4 months old" }
-    effect: { ru: "Бизнес моложе 6 месяцев по политике банка: отказ с подсказкой «подать, когда бизнесу исполнится полгода»",
-              en: "Younger than the 6 months the policy requires: a decline with a hint to apply later" }
+    effect: { ru: "Бизнесу 4 месяца",
+              en: "The business is 4 months old" }
     spec: { age_months: 4 }
     expect: { reason: POL_BUSINESS_AGE }
   unstable_inflows:
     group: business
     forms: [IP, LLC, JSC]
     title: { ru: "Нестабильные поступления", en: "Unstable inflows" }
-    effect: { ru: "Поступления скачут от месяца к месяцу (разброс 80%): минус 45 баллов", en: "Inflows swing month to month (80% variation): −45 points" }
+    effect: { ru: "Поступления скачут от месяца к месяцу — разброс около 80%",
+              en: "Inflows swing month to month — about 80% variation" }
     spec: { inflow_cv: 0.8 }
     expect: { reason: SC_UNSTABLE_INFLOWS }
   declining_inflows:
     group: business
     forms: [IP, LLC, JSC]
     title: { ru: "Поступления падают", en: "Declining inflows" }
-    effect: { ru: "Последние 3 месяца на 45% ниже предыдущих: минус 50 баллов", en: "The last 3 months are 45% below the previous ones: −50 points" }
+    effect: { ru: "Последние 3 месяца поступлений на 45% ниже предыдущих",
+              en: "The last 3 months of inflows are 45% below the previous ones" }
     spec: { inflow_trend: -0.45 }
     expect: { reason: SC_DECLINING_INFLOWS }
   loss:
     group: business
     forms: [LLC, JSC]
     title: { ru: "Убыток по отчётности", en: "Loss in the financial statements" }
-    effect: { ru: "Чистый убыток в бухотчётности ГИР БО: минус 25 баллов (у ИП отчётности нет — флаг для ООО и АО)",
-              en: "A net loss in the filed statements: −25 points (sole proprietors file none, so LLC and JSC only)" }
+    effect: { ru: "Чистый убыток в бухотчётности за прошлый год",
+              en: "A net loss in last year's financial statements" }
     spec: { profit_margin: -0.08 }
     expect: { reason: SC_LOSS }
   gov_contract:
     group: business
     forms: [IP, LLC, JSC]
     title: { ru: "Действующий госконтракт", en: "Active government contract" }
-    effect: { ru: "Контракт на 15 млн ₽ в ЕИС: доступен кредит под госконтракт (K5) — до 70% цены за вычетом аванса",
-              en: "A ₽15M contract in the procurement system: a contract loan becomes available (up to 70% of price minus advance)" }
+    effect: { ru: "Действующий госконтракт на 15 млн ₽ в ЕИС, аванс 20%",
+              en: "An active ₽15M public contract, 20% advance" }
     spec: { contract_price: 15000000 }
     expect: { product: CONTRACT }
   bki_down:
     group: integrations
     forms: [IP, LLC, JSC]
     title: { ru: "БКИ не отвечает", en: "Credit bureau is down" }
-    effect: { ru: "Бюро кредитных историй не отвечает: предварительная оферта, подпись — только после ответа БКИ (N1)",
-              en: "The credit bureau times out: a provisional offer, signing only after the bureau answers (N1)" }
+    effect: { ru: "Бюро кредитных историй не отвечает",
+              en: "The credit bureau does not respond" }
     faults: [{ source: bki, mode: timeout }]
     expect: { fault: bki }

@@ -1590,6 +1590,22 @@
             "description": "через сколько секунд закрыть поток"
           },
           {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "ru",
+                "en"
+              ],
+              "type": "string",
+              "description": "язык текстов",
+              "default": "ru",
+              "title": "Lang"
+            },
+            "description": "язык текстов"
+          },
+          {
             "name": "last-event-id",
             "in": "header",
             "required": false,
@@ -1669,7 +1685,7 @@
           "application"
         ],
         "summary": "История заявки",
-        "description": "История заявки: переходы статусов, решения, подписи, события реестров — в порядке времени.",
+        "description": "История заявки: переходы статусов, решения, подписи, события реестров — в порядке времени. `by` — кто сделал шаг:\nчеловек по имени (клиент или сотрудник банка) или «Банк» для шагов конвейера и сроков.",
         "operationId": "application_events_api_v1_applications__app_id__events_get",
         "security": [
           {
@@ -1686,6 +1702,22 @@
               "format": "uuid",
               "title": "App Id"
             }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "ru",
+                "en"
+              ],
+              "type": "string",
+              "description": "язык текстов",
+              "default": "ru",
+              "title": "Lang"
+            },
+            "description": "язык текстов"
           }
         ],
         "responses": {
@@ -2043,6 +2075,167 @@
         }
       }
     },
+    "/api/v1/companies/{inn}/offers": {
+      "get": {
+        "tags": [
+          "cabinet"
+        ],
+        "summary": "Подбор от задачи: что банк готов дать этой компании",
+        "description": "Клиент говорит, на что нужны деньги, — банк по своим данным показывает продукты этой компании: доступен ли,\nсколько максимум, условия на нужную сумму (ставка своя, по классу риска и отрасли), что понадобится и почему нет.\nБез goal — весь каталог с личными ставками. Стоп-факторы компании — в blockers, с причиной.",
+        "operationId": "offers_api_v1_companies__inn__offers_get",
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "inn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{10}$|^\\d{12}$",
+              "description": "ИНН компании: 10 цифр — юрлицо, 12 — ИП",
+              "title": "Inn"
+            },
+            "description": "ИНН компании: 10 цифр — юрлицо, 12 — ИП"
+          },
+          {
+            "name": "goal",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "cash_gap",
+                    "stock",
+                    "equipment",
+                    "growth",
+                    "contract"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "на что деньги",
+              "title": "Goal"
+            },
+            "description": "на что деньги"
+          },
+          {
+            "name": "amount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "сколько нужно, ₽; нет — максимум продукта, для кассового разрыва — сумма разрыва",
+              "title": "Amount"
+            },
+            "description": "сколько нужно, ₽; нет — максимум продукта, для кассового разрыва — сумма разрыва"
+          },
+          {
+            "name": "term_months",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 120,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "на сколько месяцев",
+              "title": "Term Months"
+            },
+            "description": "на сколько месяцев"
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "ru",
+                "en"
+              ],
+              "type": "string",
+              "description": "язык текстов",
+              "default": "ru",
+              "title": "Lang"
+            },
+            "description": "язык текстов"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "успех",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OffersResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Нужен вход: токен битый, истёк или пользователя больше нет (TOKEN_INVALID, LOGIN_REQUIRED, USER_UNKNOWN)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Нет права: в этой компании (FORBIDDEN с why и нормой закона), только для банка (BANK_ONLY) или риск-менеджера (ROLE_REQUIRED), голосуют участники (NOT_A_PARTICIPANT)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Действие недоступно сейчас: статус (INVALID_STATUS с app_status), данные компании ещё собираются (COMPANY_NOT_LOADED), ждём свежий реестр (SOURCE_WAIT), кредитную историю (BKI_PENDING), второй ключ (AWAITING_SECOND_KEY)…",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Ошибка в данных запроса (VALIDATION_ERROR с errors[])",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/companies/{inn}/repayment": {
       "get": {
         "tags": [
@@ -2114,6 +2307,24 @@
               "title": "Rate"
             },
             "description": "ставка, %; нет — по отрасли и классу риска компании"
+          },
+          {
+            "name": "product",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "продукт: у овердрафта графика нет — сравнивать нечего",
+              "title": "Product"
+            },
+            "description": "продукт: у овердрафта графика нет — сравнивать нечего"
           },
           {
             "name": "lang",
@@ -2687,6 +2898,155 @@
         ]
       }
     },
+    "/api/v1/bank/applications": {
+      "get": {
+        "tags": [
+          "bank"
+        ],
+        "summary": "Все заявки: и автоматические решения",
+        "description": "Реестр заявок банка: не только очередь исключений, но и всё, что движок решил сам, — открыть досье и «почему\nтак» можно по любой заявке. Новые и обновлённые сверху.",
+        "operationId": "all_applications_api_v1_bank_applications_get",
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "DRAFT",
+                      "SUBMITTED",
+                      "CHECKING",
+                      "INFO_REQUESTED",
+                      "UNDER_REVIEW",
+                      "OFFERED",
+                      "SIGNING",
+                      "SIGNED",
+                      "DISBURSING",
+                      "ISSUED",
+                      "REJECTED",
+                      "DECLINED",
+                      "WITHDRAWN",
+                      "EXPIRED"
+                    ],
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "фильтр по статусам",
+              "title": "Status"
+            },
+            "description": "фильтр по статусам"
+          },
+          {
+            "name": "decided_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "engine",
+                    "bank"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "кто принял решение: движок или специалист",
+              "title": "Decided By"
+            },
+            "description": "кто принял решение: движок или специалист"
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "ИНН или часть названия",
+              "title": "Q"
+            },
+            "description": "ИНН или часть названия"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 200,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "успех",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BankApplicationsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Нужен вход: токен битый, истёк или пользователя больше нет (TOKEN_INVALID, LOGIN_REQUIRED, USER_UNKNOWN)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Нет права: в этой компании (FORBIDDEN с why и нормой закона), только для банка (BANK_ONLY) или риск-менеджера (ROLE_REQUIRED), голосуют участники (NOT_A_PARTICIPANT)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Ошибка в данных запроса (VALIDATION_ERROR с errors[])",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/bank/metrics": {
       "get": {
         "tags": [
@@ -3195,7 +3555,7 @@
           "simulator"
         ],
         "summary": "Пользователи для входа",
-        "description": "Персоны для экрана входа: пресеты сценариев и свои. Карточка считается из мира (права, профиль, реестры).",
+        "description": "Пользователи для экрана входа простым языком: кто это (`role_title`), чем занимается компания (`about`), значок роли\n(`badge`). Без сценариев и исходов: сценарии со сменой ролей — в документации и `GET /sandbox/scenarios`. Скрытые\nсценарии отказов (`n1`, `n2`) и дубли входят по ID, но в списке их нет.",
         "operationId": "list_personas_api_v1_sandbox_personas_get",
         "parameters": [
           {
@@ -3314,8 +3674,8 @@
         "tags": [
           "simulator"
         ],
-        "summary": "Своя компания: параметры и флаги",
-        "description": "Что можно задать своей компании: форма, параметры с границами и флаги, которые реально меняют решение.",
+        "summary": "Своя компания: вопросы, ответы и особенности",
+        "description": "Что спросить, чтобы собрать свою компанию простым языком: чем занимается (отрасль с ОКВЭД), как устроена (кто\nподписывает и кто одобряет крупную сделку — с нормой), как платят клиенты и как ведёт себя выручка, кредиты и\nпросрочки. Особенности (недоимка, банкротство, сбой БКИ…) — фактами; что они значат для кредита, покажет решение банка.\nТочные цифры (params) — для тех, кому нужно задать их самому.",
         "operationId": "persona_options_api_v1_sandbox_persona_options_get",
         "parameters": [
           {
@@ -3949,7 +4309,8 @@
           },
           "at": {
             "type": "string",
-            "title": "At"
+            "title": "At",
+            "description": "время по часам мира симулятора"
           },
           "type": {
             "type": "string",
@@ -3961,6 +4322,7 @@
           "actor": {
             "type": "string",
             "title": "Actor",
+            "description": "техническая метка автора",
             "examples": [
               "client:770100000079"
             ]
@@ -3969,6 +4331,17 @@
             "additionalProperties": true,
             "type": "object",
             "title": "Payload"
+          },
+          "by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventAuthor"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "кто сделал шаг — для истории заявки"
           }
         },
         "additionalProperties": true,
@@ -3990,16 +4363,24 @@
             "title": "Inn"
           },
           "product": {
-            "type": "string",
-            "enum": [
-              "OVERDRAFT",
-              "EXPRESS",
-              "WORKING_CAPITAL",
-              "INVESTMENT",
-              "CONTRACT",
-              "AGRO_SEASONAL"
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "OVERDRAFT",
+                  "EXPRESS",
+                  "WORKING_CAPITAL",
+                  "INVESTMENT",
+                  "CONTRACT",
+                  "AGRO_SEASONAL"
+                ]
+              },
+              {
+                "type": "null"
+              }
             ],
-            "title": "Product"
+            "title": "Product",
+            "description": "нет — банк подберёт продукт под цель по данным компании (нужен goal)"
           },
           "amount": {
             "anyOf": [
@@ -4075,7 +4456,6 @@
         "type": "object",
         "required": [
           "inn",
-          "product",
           "amount"
         ],
         "title": "ApplicationIn",
@@ -4584,6 +4964,197 @@
         "title": "AuditCheckResponse",
         "description": "Проверка журнала: цепочка хэшей пересчитана с первой записи — правка или удаление любой записи видны."
       },
+      "BankApplication": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "inn": {
+            "type": "string",
+            "title": "Inn"
+          },
+          "company_name": {
+            "type": "string",
+            "title": "Company Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "SUBMITTED",
+              "CHECKING",
+              "INFO_REQUESTED",
+              "UNDER_REVIEW",
+              "OFFERED",
+              "SIGNING",
+              "SIGNED",
+              "DISBURSING",
+              "ISSUED",
+              "REJECTED",
+              "DECLINED",
+              "WITHDRAWN",
+              "EXPIRED"
+            ],
+            "title": "Status"
+          },
+          "flags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Flags"
+          },
+          "request": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "APPROVE",
+                  "COUNTER_OFFER",
+                  "APPROVE_WITH_CONDITIONS",
+                  "REQUEST_INFO",
+                  "MANUAL_REVIEW",
+                  "REJECT"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome",
+            "description": "исход движка"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "engine",
+                  "bank"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By",
+            "description": "решил движок сам или специалист"
+          },
+          "offer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Offer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "risk_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risk Class"
+          },
+          "loan": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Loan"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "id",
+          "inn",
+          "company_name",
+          "status",
+          "flags",
+          "request",
+          "outcome",
+          "decided_by",
+          "offer",
+          "score",
+          "risk_class",
+          "loan",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "BankApplication",
+        "description": "Заявка в реестре банка: кто решал, что предложено, класс риска — досье открывается по id."
+      },
+      "BankApplicationsResponse": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/BankApplication"
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "служебные сведения, например дата мира симулятора"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "BankApplicationsResponse",
+        "description": "Built-in mutable sequence.\n\nIf no argument is given, the constructor creates a new empty list.\nThe argument must be an iterable if specified."
+      },
       "BankMetrics": {
         "properties": {
           "applications": {
@@ -4781,6 +5352,11 @@
               }
             ],
             "title": "Person Inn"
+          },
+          "today": {
+            "type": "string",
+            "title": "Today",
+            "description": "сегодня по часам мира симулятора — для приветствия и подписей «сегодня»"
           }
         },
         "additionalProperties": true,
@@ -4793,7 +5369,8 @@
           "organization_name",
           "user_id",
           "role",
-          "person_inn"
+          "person_inn",
+          "today"
         ],
         "title": "CabinetUser",
         "description": "Кто работает в кабинете (DemoPersonaDto)."
@@ -4830,9 +5407,23 @@
             "type": "string",
             "enum": [
               "CASH_GAP",
+              "COVERED",
               "HEALTHY"
             ],
-            "title": "Status"
+            "title": "Status",
+            "description": "CASH_GAP — не хватит денег; COVERED — минус в пределах подключённого овердрафта; HEALTHY — всё в порядке"
+          },
+          "credit_line": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credit Line",
+            "description": "лимит подключённого овердрафта, ₽"
           },
           "horizon_days": {
             "type": "integer",
@@ -5422,7 +6013,8 @@
                 "type": "null"
               }
             ],
-            "title": "Payment"
+            "title": "Payment",
+            "description": "платёж в месяц; у овердрафта — проценты, если занят весь лимит"
           },
           "conditions": {
             "items": {
@@ -5431,6 +6023,19 @@
             "type": "array",
             "title": "Conditions",
             "default": []
+          },
+          "cover": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cover",
+            "description": "у предложения под разрыв: amount — сколько взять, days — на сколько дней, interest — проценты за эти дни, ₽"
           }
         },
         "additionalProperties": true,
@@ -6000,6 +6605,77 @@
           "data"
         ],
         "title": "DossierResponse"
+      },
+      "EventAuthor": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "client",
+              "bank",
+              "system"
+            ],
+            "title": "Kind"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "человек по имени; у шагов конвейера и сроков — «Банк»",
+            "examples": [
+              "Анна Смирнова"
+            ]
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role",
+            "description": "у сотрудника банка: loan_officer · risk_manager"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title",
+            "description": "у сотрудника банка: должность"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail",
+            "description": "у шагов банка: проверка данных, автоматическое решение, истёк срок"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "kind",
+          "name"
+        ],
+        "title": "EventAuthor"
       },
       "EventIn": {
         "properties": {
@@ -6621,7 +7297,70 @@
           },
           "disbursed_at": {
             "type": "string",
-            "title": "Disbursed At"
+            "title": "Disbursed At",
+            "description": "время выдачи по часам мира"
+          },
+          "number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number",
+            "description": "номер кредитного договора",
+            "examples": [
+              "КД-2026/DFDC6D"
+            ]
+          },
+          "product": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "OVERDRAFT",
+                  "EXPRESS",
+                  "WORKING_CAPITAL",
+                  "INVESTMENT",
+                  "CONTRACT",
+                  "AGRO_SEASONAL"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product"
+          },
+          "repayment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repayment",
+            "description": "annuity · revolving · bullet · seasonal"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "loan",
+                  "limit"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind",
+            "description": "loan — деньги на счёте; limit — овердрафт: подключён лимит, деньги берутся по мере нужды"
           }
         },
         "additionalProperties": true,
@@ -6656,15 +7395,25 @@
           },
           "repayment": {
             "type": "string",
-            "title": "Repayment"
+            "title": "Repayment",
+            "description": "annuity · revolving · bullet · seasonal"
           },
           "payment": {
             "type": "string",
-            "title": "Payment"
+            "title": "Payment",
+            "description": "платёж в месяц; у овердрафта — проценты, если весь лимит занят весь месяц"
           },
           "overpayment": {
-            "type": "string",
-            "title": "Overpayment"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overpayment",
+            "description": "проценты за весь срок; у овердрафта null — платят за занятые дни"
           },
           "schedule": {
             "items": {
@@ -6673,6 +7422,19 @@
             },
             "type": "array",
             "title": "Schedule"
+          },
+          "usage_example": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Usage Example",
+            "description": "у овердрафта: amount, days, interest, text — сколько стоит взять сумму на несколько дней"
           }
         },
         "additionalProperties": true,
@@ -6897,6 +7659,126 @@
           "loading"
         ],
         "title": "LoginResult"
+      },
+      "MatchOption": {
+        "properties": {
+          "product": {
+            "type": "string",
+            "enum": [
+              "OVERDRAFT",
+              "EXPRESS",
+              "WORKING_CAPITAL",
+              "INVESTMENT",
+              "CONTRACT",
+              "AGRO_SEASONAL"
+            ],
+            "title": "Product"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "repayment": {
+            "type": "string",
+            "title": "Repayment"
+          },
+          "available": {
+            "type": "boolean",
+            "title": "Available",
+            "description": "false — продукт этой компании не дать: причина в why"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "description": "PREAPPROVED · CONDITIONAL · REVIEW · UNAVAILABLE"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "APPROVE",
+              "COUNTER_OFFER",
+              "APPROVE_WITH_CONDITIONS",
+              "REQUEST_INFO",
+              "MANUAL_REVIEW",
+              "REJECT"
+            ],
+            "title": "Outcome"
+          },
+          "max_amount": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Amount",
+            "description": "сколько максимум по данным банка"
+          },
+          "offer": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offer",
+            "description": "условия на нужную сумму: amount, term_months, rate, payment, repayment"
+          },
+          "counter": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Counter",
+            "description": "что пришлось изменить: AMOUNT · TERM · PRODUCT"
+          },
+          "needs": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Needs",
+            "description": "что понадобится: code и текст"
+          },
+          "why": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Why",
+            "description": "почему нет или почему так — тексты причин"
+          },
+          "recommended": {
+            "type": "boolean",
+            "title": "Recommended"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "product",
+          "name",
+          "repayment",
+          "available",
+          "label",
+          "outcome",
+          "max_amount",
+          "offer",
+          "counter",
+          "needs",
+          "why",
+          "recommended"
+        ],
+        "title": "MatchOption",
+        "description": "Продукт в подборе от задачи — для этой компании: доступен ли, сколько, на каких условиях, что понадобится."
       },
       "Me": {
         "properties": {
@@ -7161,6 +8043,127 @@
         ],
         "title": "Offer"
       },
+      "Offers": {
+        "properties": {
+          "inn": {
+            "type": "string",
+            "title": "Inn"
+          },
+          "goal": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal"
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount",
+            "description": "сколько нужно; для кассового разрыва без суммы — сумма разрыва"
+          },
+          "term_months": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Term Months"
+          },
+          "bki_known": {
+            "type": "boolean",
+            "title": "Bki Known",
+            "description": "есть ли полный отчёт БКИ: без него условия предварительные"
+          },
+          "blockers": {
+            "items": {
+              "$ref": "#/components/schemas/Reason"
+            },
+            "type": "array",
+            "title": "Blockers",
+            "description": "стоп-факторы компании: пока они есть, кредита не будет"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/MatchOption"
+            },
+            "type": "array",
+            "title": "Options"
+          },
+          "recommended": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "OVERDRAFT",
+                  "EXPRESS",
+                  "WORKING_CAPITAL",
+                  "INVESTMENT",
+                  "CONTRACT",
+                  "AGRO_SEASONAL"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recommended"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "inn",
+          "goal",
+          "amount",
+          "term_months",
+          "bki_known",
+          "blockers",
+          "options",
+          "recommended"
+        ],
+        "title": "Offers",
+        "description": "Подбор от задачи: продукты компании с личными условиями; стоп-факторы — в blockers."
+      },
+      "OffersResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Offers"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "служебные сведения, например дата мира симулятора"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "OffersResponse",
+        "description": "Подбор от задачи: продукты компании с личными условиями; стоп-факторы — в blockers."
+      },
       "Participant": {
         "properties": {
           "inn": {
@@ -7257,15 +8260,41 @@
           "id": {
             "type": "string",
             "title": "Id",
+            "description": "ID для входа",
             "examples": [
               "s7"
+            ]
+          },
+          "badge": {
+            "type": "string",
+            "title": "Badge",
+            "description": "значок роли: ИП, Директор, Участник, Сотрудник, По доверенности, Специалист банка, Риск-менеджер",
+            "examples": [
+              "ИП"
+            ]
+          },
+          "role_title": {
+            "type": "string",
+            "title": "Role Title",
+            "description": "кто этот человек в компании",
+            "examples": [
+              "Индивидуальный предприниматель"
+            ]
+          },
+          "about": {
+            "type": "string",
+            "title": "About",
+            "description": "чем занимается компания (у сотрудника банка — что он делает)",
+            "examples": [
+              "Кофейня: 9 сотрудников, гости платят картами, бизнесу 2 года"
             ]
           },
           "code": {
             "type": "string",
             "title": "Code",
+            "description": "то же, что badge (прежнее поле)",
             "examples": [
-              "S7"
+              "ИП"
             ]
           },
           "kind": {
@@ -7297,7 +8326,8 @@
           },
           "scenario": {
             "type": "string",
-            "title": "Scenario"
+            "title": "Scenario",
+            "description": "то же, что role_title (прежнее поле)"
           },
           "permissions": {
             "type": "string",
@@ -7309,11 +8339,13 @@
           },
           "registries": {
             "type": "string",
-            "title": "Registries"
+            "title": "Registries",
+            "description": "отвечают ли источники; находки реестров на экране входа не раскрываются"
           },
           "preview": {
             "type": "string",
-            "title": "Preview"
+            "title": "Preview",
+            "description": "то же, что about (прежнее поле)"
           },
           "login_label": {
             "type": "string",
@@ -7375,6 +8407,9 @@
         "type": "object",
         "required": [
           "id",
+          "badge",
+          "role_title",
+          "about",
           "code",
           "kind",
           "full_name",
@@ -7389,7 +8424,7 @@
           "role"
         ],
         "title": "PersonaCard",
-        "description": "Карточка пользователя для экрана входа (контракт фронта SandboxPersonaDto) — права и профиль посчитаны из мира."
+        "description": "Карточка пользователя для экрана входа простым языком: кто это и чем занимается компания — без сценариев и\nисходов. Права и профиль посчитаны из мира. Поля code, scenario, preview — прежний контракт фронта (SandboxPersonaDto):\nв них те же значок, роль и описание."
       },
       "PersonaCardResponse": {
         "properties": {
@@ -7415,7 +8450,7 @@
           "data"
         ],
         "title": "PersonaCardResponse",
-        "description": "Карточка пользователя для экрана входа (контракт фронта SandboxPersonaDto) — права и профиль посчитаны из мира."
+        "description": "Карточка пользователя для экрана входа простым языком: кто это и чем занимается компания — без сценариев и\nисходов. Права и профиль посчитаны из мира. Поля code, scenario, preview — прежний контракт фронта (SandboxPersonaDto):\nв них те же значок, роль и описание."
       },
       "PersonaCardsResponse": {
         "properties": {
@@ -7591,11 +8626,176 @@
             "description": "ИП, ООО или АО; если задан ИНН — по его длине",
             "default": "LLC"
           },
+          "industry": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "coffee",
+                  "restaurant",
+                  "bakery",
+                  "retail_food",
+                  "online_shop",
+                  "wholesale",
+                  "construction",
+                  "renovation",
+                  "it",
+                  "trucking",
+                  "warehouse",
+                  "farm",
+                  "cleaning",
+                  "beauty",
+                  "dental",
+                  "education"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Industry",
+            "description": "чем занимается: отрасль из каталога — ОКВЭД, сезонность и кто платит по умолчанию"
+          },
+          "structure": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "owner_director",
+                  "hired_director",
+                  "partners",
+                  "two_directors_joint",
+                  "two_directors_independent"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Structure",
+            "description": "как устроена компания: от неё — кто подписывает и кто одобряет крупную сделку"
+          },
+          "accountant": {
+            "type": "boolean",
+            "title": "Accountant",
+            "description": "есть бухгалтер: готовит заявки в ДБО, подписать не может",
+            "default": false
+          },
+          "representative": {
+            "type": "boolean",
+            "title": "Representative",
+            "description": "есть представитель по МЧД: подписывает кредитный договор (не у ИП)",
+            "default": false
+          },
+          "seasonality": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "flat",
+                  "summer",
+                  "year_end",
+                  "harvest"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seasonality",
+            "description": "когда выручки больше"
+          },
+          "stability": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "steady",
+                  "uneven",
+                  "volatile"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stability",
+            "description": "насколько ровная выручка"
+          },
+          "trend": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "growing",
+                  "stable",
+                  "declining"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trend",
+            "description": "как выручка менялась за 3 месяца"
+          },
+          "channel": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "cards",
+                  "invoices",
+                  "marketplace",
+                  "government"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channel",
+            "description": "кто и как платит"
+          },
+          "loans": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "some",
+                  "heavy"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Loans",
+            "description": "кредиты в других банках"
+          },
+          "delays": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "recent",
+                  "serious"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delays",
+            "description": "просрочки по кредитам"
+          },
           "okved": {
             "type": "string",
             "pattern": "^\\d{2}(\\.\\d{1,2}){0,2}$",
             "title": "Okved",
-            "description": "ОКВЭД 2: от него отрасль, продукты, спред",
+            "description": "ОКВЭД 2, если отрасли нет в каталоге",
             "default": "62.01"
           },
           "okved_name": {
@@ -7625,71 +8825,119 @@
             "type": "integer",
             "minimum": 10000.0,
             "title": "Inflow Avg",
-            "description": "средние поступления на счёт в месяц, ₽",
+            "description": "выручка: средние поступления на счёт в месяц, ₽",
             "default": 3000000
           },
           "inflow_cv": {
-            "type": "number",
-            "maximum": 1.0,
-            "minimum": 0.0,
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Inflow Cv",
-            "description": "разброс поступлений от месяца к месяцу",
-            "default": 0.3
+            "description": "разброс поступлений от месяца к месяцу (вместо stability)"
           },
           "inflow_trend": {
-            "type": "number",
-            "maximum": 1.0,
-            "minimum": -0.9,
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": -0.9
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Inflow Trend",
-            "description": "последние 3 месяца к предыдущим 9, минус 1",
-            "default": 0.0
+            "description": "последние 3 месяца к предыдущим 9, минус 1"
           },
           "debt_load": {
-            "type": "number",
-            "maximum": 1.0,
-            "minimum": 0.0,
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Debt Load",
-            "description": "платежи по текущим кредитам / поступления",
-            "default": 0.15
+            "description": "платежи по текущим кредитам / поступления (вместо loans)"
           },
           "overdue_days": {
-            "type": "integer",
-            "maximum": 365.0,
-            "minimum": 0.0,
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 365.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Overdue Days",
-            "description": "максимальная просрочка в КИ",
-            "default": 0
+            "description": "максимальная просрочка в КИ (вместо delays)"
           },
           "bki_requests": {
-            "type": "integer",
-            "maximum": 50.0,
-            "minimum": 0.0,
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 50.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Bki Requests",
-            "description": "запросы в БКИ за 30 дней",
-            "default": 1
+            "description": "запросы в БКИ за 30 дней"
           },
           "tax_debt": {
-            "type": "integer",
-            "minimum": 0.0,
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Tax Debt",
-            "description": "недоимка, ₽",
-            "default": 0
+            "description": "недоимка, ₽"
           },
           "participants": {
-            "type": "integer",
-            "maximum": 10.0,
-            "minimum": 1.0,
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Participants",
-            "description": "участников ООО",
-            "default": 1
+            "description": "участников ООО (для partners — от двух)"
           },
           "profit_margin": {
-            "type": "number",
-            "maximum": 1.0,
-            "minimum": -1.0,
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": -1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Profit Margin",
-            "description": "чистая прибыль / выручка",
-            "default": 0.05
+            "description": "чистая прибыль / выручка"
           },
           "contract_price": {
             "anyOf": [
@@ -7746,6 +8994,45 @@
             "type": "array",
             "title": "Forms"
           },
+          "industries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Industries",
+            "description": "чем занимается: id, title, okved, okved_name, seasonality, channel"
+          },
+          "structures": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Structures",
+            "description": "как устроена: id, title, means — кто подписывает и кто одобряет крупную сделку, с нормой; forms"
+          },
+          "people": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "People",
+            "description": "кто ещё работает в кабинете: бухгалтер, представитель по МЧД"
+          },
+          "choices": {
+            "additionalProperties": {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Choices",
+            "description": "ответы на вопросы: seasonality, stability, trend, channel, loans, delays — id и title"
+          },
           "groups": {
             "items": {
               "additionalProperties": true,
@@ -7761,7 +9048,7 @@
             },
             "type": "array",
             "title": "Flags",
-            "description": "id, group, title, effect, forms"
+            "description": "особенности фактами: id, group, title, effect, forms"
           },
           "params": {
             "items": {
@@ -7770,18 +9057,23 @@
             },
             "type": "array",
             "title": "Params",
-            "description": "id, type, default, description, ge/le"
+            "description": "точные цифры, если нужны: id, type, default, description, ge/le"
           }
         },
         "additionalProperties": true,
         "type": "object",
         "required": [
           "forms",
+          "industries",
+          "structures",
+          "people",
+          "choices",
           "groups",
           "flags",
           "params"
         ],
-        "title": "PersonaOptions"
+        "title": "PersonaOptions",
+        "description": "Вопросы конструктора своей компании простым языком и что значит каждый ответ."
       },
       "PersonaOptionsResponse": {
         "properties": {
@@ -7806,7 +9098,8 @@
         "required": [
           "data"
         ],
-        "title": "PersonaOptionsResponse"
+        "title": "PersonaOptionsResponse",
+        "description": "Вопросы конструктора своей компании простым языком и что значит каждый ответ."
       },
       "Preset": {
         "properties": {

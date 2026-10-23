@@ -15,7 +15,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from .. import clock, company, lifecycle, personas, store
-from ..domain import calc, catalog, engine, levers
+from ..domain import calc, catalog, engine, levers, matching
 from ..domain.scoring import explain_factor
 from ..domain.state import TERMINAL
 from ..features import cash_flow, person_links
@@ -23,7 +23,7 @@ from ..jsonutil import plain
 from ..policy import load as load_policy
 from . import schemas as S
 from . import views
-from .deps import Me, access, require
+from .deps import Me, access, require, voter
 from .http import Problem, ok
 from .schemas import doc
 
@@ -119,6 +119,14 @@ async def calc_loan(body: LoanCalcIn):
                                   catalog.security_for(product, body.segment))
     rate = body.rate or rate_parts["total"]
     pay = calc.payment(product["repayment"], body.amount, rate, body.term_months)
+    if product["repayment"] == "revolving":      # у лимита нет графика: проценты — за занятую сумму и дни, а не за срок
+        days = 10
+        interest = calc.overdraft_interest(body.amount, rate, days)
+        return ok({"rate": rate, "rate_parts": rate_parts, "repayment": "revolving", "payment": pay, "overpayment": None,
+                   "schedule": [], "usage_example": {
+                       "amount": body.amount, "days": days, "interest": interest,
+                       "text": f"Займёте весь лимит на {days} дней — проценты {_rub(interest, 'ru')}; {_rub(pay, 'ru')} "
+                               "в месяц — только если лимит занят целиком весь месяц. Долг гасится сам из поступлений"}})
     schedule = calc.annuity_schedule(body.amount, rate, body.term_months) if product["repayment"] == "annuity" else []
     total = sum((r["payment"] for r in schedule), Decimal(0)) if schedule else pay * body.term_months + body.amount
     return ok({"rate": rate, "rate_parts": rate_parts, "repayment": product["repayment"], "payment": pay,
@@ -142,7 +150,8 @@ async def my_companies(conn, who) -> tuple[list[dict], bool]:
             out.append({"inn": link["inn"], "loaded": False, "bank_access": link["level"]})
             continue
         granted = (await access(conn, who, link["inn"]))[0]
-        out.append({"inn": link["inn"], "loaded": True, "name": facts.get("name"), "segment": facts.get("segment"),
+        out.append({"inn": link["inn"], "loaded": True, "name": facts.get("name"), "short_name": facts.get("short_name"),
+                    "segment": facts.get("segment"),
                     "okved": facts.get("okved"), "bank_access": link["level"], **granted})
     return out, any(not c["loaded"] for c in out)
 
@@ -253,7 +262,7 @@ class ApplicationIn(BaseModel):
         {"inn": "770100000079", "product": "OVERDRAFT", "amount": 400000, "term_months": 12, "goal": "cash_gap",
          "consent_bki": True}]})
     inn: str = Field(pattern=r"^\d{10}$|^\d{12}$")
-    product: Product
+    product: Product | None = Field(None, description="нет — банк подберёт продукт под цель по данным компании (нужен goal)")
     amount: Decimal = Field(gt=0)
     term_months: int | None = Field(None, gt=0, le=120)
     goal: Goal | None = None
@@ -264,6 +273,10 @@ class ApplicationIn(BaseModel):
 
 async def _app_for(conn, who, app_id: UUID, right: str) -> tuple[dict, dict]:
     app = await lifecycle.load(conn, app_id)
+    if right == "view":                          # участник видит заявку, где его просят голосовать, — и только её
+        granted, _, _ = await access(conn, who, app["company_inn"])
+        if granted["can"]["view"] or voter(app, who, granted):
+            return app, granted
     granted, _ = await require(conn, who, app["company_inn"], right)
     return app, granted
 
@@ -293,10 +306,26 @@ async def create_application(body: ApplicationIn, who: Me):
     request = body.model_dump(exclude={"inn", "consent_bki"}, exclude_none=True)
     pool = await store.pool()
     async with pool.acquire() as conn:
-        granted, _ = await require(conn, who, body.inn, "prepare")
+        granted, facts = await require(conn, who, body.inn, "prepare")
+        if body.product is None:                 # от задачи: продукт выбирает банк тем же подбором, что и /offers
+            chosen = _product_for(facts, body)
+            limit = matching.limit_for(load_policy()["products"][chosen], body.amount)
+            request.update(product=chosen, product_chosen_by="bank", amount=limit,
+                           **({"need": body.amount} if limit != body.amount else {}))   # лимит овердрафта ≥ минимума
         app = await lifecycle.create(conn, body.inn, request, body.consent_bki, who.label,
                                      {"persona": who.persona_id, "inn": who.inn, "name": who.name})
     return ok(_view(app, granted, who))
+
+
+def _product_for(facts: dict, body: ApplicationIn) -> str:
+    if body.goal is None:
+        raise Problem(422, "GOAL_REQUIRED", "без продукта нужна цель — банк подберёт продукт под неё")
+    found = matching.match(facts, load_policy(), body.goal, body.amount, body.term_months)
+    chosen = found["recommended"] or next((o["product"] for o in found["options"] if o["available"]), None)
+    if chosen is None:
+        raise Problem(422, "NO_PRODUCT_FOR_GOAL", "под эту задачу банк сейчас ничего не предложит",
+                      blockers=found["blockers"], why={o["product"]: o["why"] for o in found["options"]})
+    return chosen
 
 
 @router.get("/applications/{app_id}", tags=["application"],
@@ -405,6 +434,29 @@ LEVERS = {
 }
 
 
+PATH = {   # заголовок пути по исходу: у одобренной заявки рычаги улучшают условия, у встречного — дают всю сумму
+    "approval": ("Как получить одобрение", "How to get approved"),
+    "full_amount": ("Как получить всю сумму", "How to get the full amount"),
+    "better_terms": ("Как улучшить условия", "How to improve the terms"),
+}
+NO_DATA = {"ru": "нет данных — банк спросит", "en": "no data — the bank will ask"}
+
+
+def _rub(value, lang: str) -> str:
+    amount = f"{int(Decimal(str(value))):,}"
+    return f"{amount.replace(',', ' ')} ₽" if lang == "ru" else f"₽{amount}"
+
+
+def _caps(decision: dict, offer: dict, pol: dict, lang: str) -> list[dict]:
+    """Ограничения суммы с суммами: какой лимит сработал, видно без расчётов на фронте."""
+    out = []
+    for cap in decision.get("caps") or []:
+        title = pol["reasons"].get(cap["code"], cap["code"])
+        value = NO_DATA[lang] if cap["value"] is None else _rub(cap["value"], lang)
+        out.append({**cap, "title": title, "text": f"{title}: {value}", "binding": cap["code"] == offer.get("binding_cap")})
+    return out
+
+
 def _price_parts(rate: dict) -> list[dict]:
     return [{"part": "key_rate", "value": rate.get("key_rate"), "text": "ключевая ставка Банка России"},
             {"part": "industry", "value": rate.get("industry"),
@@ -433,6 +485,10 @@ def explanation(decision: dict, facts: dict, request: dict, pol: dict, lang: str
     k3 = levers.path_to_approval(facts, request, decision, pol, engine.decide)
     for option in k3["options"]:
         option["title"] = " + ".join(LEVERS[n][0 if lang == "ru" else 1] for n in option["levers"])
+    outcome = decision["outcome"]
+    k3["kind"] = "better_terms" if outcome in ("APPROVE", "APPROVE_WITH_CONDITIONS") else \
+        "full_amount" if outcome == "COUNTER_OFFER" else "approval"
+    k3["title"] = PATH[k3["kind"]][0 if lang == "ru" else 1]
     return {
         "outcome": decision["outcome"], "status": decision["status"], "policy_version": decision["policy_version"],
         "reasons": decision["reasons"],
@@ -440,7 +496,7 @@ def explanation(decision: dict, facts: dict, request: dict, pol: dict, lang: str
                     "best_class": risk.get("best_class"), "base": card["base"], "classes": card["classes"],
                     "pd_scale": card["pd_scale"], "factors": factors, "missing": risk.get("missing", [])},
         "price": {**rate, "parts": _price_parts(rate)} if rate else None,
-        "limit": {"caps": [{**cap, "text": pol["reasons"].get(cap["code"], cap["code"])} for cap in decision.get("caps") or []],
+        "limit": {"caps": _caps(decision, offer, pol, lang),
                   "binding": offer.get("binding_cap"), "amount": offer.get("amount"),
                   "class_multiplier": (product.get("class_multiplier") or {}).get(risk.get("class"))} if offer else None,
         "path_to_approval": k3,
@@ -501,13 +557,15 @@ STREAM_DOC = {"description": "Поток событий text/event-stream: пе�
                        **{c: {"model": S.ProblemDetails, "description": S.ERRORS[c]} for c in (401, 403, 404)}})
 async def stream(app_id: UUID, who: Me,
                  timeout_s: Annotated[float, Query(ge=1, le=600, description="через сколько секунд закрыть поток")] = 300,
-                 last_event_id: Annotated[int | None, Header(description="переподключение: пропущенное после id")] = None):
+                 last_event_id: Annotated[int | None, Header(description="переподключение: пропущенное после id")] = None,
+                 lang: Lang = "ru"):
     """Server-Sent Events: каждая новая запись истории заявки приходит сразу — переход статуса, решение, подпись, событие
     реестра. Поток закрывается, когда заявка дошла до конца (ISSUED, REJECTED, DECLINED, WITHDRAWN, EXPIRED) или истёк
     timeout_s. Источник — NOTIFY из PostgreSQL после вставки в events, без опроса базы."""
     pool = await store.pool()
     async with pool.acquire() as conn:
         app, _ = await _app_for(conn, who, app_id, "view")
+        index = await personas.actor_index(conn, lang)
 
     async def events():
         conn = await store.listener()
@@ -537,7 +595,7 @@ async def stream(app_id: UUID, who: Me,
                                         "ORDER BY id", app_id, last)
                 for row in rows:
                     last = row["id"]
-                    yield _sse(row["type"], dict(row), row["id"])
+                    yield _sse(row["type"], {**dict(row), "by": personas.actor_view(index, row["actor"], lang)}, row["id"])
                     if row["type"] == "application.status_changed" and row["payload"].get("to") in TERMINAL:
                         return
         finally:
@@ -548,9 +606,12 @@ async def stream(app_id: UUID, who: Me,
 
 @router.get("/applications/{app_id}/events", tags=["application"],
             **doc(S.EventsResponse, 401, 403, 404, summary="История заявки"))
-async def application_events(app_id: UUID, who: Me):
-    """История заявки: переходы статусов, решения, подписи, события реестров — в порядке времени."""
+async def application_events(app_id: UUID, who: Me, lang: Lang = "ru"):
+    """История заявки: переходы статусов, решения, подписи, события реестров — в порядке времени. `by` — кто сделал шаг:
+    человек по имени (клиент или сотрудник банка) или «Банк» для шагов конвейера и сроков."""
     pool = await store.pool()
     async with pool.acquire() as conn:
         await _app_for(conn, who, app_id, "view")
-        return ok(await store.events(conn, app_id))
+        index = await personas.actor_index(conn, lang)
+        rows = await store.events(conn, app_id)
+    return ok([{**row, "by": personas.actor_view(index, row["actor"], lang)} for row in rows])

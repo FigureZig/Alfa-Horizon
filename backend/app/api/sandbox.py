@@ -18,7 +18,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from seed import flags, world
 from seed.flows import ACTION_TEXT, ACTION_TEXT_EN, ARG_TEXT, ARG_TEXT_EN, EN, FLOWS
 
-from .. import auth, clock, personas, store
+from .. import auth, clock, company, personas, store
 from ..config import settings
 from ..domain import engine
 from ..policy import load as load_policy
@@ -115,11 +115,13 @@ def persona_stubs(company: dict, people: dict, on: date, *, priority: int = 3, c
 
 @router.get("/personas", **doc(S.PersonaCardsResponse, summary="Пользователи для входа"))
 async def list_personas(lang: Lang = "ru"):
-    """Персоны для экрана входа: пресеты сценариев и свои. Карточка считается из мира (права, профиль, реестры)."""
+    """Пользователи для экрана входа простым языком: кто это (`role_title`), чем занимается компания (`about`), значок роли
+    (`badge`). Без сценариев и исходов: сценарии со сменой ролей — в документации и `GET /sandbox/scenarios`. Скрытые
+    сценарии отказов (`n1`, `n2`) и дубли входят по ID, но в списке их нет."""
     pool = await store.pool()
     async with pool.acquire() as conn:
         items = await personas.all_personas(conn)
-    return ok([personas.card(p, lang) for p in items])
+    return ok([personas.card(p, lang) for p in items if p.get("listed", True)])
 
 
 class PersonaIn(BaseModel):
@@ -140,19 +142,33 @@ class PersonaIn(BaseModel):
     preview: str | None = Field(None, max_length=300)
     login_label: str | None = Field(None, max_length=60)
     form: Literal["IP", "LLC", "JSC"] = Field("LLC", description="ИП, ООО или АО; если задан ИНН — по его длине")
-    okved: str = Field("62.01", pattern=r"^\d{2}(\.\d{1,2}){0,2}$", description="ОКВЭД 2: от него отрасль, продукты, спред")
+    # простыми вопросами (каталог ответов — GET /sandbox/persona-options): из них генератор строит выписку, отчётность и людей
+    industry: Literal[tuple(world.INDUSTRIES)] | None = Field(None, description="чем занимается: отрасль из каталога — "
+                                                                                "ОКВЭД, сезонность и кто платит по умолчанию")
+    structure: Literal[world.STRUCTURES] | None = Field(None, description="как устроена компания: от неё — кто подписывает и "
+                                                                         "кто одобряет крупную сделку")
+    accountant: bool = Field(False, description="есть бухгалтер: готовит заявки в ДБО, подписать не может")
+    representative: bool = Field(False, description="есть представитель по МЧД: подписывает кредитный договор (не у ИП)")
+    seasonality: Literal["flat", "summer", "year_end", "harvest"] | None = Field(None, description="когда выручки больше")
+    stability: Literal["steady", "uneven", "volatile"] | None = Field(None, description="насколько ровная выручка")
+    trend: Literal["growing", "stable", "declining"] | None = Field(None, description="как выручка менялась за 3 месяца")
+    channel: Literal["cards", "invoices", "marketplace", "government"] | None = Field(None, description="кто и как платит")
+    loans: Literal["none", "some", "heavy"] | None = Field(None, description="кредиты в других банках")
+    delays: Literal["none", "recent", "serious"] | None = Field(None, description="просрочки по кредитам")
+    # точные цифры — если нужны (иначе их выведет генератор из ответов выше)
+    okved: str = Field("62.01", pattern=r"^\d{2}(\.\d{1,2}){0,2}$", description="ОКВЭД 2, если отрасли нет в каталоге")
     okved_name: str = Field("Основной вид деятельности", max_length=300, description="название вида деятельности")
     age_months: int = Field(36, ge=1, le=600, description="сколько месяцев бизнесу")
     headcount: int = Field(12, ge=1, le=250, description="сотрудников — от численности категория МСП")
-    inflow_avg: int = Field(3_000_000, ge=10_000, description="средние поступления на счёт в месяц, ₽")
-    inflow_cv: float = Field(0.3, ge=0, le=1, description="разброс поступлений от месяца к месяцу")
-    inflow_trend: float = Field(0.0, ge=-0.9, le=1, description="последние 3 месяца к предыдущим 9, минус 1")
-    debt_load: float = Field(0.15, ge=0, le=1, description="платежи по текущим кредитам / поступления")
-    overdue_days: int = Field(0, ge=0, le=365, description="максимальная просрочка в КИ")
-    bki_requests: int = Field(1, ge=0, le=50, description="запросы в БКИ за 30 дней")
-    tax_debt: int = Field(0, ge=0, description="недоимка, ₽")
-    participants: int = Field(1, ge=1, le=10, description="участников ООО")
-    profit_margin: float = Field(0.05, ge=-1, le=1, description="чистая прибыль / выручка")
+    inflow_avg: int = Field(3_000_000, ge=10_000, description="выручка: средние поступления на счёт в месяц, ₽")
+    inflow_cv: float | None = Field(None, ge=0, le=1, description="разброс поступлений от месяца к месяцу (вместо stability)")
+    inflow_trend: float | None = Field(None, ge=-0.9, le=1, description="последние 3 месяца к предыдущим 9, минус 1")
+    debt_load: float | None = Field(None, ge=0, le=1, description="платежи по текущим кредитам / поступления (вместо loans)")
+    overdue_days: int | None = Field(None, ge=0, le=365, description="максимальная просрочка в КИ (вместо delays)")
+    bki_requests: int | None = Field(None, ge=0, le=50, description="запросы в БКИ за 30 дней")
+    tax_debt: int | None = Field(None, ge=0, description="недоимка, ₽")
+    participants: int | None = Field(None, ge=1, le=10, description="участников ООО (для partners — от двух)")
+    profit_margin: float | None = Field(None, ge=-1, le=1, description="чистая прибыль / выручка")
     contract_price: int | None = Field(None, gt=0, description="действующий госконтракт в ЕИС, ₽")
     flags: list[str] = Field([], description="флаги из каталога GET /sandbox/persona-options: недоимка, банкротство, "
                              "просрочка, крупная сделка, БКИ не отвечает… Задают параметры поверх полей и обязаны менять решение",
@@ -163,27 +179,114 @@ TEXT_FIELDS = ("organization", "scenario", "permissions", "profile", "registries
 PARAMS = ("form", "okved", "okved_name", "age_months", "headcount", "inflow_avg", "inflow_cv", "inflow_trend", "debt_load",
           "overdue_days", "bki_requests", "tax_debt", "participants", "profit_margin", "contract_price")
 FORMS = {"IP": {"ru": "ИП", "en": "Sole proprietor"}, "LLC": {"ru": "ООО", "en": "LLC"}, "JSC": {"ru": "АО", "en": "JSC"}}
+# простые ответы конструктора → параметры генератора (seed/world.py)
+TREND = {"growing": 0.15, "stable": 0.0, "declining": -0.25}
+LOANS = {"none": 0.0, "some": 0.15, "heavy": 0.45}          # платежи по кредитам — доля выручки
+DELAYS = {"none": 0, "recent": 20, "serious": 120}           # самая долгая просрочка, дней
+INDUSTRY_TITLES = {
+    "coffee": ("Кофейня", "Coffee shop"), "restaurant": ("Ресторан или доставка еды", "Restaurant or food delivery"),
+    "bakery": ("Пекарня, хлебозавод", "Bakery"), "retail_food": ("Продуктовый магазин", "Grocery store"),
+    "online_shop": ("Интернет-магазин на маркетплейсах", "Online shop on marketplaces"),
+    "wholesale": ("Оптовая торговля", "Wholesale"), "construction": ("Строительство", "Construction"),
+    "renovation": ("Ремонт и отделка", "Renovation"), "it": ("Разработка программ", "Software development"),
+    "trucking": ("Грузоперевозки", "Trucking"), "warehouse": ("Склад и логистика", "Warehousing"),
+    "farm": ("Сельское хозяйство", "Farming"), "cleaning": ("Клининг", "Cleaning"), "beauty": ("Салон красоты", "Beauty salon"),
+    "dental": ("Стоматология", "Dental clinic"), "education": ("Курсы и обучение", "Courses and training"),
+}
+CHOICES = {   # id → (ru, en)
+    "seasonality": {"flat": ("Ровно круглый год", "Even all year"), "summer": ("Летом больше", "More in summer"),
+                    "year_end": ("Больше к концу года", "More towards the year end"),
+                    "harvest": ("После урожая", "After the harvest")},
+    "stability": {"steady": ("Стабильно", "Steady"), "uneven": ("Бывают провалы", "Some dips"),
+                  "volatile": ("Сильно скачет", "Very uneven")},
+    "trend": {"growing": ("Растёт", "Growing"), "stable": ("Без изменений", "Stable"), "declining": ("Падает", "Declining")},
+    "channel": {"cards": ("Покупатели платят картами", "Customers pay by card"),
+                "invoices": ("Компании платят по счетам", "Companies pay invoices"),
+                "marketplace": ("Выплаты маркетплейса", "Marketplace payouts"), "government": ("Госзаказ", "Public contracts")},
+    "loans": {"none": ("Кредитов нет", "No loans"), "some": ("Есть кредит: платёж около 15% выручки", "A loan: ~15% of revenue"),
+              "heavy": ("Кредиты съедают почти половину выручки", "Loans take almost half of revenue")},
+    "delays": {"none": ("Без просрочек", "No delays"), "recent": ("Была просрочка до месяца", "A delay of up to a month"),
+               "serious": ("Просрочка больше 90 дней", "A delay of over 90 days")},
+}
+STRUCTURE_TEXTS = {   # как устроена компания → кто подписывает и кто одобряет крупную сделку, с нормой
+    "owner_director": ("Владелец и директор — один человек", "Owner and director are one person",
+                       "Согласия на крупную сделку не нужно: единственный участник сам руководит (14-ФЗ ст. 46 п. 7)"),
+    "hired_director": ("Владелец нанял директора", "The owner hired a director",
+                       "Крупную сделку одобряет владелец письменным решением (14-ФЗ ст. 39, ст. 46 п. 3)"),
+    "partners": ("Несколько участников", "Several members",
+                 "Крупную сделку одобряет общее собрание: голоса по долям, нужно больше половины (14-ФЗ ст. 46 п. 3)"),
+    "two_directors_joint": ("Два директора, подписывают вместе", "Two directors who sign together",
+                            "Договор подписывают оба директора (ГК ст. 53 п. 1)"),
+    "two_directors_independent": ("Два директора, каждый сам", "Two directors, each on their own",
+                                  "Договор вправе подписать любой из директоров (ГК ст. 53 п. 1)"),
+}
+STRUCTURE_FORMS = {k: ["LLC", "JSC"] if k == "owner_director" else ["LLC"] for k in STRUCTURE_TEXTS}   # у ИП — он сам
+PEOPLE_TEXTS = {
+    "accountant": ("Бухгалтер готовит заявки", "An accountant prepares applications",
+                   "Доступ в ДБО на подготовку: готовит и подаёт заявку, подписать не может"),
+    "representative": ("Финансовый директор по доверенности", "A finance director by power of attorney",
+                       "Машиночитаемая доверенность на подписание кредитного договора (ГК ст. 185.1; 63-ФЗ ст. 17.2)"),
+}
 
 
 def _param(name: str) -> dict:
     field = PersonaIn.model_fields[name]
     bounds = {type(m).__name__.lower(): getattr(m, type(m).__name__.lower()) for m in field.metadata
               if type(m).__name__ in ("Ge", "Le", "Gt")}
-    kind = {int: "integer", float: "number", str: "string"}.get(field.annotation, "string")
+    base = field.annotation.__args__[0] if getattr(field.annotation, "__args__", None) else field.annotation
+    kind = {int: "integer", float: "number", str: "string"}.get(base, "string")
     if name == "form":
         kind = "enum"
     return {"id": name, "type": kind, "default": field.default, "description": field.description, **bounds}
 
 
-@router.get("/persona-options", **doc(S.PersonaOptionsResponse, summary="Своя компания: параметры и флаги"))
+def _choices(name: str, lang: str) -> list[dict]:
+    i = 0 if lang == "ru" else 1
+    return [{"id": k, "title": v[i]} for k, v in CHOICES[name].items()]
+
+
+@router.get("/persona-options", **doc(S.PersonaOptionsResponse, summary="Своя компания: вопросы, ответы и особенности"))
 async def persona_options(lang: Lang = "ru"):
-    """Что можно задать своей компании: форма, параметры с границами и флаги, которые реально меняют решение."""
-    cat = flags.catalog()
+    """Что спросить, чтобы собрать свою компанию простым языком: чем занимается (отрасль с ОКВЭД), как устроена (кто
+    подписывает и кто одобряет крупную сделку — с нормой), как платят клиенты и как ведёт себя выручка, кредиты и
+    просрочки. Особенности (недоимка, банкротство, сбой БКИ…) — фактами; что они значат для кредита, покажет решение банка.
+    Точные цифры (params) — для тех, кому нужно задать их самому."""
+    cat, i = flags.catalog(), 0 if lang == "ru" else 1
     return ok({"forms": [{"id": k, "title": v[lang]} for k, v in FORMS.items()],
+               "industries": [{"id": k, "title": INDUSTRY_TITLES[k][i], "okved": code, "okved_name": name,
+                               "seasonality": world.PROFILES[profile]["season"], "channel": world.PROFILES[profile]["channel"]}
+                              for k, (code, name, profile) in world.INDUSTRIES.items()],
+               "structures": [{"id": k, "title": t[i], "means": t[2], "forms": STRUCTURE_FORMS[k]}
+                              for k, t in STRUCTURE_TEXTS.items()],
+               "people": [{"id": k, "title": t[i], "means": t[2], "forms": ["LLC", "JSC"] if k == "representative"
+                           else ["IP", "LLC", "JSC"]} for k, t in PEOPLE_TEXTS.items()],
+               "choices": {name: _choices(name, lang) for name in CHOICES},
                "groups": [{"id": k, "title": v[lang]} for k, v in cat["groups"].items()],
                "flags": [{"id": k, "group": f["group"], "title": f["title"][lang], "effect": f["effect"][lang],
                           "forms": f["forms"]} for k, f in cat["flags"].items()],
                "params": [_param(name) for name in PARAMS]})
+
+
+def _spec(body: PersonaIn, form: str, inn: str | None) -> dict:
+    """Ответы конструктора → описание компании для генератора: простые ответы, точные цифры поверх них."""
+    numbers = {k: v for k, v in body.model_dump(include={"age_months", "headcount", "inflow_avg", "inflow_cv", "inflow_trend",
+                                                         "debt_load", "overdue_days", "bki_requests", "tax_debt",
+                                                         "participants", "profit_margin", "contract_price"}).items()
+               if v is not None}
+    code, name, profile = world.INDUSTRIES[body.industry] if body.industry else (body.okved, body.okved_name,
+                                                                                world.profile_for(body.okved))
+    spec = {"kind": form, "inn": inn, "okved": [code, name], "profile": profile, "owner_fio": parse_fio(body.full_name),
+            "company_name": company_title(body.organization) if form != "IP" else None,
+            "accountant": body.accountant, "representative": body.representative and form != "IP"}
+    spec.update({k: v for k, v in (("structure", body.structure), ("seasonality", body.seasonality),
+                                   ("stability", body.stability), ("channel", body.channel)) if v})
+    if body.trend:
+        spec["inflow_trend"] = TREND[body.trend]
+    if body.loans:
+        spec["debt_load"] = LOANS[body.loans]
+    if body.delays:
+        spec["overdue_days"] = DELAYS[body.delays]
+    return {**spec, **numbers}                      # точная цифра важнее ответа «примерно»
 
 
 async def _check_inn(conn, inn: str | None) -> str | None:
@@ -235,6 +338,13 @@ async def create_persona(body: PersonaIn, lang: Lang = "ru"):
                       known=sorted(flags.catalog()["flags"]))
     if body.kind == "client" and (bad := flags.not_applicable(form, body.flags)):
         raise Problem(422, "FLAG_NOT_APPLICABLE", f"для формы {form} не бывает: {', '.join(bad)}", flags=bad, form=form)
+    if body.kind == "client" and form == "IP" and (body.structure not in (None, "owner_director") or body.representative):
+        raise Problem(422, "STRUCTURE_NOT_APPLICABLE", "у ИП нет участников и директоров, а доверенность ИП не моделируем — "
+                      "предприниматель действует сам (ГК ст. 23)", form=form)
+    if body.kind == "client" and form != "IP" and body.structure and form not in STRUCTURE_FORMS[body.structure]:
+        raise Problem(422, "STRUCTURE_NOT_APPLICABLE", "у АО акционеров ведёт реестродержатель, а не ЕГРЮЛ: участников и "
+                      "одобрение сделки по ним не моделируем — для АО только «Владелец и директор — один человек»",
+                      form=form, structure=body.structure)
     number = PERSONA_BASE + seq % 1000
     texts = {k: getattr(body, k) for k in TEXT_FIELDS if getattr(body, k)}
     titles = [flags.catalog()["flags"][f]["title"] for f in body.flags] if body.kind == "client" else []
@@ -247,16 +357,18 @@ async def create_persona(body: PersonaIn, lang: Lang = "ru"):
                         "en": body.preview or "Your own company: matching, application, decision and signing"}}
     if body.kind == "bank":
         fio = parse_fio(body.full_name) or ["Соколова", "Мария", "Андреевна"]
-        role = body.organization or "Кредитный специалист"
-        persona = {**base, "id": f"b{seq}", "kind": "bank", "staff": {"key": f"staff{seq}", "fio": fio,
-                                                                       "role": {"ru": role, "en": role}}}
+        title = body.organization or "Кредитный специалист"
+        role = "risk_manager" if "риск" in title.lower() or "risk" in title.lower() else "loan_officer"   # роль — код
+        persona = {**base, "id": f"b{seq}", "kind": "bank", "staff": {"key": f"staff{seq}", "fio": fio, "role": role,
+                                                                       "title": {"ru": title, "en": title}}}
         created_personas = [persona]
     else:
-        card_fields = {"kind", "form", "okved", "okved_name", "full_name", "organization", "code", "inn", "flags", *TEXT_FIELDS}
-        spec = {**body.model_dump(exclude=card_fields), "inn": inn,
-                "kind": form, "okved": [body.okved, body.okved_name], "owner_fio": parse_fio(body.full_name),
-                "company_name": company_title(body.organization) if form != "IP" else None}
-        spec, base["faults"] = flags.apply(spec, body.flags)
+        spec, base["faults"] = flags.apply(_spec(body, form, inn), body.flags)
+        if spec.get("structure") in ("owner_director", "hired_director") and spec.get("participants", 1) > 1 \
+                or spec.get("structure") == "partners" and spec.get("participants", 2) < 2:
+            raise Problem(422, "STRUCTURE_CONFLICT", "устройство компании и число участников противоречат друг другу: при "
+                          "одном владельце участник один, у «нескольких участников» — от двух", structure=spec["structure"],
+                          participants=spec.get("participants"), flags=body.flags)
         company, people = world.custom(spec, number, today)
         errors = world.validate(company, people, today)
         if errors:
@@ -265,7 +377,7 @@ async def create_persona(body: PersonaIn, lang: Lang = "ru"):
         owner = company.get("owner") or company["eio"][0][0]
         persona = {**base, "id": f"c{seq}", "kind": "client", "person": {"key": owner, **people[owner]},
                    "companies": [company], "people": people}
-        created_personas = [persona, *personas.participant_personas(persona)]
+        created_personas = [persona, *personas.company_personas(persona)]
     async with pool.acquire() as conn:
         await personas.add_many(conn, created_personas)
         if persona["kind"] == "client":
@@ -318,7 +430,7 @@ async def _resolve(conn, login: str) -> dict | None:
     key = login.strip().lower()
     everyone = await personas.all_personas(conn)
     found = next((p for p in everyone if p["id"].lower() == key), None) or \
-        next((p for p in everyone if str(personas.card(p, "ru").get("code", "")).lower() == key), None)
+        next((p for p in everyone if isinstance(p.get("code"), str) and p["code"].lower() == key), None)   # S7, R12
     if found or not key.isdigit():
         return found
     return next((p for p in everyone if p["kind"] == "client" and p["person"]["inn"] == key), None) or \
@@ -584,6 +696,8 @@ async def reset():
         for key, value in (("worker:paused", False), (personas.CUSTOM_KEY, []), (clock.OFFSET_KEY, 0), (OVERRIDES_KEY, {})):
             await store.kv_set(conn, key, value)
         await store.kv_delete(conn, personas.ACTIVE_KEY)
+        # выданные кредиты остаются в истории заявок, но мир — как сначала: прогноз и предложения их больше не учитывают
+        await company.forget_loans(conn)
     return ok({"status": "ok"})
 
 
