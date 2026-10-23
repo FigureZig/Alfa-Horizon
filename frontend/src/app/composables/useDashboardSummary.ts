@@ -93,12 +93,19 @@ export function useDashboardSummary(inn: MaybeRefOrGetter<string>, refreshKey?: 
     loadSummary()
   }
 
+  // Пустой ключ → первый состав очереди: сводка уже загружена параллельно, повторять запрос незачем
+  function onRefreshKeyChange(_key: string, previousKey: string) {
+    if (!previousKey) return
+
+    loadSummary()
+  }
+
   watch(() => toValue(inn), onInnChange, { immediate: true })
   watch(locale, loadSummary)
 
   // Данные за карточками изменились (например, очередь банка): обновляем их, не сбрасывая показанное
   if (refreshKey) {
-    watch(() => toValue(refreshKey), loadSummary)
+    watch(() => toValue(refreshKey), onRefreshKeyChange)
   }
 
   return { cards, isLoading, error, isVisible, isSkeletonVisible, loadSummary }

@@ -4,6 +4,13 @@ import { useApiFetch } from '@/app/composables/useApiFetch'
 import { bankService } from '@/app/services/bank/bank.service'
 import { sandboxService } from '@/app/services/sandbox/sandbox.service'
 import type { AppLocale } from '@/app/i18n'
+import type { Nullable } from '@/app/types/nullable'
+
+// Названия общие для банковских страниц: переходы между очередью и досье не перечитывают реестр и список компаний
+const CACHE_TTL = 60000
+const cachedNames = ref<Record<string, string>>({})
+let cachedAt = 0
+let pendingLoad: Nullable<Promise<void>> = null
 
 /**
  * Названия компаний по ИНН для рабочего места банка: в очереди приходит только ИНН.
@@ -14,12 +21,21 @@ export function useCompanyNames() {
   const $fetch = useApiFetch()
   const { locale } = useI18n({ useScope: 'global' })
 
-  const names = ref<Record<string, string>>({})
-  const isLoading = ref(true)
+  const isLoading = ref(!cachedAt)
 
-  const getCompanyName = computed(() => (inn: string) => names.value[inn] ?? '')
+  const getCompanyName = computed(() => (inn: string) => cachedNames.value[inn] ?? '')
 
-  async function loadCompanyNames() {
+  function loadCompanyNames() {
+    if (Date.now() - cachedAt < CACHE_TTL) return Promise.resolve()
+
+    pendingLoad ??= requestCompanyNames().finally(() => {
+      pendingLoad = null
+    })
+
+    return pendingLoad
+  }
+
+  async function requestCompanyNames() {
     const [registry, personas] = await Promise.allSettled([
       bankService.fetchApplications($fetch, { status: null, decidedBy: null, query: '' }),
       sandboxService.fetchPersonas($fetch, locale.value as AppLocale),
@@ -45,11 +61,16 @@ export function useCompanyNames() {
       console.error('Company names loading failed:', personas.reason)
     }
 
-    names.value = result
+    cachedNames.value = result
+    cachedAt = Date.now()
+  }
+
+  async function init() {
+    await loadCompanyNames()
     isLoading.value = false
   }
 
-  loadCompanyNames()
+  init()
 
   return { getCompanyName, isLoading }
 }

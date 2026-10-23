@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import AppErrorState from '@/app/components/AppErrorState.vue'
@@ -67,8 +66,6 @@ function applyForProduct(product: CreditProductInterface) {
 function reloadDemoPersona() {
   loadDemoPersona(props.inn)
 }
-
-watch(() => props.inn, reloadDemoPersona, { immediate: true })
 </script>
 
 <template>
