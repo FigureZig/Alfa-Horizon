@@ -10,7 +10,6 @@ const ROWS = [
 ] as const
 
 const README_URL = 'https://github.com/FigureZig/Alfa-Horizon#readme'
-const SWAGGER_URL = '/api/docs'
 
 const { t } = useI18n({ useScope: 'global' })
 </script>
@@ -46,20 +45,6 @@ const { t } = useI18n({ useScope: 'global' })
     </ul>
 
     <div class="flex flex-wrap gap-2">
-      <a
-        :href="SWAGGER_URL"
-        target="_blank"
-        rel="noopener"
-        class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-fino-border px-4 text-sm font-semibold
-               text-fino-text transition-colors hover:bg-fino-surface-hover motion-reduce:transition-none"
-      >
-        <i
-          class="pi pi-code text-xs"
-          aria-hidden="true"
-        />
-        {{ t('reviewer.guide.swagger') }}
-      </a>
-
       <a
         :href="README_URL"
         target="_blank"

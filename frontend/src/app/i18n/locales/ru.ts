@@ -165,7 +165,6 @@ export default {
                 data: { what: 'Данные о компании', where: 'Карточка «Что банк знает о компании» на главной.' },
                 history: { what: 'Кто что сделал', where: '«История заявки»: действия по именам и ролям.' },
             },
-            swagger: 'Swagger (API)',
             readme: 'README',
         },
         hint: {
