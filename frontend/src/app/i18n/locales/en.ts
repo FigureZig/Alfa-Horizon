@@ -180,7 +180,7 @@ export default {
             readme: 'README',
         },
         hint: {
-            text: 'For reviewers: role scenarios, sign-in by ID, world clock and events. Details are in the README.',
+            text: 'For reviewers: role scenarios, world clock and events. Details are in the README.',
             ok: 'Got it',
         },
     },
