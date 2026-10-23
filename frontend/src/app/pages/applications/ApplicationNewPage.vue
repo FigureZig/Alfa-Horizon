@@ -12,6 +12,8 @@ import { useApplicationCreate } from '@/app/composables/useApplicationCreate'
 import { useCatalogProducts } from '@/app/composables/useCatalogProducts'
 import { useDemoPersona } from '@/app/composables/useDemoPersona'
 import { useFormatters } from '@/app/composables/useFormatters'
+import { ApplicationProductChoiceEnum } from '@/app/types/application/application-product-choice-enum'
+import { CreditGoalEnum } from '@/app/types/application/credit-goal-enum'
 import type { ApplicationFormInterface } from '@/app/types/application/application-form-interface'
 import type { Nullable } from '@/app/types/nullable'
 
@@ -40,17 +42,27 @@ const isPrefilled = ref(false)
 
 const selectedProduct = computed(() => products.value.find((product) => product.code === form.product) ?? null)
 
-const productOptions = computed(() => products.value.map((product) => ({ code: product.code, name: product.name })))
+// Продукт можно не выбирать: «Пусть банк подберёт» — тогда нужна задача, а продукт банк определит сам
+const isBankChoice = computed(() => form.product === ApplicationProductChoiceEnum.BankChoice)
 
-const goalOptions = computed(() =>
-  (selectedProduct.value?.goals ?? []).map((goal) => ({ code: goal, label: t(`application.goal.${goal}`) })),
-)
+const productOptions = computed(() => [
+  { code: ApplicationProductChoiceEnum.BankChoice, name: t('application.new.bankChoice') },
+  ...products.value.map((product) => ({ code: product.code, name: product.name })),
+])
 
-type FormErrorKey = 'product' | 'amount' | 'termMonths'
+const goalOptions = computed(() => {
+  const goals = isBankChoice.value ? Object.values(CreditGoalEnum) : selectedProduct.value?.goals ?? []
+
+  return goals.map((goal) => ({ code: goal, label: t(`application.goal.${goal}`) }))
+})
+
+type FormErrorKey = 'product' | 'amount' | 'termMonths' | 'goal'
 
 // Пока продукт не выбран, поля заблокированы: подсказка объясняет почему
 const amountHint = computed(() =>
-  selectedProduct.value
+  isBankChoice.value
+    ? t('application.new.bankChoiceHint')
+    : selectedProduct.value
     ? t('application.new.amountRange', {
       min: formatCurrency(selectedProduct.value.amountMin, 'RUB'),
       max: formatCurrency(selectedProduct.value.amountMax, 'RUB'),
@@ -58,14 +70,18 @@ const amountHint = computed(() =>
     : t('application.new.selectProductFirst'),
 )
 
-const termHint = computed(() =>
-  selectedProduct.value
-    ? t('application.new.termRange', {
-      min: selectedProduct.value.termMonthsMin,
-      max: selectedProduct.value.termMonthsMax,
-    })
-    : t('application.new.selectProductFirst'),
-)
+// Фиксированный срок — просто «12 мес.», а не «от 12 до 12»
+const termHint = computed(() => {
+  if (isBankChoice.value) return undefined
+
+  const product = selectedProduct.value
+
+  if (!product) return t('application.new.selectProductFirst')
+
+  return product.termMonthsMin === product.termMonthsMax
+    ? t('credits.products.termFixed', { months: product.termMonthsMin })
+    : t('application.new.termRange', { min: product.termMonthsMin, max: product.termMonthsMax })
+})
 
 const termSuffix = computed(() => ` ${t('application.new.months')}`)
 
@@ -76,10 +92,20 @@ const errors = computed<Partial<Record<FormErrorKey, string>>>(() => {
   const required = t('application.new.required')
   const result: Partial<Record<FormErrorKey, string>> = {}
 
-  if (!product) {
+  if (!form.product) {
     result.product = required
     return result
   }
+
+  // Без продукта банк подбирает его по задаче: границ продукта нет, но нужны задача и сумма
+  if (isBankChoice.value) {
+    if (!form.goal) result.goal = t('application.errors.goalRequired')
+    if (form.amount === null) result.amount = required
+
+    return result
+  }
+
+  if (!product) return result
 
   if (form.amount === null) {
     result.amount = required
@@ -102,6 +128,8 @@ const errors = computed<Partial<Record<FormErrorKey, string>>>(() => {
 const isFormValid = computed(() => {
   const product = selectedProduct.value
 
+  if (isBankChoice.value) return Boolean(form.goal && form.amount !== null && form.amount > 0)
+
   return Boolean(
     product
     && form.amount !== null && form.amount >= product.amountMin && form.amount <= product.amountMax
@@ -119,7 +147,19 @@ function parseNumberQuery(value: unknown): Nullable<number> {
 function applyQueryPrefill() {
   const product = products.value.find((item) => item.code === route.query.product)
 
-  if (!product) return
+  // Пришли с задачей, но без продукта (например, «Пусть банк подберёт»)
+  if (!product) {
+    const goal = Object.values(CreditGoalEnum).find((item) => item === route.query.goal)
+
+    if (goal) {
+      form.product = ApplicationProductChoiceEnum.BankChoice
+      form.goal = goal
+      form.amount = parseNumberQuery(route.query.amount)
+      form.termMonths = parseNumberQuery(route.query.term)
+    }
+
+    return
+  }
 
   form.product = product.code
   form.amount = parseNumberQuery(route.query.amount) ?? product.amountMin
@@ -241,13 +281,13 @@ watch(() => form.product, applyProductBounds)
               <InputNumber
                 v-model="form.amount"
                 input-id="application-amount"
-                :min="selectedProduct?.amountMin"
+                :min="selectedProduct?.amountMin ?? 1"
                 :max="selectedProduct?.amountMax"
                 :max-fraction-digits="0"
                 suffix=" ₽"
                 :locale="locale"
                 :invalid="Boolean(errors.amount)"
-                :disabled="!selectedProduct || isSubmitting"
+                :disabled="!form.product || isSubmitting"
                 fluid
               />
             </SandboxPersonaField>
@@ -267,7 +307,7 @@ watch(() => form.product, applyProductBounds)
                 :suffix="termSuffix"
                 :locale="locale"
                 :invalid="Boolean(errors.termMonths)"
-                :disabled="!selectedProduct || isSubmitting"
+                :disabled="!form.product || isSubmitting"
                 fluid
               />
             </SandboxPersonaField>
@@ -277,8 +317,8 @@ watch(() => form.product, applyProductBounds)
             v-if="goalOptions.length"
             input-id="application-goal"
             :label="t('application.new.goal')"
-            :hint="t('application.new.goalHint')"
-            :error="null"
+            :hint="isBankChoice ? undefined : t('application.new.goalHint')"
+            :error="errors.goal ?? null"
           >
             <Select
               v-model="form.goal"
@@ -287,7 +327,8 @@ watch(() => form.product, applyProductBounds)
               option-label="label"
               option-value="code"
               :placeholder="t('application.new.goalPlaceholder')"
-              show-clear
+              :invalid="Boolean(errors.goal)"
+              :show-clear="!isBankChoice"
               :disabled="isSubmitting"
               fluid
             />

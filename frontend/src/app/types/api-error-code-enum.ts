@@ -27,4 +27,6 @@ export enum ApiErrorCodeEnum {
   BankOnly = 'BANK_ONLY',
   RoleRequired = 'ROLE_REQUIRED',
   AmountRequired = 'AMOUNT_REQUIRED',
+  GoalRequired = 'GOAL_REQUIRED',
+  NoProductForGoal = 'NO_PRODUCT_FOR_GOAL',
 }
