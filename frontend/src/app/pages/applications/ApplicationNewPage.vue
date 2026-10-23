@@ -24,7 +24,7 @@ const props = defineProps<{
 const { t, locale } = useI18n({ useScope: 'global' })
 const route = useRoute()
 const router = useRouter()
-const { formatCurrency, formatPercent } = useFormatters()
+const { formatCurrency, formatMoney, formatPercent } = useFormatters()
 const { demoPersona } = useDemoPersona()
 const { products, isLoading: isCatalogLoading, error: catalogError, loadProducts } = useCatalogProducts()
 const { isSubmitting, errorMessage, createAndSubmit } = useApplicationCreate(props.inn)
@@ -141,6 +141,29 @@ function parseNumberQuery(value: unknown): Nullable<number> {
   const parsed = typeof value === 'string' ? Number(value) : NaN
 
   return Number.isFinite(parsed) ? parsed : null
+}
+
+// Личная ставка варианта из подбора: в сводке — она, а не «от» из каталога
+const offerRate = computed(() => parseNumberQuery(route.query.rate))
+const rateText = computed(() => (offerRate.value === null ? '' : t('application.new.rate', { rate: formatPercent(offerRate.value) })))
+
+// Хотели больше, чем банк готов дать по варианту: не подменяем сумму молча, а говорим и даём выбор
+const wantedAmount = computed(() => parseNumberQuery(route.query.wanted))
+const isWantedNoticeVisible = computed(() =>
+  Boolean(wantedAmount.value && form.amount !== null && form.amount < wantedAmount.value && !isBankChoice.value),
+)
+const wantedNotice = computed(() =>
+  wantedAmount.value && form.amount !== null
+    ? t('application.new.wanted.text', { wanted: formatMoney(wantedAmount.value), amount: formatMoney(form.amount) })
+    : '',
+)
+
+function applyWantedAmount() {
+  const product = selectedProduct.value
+
+  if (!wantedAmount.value) return
+
+  form.amount = product ? Math.min(wantedAmount.value, product.amountMax) : wantedAmount.value
 }
 
 // Подставляем в форму предложение, с которого пришёл пользователь: продукт, сумму, срок и цель из адреса
@@ -277,6 +300,28 @@ watch(() => form.product, applyProductBounds)
               fluid
             />
           </SandboxPersonaField>
+
+          <!-- Сумма варианта меньше желаемой — говорим прямо и даём подать на всю -->
+          <div
+            v-if="isWantedNoticeVisible"
+            class="flex flex-col gap-3 rounded-2xl bg-amber-500/10 p-4 text-sm text-fino-text"
+            role="status"
+          >
+            <p class="leading-relaxed">
+              {{ wantedNotice }}
+            </p>
+
+            <button
+              type="button"
+              class="inline-flex min-h-10 w-fit cursor-pointer items-center gap-2 rounded-xl border border-fino-border
+                     bg-fino-surface px-4 text-sm font-semibold text-fino-text transition-colors hover:bg-fino-surface-hover
+                     disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
+              :disabled="isSubmitting"
+              @click="applyWantedAmount"
+            >
+              {{ t('application.new.wanted.action', { wanted: formatMoney(wantedAmount ?? 0) }) }}
+            </button>
+          </div>
 
           <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <SandboxPersonaField
@@ -424,8 +469,11 @@ watch(() => form.product, applyProductBounds)
             {{ selectedProduct.name }}
           </h2>
 
-          <p class="mt-2 text-sm text-fino-text-muted">
-            {{ t('application.new.rateFrom', { rate: formatPercent(selectedProduct.rateFrom) }) }}
+          <p
+            v-if="rateText"
+            class="mt-2 text-sm font-semibold text-fino-text"
+          >
+            {{ rateText }}
           </p>
 
           <ul class="mt-3 flex flex-col gap-2">

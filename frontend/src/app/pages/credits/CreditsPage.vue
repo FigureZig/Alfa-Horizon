@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import AppErrorState from '@/app/components/AppErrorState.vue'
@@ -38,10 +38,7 @@ const {
   isLoading: isCatalogLoading,
 } = useCatalogProducts()
 
-const {
-  products: preApprovedProducts,
-  isProductsLoading: isPreApprovedLoading,
-} = useCompanyProducts(() => props.inn)
+const { products: preApprovedProducts } = useCompanyProducts(() => props.inn)
 
 const { profile, isProfileLoading } = useCompanyProfile(() => props.inn)
 const {
@@ -52,9 +49,14 @@ const {
   loadCreditScore,
 } = useCreditScore(() => props.inn)
 
-const calculatorRef = useTemplateRef<HTMLElement>('calculator')
+const HIGHLIGHT_MS = 1600
 
-const selectedCode = ref<Nullable<CreditProductCodeEnum>>(null)
+// Расчёт платежа раскрыт внутри одного варианта; сумма и срок оттуда уходят в заявку
+const calculatorCode = ref<Nullable<CreditProductCodeEnum>>(null)
+const calculatorTerms = ref<{ amount: Nullable<number>; termMonths: Nullable<number> }>({ amount: null, termMonths: null })
+// Вариант, который выбрал бы банк, — подсвечиваем по «Пусть банк подберёт»
+const highlightedCode = ref<Nullable<CreditProductCodeEnum>>(null)
+let highlightTimer: ReturnType<typeof setTimeout> | undefined
 
 // Задача может прийти из адреса: например, с карточки госконтракта на главной
 function readGoalFromQuery(): Nullable<CreditGoalEnum> {
@@ -79,9 +81,21 @@ const featuredOption = computed(() => availableOptions.value.find((option) => op
 const otherOptions = computed(() => availableOptions.value.filter((option) => option !== featuredOption.value))
 const unavailableOptions = computed(() => (offers.value?.options ?? []).filter((option) => !option.isAvailable))
 const blockers = computed(() => offers.value?.blockers ?? [])
+const isBlocked = computed(() => blockers.value.length > 0)
+// Без кредитной истории суммы и ставки предварительные: говорим это один раз над списком
+const isPreliminary = computed(() => offers.value?.isBkiKnown === false)
 
 // «Пусть банк подберёт» возможно, когда задача выбрана и компании что-то можно предложить
-const isBankChoiceVisible = computed(() => Boolean(goal.value) && !blockers.value.length && availableOptions.value.length > 0)
+const isBankChoiceVisible = computed(() => Boolean(goal.value) && !isBlocked.value && availableOptions.value.length > 0)
+
+// Почему банк выбрал бы этот вариант: закрывает всю сумму или даёт больше остальных
+const recommendedReason = computed(() => {
+  const featured = featuredOption.value
+
+  if (!featured?.isRecommended || !amount.value || featured.amount === null) return ''
+
+  return featured.amount >= amount.value ? t('credits.options.recommendedFull') : t('credits.options.recommendedMost')
+})
 
 // Ставка зависит от формы, отрасли и класса риска компании: считаем, когда они известны
 const calcContext = computed<Nullable<LoanCalcContextInterface>>(() => {
@@ -98,13 +112,6 @@ const keyRateText = computed(() =>
   keyRate.value === null ? '' : t('credits.keyRate', { rate: formatPercent(keyRate.value) }),
 )
 
-// Калькулятор сразу показывает расчёт: берём предодобренный продукт, а если его нет — первый из каталога
-function selectDefaultProduct() {
-  if (selectedCode.value || !catalogProducts.value.length || isPreApprovedLoading.value) return
-
-  selectedCode.value = preApprovedProducts.value[0]?.code ?? catalogProducts.value[0].code
-}
-
 function handleGoalChange(value: Nullable<CreditGoalEnum>) {
   goal.value = value
 }
@@ -117,51 +124,67 @@ function handleTermChange(value: Nullable<number>) {
   termMonths.value = value
 }
 
-// Заявка по варианту: открывается с его продуктом, суммой, сроком и задачей
-function handleApply(option: CompanyOfferOptionInterface) {
+// Заявка по варианту: его продукт, сумма и срок (или подобранные в расчёте), задача и личная ставка
+function handleSelect(option: CompanyOfferOptionInterface) {
+  const terms = calculatorCode.value === option.code ? calculatorTerms.value : { amount: null, termMonths: null }
+  const optionAmount = terms.amount ?? option.amount ?? amount.value ?? option.maxAmount
+
   router.push({
     name: 'application-new',
     params: { inn: props.inn },
     query: {
       product: option.code,
-      amount: option.amount ?? amount.value ?? option.maxAmount ?? undefined,
-      term: option.termMonths ?? termMonths.value ?? undefined,
+      amount: optionAmount ?? undefined,
+      term: terms.termMonths ?? option.termMonths ?? termMonths.value ?? undefined,
       goal: goal.value ?? undefined,
+      // Ставка варианта: в форме — та же, а не «от» из каталога
+      rate: option.rate ?? undefined,
       // Сколько показал вариант: если банк даст меньше, «Почему» скажет, откуда разница
       shown: option.amount ?? option.maxAmount ?? undefined,
+      // Хотели больше, чем даёт вариант: форма скажет об этом и предложит подать на всю сумму
+      ...(amount.value && optionAmount && amount.value > optionAmount ? { wanted: amount.value } : {}),
     },
   })
 }
 
-// Без продукта: банк подберёт сам по задаче
-function handleBankChoice() {
-  router.push({
-    name: 'application-new',
-    params: { inn: props.inn },
-    query: { goal: goal.value ?? undefined, amount: amount.value ?? undefined, term: termMonths.value ?? undefined },
-  })
-}
+// «Пусть банк подберёт»: показываем, какой вариант выбрал бы банк
+async function handleBankChoice() {
+  const featured = featuredOption.value
 
-function handleCalculate(option: CompanyOfferOptionInterface) {
-  selectedCode.value = option.code
+  if (!featured) return
+
+  clearTimeout(highlightTimer)
+  highlightedCode.value = featured.code
+  highlightTimer = setTimeout(clearHighlight, HIGHLIGHT_MS)
+
+  await nextTick()
 
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-  calculatorRef.value?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' })
+  document.getElementById(`credit-option-${featured.code}`)
+    ?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'center' })
 }
 
-function handleSelectProduct(productCode: CreditProductCodeEnum) {
-  selectedCode.value = productCode
+function clearHighlight() {
+  highlightedCode.value = null
+}
+
+function handleToggleCalculator(option: CompanyOfferOptionInterface) {
+  calculatorCode.value = calculatorCode.value === option.code ? null : option.code
+  calculatorTerms.value = { amount: null, termMonths: null }
+}
+
+function handleCalculatorChange(calcAmount: Nullable<number>, calcTermMonths: Nullable<number>) {
+  calculatorTerms.value = { amount: calcAmount, termMonths: calcTermMonths }
 }
 
 function onInnChange() {
-  selectedCode.value = null
+  calculatorCode.value = null
   goal.value = readGoalFromQuery()
   amount.value = null
   termMonths.value = null
 }
 
-watch([catalogProducts, preApprovedProducts, isPreApprovedLoading], selectDefaultProduct, { immediate: true })
 watch(() => props.inn, onInnChange)
 </script>
 
@@ -192,8 +215,9 @@ watch(() => props.inn, onInnChange)
 
     <div class="grid grid-cols-1 items-start gap-6 2xl:grid-cols-[minmax(0,1fr)_24rem]">
       <div class="flex min-w-0 flex-col gap-6">
-        <!-- На что нужны деньги -->
+        <!-- На что нужны деньги; при стоп-факторе выбирать не из чего -->
         <CreditGoalPicker
+          v-if="!isBlocked"
           :goal="goal"
           :amount="amount"
           :term-months="termMonths"
@@ -216,30 +240,60 @@ watch(() => props.inn, onInnChange)
             @retry="loadOffers"
           />
 
-          <template v-else-if="offers">
-            <!-- Стоп для всей компании: причина и что делать -->
-            <div
-              v-if="blockers.length"
-              class="rounded-3xl border border-red-500/30 bg-red-500/5 p-5"
-            >
-              <p class="flex items-center gap-2 text-sm font-bold text-red-700 dark:text-red-400">
-                <i
-                  class="pi pi-ban"
-                  aria-hidden="true"
-                />
-                {{ t('credits.options.blocked') }}
-              </p>
+          <!-- Стоп для всей компании: причина и действие вместо списка «не подходит» и калькулятора -->
+          <div
+            v-else-if="isBlocked"
+            class="flex flex-col gap-4 rounded-3xl border border-red-500/30 bg-red-500/5 p-5 sm:p-6"
+          >
+            <div class="flex items-start gap-3">
+              <span
+                class="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-red-500/10 text-red-700
+                       dark:text-red-400"
+                aria-hidden="true"
+              >
+                <i class="pi pi-ban" />
+              </span>
 
-              <ul class="mt-2 flex flex-col gap-1.5 text-sm text-fino-text">
-                <li
-                  v-for="blocker in blockers"
-                  :key="blocker.code"
-                >
-                  {{ blocker.text }}
-                </li>
-              </ul>
+              <div class="min-w-0">
+                <h2 class="text-lg font-bold tracking-tight text-fino-text">
+                  {{ t('credits.options.blocked') }}
+                </h2>
+
+                <ul class="mt-1 flex flex-col gap-1 text-sm text-fino-text">
+                  <li
+                    v-for="blocker in blockers"
+                    :key="blocker.code"
+                    class="break-words"
+                  >
+                    {{ blocker.text }}
+                  </li>
+                </ul>
+
+                <p class="mt-2 text-sm text-fino-text-muted">
+                  {{ t('credits.options.blockedHint') }}
+                </p>
+              </div>
             </div>
 
+            <button
+              type="button"
+              class="inline-flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 text-sm
+                     font-semibold text-primary-contrast transition-all duration-200 hover:opacity-90 active:scale-95
+                     disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none
+                     focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              :disabled="isOffersLoading"
+              @click="loadOffers"
+            >
+              <i
+                :class="isOffersLoading ? 'pi pi-spinner pi-spin' : 'pi pi-refresh'"
+                class="text-xs"
+                aria-hidden="true"
+              />
+              {{ t('credits.options.checkAgain') }}
+            </button>
+          </div>
+
+          <template v-else-if="offers">
             <div class="flex flex-wrap items-center justify-between gap-3">
               <h2 class="text-lg font-bold tracking-tight text-fino-text">
                 {{ t('credits.options.title') }}
@@ -262,16 +316,58 @@ watch(() => props.inn, onInnChange)
               </button>
             </div>
 
-            <CreditOptionCard
+            <!-- Без кредитной истории — одна строка над списком, а не плашка на каждой карточке -->
+            <p
+              v-if="isPreliminary"
+              class="flex items-start gap-2 rounded-2xl bg-amber-500/10 px-4 py-3 text-sm text-fino-text"
+            >
+              <i
+                class="pi pi-info-circle mt-0.5 text-amber-700 dark:text-amber-400"
+                aria-hidden="true"
+              />
+              <span class="min-w-0">{{ t('credits.options.preliminary') }}</span>
+            </p>
+
+            <div
               v-if="featuredOption"
-              :option="featuredOption"
-              is-featured
-              @apply="handleApply"
-              @calculate="handleCalculate"
-            />
+              :id="`credit-option-${featuredOption.code}`"
+              class="scroll-mt-28"
+            >
+              <p
+                v-if="recommendedReason"
+                class="mb-2 text-xs font-semibold text-fino-text-muted"
+              >
+                {{ recommendedReason }}
+              </p>
+
+              <CreditOptionCard
+                :option="featuredOption"
+                is-featured
+                :is-preliminary="isPreliminary"
+                :is-calculator-open="calculatorCode === featuredOption.code"
+                :is-highlighted="highlightedCode === featuredOption.code"
+                @select="handleSelect"
+                @toggle-calculator="handleToggleCalculator"
+              >
+                <template #calculator>
+                  <LoanCalculator
+                    :inn="inn"
+                    :products="catalogProducts"
+                    :pre-approved-products="preApprovedProducts"
+                    :selected-code="featuredOption.code"
+                    :context="calcContext"
+                    :is-products-loading="isCatalogLoading"
+                    is-embedded
+                    :initial-amount="featuredOption.amount ?? featuredOption.maxAmount"
+                    :initial-term-months="featuredOption.termMonths"
+                    @change="handleCalculatorChange"
+                  />
+                </template>
+              </CreditOptionCard>
+            </div>
 
             <p
-              v-else-if="!blockers.length"
+              v-else
               class="rounded-3xl border border-dashed border-fino-border bg-fino-surface p-6 text-sm text-fino-text-muted"
             >
               {{ t('credits.options.none') }}
@@ -280,7 +376,7 @@ watch(() => props.inn, onInnChange)
             <TransitionGroup
               v-if="otherOptions.length"
               tag="ul"
-              class="grid grid-cols-1 gap-4 md:grid-cols-2"
+              class="grid grid-cols-1 items-start gap-4 md:grid-cols-2"
               move-class="transition-transform duration-300 ease-out motion-reduce:transition-none"
               enter-active-class="transition duration-200 motion-reduce:transition-none"
               enter-from-class="opacity-0"
@@ -288,13 +384,31 @@ watch(() => props.inn, onInnChange)
               <li
                 v-for="option in otherOptions"
                 :key="option.code"
+                :class="{ 'md:col-span-2': calculatorCode === option.code }"
               >
                 <CreditOptionCard
                   :option="option"
                   :is-featured="false"
-                  @apply="handleApply"
-                  @calculate="handleCalculate"
-                />
+                  :is-preliminary="isPreliminary"
+                  :is-calculator-open="calculatorCode === option.code"
+                  @select="handleSelect"
+                  @toggle-calculator="handleToggleCalculator"
+                >
+                  <template #calculator>
+                    <LoanCalculator
+                      :inn="inn"
+                      :products="catalogProducts"
+                      :pre-approved-products="preApprovedProducts"
+                      :selected-code="option.code"
+                      :context="calcContext"
+                      :is-products-loading="isCatalogLoading"
+                      is-embedded
+                      :initial-amount="option.amount ?? option.maxAmount"
+                      :initial-term-months="option.termMonths"
+                      @change="handleCalculatorChange"
+                    />
+                  </template>
+                </CreditOptionCard>
               </li>
             </TransitionGroup>
 
@@ -333,22 +447,6 @@ watch(() => props.inn, onInnChange)
             </details>
           </template>
         </section>
-
-        <!-- Калькулятор: расчёт и способ погашения -->
-        <div
-          ref="calculator"
-          class="scroll-mt-28 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm sm:p-6"
-        >
-          <LoanCalculator
-            :inn="inn"
-            :products="catalogProducts"
-            :pre-approved-products="preApprovedProducts"
-            :selected-code="selectedCode"
-            :context="calcContext"
-            :is-products-loading="isCatalogLoading"
-            @select-product="handleSelectProduct"
-          />
-        </div>
       </div>
 
       <!-- Кредитное здоровье -->

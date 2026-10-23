@@ -10,6 +10,10 @@ const LABEL_RANKS: Record<string, number> = {
 }
 
 const REVOLVING = 'revolving'
+// Согласие на запрос кредитной истории нужно для всех вариантов — его показываем один раз над списком
+const CONSENT_NEED = 'consent_bki'
+// Нормы закона в скобках: «поручитель (ГК ст. 361)» → «поручитель»
+const LAW_REFERENCE_PATTERN = /\s*\([^()]*(?:ст\.|ФЗ|ГК)[^()]*\)/g
 
 export class CompanyOffersMapper {
   static toBlockers(data: CompanyOffersDto): CompanyBlockerInterface[] {
@@ -23,6 +27,7 @@ export class CompanyOffersMapper {
   static toEntity(data: CompanyOffersDto): CompanyOffersInterface {
     return {
       blockers: CompanyOffersMapper.toBlockers(data),
+      isBkiKnown: data.bki_known ?? true,
       options: data.options
         .map((option) => CompanyOffersMapper.toOption(option))
         .sort((first, second) => first.rank - second.rank || Number(second.isRecommended) - Number(first.isRecommended)),
@@ -44,7 +49,9 @@ export class CompanyOffersMapper {
       termMonths: terms?.term_months ?? null,
       rate: terms ? Number(terms.rate) : null,
       payment: terms ? Number(terms.payment) : null,
-      needs: option.needs.map((need) => (typeof need === 'string' ? need : need.text)),
+      needs: option.needs
+        .filter((need) => typeof need === 'string' || need.code !== CONSENT_NEED)
+        .map((need) => (typeof need === 'string' ? need : need.text).replace(LAW_REFERENCE_PATTERN, '')),
       reasons: option.why,
       isRecommended: option.recommended,
     }

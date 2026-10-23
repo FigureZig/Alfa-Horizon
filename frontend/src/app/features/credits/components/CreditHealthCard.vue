@@ -89,6 +89,19 @@ const classChips = computed(() =>
 
 const classTone = computed(() => (props.creditScore ? CLASS_TONES[props.creditScore.riskClass] : ''))
 
+// Свёрнуто — одной строкой словами: «Банк оценивает риск компании как умеренный»; баллы и классы — по раскрытию
+const summaryLine = computed(() => {
+  const score = props.creditScore
+
+  if (!score) return t('credits.score.description')
+
+  const risk = t(`application.explanation.risk.${score.riskClass}`)
+
+  return score.hasMissingFactors && !score.bkiKnown
+    ? t('credits.score.summaryNoBki', { risk })
+    : t('credits.score.summary', { risk })
+})
+
 const factors = computed(() =>
   (props.creditScore?.factors ?? []).map((factor) => ({
     factor: factor.factor,
@@ -127,164 +140,177 @@ function handleRetry() {
 </script>
 
 <template>
-  <article
-    class="flex min-w-0 flex-col gap-5 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm"
+  <!-- Подробности по запросу: на первом уровне — риск словами, без баллов и классов -->
+  <details
+    class="group min-w-0 rounded-3xl border border-fino-border bg-fino-surface shadow-sm"
     :aria-label="t('credits.score.title')"
   >
-    <div>
-      <h2 class="text-sm font-semibold text-fino-text">
-        {{ t('credits.score.title') }}
-      </h2>
+    <summary
+      class="flex cursor-pointer items-center justify-between gap-3 rounded-3xl p-5 marker:content-none
+             focus-visible:outline-2 focus-visible:outline-primary"
+    >
+      <span class="min-w-0">
+        <span class="block text-sm font-semibold text-fino-text">{{ t('credits.score.title') }}</span>
+        <span class="mt-1 block text-sm text-fino-text-muted">{{ summaryLine }}</span>
+      </span>
 
-      <p class="mt-1 text-xs text-fino-text-muted">
+      <i
+        class="pi pi-chevron-down shrink-0 text-xs text-fino-text-muted transition-transform duration-200
+               group-open:rotate-180 motion-reduce:transition-none"
+        aria-hidden="true"
+      />
+    </summary>
+
+    <div class="flex min-w-0 flex-col gap-5 px-5 pb-5">
+      <p class="text-xs text-fino-text-muted">
         {{ t('credits.score.description') }}
       </p>
-    </div>
 
-    <CreditHealthCardSkeleton v-if="isSkeletonVisible" />
+      <CreditHealthCardSkeleton v-if="isSkeletonVisible" />
 
-    <AppErrorState
-      v-else-if="hasError"
-      :message="t('credits.score.loadError')"
-      is-inline
-      @retry="handleRetry"
-    />
+      <AppErrorState
+        v-else-if="hasError"
+        :message="t('credits.score.loadError')"
+        is-inline
+        @retry="handleRetry"
+      />
 
-    <template v-else-if="creditScore">
-      <div class="flex items-center gap-4">
-        <p class="text-5xl font-bold tracking-tight text-fino-text">
-          {{ creditScore.score }}
+      <template v-else-if="creditScore">
+        <div class="flex items-center gap-4">
+          <p class="text-5xl font-bold tracking-tight text-fino-text">
+            {{ creditScore.score }}
+          </p>
+
+          <div>
+            <span
+              class="inline-flex rounded-lg px-2.5 py-1 text-xs font-semibold"
+              :class="classTone"
+            >
+              {{ t('credits.score.riskClass', { riskClass: creditScore.riskClass }) }}
+            </span>
+
+            <p class="mt-1 text-xs text-fino-text-muted">
+              {{ t('credits.score.points') }}
+            </p>
+          </div>
+        </div>
+
+        <ul class="grid grid-cols-4 gap-2">
+          <li
+            v-for="chip in classChips"
+            :key="chip.riskClass"
+            class="rounded-xl border px-2 py-2 text-center"
+            :class="chip.isCurrent ? 'border-primary bg-fino-accent' : 'border-fino-border'"
+            :aria-current="chip.isCurrent ? 'true' : undefined"
+          >
+            <p class="text-sm font-bold text-fino-text">
+              {{ chip.riskClass }}
+            </p>
+
+            <p class="text-[11px] text-fino-text-muted">
+              {{ chip.min }}
+            </p>
+          </li>
+        </ul>
+
+        <p
+          v-if="creditScore.hasMissingFactors"
+          class="flex items-start gap-2 rounded-2xl bg-fino-surface-secondary p-3 text-xs text-fino-text-muted"
+        >
+          <i
+            class="pi pi-info-circle mt-0.5"
+            aria-hidden="true"
+          />
+          {{ creditScore.bkiKnown ? t('credits.score.missingFactors') : t('credits.score.noBki') }}
         </p>
 
         <div>
-          <span
-            class="inline-flex rounded-lg px-2.5 py-1 text-xs font-semibold"
-            :class="classTone"
-          >
-            {{ t('credits.score.riskClass', { riskClass: creditScore.riskClass }) }}
-          </span>
+          <h3 class="text-xs font-semibold uppercase tracking-wide text-fino-text-muted">
+            {{ t('credits.score.factors') }}
+          </h3>
 
-          <p class="mt-1 text-xs text-fino-text-muted">
-            {{ t('credits.score.points') }}
-          </p>
-        </div>
-      </div>
-
-      <ul class="grid grid-cols-4 gap-2">
-        <li
-          v-for="chip in classChips"
-          :key="chip.riskClass"
-          class="rounded-xl border px-2 py-2 text-center"
-          :class="chip.isCurrent ? 'border-primary bg-fino-accent' : 'border-fino-border'"
-          :aria-current="chip.isCurrent ? 'true' : undefined"
-        >
-          <p class="text-sm font-bold text-fino-text">
-            {{ chip.riskClass }}
-          </p>
-
-          <p class="text-[11px] text-fino-text-muted">
-            {{ chip.min }}
-          </p>
-        </li>
-      </ul>
-
-      <p
-        v-if="creditScore.hasMissingFactors"
-        class="flex items-start gap-2 rounded-2xl bg-fino-surface-secondary p-3 text-xs text-fino-text-muted"
-      >
-        <i
-          class="pi pi-info-circle mt-0.5"
-          aria-hidden="true"
-        />
-        {{ creditScore.bkiKnown ? t('credits.score.missingFactors') : t('credits.score.noBki') }}
-      </p>
-
-      <div>
-        <h3 class="text-xs font-semibold uppercase tracking-wide text-fino-text-muted">
-          {{ t('credits.score.factors') }}
-        </h3>
-
-        <ul class="mt-2 flex flex-col divide-y divide-fino-border">
-          <li
-            v-for="factor in factors"
-            :key="factor.factor"
-            class="flex items-start justify-between gap-3 py-2 text-sm first:pt-0 last:pb-0"
-          >
-            <div class="min-w-0">
-              <p class="break-words text-fino-text">
-                {{ factor.title }}
-              </p>
-
-              <p class="text-xs text-fino-text-muted">
-                {{ factor.value }}
-              </p>
-            </div>
-
-            <span
-              class="shrink-0 font-semibold"
-              :class="factor.pointsClass"
+          <ul class="mt-2 flex flex-col divide-y divide-fino-border">
+            <li
+              v-for="factor in factors"
+              :key="factor.factor"
+              class="flex items-start justify-between gap-3 py-2 text-sm first:pt-0 last:pb-0"
             >
-              {{ factor.points }}
-            </span>
-          </li>
-        </ul>
-      </div>
+              <div class="min-w-0">
+                <p class="break-words text-fino-text">
+                  {{ factor.title }}
+                </p>
 
-      <div v-if="levers.length">
-        <h3 class="text-xs font-semibold uppercase tracking-wide text-fino-text-muted">
-          {{ t('credits.score.levers') }}
-        </h3>
+                <p class="text-xs text-fino-text-muted">
+                  {{ factor.value }}
+                </p>
+              </div>
 
-        <ul class="mt-2 flex flex-col gap-2">
-          <li
-            v-for="lever in levers"
-            :key="lever.factor"
-            class="rounded-xl bg-fino-surface-secondary p-3 text-sm"
-          >
-            <div class="flex items-start justify-between gap-3">
-              <p class="min-w-0 break-words font-semibold text-fino-text">
-                {{ lever.title }}
-              </p>
-
-              <span class="shrink-0 font-semibold text-green-700 dark:text-green-400">
-                {{ lever.gain }}
+              <span
+                class="shrink-0 font-semibold"
+                :class="factor.pointsClass"
+              >
+                {{ factor.points }}
               </span>
-            </div>
+            </li>
+          </ul>
+        </div>
 
-            <p class="mt-0.5 break-words text-xs text-fino-text-muted">
-              {{ lever.text }}
-            </p>
-          </li>
-        </ul>
-      </div>
+        <div v-if="levers.length">
+          <h3 class="text-xs font-semibold uppercase tracking-wide text-fino-text-muted">
+            {{ t('credits.score.levers') }}
+          </h3>
 
-      <div v-if="timeLevers.length">
-        <h3 class="text-xs font-semibold uppercase tracking-wide text-fino-text-muted">
-          {{ t('credits.score.timeLevers') }}
-        </h3>
+          <ul class="mt-2 flex flex-col gap-2">
+            <li
+              v-for="lever in levers"
+              :key="lever.factor"
+              class="rounded-xl bg-fino-surface-secondary p-3 text-sm"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <p class="min-w-0 break-words font-semibold text-fino-text">
+                  {{ lever.title }}
+                </p>
 
-        <ul class="mt-2 flex flex-col gap-2">
-          <li
-            v-for="lever in timeLevers"
-            :key="lever.factor"
-            class="rounded-xl border border-dashed border-fino-border p-3 text-sm"
-          >
-            <div class="flex items-start justify-between gap-3">
-              <p class="min-w-0 break-words font-semibold text-fino-text">
-                {{ lever.title }}
+                <span class="shrink-0 font-semibold text-green-700 dark:text-green-400">
+                  {{ lever.gain }}
+                </span>
+              </div>
+
+              <p class="mt-0.5 break-words text-xs text-fino-text-muted">
+                {{ lever.text }}
               </p>
+            </li>
+          </ul>
+        </div>
 
-              <span class="shrink-0 font-semibold text-fino-text-muted">
-                {{ lever.gain }}
-              </span>
-            </div>
+        <div v-if="timeLevers.length">
+          <h3 class="text-xs font-semibold uppercase tracking-wide text-fino-text-muted">
+            {{ t('credits.score.timeLevers') }}
+          </h3>
 
-            <p class="mt-0.5 break-words text-xs text-fino-text-muted">
-              {{ lever.text }}
-            </p>
-          </li>
-        </ul>
-      </div>
-    </template>
-  </article>
+          <ul class="mt-2 flex flex-col gap-2">
+            <li
+              v-for="lever in timeLevers"
+              :key="lever.factor"
+              class="rounded-xl border border-dashed border-fino-border p-3 text-sm"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <p class="min-w-0 break-words font-semibold text-fino-text">
+                  {{ lever.title }}
+                </p>
+
+                <span class="shrink-0 font-semibold text-fino-text-muted">
+                  {{ lever.gain }}
+                </span>
+              </div>
+
+              <p class="mt-0.5 break-words text-xs text-fino-text-muted">
+                {{ lever.text }}
+              </p>
+            </li>
+          </ul>
+        </div>
+      </template>
+    </div>
+  </details>
 </template>

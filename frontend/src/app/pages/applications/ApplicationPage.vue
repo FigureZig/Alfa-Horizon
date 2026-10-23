@@ -167,7 +167,6 @@ const createdAt = computed(() =>
     : '',
 )
 
-const deadlineAt = computed(() => application.value?.deadline?.at ?? null)
 
 // Отзыв доступен почти на всех шагах; при оферте вместо него — «Отказаться от предложения»
 const canWithdraw = computed(() =>
@@ -339,7 +338,6 @@ async function confirmAction() {
             :can-accept="hasAction(ApplicationActionEnum.AcceptOffer)"
             :can-decline="hasAction(ApplicationActionEnum.DeclineOffer)"
             :pending-action="pendingAction"
-            :deadline-at="deadlineAt"
             @accept="handleAccept"
             @decline="askDecline"
           />

@@ -26,8 +26,8 @@ export interface CompanyOfferOptionDto {
   label: string
   max_amount: Nullable<string>
   offer: Nullable<CompanyOfferTermsDto>
-  // Что понадобится, чтобы получить продукт: поручитель, залог, документы
-  needs: Array<string | { text: string }>
+  // Что понадобится, чтобы получить продукт: поручитель, залог, документы, согласие на запрос кредитной истории
+  needs: Array<string | { code?: string; text: string }>
   // Почему продукт не подходит компании
   why: string[]
   recommended: boolean
@@ -45,4 +45,6 @@ export interface CompanyOffersDto {
   blockers: CompanyBlockerDto[]
   options: CompanyOfferOptionDto[]
   recommended: Nullable<CreditProductCodeEnum>
+  // false — банк ещё не видел кредитную историю: суммы и ставки предварительные
+  bki_known?: boolean
 }
