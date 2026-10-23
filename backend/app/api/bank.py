@@ -59,7 +59,7 @@ async def all_applications(who: Me,
         data = app["data"]
         decision = data.get("decision") or {}
         by = "bank" if data.get("bank_decision") else "engine" if decision.get("outcome") in FINAL else None   # ещё решают
-        name = names.get(app["company_inn"], app["company_inn"])
+        name = names.get(app["company_inn"]) or data.get("company_name") or app["company_inn"]   # своя компания удалена
         if decided_by and by != decided_by or q and q.lower() not in f"{app['company_inn']} {name}".lower():
             continue
         offer = data.get("offer") or decision.get("offer")

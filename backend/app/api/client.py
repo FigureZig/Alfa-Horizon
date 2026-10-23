@@ -313,7 +313,8 @@ async def create_application(body: ApplicationIn, who: Me):
             request.update(product=chosen, product_chosen_by="bank", amount=limit,
                            **({"need": body.amount} if limit != body.amount else {}))   # лимит овердрафта ≥ минимума
         app = await lifecycle.create(conn, body.inn, request, body.consent_bki, who.label,
-                                     {"persona": who.persona_id, "inn": who.inn, "name": who.name})
+                                     {"persona": who.persona_id, "inn": who.inn, "name": who.name},
+                                     facts.get("short_name") or facts.get("name"))
     return ok(_view(app, granted, who))
 
 

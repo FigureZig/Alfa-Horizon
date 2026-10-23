@@ -48,19 +48,22 @@ def match(facts: dict, pol: dict, goal: str | None = None, amount=None, term_mon
         term = term_months or TERMS[code]
         base = {"product": code, "name": product["name"], "repayment": product["repayment"]}
         if code not in fit:
+            text = pol["reasons"]["POL_PRODUCT_FIT"].format(product_name=product["name"])
             options.append({**base, "available": False, "label": "UNAVAILABLE", "outcome": "REJECT", "max_amount": None,
-                            "offer": None, "counter": [], "needs": [],
-                            "why": [pol["reasons"]["POL_PRODUCT_FIT"].format(product_name=product["name"])]})
+                            "offer": None, "counter": [], "needs": [], "why": [text],
+                            "causes": [{"code": "POL_PRODUCT_FIT", "kind": "policy", "text": text}]})
             continue
         most = decide(facts, {"product": code, "amount": product["amount"]["max"], "term_months": term, "goal": goal}, pol,
                       "simulate", allow_alternative=False)
         want = most if amount is None else decide(facts, {"product": code, "amount": limit_for(product, amount),
                                                           "term_months": term, "goal": goal},
                                                   pol, "simulate", allow_alternative=False)
+        causes = [{"code": r["code"], "kind": r["kind"], "text": r["text"]} for r in want["reasons"]
+                  if r["kind"] in ("stop", "policy", "cap", "score", "manual")]
         options.append({**base, "available": want["outcome"] != "REJECT", "label": PREAPPROVAL_LABEL[want["outcome"]],
                         "outcome": want["outcome"], "max_amount": (most["offer"] or {}).get("amount"),
                         "offer": _terms(want["offer"]), "counter": want["counter"], "needs": _needs(want, facts),
-                        "why": [r["text"] for r in want["reasons"] if r["kind"] in ("stop", "policy", "cap", "score", "manual")]})
+                        "why": [c["text"] for c in causes], "causes": causes})
     return {"blockers": blockers, "options": options, "recommended": _best(options, amount)}
 
 

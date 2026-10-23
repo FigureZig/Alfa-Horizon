@@ -162,6 +162,45 @@ async def test_builder_company_structure_drives_the_flow(stand):
     assert (await stand.call("GET", path, first))["status"] == "ISSUED"
 
 
+async def test_own_company_preview_edit_delete(stand):
+    """Своя компания под контролем проверяющего: предпросмотр совпадает с созданной компанией и указывает на ответы,
+    правка пересобирает её людей и данные, удаление убирает всех. Готовых пользователей мира не трогаем."""
+    answers = {"full_name": "Ольга Петрова", "organization": "Пекарня у дома", "industry": "bakery", "structure": "partners",
+               "accountant": True, "flags": ["tax_debt"]}
+    preview = await stand.call("POST", "/sandbox/personas/preview", json=answers)
+    assert preview["assumes"] == "consent_bki" and preview["path"]["structure"] == "partners"
+    assert [b["code"] for b in preview["blockers"]] == ["STOP_TAX_DEBT"] and "flags.tax_debt" in preview["blockers"][0]["fields"]
+    assert not any(p["available"] for p in preview["products"])                 # недоимка — стоп для всех продуктов
+
+    owner = await stand.call("POST", "/sandbox/personas", expect=201, json=answers)
+    team = [c for c in await stand.call("GET", "/sandbox/personas") if c["company_inn"] == owner["inn"]]
+    people = sorted((p["badge"], p["role_title"]) for p in preview["people"])
+    assert sorted((c["badge"], c["role_title"]) for c in team) == people            # предпросмотр — те же люди
+    offers = await stand.call("GET", f"/companies/{owner['inn']}/offers", await stand.login(owner["id"]))
+    assert [b["code"] for b in offers["blockers"]] == ["STOP_TAX_DEBT"]               # и тот же стоп в кабинете
+
+    fixed = {**answers, "accountant": False, "flags": []}                          # недоимку погасили, бухгалтера нет
+    again = await stand.call("POST", "/sandbox/personas/preview", params={"persona_id": owner["id"]}, json=fixed)
+    assert not again["blockers"] and any(p["available"] for p in again["products"])
+    edited = await stand.call("PUT", f"/sandbox/personas/{owner['id']}", json=fixed)
+    assert (edited["id"], edited["inn"]) == (owner["id"], owner["inn"])
+    team_after = [c for c in await stand.call("GET", "/sandbox/personas") if c["company_inn"] == owner["inn"]]
+    assert len(team_after) == len(team) - 1 and "Бухгалтер" not in {c["badge"] for c in team_after}
+    offers = await stand.call("GET", f"/companies/{owner['inn']}/offers", await stand.login(owner["id"]))
+    assert not offers["blockers"]                                                  # данные компании пересобраны
+
+    member = next(c for c in team_after if c["id"] != owner["id"])
+    for target, code in ((member["id"], "PERSON_IN_COMPANY"), ("s7", "PERSONA_READONLY")):
+        refused = await stand.api.delete(f"/sandbox/personas/{target}")
+        assert refused.status_code == 409 and refused.json()["code"] == code
+    gone = await stand.call("DELETE", f"/sandbox/personas/{owner['id']}")
+    assert set(gone["deleted"]) == {c["id"] for c in team_after}
+    assert not [c for c in await stand.call("GET", "/sandbox/personas") if c["company_inn"] == owner["inn"]]
+
+    conflict = await stand.api.post("/sandbox/personas/preview", json={"loans": "none", "delays": "serious"})
+    assert conflict.status_code == 422 and conflict.json()["code"] == "ANSWERS_CONFLICT"   # просрочка без кредита
+
+
 async def test_issued_overdraft_changes_the_cabinet(stand):
     """Выданное не теряется: подключённый овердрафт прикрывает разрыв и второй раз не предлагается, выдача — по часам мира."""
     await stand.advance(24 * 3600)                         # выдача после перемотки: сброс вернёт часы назад, а кредит забудет
