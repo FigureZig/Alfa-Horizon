@@ -65,13 +65,6 @@ export function useSession() {
     await router.push(getEntryRoute(persona, companies))
   }
 
-  // Вход по ID, ИНН человека или ИНН компании: поле «Вход по ID» для проверяющих
-  async function enterCabinetByLogin(login: string): Promise<void> {
-    const { persona, companies } = await signInWith(() => authService.login($fetch, login, locale.value))
-
-    await router.push(getEntryRoute(persona, companies))
-  }
-
   async function logout() {
     try {
       await authService.logout($fetch)
@@ -83,5 +76,5 @@ export function useSession() {
     }
   }
 
-  return { loginAsPersona, enterCabinet, enterCabinetByLogin, logout }
+  return { loginAsPersona, enterCabinet, logout }
 }
