@@ -15,6 +15,11 @@ export interface SandboxPersonaInterface {
   registries: string
   preview: string
   loginLabel: string
+  badge: string
+  roleTitle: string
+  about: string
+  companyInn: Nullable<string>
+  companyName: Nullable<string>
   isCustom: boolean
   personInn: Nullable<string>
 }

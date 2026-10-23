@@ -7,6 +7,7 @@ import { DecisionOfferKindEnum } from '@/app/types/application/decision-offer-ki
 import type {
   ApplicationDecisionInterface,
   ApplicationOfferInterface,
+  ApplicationRequestInterface,
 } from '@/app/types/application/application-interface'
 import type { Nullable } from '@/app/types/nullable'
 
@@ -14,6 +15,7 @@ const MAIN_VARIANT = 0
 
 const props = defineProps<{
   offers: ApplicationOfferInterface[]
+  request: ApplicationRequestInterface
   decision: Nullable<ApplicationDecisionInterface>
   canAccept: boolean
   canDecline: boolean
@@ -42,6 +44,22 @@ const changes = computed(() => [
   ...(props.decision?.counter ?? []).map((code) => t(`application.offers.counter.${code}`)),
   ...(props.decision?.conditions ?? []).map((code) => t(`application.offers.condition.${code}`)),
 ])
+
+// Встречное предложение: что просили и что предлагает банк — рядом, чтобы разница была видна сразу
+const comparison = computed(() => {
+  const main = props.offers[MAIN_VARIANT]
+
+  if (!main) return null
+
+  const isChanged = main.amount !== props.request.amount || (props.request.termMonths !== null && main.termMonths !== props.request.termMonths)
+
+  if (!isChanged) return null
+
+  return {
+    requested: [formatCurrency(props.request.amount, 'RUB'), props.request.termMonths ? t('application.term', props.request.termMonths) : ''].filter(Boolean).join(' · '),
+    proposed: [formatCurrency(main.amount, 'RUB'), t('application.term', main.termMonths)].join(' · '),
+  }
+})
 
 const offerCards = computed(() =>
   props.offers.map((offer, index) => ({
@@ -90,6 +108,35 @@ function handleDecline() {
         {{ kindText }}
       </p>
 
+      <div
+        v-if="comparison"
+        class="mt-4 grid grid-cols-1 items-center gap-3 rounded-2xl bg-fino-surface-secondary p-4
+               sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
+      >
+        <div class="min-w-0">
+          <p class="text-xs text-fino-text-muted">
+            {{ t('application.offers.requested') }}
+          </p>
+          <p class="mt-0.5 break-words text-base font-semibold text-fino-text-muted line-through decoration-fino-border">
+            {{ comparison.requested }}
+          </p>
+        </div>
+
+        <i
+          class="pi pi-arrow-right hidden text-primary sm:block"
+          aria-hidden="true"
+        />
+
+        <div class="min-w-0">
+          <p class="text-xs text-fino-text-muted">
+            {{ t('application.offers.proposed') }}
+          </p>
+          <p class="mt-0.5 break-words text-lg font-bold text-fino-text">
+            {{ comparison.proposed }}
+          </p>
+        </div>
+      </div>
+
       <ul
         v-if="changes.length"
         class="mt-3 flex flex-wrap gap-2"
@@ -104,7 +151,10 @@ function handleDecline() {
       </ul>
     </div>
 
-    <ul class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <ul
+      class="grid grid-cols-1 gap-4"
+      :class="{ 'lg:grid-cols-2': offerCards.length > 1 }"
+    >
       <li
         v-for="card in offerCards"
         :key="card.variant"

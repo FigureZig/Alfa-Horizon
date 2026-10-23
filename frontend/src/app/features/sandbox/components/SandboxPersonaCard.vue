@@ -1,62 +1,53 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { SandboxPersonaKindEnum } from '@/app/types/sandbox/sandbox-persona-kind-enum'
 import type { SandboxPersonaInterface } from '@/app/types/sandbox/sandbox-persona-interface'
 
 const props = defineProps<{
   persona: SandboxPersonaInterface
-  isSelected: boolean
+  isBusy: boolean
 }>()
 
 const emit = defineEmits<{
-  select: [persona: SandboxPersonaInterface]
+  login: [persona: SandboxPersonaInterface]
 }>()
 
-const cardStateClass = computed(() =>
-  props.isSelected
-    ? 'border-primary ring-1 ring-primary'
-    : 'border-fino-border',
+const { t } = useI18n({ useScope: 'global' })
+
+const isBank = computed(() => props.persona.kind === SandboxPersonaKindEnum.Bank)
+
+const avatarClass = computed(() =>
+  isBank.value ? 'bg-primary text-primary-contrast' : 'bg-fino-accent text-primary',
 )
 
-const avatarStateClass = computed(() =>
-  props.isSelected
-    ? 'bg-primary text-primary-contrast'
-    : 'bg-fino-accent text-primary',
-)
-
-function handleSelect() {
-  emit('select', props.persona)
+function handleLogin() {
+  emit('login', props.persona)
 }
 </script>
 
 <template>
-  <button
-    type="button"
-    class="group flex h-full w-full min-w-0 cursor-pointer flex-col gap-4
-           rounded-3xl border bg-fino-surface p-5 text-left shadow-sm
-           transition-all duration-300
-           hover:-translate-y-1 hover:shadow-md
-           focus-visible:outline-2 focus-visible:outline-primary
+  <article
+    class="group relative flex h-full min-w-0 flex-col gap-4 rounded-3xl border border-fino-border
+           bg-fino-surface p-5 shadow-sm transition-all duration-300
+           hover:-translate-y-1 hover:border-primary/40 hover:shadow-md
+           has-focus-visible:outline-2 has-focus-visible:outline-primary
            motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-    :class="cardStateClass"
-    :aria-pressed="isSelected"
-    @click="handleSelect"
   >
     <div class="flex items-start justify-between gap-3">
       <div
-        class="flex size-12 shrink-0 items-center justify-center rounded-full
-               text-base font-bold transition-all duration-300
-               group-hover:scale-110 motion-reduce:group-hover:scale-100"
-        :class="avatarStateClass"
+        class="flex size-12 shrink-0 items-center justify-center rounded-2xl text-base font-bold"
+        :class="avatarClass"
         aria-hidden="true"
       >
         {{ persona.initials }}
       </div>
 
       <span
-        class="shrink-0 rounded-lg bg-fino-surface-secondary px-2 py-1
-               text-xs font-semibold text-fino-text"
+        class="shrink-0 rounded-full bg-fino-surface-secondary px-2.5 py-1 text-xs font-semibold
+               text-fino-text-muted"
       >
-        {{ persona.code }}
+        {{ persona.badge }}
       </span>
     </div>
 
@@ -65,16 +56,33 @@ function handleSelect() {
         {{ persona.fullName }}
       </p>
 
-      <p class="mt-1 break-words text-sm text-fino-text-muted">
-        {{ persona.organization }}
+      <p class="mt-0.5 break-words text-sm text-fino-text-muted">
+        {{ persona.roleTitle }}
       </p>
     </div>
 
-    <p
-      class="mt-auto break-words border-t border-fino-border pt-4
-             text-sm font-medium text-fino-text"
-    >
-      {{ persona.scenario }}
+    <p class="line-clamp-3 text-sm leading-relaxed text-fino-text-muted">
+      {{ persona.about }}
     </p>
-  </button>
+
+    <!-- Вся карточка кликабельна: кнопка растянута на неё -->
+    <button
+      type="button"
+      class="mt-auto inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl
+             border border-fino-border bg-fino-surface-secondary px-4 text-sm font-semibold text-fino-text
+             transition-colors duration-200 group-hover:border-primary group-hover:bg-primary
+             group-hover:text-primary-contrast after:absolute after:inset-0 after:rounded-3xl
+             after:content-[''] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60
+             motion-reduce:transition-none"
+      :disabled="isBusy"
+      :aria-label="t('login.enterAs', { name: persona.fullName })"
+      @click="handleLogin"
+    >
+      {{ t('login.enter') }}
+      <i
+        class="pi pi-arrow-right text-xs"
+        aria-hidden="true"
+      />
+    </button>
+  </article>
 </template>

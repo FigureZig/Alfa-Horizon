@@ -25,11 +25,12 @@ const { t } = useI18n({ useScope: 'global' })
 const router = useRouter()
 const { isK1Enabled } = useFeatureFlags()
 
-// Один запрос /products на страницу — его результат делят прогноз K1/K2 и «Предодобрено»
+// Предодобренные продукты: если их нет, рядом приходит причина
 const {
   products,
   isProductsLoading,
   productsError,
+  blockers,
   loadProducts,
 } = useCompanyProducts(() => props.inn)
 
@@ -76,6 +77,7 @@ watch(() => props.inn, reloadDemoPersona, { immediate: true })
     <DashboardGreeting
       v-if="demoPersona"
       :first-name="demoPersona.firstName"
+      :today="demoPersona.today"
       :organization-name="demoPersona.organizationName"
     />
 
@@ -94,10 +96,6 @@ watch(() => props.inn, reloadDemoPersona, { immediate: true })
     <CashForecastSection
       v-if="isK1Enabled"
       :inn="inn"
-      :products="products"
-      :is-products-loading="isProductsLoading"
-      :products-error="productsError"
-      @retry-products="loadProducts"
     />
 
     <!-- Сводка по компании: три независимых виджета -->
@@ -107,6 +105,7 @@ watch(() => props.inn, reloadDemoPersona, { immediate: true })
     >
       <PreApprovedProductsCard
         :products="products"
+        :blockers="blockers"
         :is-loading="isProductsLoading"
         :has-error="productsError"
         @apply="applyForProduct"

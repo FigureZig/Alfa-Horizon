@@ -87,6 +87,8 @@ export interface ApplicationApprovalInterface {
 }
 
 export interface ApplicationLoanInterface {
+  isLimit: boolean
+  number: string
   loanId: string
   amount: number
   rate: number

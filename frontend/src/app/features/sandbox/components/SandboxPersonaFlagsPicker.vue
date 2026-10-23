@@ -11,6 +11,8 @@ const props = defineProps<{
   flags: SandboxPersonaFlagInterface[]
   selected: string[]
   isDisabled: boolean
+  // Особенности, которые называет причина в предпросмотре
+  highlighted?: string[]
 }>()
 
 const emit = defineEmits<{
@@ -50,11 +52,12 @@ function handleChange(flagIds: string[]) {
         >
           <label
             :for="`persona-flag-${flag.id}`"
-            class="flex h-full cursor-pointer items-start gap-3 rounded-2xl border
-                   border-fino-border p-3 transition-colors duration-200
-                   hover:bg-fino-surface-hover
-                   has-[:checked]:border-primary has-[:checked]:bg-fino-accent
-                   motion-reduce:transition-none"
+            class="flex h-full cursor-pointer items-start gap-3 rounded-2xl border p-3
+                   transition-colors duration-200 hover:bg-fino-surface-hover
+                   has-[:checked]:bg-fino-accent motion-reduce:transition-none"
+            :class="highlighted?.includes(flag.id)
+              ? 'border-primary ring-2 ring-primary/40'
+              : 'border-fino-border has-[:checked]:border-primary'"
           >
             <Checkbox
               :model-value="selected"

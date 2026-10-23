@@ -5,6 +5,7 @@ import type { ApplicationCreateDto, ApplicationInfoAnswerDto } from '@/app/types
 import type { ApplicationDto } from '@/app/types/application/application-dto'
 import type { ApplicationEventDto } from '@/app/types/application/application-event-dto'
 import type { ApplicationExplanationDto } from '@/app/types/application/application-explanation-dto'
+import type { ApplicationTaskDto } from '@/app/types/application/application-task-dto'
 import type { ApplicationVoteEnum } from '@/app/types/application/application-vote-enum'
 import type { ApplicationsSummaryDto } from '@/app/types/application/applications-summary-dto'
 
@@ -16,6 +17,11 @@ function applicationRoute(applicationId: string): string {
 }
 
 export const applicationsService = {
+  // Входящие пользователя по всем его компаниям: в том числе «проголосовать» у участника ООО
+  async fetchTasks($fetch: AxiosInstance) {
+    return await $fetch.get<ApiResponse<ApplicationTaskDto[]>>('v1/tasks')
+  },
+
   // Сводка для главной: заявки и задачи компании
   async fetchSummary($fetch: AxiosInstance, inn: string, locale: AppLocale) {
     return await $fetch.get<ApiResponse<ApplicationsSummaryDto>>(

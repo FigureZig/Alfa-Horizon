@@ -8,6 +8,7 @@ const NOW_UPDATE_INTERVAL = 60_000
 
 const props = defineProps<{
   firstName: string
+  today: string
   organizationName: string
 }>()
 
@@ -28,10 +29,17 @@ const greeting = computed(() =>
   t(`dashboard.greeting.${getDayPeriod(now.value.getHours())}`, { name: props.firstName }),
 )
 
-const currentDate = computed(() => {
-  const dayMonth = new Intl.DateTimeFormat(locale.value, { day: 'numeric', month: 'long' }).format(now.value)
+// Дата — по часам мира из API, а не по браузеру: мир может жить не в сегодняшнем дне
+const worldDate = computed(() => {
+  const [year, month, day] = props.today.split('-').map(Number)
 
-  return t('dashboard.currentDate', { dayMonth, year: now.value.getFullYear() })
+  return new Date(year, month - 1, day)
+})
+
+const currentDate = computed(() => {
+  const dayMonth = new Intl.DateTimeFormat(locale.value, { day: 'numeric', month: 'long' }).format(worldDate.value)
+
+  return t('dashboard.currentDate', { dayMonth, year: worldDate.value.getFullYear() })
 })
 
 // Приветствие и дата обновляются, если страница открыта долго

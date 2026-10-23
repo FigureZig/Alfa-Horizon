@@ -16,6 +16,8 @@ export class DemoPersonaMapper {
       initials: data.initials,
       organizationName: data.organization_name,
       role: data.role,
+      today: data.today,
+      userId: data.user_id,
       isBankStaff: data.role !== DemoPersonaRoleEnum.Client,
     }
   }

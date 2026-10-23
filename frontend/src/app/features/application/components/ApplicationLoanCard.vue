@@ -20,31 +20,17 @@ const disbursedAt = computed(() =>
 
 <template>
   <section class="flex flex-col gap-5">
-    <div class="flex items-center gap-3">
-      <span
-        class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-green-500/10
-               text-green-700 dark:text-green-400"
-        aria-hidden="true"
-      >
-        <i class="pi pi-check-circle text-2xl" />
-      </span>
+    <div>
+      <p class="break-words text-3xl font-bold tracking-tight text-fino-text">
+        {{ amount }}
+      </p>
 
-      <div>
-        <h2 class="text-lg font-bold tracking-tight text-fino-text">
-          {{ t('application.loan.title') }}
-        </h2>
-
-        <p class="text-sm text-fino-text-muted">
-          {{ t('application.loan.disbursedAt', { date: disbursedAt }) }}
-        </p>
-      </div>
+      <p class="mt-1 text-sm text-fino-text-muted">
+        {{ loan.isLimit ? t('application.loan.limitHint') : t('application.loan.loanHint') }}
+      </p>
     </div>
 
-    <p class="break-words text-3xl font-bold tracking-tight text-fino-text">
-      {{ amount }}
-    </p>
-
-    <dl class="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
+    <dl class="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
       <div>
         <dt class="text-xs text-fino-text-muted">
           {{ t('application.offers.rate') }}
@@ -63,12 +49,21 @@ const disbursedAt = computed(() =>
         </dd>
       </div>
 
-      <div class="col-span-2 min-w-0 sm:col-span-1">
+      <div class="min-w-0">
         <dt class="text-xs text-fino-text-muted">
           {{ t('application.loan.number') }}
         </dt>
         <dd class="mt-0.5 truncate font-semibold text-fino-text">
-          {{ loan.loanId }}
+          {{ loan.number }}
+        </dd>
+      </div>
+
+      <div class="min-w-0">
+        <dt class="text-xs text-fino-text-muted">
+          {{ loan.isLimit ? t('application.loan.limitDateLabel') : t('application.loan.dateLabel') }}
+        </dt>
+        <dd class="mt-0.5 font-semibold text-fino-text">
+          {{ disbursedAt }}
         </dd>
       </div>
     </dl>

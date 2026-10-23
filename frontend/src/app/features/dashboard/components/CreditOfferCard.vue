@@ -2,29 +2,46 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useFormatters } from '@/app/composables/useFormatters'
-import type { CreditProductInterface } from '@/app/types/company/credit-product-interface'
+import type { CashGapOfferInterface } from '@/app/types/company/cash-forecast-interface'
+
+const MAX_BENEFITS = 2
 
 const props = defineProps<{
-  product: CreditProductInterface
+  offer: CashGapOfferInterface
 }>()
 
 const emit = defineEmits<{
-  closeGap: [product: CreditProductInterface]
+  closeGap: []
   showOptions: []
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
 const { formatCurrency, formatPercent } = useFormatters()
 
-const amount = computed(() => formatCurrency(props.product.amount, props.product.currency))
+const amount = computed(() => formatCurrency(props.offer.amount, props.offer.currency))
 
 const conditions = computed(() => [
-  t('creditOffer.rate', { rate: formatPercent(props.product.rate) }),
-  t('creditOffer.term', props.product.termMonths),
+  t('creditOffer.rate', { rate: formatPercent(props.offer.rate) }),
+  t('creditOffer.term', props.offer.termMonths),
 ].join(' · '))
 
+// Цена закрытия разрыва: сколько возьмём из лимита и сколько это стоит
+const coverLine = computed(() => {
+  const { cover, currency } = props.offer
+
+  return cover
+    ? t('creditOffer.cover', {
+      amount: formatCurrency(cover.amount, currency),
+      days: cover.days,
+      interest: formatCurrency(cover.interest, currency),
+    })
+    : ''
+})
+
+const benefits = computed(() => props.offer.benefits.slice(0, MAX_BENEFITS))
+
 function handleCloseGap() {
-  emit('closeGap', props.product)
+  emit('closeGap')
 }
 
 function handleShowOptions() {
@@ -34,13 +51,13 @@ function handleShowOptions() {
 
 <template>
   <article
-    class="flex min-w-0 flex-col gap-5 rounded-3xl bg-violet-600 p-5 text-white
-           shadow-sm sm:p-6 dark:bg-violet-700"
+    class="relative flex min-w-0 flex-col gap-5 overflow-hidden rounded-3xl border border-fino-border
+           bg-linear-to-br from-fino-accent to-fino-surface p-5 shadow-sm sm:p-6"
     :aria-label="t('creditOffer.label')"
   >
     <span
-      class="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/15
-             px-3 py-1 text-xs font-semibold"
+      class="inline-flex w-fit items-center gap-1.5 rounded-full bg-fino-surface px-3 py-1 text-xs
+             font-semibold text-primary shadow-sm"
     >
       <i
         class="pi pi-check-circle text-xs"
@@ -50,44 +67,50 @@ function handleShowOptions() {
     </span>
 
     <div class="min-w-0">
-      <h2 class="break-words text-lg font-semibold">
-        {{ product.name }}
+      <h2 class="break-words text-base font-semibold text-fino-text">
+        {{ offer.name }}
       </h2>
 
-      <p class="mt-2 break-words text-3xl font-bold tracking-tight">
+      <p class="mt-1 break-words text-3xl font-bold tracking-tight text-fino-text">
         {{ amount }}
       </p>
 
-      <p class="mt-1 text-sm text-white/80">
+      <p class="mt-1 text-sm text-fino-text-muted">
         {{ conditions }}
       </p>
     </div>
 
+    <p
+      v-if="coverLine"
+      class="rounded-2xl bg-fino-surface px-4 py-3 text-sm leading-relaxed text-fino-text shadow-sm"
+    >
+      {{ coverLine }}
+    </p>
+
     <ul
-      v-if="product.benefits.length"
-      class="flex flex-col gap-2.5 border-t border-white/20 pt-4"
+      v-if="benefits.length"
+      class="flex flex-col gap-2"
     >
       <li
-        v-for="benefit in product.benefits"
+        v-for="benefit in benefits"
         :key="benefit"
-        class="flex items-start gap-2 text-sm"
+        class="flex items-start gap-2 text-sm text-fino-text-muted"
       >
         <i
-          class="pi pi-check mt-0.5 text-xs text-white/80"
+          class="pi pi-check mt-0.5 text-xs text-primary"
           aria-hidden="true"
         />
         <span class="min-w-0 break-words">{{ benefit }}</span>
       </li>
     </ul>
 
-    <div class="mt-auto flex flex-col gap-2.5">
+    <div class="mt-auto flex flex-col gap-2">
       <button
         type="button"
-        class="inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2
-               rounded-xl bg-white px-5 py-3 text-center text-sm font-semibold text-violet-700
-               transition-all duration-200 hover:bg-white/90 active:scale-95
-               focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white
-               motion-reduce:transition-none"
+        class="inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary
+               px-5 py-3 text-center text-sm font-semibold text-primary-contrast shadow-sm transition-all
+               duration-200 hover:opacity-90 active:scale-95 focus-visible:outline-2
+               focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none"
         @click="handleCloseGap"
       >
         <i
@@ -99,10 +122,9 @@ function handleShowOptions() {
 
       <button
         type="button"
-        class="inline-flex min-h-12 w-full cursor-pointer items-center justify-center
-               rounded-xl border border-white/30 px-5 py-3 text-center text-sm font-semibold
-               transition-colors duration-200 hover:bg-white/10
-               focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white
+        class="inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-xl px-5 py-2.5
+               text-center text-sm font-semibold text-fino-text-muted transition-colors duration-200
+               hover:bg-fino-surface hover:text-fino-text focus-visible:outline-2 focus-visible:outline-primary
                motion-reduce:transition-none"
         @click="handleShowOptions"
       >

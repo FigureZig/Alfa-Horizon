@@ -20,6 +20,20 @@
     /* Текст */
     --color-fino-text: var(--fino-text);
     --color-fino-text-muted: var(--fino-text-muted);
+
+    /* Анимации появления: шапка и секции страниц */
+    --animate-header-appear: header-appear 450ms ease-out both;
+    --animate-fade-up: fade-up 600ms ease-out both;
+
+    @keyframes header-appear {
+        from { opacity: 0; transform: translateY(-0.75rem); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fade-up {
+        from { opacity: 0; transform: translateY(1rem); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 }
 
 body {

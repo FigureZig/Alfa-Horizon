@@ -4,13 +4,14 @@ import { useI18n } from 'vue-i18n'
 import { useToast } from 'primevue/usetoast'
 import { isNotFoundError, useApiFetch } from '@/app/composables/useApiFetch'
 import { companyProductsService } from '@/app/services/company/company-products.service'
+import { CompanyOffersMapper } from '@/app/mappers/company-offers.mapper'
 import { CreditProductMapper } from '@/app/mappers/credit-product.mapper'
 import type { AppLocale } from '@/app/i18n'
+import type { CompanyBlockerInterface } from '@/app/types/company/company-blocker-interface'
 import type { CreditProductInterface } from '@/app/types/company/credit-product-interface'
 
 /**
- * Предодобренные продукты (K2) по ИНН. Один запрос на страницу:
- * результат используют и карточка предложения у прогноза, и карточка «Предодобрено».
+ * Предодобренные продукты (K2) по ИНН. Если предложений нет, дополнительно узнаём, что мешает компании.
  */
 export function useCompanyProducts(inn: MaybeRefOrGetter<string>) {
   const $fetch = useApiFetch()
@@ -20,9 +21,27 @@ export function useCompanyProducts(inn: MaybeRefOrGetter<string>) {
   const products = ref<CreditProductInterface[]>([])
   const isProductsLoading = ref(false)
   const productsError = ref(false)
+  const blockers = ref<CompanyBlockerInterface[]>([])
 
   // Номер последнего запроса: ответы по прежнему ИНН или языку отбрасываем
   let lastRequestId = 0
+
+  // Причина пустого «Предодобрено»: без неё клиент видит пустоту, а не «что сделать». Ошибка здесь не мешает странице
+  async function loadBlockers(requestId: number) {
+    blockers.value = []
+
+    if (products.value.length) return
+
+    try {
+      const { data } = await companyProductsService.fetchOffers($fetch, toValue(inn), locale.value as AppLocale)
+
+      if (requestId !== lastRequestId) return
+
+      blockers.value = CompanyOffersMapper.toBlockers(data.data)
+    } catch (err: unknown) {
+      console.error('Company blockers loading failed:', err)
+    }
+  }
 
   async function loadProducts() {
     const requestId = ++lastRequestId
@@ -40,6 +59,8 @@ export function useCompanyProducts(inn: MaybeRefOrGetter<string>) {
       if (requestId !== lastRequestId) return
 
       products.value = data.data.map((product) => CreditProductMapper.toEntity(product))
+
+      await loadBlockers(requestId)
     } catch (err: unknown) {
       if (requestId !== lastRequestId) return
 
@@ -66,6 +87,7 @@ export function useCompanyProducts(inn: MaybeRefOrGetter<string>) {
   function onInnChange() {
     // Продукты прежней компании убираем сразу, не дожидаясь ответа
     products.value = []
+    blockers.value = []
     loadProducts()
   }
 
@@ -76,6 +98,7 @@ export function useCompanyProducts(inn: MaybeRefOrGetter<string>) {
     products,
     isProductsLoading,
     productsError,
+    blockers,
     loadProducts,
   }
 }

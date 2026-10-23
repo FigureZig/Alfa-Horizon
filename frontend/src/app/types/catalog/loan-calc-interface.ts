@@ -26,6 +26,13 @@ export interface LoanCalcScheduleRowInterface {
   balance: number
 }
 
+export interface LoanCalcUsageExampleInterface {
+  amount: number
+  days: number
+  interest: number
+  text: string
+}
+
 export interface LoanCalcInterface {
   rate: number
   keyRate: Nullable<number>
@@ -34,6 +41,7 @@ export interface LoanCalcInterface {
   riskClass: Nullable<RiskClassEnum>
   repayment: RepaymentKindEnum
   payment: number
-  overpayment: number
+  overpayment: Nullable<number>
+  usageExample: Nullable<LoanCalcUsageExampleInterface>
   schedule: LoanCalcScheduleRowInterface[]
 }

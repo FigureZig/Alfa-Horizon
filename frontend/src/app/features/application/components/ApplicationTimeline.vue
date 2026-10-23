@@ -72,10 +72,11 @@ const items = computed(() =>
       id: event.id,
       icon: view.icon,
       title: getEventTitle(event, view.key),
-      meta: [
-        formatDateTime(event.at, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-        getActorLabel(event.actor),
-      ].filter(Boolean).join(' · '),
+      // Автор по имени и должности: «Мария Соколова · Кредитный специалист», «Банк · проверка данных»
+      author: event.author
+        ? [event.author.name, event.author.caption].filter(Boolean).join(' · ')
+        : getActorLabel(event.actor),
+      time: formatDateTime(event.at, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
     }
   }),
 )
@@ -120,7 +121,11 @@ const items = computed(() =>
           </p>
 
           <p class="mt-0.5 text-xs text-fino-text-muted">
-            {{ item.meta }}
+            <span
+              v-if="item.author"
+              class="font-medium text-fino-text"
+            >{{ item.author }}</span>
+            <span v-if="item.author"> · </span>{{ item.time }}
           </p>
         </div>
       </li>

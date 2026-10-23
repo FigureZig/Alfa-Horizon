@@ -17,7 +17,15 @@ export class LoanCalcMapper {
       riskClass: parts?.risk_class ?? null,
       repayment: data.repayment,
       payment: Number(data.payment),
-      overpayment: Number(data.overpayment),
+      overpayment: data.overpayment === null ? null : Number(data.overpayment),
+      usageExample: data.usage_example
+        ? {
+          amount: Number(data.usage_example.amount),
+          days: data.usage_example.days,
+          interest: Number(data.usage_example.interest),
+          text: data.usage_example.text,
+        }
+        : null,
       schedule: data.schedule.map((row) => ({
         number: row.n,
         payment: Number(row.payment),

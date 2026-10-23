@@ -11,6 +11,7 @@ import SandboxPersonaField from '@/app/features/sandbox/components/SandboxPerson
 import { useFormatters } from '@/app/composables/useFormatters'
 import { useLoanCalculator } from '@/app/composables/useLoanCalculator'
 import { useRepayment } from '@/app/composables/useRepayment'
+import { RepaymentKindEnum } from '@/app/types/catalog/repayment-kind-enum'
 import type { CreditProductCodeEnum } from '@/app/types/application/credit-product-code-enum'
 import type { CatalogProductInterface } from '@/app/types/catalog/catalog-product-interface'
 import type { LoanCalcContextInterface, LoanCalcParamsInterface } from '@/app/types/catalog/loan-calc-interface'
@@ -98,9 +99,15 @@ const params = computed<Nullable<LoanCalcParamsInterface>>(() => {
 const { result, isLoading, error, calculate } = useLoanCalculator(params)
 
 // Способ погашения сравниваем по тем же сумме и сроку, но по ставке из расчёта
+// Только для кредитов с графиком: у овердрафта и кредита с погашением в конце срока сравнивать нечего
 const repaymentParams = computed(() =>
-  params.value && result.value && !isLoading.value
-    ? { amount: params.value.amount, termMonths: params.value.termMonths, rate: result.value.rate }
+  params.value && result.value && !isLoading.value && result.value.repayment === RepaymentKindEnum.Annuity
+    ? {
+      amount: params.value.amount,
+      termMonths: params.value.termMonths,
+      rate: result.value.rate,
+      product: params.value.product,
+    }
     : null,
 )
 
@@ -288,7 +295,28 @@ watch(() => selectedProduct.value?.code, applyProductDefaults, { immediate: true
             </dd>
           </div>
 
-          <div class="rounded-2xl bg-fino-surface-secondary p-4">
+          <div
+            v-if="result.overpayment === null"
+            class="rounded-2xl bg-fino-surface-secondary p-4"
+          >
+            <dt class="text-xs text-fino-text-muted">
+              {{ t('credits.calculator.usageTitle') }}
+            </dt>
+            <dd class="mt-1 break-words text-2xl font-bold tracking-tight text-fino-text">
+              {{ result.usageExample ? formatCurrency(result.usageExample.interest, 'RUB') : '—' }}
+            </dd>
+            <dd
+              v-if="result.usageExample"
+              class="mt-1 text-xs text-fino-text-muted"
+            >
+              {{ result.usageExample.text }}
+            </dd>
+          </div>
+
+          <div
+            v-else
+            class="rounded-2xl bg-fino-surface-secondary p-4"
+          >
             <dt class="text-xs text-fino-text-muted">
               {{ t('credits.calculator.overpayment') }}
             </dt>
@@ -313,7 +341,7 @@ watch(() => selectedProduct.value?.code, applyProductDefaults, { immediate: true
         </div>
 
         <RepaymentComparison
-          v-if="!isRepaymentUnavailable"
+          v-if="result.repayment === RepaymentKindEnum.Annuity && !isRepaymentUnavailable"
           :repayment="repayment"
           :is-loading="isRepaymentLoading || isLoading"
           :has-error="repaymentError"

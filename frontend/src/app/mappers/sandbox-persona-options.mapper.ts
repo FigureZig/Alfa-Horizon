@@ -20,6 +20,16 @@ export class SandboxPersonaOptionsMapper {
         effect: flag.effect,
         forms: flag.forms,
       })),
+      industries: data.industries.map((industry) => ({
+        id: industry.id,
+        title: industry.title,
+        okved: industry.okved,
+        seasonality: industry.seasonality,
+        channel: industry.channel,
+      })),
+      structures: data.structures.map((structure) => ({ ...structure })),
+      people: data.people.map((person) => ({ ...person })),
+      choices: data.choices,
       params: data.params.map((param) => SandboxPersonaOptionsMapper.toParam(param)),
     }
   }

@@ -66,6 +66,8 @@ export class ApplicationMapper {
         : null,
       loan: data.loan
         ? {
+          isLimit: data.loan.kind === 'limit',
+          number: data.loan.number ?? data.loan.loan_id,
           loanId: data.loan.loan_id,
           amount: Number(data.loan.amount),
           rate: Number(data.loan.rate),
