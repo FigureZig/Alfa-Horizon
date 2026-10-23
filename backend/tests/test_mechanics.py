@@ -63,7 +63,7 @@ def test_simulate_equals_commit_on_complete_data(cases, pol):
 
 def test_matching_agrees_with_the_decision_and_explains_every_no(cases, pol):
     """Подбор от задачи = решение по заявке: доступное в подборе так же решит движок, недоступное — всегда с причиной,
-    рекомендованный продукт доступен, а стоп-фактор закрывает всё."""
+    рекомендованный продукт доступен и закрывает задачу, если это вообще можно, а стоп-фактор закрывает всё."""
     for c in cases["healthy"] + cases["stops"]:
         req = c["request"]
         found = matching.match(c["facts"], pol, req.get("goal"), req["amount"], req.get("term_months"))
@@ -76,7 +76,12 @@ def test_matching_agrees_with_the_decision_and_explains_every_no(cases, pol):
                 again = engine.decide(c["facts"], same, pol, "simulate", allow_alternative=False)
                 assert again["outcome"] == option["outcome"], (c["vector"], option["product"])
         if found["recommended"]:
-            assert next(o for o in found["options"] if o["product"] == found["recommended"])["available"], c["vector"]
+            best = next(o for o in found["options"] if o["product"] == found["recommended"])
+            assert best["available"], c["vector"]
+            covering = [o for o in found["options"] if o["available"] and o["offer"]
+                        and o["label"] in matching.READY and o["offer"]["amount"] >= req["amount"]]
+            if covering:                                         # есть что закрывает задачу — совет закрывает её тоже
+                assert best["offer"]["amount"] >= req["amount"], (c["vector"], best["product"])
         if found["blockers"]:
             assert not any(o["available"] for o in found["options"]), c["vector"]
 

@@ -226,7 +226,8 @@ def _flows() -> list[dict]:
         company = COMPANIES[flow.company]
         request = flow.request or company["scenario"]["request"]
         users = list(dict.fromkeys(s.user for s in flow.steps if s.user != "system"))
-        items = [_login(user, f"{i}.0.{k}") for k, user in enumerate(users, 1)]
+        items = [_item(f"{i}.0 сбросить мир: сценарий начинается с чистого листа", "POST", "/sandbox/reset", tests=_expect(200)),
+                 *[_login(user, f"{i}.0.{k}") for k, user in enumerate(users, 1)]]
         for n, step in enumerate(flow.steps, 1):
             made = _step(flow, step, f"{i}.{n}", company, request)
             items += made if isinstance(made, list) else [made]
@@ -237,6 +238,7 @@ def _flows() -> list[dict]:
 ABOUT = ("Сгенерировано: `cd backend && uv run python -m qa.postman`. Стенд — `cd infra && docker compose up --build`, "
          "`base` = http://localhost:8080/api/v1 (через nginx фронта) или http://localhost:8000/api/v1 (напрямую). "
          "Запускать папки по порядку в Collection Runner или `newman run`: шаги конвейера ждут статус опросом. "
+         "Каждый сценарий начинается со сброса мира: события реестров и отказы живут до сброса, перелогин их не снимает. "
          "Сценарии ролей — те же, что в docs/15_roles.md §4 и tests/e2e/test_flows.py.")
 
 

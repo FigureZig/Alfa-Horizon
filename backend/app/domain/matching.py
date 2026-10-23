@@ -67,13 +67,20 @@ def match(facts: dict, pol: dict, goal: str | None = None, amount=None, term_mon
     return {"blockers": blockers, "options": options, "recommended": _best(options, amount)}
 
 
+READY = {"PREAPPROVED": 0, "CONDITIONAL": 1}   # решает сам банк: сразу или с условием (поручитель, залог)
+
+
 def _best(options: list[dict], amount) -> str | None:
-    """Что посоветовать: предодобренное, которое закрывает нужную сумму, — с самой низкой ставкой; иначе — где больше всего."""
-    ready = [o for o in options if o["available"] and o["label"] == "PREAPPROVED" and o["offer"]]
+    """Что посоветовать под задачу: то, что закрывает нужную сумму, — сначала без условий, потом с условиями, дешевле;
+    если всю сумму не закрывает никто — то, что даёт больше всего (овердрафт на 5% нужды не совет).
+    Без суммы — предодобренное с самым большим лимитом."""
+    ready = [o for o in options if o["available"] and o["label"] in READY and o["offer"]]
     if amount is not None:
         enough = [o for o in ready if dec(o["offer"]["amount"]) >= dec(amount)]
         if enough:
-            return min(enough, key=lambda o: dec(o["offer"]["rate"]))["product"]
-    if ready:
-        return max(ready, key=lambda o: dec(o["max_amount"] or Decimal(0)))["product"]
-    return None
+            return min(enough, key=lambda o: (READY[o["label"]], dec(o["offer"]["rate"])))["product"]
+        if ready:
+            return max(ready, key=lambda o: (dec(o["offer"]["amount"]), -READY[o["label"]]))["product"]
+        return None
+    pre = [o for o in ready if o["label"] == "PREAPPROVED"]
+    return max(pre, key=lambda o: dec(o["max_amount"] or Decimal(0)))["product"] if pre else None

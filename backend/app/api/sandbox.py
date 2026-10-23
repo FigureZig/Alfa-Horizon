@@ -187,16 +187,6 @@ FORMS = {"IP": {"ru": "ИП", "en": "Sole proprietor"}, "LLC": {"ru": "ООО", 
 TREND = {"growing": 0.15, "stable": 0.0, "declining": -0.25}
 LOANS = {"none": 0.0, "some": 0.15, "heavy": 0.45}          # платежи по кредитам — доля выручки
 DELAYS = {"none": 0, "recent": 20, "serious": 120}           # самая долгая просрочка, дней
-INDUSTRY_TITLES = {
-    "coffee": ("Кофейня", "Coffee shop"), "restaurant": ("Ресторан или доставка еды", "Restaurant or food delivery"),
-    "bakery": ("Пекарня, хлебозавод", "Bakery"), "retail_food": ("Продуктовый магазин", "Grocery store"),
-    "online_shop": ("Интернет-магазин на маркетплейсах", "Online shop on marketplaces"),
-    "wholesale": ("Оптовая торговля", "Wholesale"), "construction": ("Строительство", "Construction"),
-    "renovation": ("Ремонт и отделка", "Renovation"), "it": ("Разработка программ", "Software development"),
-    "trucking": ("Грузоперевозки", "Trucking"), "warehouse": ("Склад и логистика", "Warehousing"),
-    "farm": ("Сельское хозяйство", "Farming"), "cleaning": ("Клининг", "Cleaning"), "beauty": ("Салон красоты", "Beauty salon"),
-    "dental": ("Стоматология", "Dental clinic"), "education": ("Курсы и обучение", "Courses and training"),
-}
 CHOICES = {   # id → (ru, en)
     "seasonality": {"flat": ("Ровно круглый год", "Even all year"), "summer": ("Летом больше", "More in summer"),
                     "year_end": ("Больше к концу года", "More towards the year end"),
@@ -257,7 +247,7 @@ async def persona_options(lang: Lang = "ru"):
     Точные цифры (params) — для тех, кому нужно задать их самому."""
     cat, i = flags.catalog(), 0 if lang == "ru" else 1
     return ok({"forms": [{"id": k, "title": v[lang]} for k, v in FORMS.items()],
-               "industries": [{"id": k, "title": INDUSTRY_TITLES[k][i], "okved": code, "okved_name": name,
+               "industries": [{"id": k, "title": world.INDUSTRY_TITLES[k][i], "okved": code, "okved_name": name,
                                "seasonality": world.PROFILES[profile]["season"], "channel": world.PROFILES[profile]["channel"]}
                               for k, (code, name, profile) in world.INDUSTRIES.items()],
                "structures": [{"id": k, "title": t[i], "means": t[2], "forms": STRUCTURE_FORMS[k]}
@@ -612,26 +602,31 @@ def _float(x) -> float | None:
     return None if x is None else float(x)
 
 
-async def _apply_faults(faults: list[dict]) -> None:
-    await _drop("sandbox")
-    for f in faults:
+async def _apply_scenario_faults(persona: dict) -> None:
+    """Отказы, с которых начинается сценарий пользователя (n1, n2: БКИ не отвечает), — только по его компании и со своей
+    меткой: их пересобирает каждый вход. Отказы из панели и события реестров вход не трогает — их снимает сброс мира."""
+    await _drop("sandbox-scenario")
+    companies = persona.get("companies") or [{}]
+    for f in persona["faults"]:
+        stub = fault_stub(f["source"], f["mode"], f.get("inn") or companies[0].get("inn"))
+        stub["metadata"]["createdBy"] = "sandbox-scenario"
         async with _client() as client:
-            (await client.post(f"{ADMIN}/mappings", json=fault_stub(f["source"], f["mode"], f.get("inn")))).raise_for_status()
+            (await client.post(f"{ADMIN}/mappings", json=stub)).raise_for_status()
 
 
 @router.post("/personas/{persona_id}/login", **doc(S.LoginResponse, 404, summary="Войти пользователем из списка"))
 async def login(persona_id: str, lang: Lang = "ru", wait_s: WaitS = 5):
-    """Войти персоной: включаются отказы её сценария, банк собирает данные её компаний, выдаётся JWT.
-    Запросы без токена дальше тоже идут от этой персоны (одна сессия симулятора, docs/08 §2)."""
+    """Войти персоной: банк собирает данные её компаний, выдаётся JWT. Запросы без токена дальше тоже идут от этой
+    персоны (одна сессия симулятора, docs/08 §2). Мир при входе не меняется: перелогин между людьми одной компании —
+    главный способ пройти заявку, и события реестров (смена директора, отзыв МЧД, погашенная недоимка) и отказы из
+    панели остаются, пока их не снимут или не сбросят мир. Пересобираются только отказы сценария самого пользователя."""
     pool = await store.pool()
     async with pool.acquire() as conn:
         persona = await personas.get(conn, persona_id)
         if persona is None:
             raise Problem(404, "PERSONA_NOT_FOUND", f"персоны {persona_id} нет")
         await store.kv_set(conn, personas.ACTIVE_KEY, persona_id)
-        await store.kv_set(conn, OVERRIDES_KEY, {})
-    await _drop("sandbox-event")                             # новый сценарий — мир без событий прошлого
-    await _apply_faults(persona["faults"])
+    await _apply_scenario_faults(persona)
     who = actor_of(persona)
     async with pool.acquire() as conn:
         if who.kind == "client":
@@ -783,7 +778,7 @@ async def list_faults():
     """Отказы источников, которые сейчас включены."""
     async with _client() as client:
         resp = await client.post(f"{ADMIN}/mappings/find-by-metadata",
-                                 json={"matchesJsonPath": {"expression": "$.createdBy", "equalTo": "sandbox"}})
+                                 json={"matchesJsonPath": {"expression": "$.createdBy", "matches": "^sandbox(-scenario)?$"}})
         resp.raise_for_status()
     return ok([{"id": m["id"], **m["metadata"]} for m in resp.json().get("mappings", [])])
 

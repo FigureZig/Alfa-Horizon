@@ -346,7 +346,7 @@ def _about(facts: dict, lang: str) -> str:
     t = T[lang]
     staff = _plural(facts.get("headcount") or 1, t["people"], lang)
     age = _age(facts.get("age_months") or 0, lang)
-    industry = facts.get("okved_name") if lang == "ru" else None
+    industry = world.industry_title(facts.get("okved"), lang) or (facts.get("okved_name") if lang == "ru" else None)
     return t["about"].format(industry=industry, staff=staff, age=age) if industry else t["about_short"].format(staff=staff,
                                                                                                                 age=age)
 
