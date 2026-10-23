@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
@@ -17,6 +17,7 @@ import SandboxPersonaField from '@/app/features/sandbox/components/SandboxPerson
 import SandboxPersonaFlagsPicker from '@/app/features/sandbox/components/SandboxPersonaFlagsPicker.vue'
 import SandboxPersonaGroup from '@/app/features/sandbox/components/SandboxPersonaGroup.vue'
 import SandboxPersonaPreview from '@/app/features/sandbox/components/SandboxPersonaPreview.vue'
+import SandboxPersonaPreviewBar from '@/app/features/sandbox/components/SandboxPersonaPreviewBar.vue'
 import { getApiProblem, useApiFetch } from '@/app/composables/useApiFetch'
 import { useSandboxPersonaPreview } from '@/app/composables/useSandboxPersonaPreview'
 import { useSession } from '@/app/composables/useSession'
@@ -71,6 +72,7 @@ const isSubmitted = ref(false)
 const innServerError = ref<Nullable<string>>(null)
 const highlightedFields = ref<string[]>([])
 const readyGroup = ref<Nullable<SandboxPersonaGroupInterface>>(null)
+const previewRef = useTemplateRef<HTMLElement>('preview')
 
 const form = reactive<SandboxPersonaFormInterface>({
   fullName: '',
@@ -166,6 +168,13 @@ function isHighlighted(...keys: string[]) {
 // Противоречие ответов показываем у тех полей, которые оно называет
 function conflictFor(...keys: string[]) {
   return conflict.value && keys.some((key) => conflict.value?.fields.includes(key)) ? conflict.value.message : null
+}
+
+// На мобильном предпросмотр под формой: полоса снизу возвращает к нему одним касанием
+function scrollToPreview() {
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  previewRef.value?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' })
 }
 
 function handleHighlight(fields: string[]) {
@@ -874,7 +883,10 @@ onMounted(loadOptions)
         </form>
 
         <!-- Живой предпросмотр: что банк скажет и почему -->
-        <div class="min-w-0 lg:sticky lg:top-28">
+        <div
+          ref="preview"
+          class="min-w-0 scroll-mt-24 pb-20 lg:sticky lg:top-28 lg:pb-0"
+        >
           <SandboxPersonaPreview
             :preview="preview"
             :is-loading="isPreviewLoading"
@@ -884,6 +896,13 @@ onMounted(loadOptions)
           />
         </div>
       </div>
+
+      <SandboxPersonaPreviewBar
+        v-if="!readyGroup"
+        :preview="preview"
+        :is-loading="isPreviewLoading"
+        @show="scrollToPreview"
+      />
     </main>
   </div>
 </template>

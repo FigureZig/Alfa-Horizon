@@ -1156,6 +1156,8 @@ export default {
             preview: {
                 title: 'Что скажет банк',
                 updating: 'Пересчитываем…',
+                barAvailable: 'Доступно {available} из {total} продуктов',
+                barMore: 'Нажмите, чтобы посмотреть',
                 products: 'Продукты',
                 recommended: 'Рекомендуем',
                 stopTitle: 'Банк не сможет ничего предложить',

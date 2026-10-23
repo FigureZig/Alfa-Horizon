@@ -1156,6 +1156,8 @@ export default {
             preview: {
                 title: 'What the bank will say',
                 updating: 'Recalculating…',
+                barAvailable: '{available} of {total} products available',
+                barMore: 'Tap to see details',
                 products: 'Products',
                 recommended: 'Recommended',
                 stopTitle: 'The bank will not be able to offer anything',

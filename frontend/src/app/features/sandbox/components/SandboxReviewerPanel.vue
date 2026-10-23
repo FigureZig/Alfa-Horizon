@@ -49,7 +49,12 @@ const eventInn = computed(() => (String(route.name ?? '').startsWith(BANK_ROUTE_
 const isHintVisible = computed(() => route.name === 'login' && !isHintDismissed.value && !isVisible.value)
 
 // В кабинете снизу мобильная навигация: кнопка стоит над ней
-const positionClass = computed(() => (inn.value ? 'bottom-24 lg:bottom-6' : 'bottom-4 sm:bottom-6'))
+const positionClass = computed(() => {
+  // В конструкторе снизу полоса предпросмотра
+  if (route.name === 'login-company' || route.name === 'login-company-edit') return 'bottom-24 lg:bottom-6'
+
+  return inn.value ? 'bottom-24 lg:bottom-6' : 'bottom-4 sm:bottom-6'
+})
 
 function openPanel() {
   isVisible.value = true
