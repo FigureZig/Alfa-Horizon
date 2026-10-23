@@ -1,6 +1,6 @@
 // Замер экрана для приёмки из 1-redesign.md (§7): слова, кнопки, поля, экраны прокрутки, жаргон, сырые ключи перевода.
 //
-// Один раз:   npm i -D playwright && npx playwright install chromium
+// Один раз:   (cd handoff && npm i --no-save playwright && npx playwright install chromium)   ← только node_modules, без package.json
 // Запуск:     node handoff/measure.mjs s7 /cabinet/770100000079 /cabinet/770100000079/credits
 //             node handoff/measure.mjs - /login /            ← без входа
 //             MOBILE=1 node handoff/measure.mjs s7 /cabinet/770100000079
