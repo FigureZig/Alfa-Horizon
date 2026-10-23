@@ -163,7 +163,6 @@ export default {
                 data: { what: 'Company data', where: 'The “What the bank knows about the company” card on the home page.' },
                 history: { what: 'Who did what', where: '“Application history”: actions by name and role.' },
             },
-            swagger: 'Swagger (API)',
             readme: 'README',
         },
         hint: {
