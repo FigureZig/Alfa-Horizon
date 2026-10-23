@@ -658,6 +658,13 @@ export default {
             loadError: 'Не удалось загрузить очередь заявок.',
             companyInn: 'ИНН {inn}',
             proposal: 'Движок предложил {amount} под {rate}',
+            columns: {
+                request: 'Запрос',
+                reason: 'Почему нужен человек',
+                proposal: 'Что предлагал движок',
+                sla: 'Срок',
+            },
+            moreReasons: 'ещё {n}',
             noProposal: 'Движок не смог предложить условия',
             score: 'Балл {score} · класс {riskClass}',
             waitingSecondKey: 'Ждёт второго ключа',

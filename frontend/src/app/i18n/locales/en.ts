@@ -658,6 +658,13 @@ export default {
             loadError: 'Failed to load the application queue.',
             companyInn: 'TIN {inn}',
             proposal: 'The engine proposed {amount} at {rate}',
+            columns: {
+                request: 'Request',
+                reason: 'Why a human is needed',
+                proposal: 'What the engine proposed',
+                sla: 'Deadline',
+            },
+            moreReasons: '{n} more',
             noProposal: 'The engine could not propose terms',
             score: 'Score {score} · class {riskClass}',
             waitingSecondKey: 'Awaiting second key',
