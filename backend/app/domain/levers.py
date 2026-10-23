@@ -89,6 +89,9 @@ def path_to_approval(facts: dict, request: dict, decision: dict, pol: dict, deci
             d = decide(f, r, pol, "simulate", allow_alternative=False)
             if _key(d) > base:
                 tried.append((names, d))
+    if decision["outcome"] == "COUNTER_OFFER":   # путь ко всей сумме — только то, что даёт больше уже предложенного
+        current = Decimal(str((decision.get("offer") or {}).get("amount", 0)))
+        tried = [(names, d) for names, d in tried if Decimal(str((d.get("offer") or {}).get("amount", 0))) > current]
     best = {}
     for names, d in sorted(tried, key=lambda x: (tuple(-v for v in _key(x[1])), sum(COST[n] for n in x[0]), len(x[0]))):
         if any(set(prev) < set(names) and _key(best[prev]) >= _key(d) for prev in best):

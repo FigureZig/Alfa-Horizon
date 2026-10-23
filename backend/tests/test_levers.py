@@ -44,6 +44,8 @@ def test_every_option_improves_and_final_stops_have_none(cases, pol):
         base = _key(d["outcome"], offer.get("amount"), (offer.get("rate") or {}).get("total"))
         for option in path["options"]:
             assert _key(option["outcome"], option["amount"], option["rate"]) > base, (c["vector"], option)
+            if d["outcome"] == "COUNTER_OFFER":             # «как получить всю сумму» — только то, что даёт больше
+                assert Decimal(str(option["amount"])) > Decimal(str(offer["amount"])), (c["vector"], option)
 
 
 def test_factor_target_moves_to_the_better_interval(cases, pol):

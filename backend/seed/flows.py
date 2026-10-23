@@ -137,7 +137,8 @@ FLOWS = [
 ]
 
 ACTION_TEXT = {
-    "create": "создаёт заявку", "submit": "подаёт", "run": "конвейер / выдача", "vote": "голосует", "accept": "принимает оферту",
+    "create": "создаёт заявку", "submit": "подаёт", "run": "делает свою часть сама — подождите несколько секунд",
+    "vote": "голосует", "accept": "принимает оферту",
     "decline": "отказывается от оферты", "sign": "подписывает", "answer": "отвечает на запрос", "withdraw": "отзывает",
     "bank": "решение специалиста", "confirm": "второй ключ", "event": "событие в реестре", "forbidden": "пробует",
 }
@@ -147,7 +148,7 @@ ARG_TEXT = {"for": "«за»", "against": "«против»", "approve": "одо
             "sign": "подписать", "create": "подать заявку", "confirm": "подтвердить"}
 
 ACTION_TEXT_EN = {
-    "create": "creates an application", "submit": "submits", "run": "pipeline / disbursement", "vote": "votes",
+    "create": "creates an application", "submit": "submits", "run": "does its part — wait a few seconds", "vote": "votes",
     "accept": "accepts the offer", "decline": "declines the offer", "sign": "signs", "answer": "answers the request",
     "withdraw": "withdraws", "bank": "specialist decision", "confirm": "second key", "event": "register event",
     "forbidden": "tries",

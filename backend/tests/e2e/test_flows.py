@@ -1,5 +1,6 @@
-"""Сценарии ролей из seed/flows.py через HTTP API: каждый шаг — от лица своего пользователя (свой токен),
-после шага сверяется статус заявки. «Нельзя» проверяется честно: запрос уходит и получает 403."""
+"""Сценарии ролей из seed/flows.py через HTTP API: каждый шаг — от лица своего пользователя, и перед шагом он входит
+заново, как проверяющий в интерфейсе. Перелогин не меняет мир: события реестров и отказы из панели остаются до сброса.
+После шага сверяется статус заявки. «Нельзя» проверяется честно: запрос уходит и получает 403."""
 
 import pytest
 
@@ -24,12 +25,10 @@ async def _forbidden(stand, headers: dict, action: str, inn: str, app_id: str | 
 async def test_flow(stand, flow):
     company = COMPANIES[flow.company]
     request = flow.request or company["scenario"]["request"]
-    tokens = {}
-    for user in dict.fromkeys(s.user for s in flow.steps if s.user != "system"):
-        tokens[user] = await stand.login(user)
     app_id = None
     for n, step in enumerate(flow.steps, 1):
-        headers, base = tokens.get(step.user), f"/applications/{app_id}"
+        headers = await stand.login(step.user) if step.user != "system" else None     # перелогин перед каждым шагом
+        base = f"/applications/{app_id}"
         match step.action:
             case "create":
                 app_id = (await stand.call("POST", "/applications", headers, expect=201,

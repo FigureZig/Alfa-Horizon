@@ -11,6 +11,8 @@ from typing import Annotated, Literal
 
 from fastapi import APIRouter, Path, Query
 
+from seed import world
+
 from .. import clock, company, lifecycle, personas, store
 from ..config import settings
 from ..domain import catalog, engine, forecast, levers, matching
@@ -372,7 +374,8 @@ async def profile(inn: Inn, who: Me, lang: Lang = "ru"):
     fetched = [p["fetched_at"] for p in provenance if p["used"]]
     return ok({"inn": inn, "name": facts.get("name"), "legal_form": facts.get("segment"),
                "registered_at": facts.get("registered"),
-               "activity": {"okved_code": facts["okved"], "name": facts.get("okved_name")} if facts.get("okved") else None,
+               "activity": {"okved_code": facts["okved"], "name": facts.get("okved_name"),
+                            "title": world.industry_title(facts["okved"], lang)} if facts.get("okved") else None,
                "tax_regime": facts.get("tax_regime"), "monthly_revenue": num(facts.get("inflow_avg")), "currency": CURRENCY,
                "sources": [k for k, names in DATA_SOURCES.items() if ok_sources & set(names)],
                "updated_at": max(fetched) if fetched else None, "msp_category": facts.get("msp_category"),

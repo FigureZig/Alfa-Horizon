@@ -529,6 +529,35 @@ INDUSTRIES = {
     "dental": ("86.23", "Стоматологическая практика", "services_retail"),
     "education": ("85.41", "Образование дополнительное детей и взрослых", "services"),
 }
+# отрасль конструктора → коротко и по-человечески (экран входа, конструктор, профиль)
+INDUSTRY_TITLES = {
+    "coffee": ("Кофейня", "Coffee shop"), "restaurant": ("Ресторан или доставка еды", "Restaurant or food delivery"),
+    "bakery": ("Пекарня, хлебозавод", "Bakery"), "retail_food": ("Продуктовый магазин", "Grocery store"),
+    "online_shop": ("Интернет-магазин на маркетплейсах", "Online shop on marketplaces"),
+    "wholesale": ("Оптовая торговля", "Wholesale"), "construction": ("Строительство", "Construction"),
+    "renovation": ("Ремонт и отделка", "Renovation"), "it": ("Разработка программ", "Software development"),
+    "trucking": ("Грузоперевозки", "Trucking"), "warehouse": ("Склад и логистика", "Warehousing"),
+    "farm": ("Сельское хозяйство", "Farming"), "cleaning": ("Клининг", "Cleaning"), "beauty": ("Салон красоты", "Beauty salon"),
+    "dental": ("Стоматология", "Dental clinic"), "education": ("Курсы и обучение", "Courses and training"),
+}
+_SECTION_TITLES = {   # ОКВЭД без отрасли в каталоге → по первым двум цифрам
+    "01": ("Сельское хозяйство", "Farming"), "10": ("Производство еды", "Food production"),
+    "41": ("Строительство", "Construction"), "43": ("Ремонт и отделка", "Renovation"), "46": ("Оптовая торговля", "Wholesale"),
+    "47": ("Розничная торговля", "Retail"), "49": ("Грузоперевозки", "Trucking"), "52": ("Склад и логистика", "Warehousing"),
+    "56": ("Общепит", "Food service"), "62": ("Разработка программ", "Software development"), "81": ("Клининг", "Cleaning"),
+    "85": ("Обучение", "Education"), "86": ("Медицина", "Healthcare"), "96": ("Бытовые услуги", "Personal services"),
+}
+
+
+def industry_title(okved: str | None, lang: str = "ru") -> str | None:
+    """Вид деятельности коротко: «Пекарня, хлебозавод», а не формулировка ОКВЭД; нет в каталоге — None."""
+    if not okved:
+        return None
+    i = 0 if lang == "ru" else 1
+    exact = next((INDUSTRY_TITLES[k][i] for k, (code, _, _) in INDUSTRIES.items() if code == okved), None)
+    return exact or (_SECTION_TITLES.get(okved[:2]) or (None, None))[i]
+
+
 # профиль: сезонность и канал по умолчанию, доли регулярных платежей от средних поступлений, маржа, активы / выручка
 PROFILES = {
     "horeca": {"season": "summer", "channel": "cards", "payroll": .30, "rent": .12, "suppliers": .30, "taxes": .07,
@@ -682,7 +711,7 @@ def custom(spec: dict, number: int, today: date) -> tuple[dict, dict]:
     payment = spec.get("debt_load", 0.15) * avg
     factor = float(annuity_payment(1_000_000, 20, 36)) / 1_000_000              # платёж на рубль долга: 20% на 36 мес.
     loan = [] if payment <= 0 else [[max(100_000, round(payment / factor, -5)), 20, 36, 10, spec.get("overdue_days", 0)]]
-    title = spec.get("company_name") or f"Персона {number}"
+    title = spec.get("company_name") or f"{industry_title((spec.get('okved') or [''])[0]) or 'Своё дело'} {number % 1000}"
     revenue = round(sum(inflows) / 1000)
     small = (msp_category(spec.get("headcount", 12), revenue * 1000) or 3) <= 2
     regime = spec.get("tax_regime") or ("ESHN" if profile is PROFILES["farm"] else "USN" if kind == "IP" or small else "OSN")
