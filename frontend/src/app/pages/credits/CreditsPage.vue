@@ -127,6 +127,8 @@ function handleApply(option: CompanyOfferOptionInterface) {
       amount: option.amount ?? amount.value ?? option.maxAmount ?? undefined,
       term: option.termMonths ?? termMonths.value ?? undefined,
       goal: goal.value ?? undefined,
+      // Сколько показал вариант: если банк даст меньше, «Почему» скажет, откуда разница
+      shown: option.amount ?? option.maxAmount ?? undefined,
     },
   })
 }

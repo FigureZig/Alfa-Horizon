@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import Dialog from 'primevue/dialog'
 import AppErrorState from '@/app/components/AppErrorState.vue'
 import ApplicationExplanationCard from '@/app/features/application/components/ApplicationExplanationCard.vue'
@@ -45,6 +46,7 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
+const route = useRoute()
 const { demoPersona } = useDemoPersona()
 const { me } = useCompanyAccess(() => props.inn)
 const { profile } = useCompanyProfile(() => props.inn)
@@ -118,6 +120,14 @@ const directorName = computed(() => {
 
   return name ? formatShortName(name) : null
 })
+
+// Сколько показывал подбор до заявки: «Почему» объяснит, если банк дал меньше
+const shownAmount = computed(() => {
+  const value = Number(route.query.shown)
+
+  return Number.isFinite(value) && value > 0 ? value : null
+})
+const isProvisional = computed(() => Boolean(application.value?.flags.includes(ApplicationFlagEnum.Provisional)))
 
 const extraFlags = computed(() => application.value?.flags.filter((flag) => !HEADER_FLAGS.includes(flag)) ?? [])
 const isLimit = computed(() => {
@@ -369,6 +379,10 @@ async function confirmAction() {
           :explanation="explanation"
           :is-loading="isExplanationLoading"
           :has-error="explanationError"
+          :requested-amount="application.request.amount"
+          :shown-amount="shownAmount"
+          :is-provisional="isProvisional"
+          :sources="profile?.sources ?? []"
           @retry="loadExplanation"
         />
 
@@ -381,6 +395,10 @@ async function confirmAction() {
             :explanation="explanation"
             :is-loading="isExplanationLoading"
             :has-error="explanationError"
+            :requested-amount="application.request.amount"
+            :shown-amount="shownAmount"
+            :is-provisional="isProvisional"
+            :sources="profile?.sources ?? []"
             @retry="loadExplanation"
           />
 

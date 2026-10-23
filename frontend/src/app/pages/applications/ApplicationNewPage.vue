@@ -193,8 +193,15 @@ async function handleSubmit() {
   const application = await createAndSubmit(form)
 
   if (application) {
-    await router.push({ name: 'application', params: { inn: props.inn, applicationId: application.id },
-      query: route.query.guide === props.inn ? { guide: props.inn } : {} })
+    await router.push({
+      name: 'application',
+      params: { inn: props.inn, applicationId: application.id },
+      query: {
+        ...(route.query.guide === props.inn ? { guide: props.inn } : {}),
+        // Сколько показывал подбор — страница заявки сравнит с решением
+        ...(typeof route.query.shown === 'string' ? { shown: route.query.shown } : {}),
+      },
+    })
   }
 }
 

@@ -28,9 +28,13 @@ export class ApplicationExplanationMapper {
       })),
       caps: (data.limit?.caps ?? []).map((cap) => ({
         code: cap.code,
+        title: cap.title ?? cap.text,
         text: cap.text,
+        value: cap.value ? Number(cap.value) : null,
         isBinding: cap.binding ?? cap.code === data.limit?.binding,
       })),
+      limitAmount: data.limit?.amount ? Number(data.limit.amount) : null,
+      missingFactors: data.scoring.missing ?? [],
       pathTitle: data.path_to_approval.title ?? null,
       pathBlocked: !data.path_to_approval.changeable,
       pathOptions: data.path_to_approval.options.map((option) => ({

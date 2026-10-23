@@ -22,6 +22,8 @@ export interface ExplanationScoringDto {
   pd: Nullable<number>
   risk_class: Nullable<string>
   factors: ExplanationFactorDto[]
+  // Факторы, для которых не хватило данных: например, кредитная история не пришла
+  missing?: string[]
 }
 
 export interface ExplanationPricePartDto {
@@ -38,6 +40,8 @@ export interface ExplanationPriceDto {
 export interface ExplanationCapDto {
   code: string
   title?: string
+  // Сколько разрешает это правило
+  value?: Nullable<string>
   text: string
   // Лимит, который ограничил сумму
   binding?: boolean
@@ -46,6 +50,8 @@ export interface ExplanationCapDto {
 export interface ExplanationLimitDto {
   caps: ExplanationCapDto[]
   binding: Nullable<string>
+  // Итог: сработавший лимит с запасом по классу риска и округлением
+  amount?: Nullable<string>
 }
 
 export interface ExplanationPathOptionDto {
