@@ -49,7 +49,8 @@ async def test_custom_company_flags_change_the_outcome(stand):
     card = await stand.call("POST", "/sandbox/personas", expect=201,
                             json={"full_name": "Олег Петров", "organization": "ООО «Пекарня»", "okved": "10.71",
                                   "flags": ["tax_debt", "bki_down"]})
-    assert card["scenario"] == "Своя компания: налоговая недоимка, бки не отвечает" and card["faults"]
+    assert card["role_title"] == "Генеральный директор «Пекарня», доля 100%" and card["faults"]
+    assert "недоимк" not in " ".join(str(v) for v in card.values()).lower()   # особенности компании решение покажет само
     headers = await stand.login(card["id"])
     app = await stand.call("POST", "/applications", headers, expect=201,
                            json={"inn": card["inn"], "product": "EXPRESS", "amount": 1000000, "term_months": 24,

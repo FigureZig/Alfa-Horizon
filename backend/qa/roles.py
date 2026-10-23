@@ -104,20 +104,22 @@ def _section_matrix() -> list[str]:
 
 
 def _section_users() -> list[str]:
-    pol = load()
     lines = ["## 3. Пользователи симулятора", "",
              "Вход — по ID, ИНН человека или ИНН компании (`POST /api/v1/auth/login {\"login\": \"s7\"}`) или карточкой "
-             "(`GET /api/v1/sandbox/personas` → `POST …/{id}/login`), в ответе токен. Люди без отдельного сценария добавлены "
-             "по их связям с компаниями мира.", "",
-             "| id | Кто | Компания | Права | Сценарий |", "|---|---|---|---|---|"]
+             "(`GET /api/v1/sandbox/personas` → `POST …/{id}/login`), в ответе токен. Карточка входа говорит только, кто это "
+             "и чем занимается компания; сценарий, ради которого пользователь в мире, — здесь. Люди без отдельного сценария "
+             "добавлены по их связям с компаниями мира; скрытые из списка входа (отказы источников и дубли) входят по ID.", "",
+             "| id | Кто | Роль | Права | Сценарий |", "|---|---|---|---|---|"]
     for p in personas.presets():
-        c = personas.card(p, "ru", limit=pol["params"]["specialist_authority_max"])
-        lines.append(f"| `{c['id']}` | {c['full_name']} | {c['organization']} | {c['permissions']} | {c['scenario']} |")
+        c = personas.card(p, "ru")
+        scenario = (p.get("title") or {}).get("ru") or "—"
+        hidden = "" if p.get("listed", True) else " (не в списке входа)"
+        lines.append(f"| `{c['id']}`{hidden} | {c['full_name']} | {c['role_title']} | {c['permissions']} | {scenario} |")
     return lines + [""]
 
 
 def _name(user: str, cards: dict) -> str:
-    return "конвейер" if user == "system" else f"{cards[user]['full_name']} ({cards[user]['code']})"
+    return "конвейер" if user == "system" else f"{cards[user]['full_name']} (`{user}`)"
 
 
 def _section_flows() -> list[str]:

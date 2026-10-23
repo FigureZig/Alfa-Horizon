@@ -1,6 +1,7 @@
 {
   "companyInn": "7701000040",
   "kycDirectorInn": "770100000784",
+  "kycDirectorFio": "Иванов Иван Иванович",
   "persons": [
     {
       "personInn": "770100000784",

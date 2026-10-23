@@ -24,9 +24,13 @@ CASES = {
     "сведения о директоре недостоверны, но есть ДБО": (
         company(eio=[{"inn": A, "title": "Директор", "unreliable": True}], bank_access=[{"inn": A, "level": "prepare"}]),
         A, {"view", "prepare"}),
-    "участник ООО голосует, но не подписывает": (company(participants=[{"inn": A, "share": 30.0}]), A, {"view", "approve"}),
-    "акционер АО в ЕГРЮЛ не виден — голос не из реестра": (
-        company(segment="JSC", participants=[{"inn": A, "share": 30.0}]), A, {"view"}),
+    # счёт компании видит тот, кому компания дала доступ по договору ДБО; участник — только своё голосование в заявке
+    "участник ООО голосует, но счёт не видит и не подписывает": (company(participants=[{"inn": A, "share": 30.0}]), A,
+                                                                 {"approve"}),
+    "участник ООО с доступом в ДБО видит счёт и голосует": (
+        company(participants=[{"inn": A, "share": 30.0}], bank_access=[{"inn": A, "level": "view"}]), A, {"view", "approve"}),
+    "акционер АО в ЕГРЮЛ не виден — ни голоса, ни счёта": (
+        company(segment="JSC", participants=[{"inn": A, "share": 30.0}]), A, set()),
     "ДБО только просмотр": (company(bank_access=[{"inn": A, "level": "view"}]), A, {"view"}),
     "чужой человек": (company(eio=[{"inn": B, "title": "Директор"}]), A, set()),
     "представитель по действующей МЧД подписывает": (

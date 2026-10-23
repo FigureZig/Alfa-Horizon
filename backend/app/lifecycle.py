@@ -80,7 +80,8 @@ def actions(app: dict, can: dict | None = None, *, role: str = "client", person_
     if can.get("prepare"):
         out += by_status.get(status, [])
         out += ["withdraw"] * state.can(status, "WITHDRAWN")
-    if can.get("sign") and status == "SIGNING" and "PROVISIONAL" not in app["flags"]:
+    if can.get("sign") and status == "SIGNING" and "PROVISIONAL" not in app["flags"] \
+            and person_inn not in {s["inn"] for s in data.get("signatures", [])}:   # уже подписал — ждём остальных
         out.append("sign")
     approval = data.get("approval") or {}
     if status == "INFO_REQUESTED" and can.get("approve") and approval.get("status") == "open" \
@@ -366,7 +367,16 @@ async def disburse(conn, client: httpx.AsyncClient, app: dict) -> None:
         await move(conn, app, "UNDER_REVIEW", "worker", flags=sorted({*flags, "DISBURSE_ERROR"}),
                    patch={"disburse_error": str(exc)}, reason="АБС не подтвердила выдачу — у специалиста")
         return
-    await move(conn, app, "ISSUED", "worker", patch={"loan": loan}, reason="кредит выдан")
+    now, repayment = await clock.now(conn), app["data"]["offer"]["repayment"]
+    loan.update(disbursed_at=now.isoformat(), number=contract_number(app["id"], now), product=app["data"]["offer"]["product"],
+                repayment=repayment, kind="limit" if repayment == "revolving" else "loan")   # овердрафт — лимит на счёте
+    await move(conn, app, "ISSUED", "worker", patch={"loan": loan},
+               reason="лимит подключён к счёту" if loan["kind"] == "limit" else "кредит выдан")
+
+
+def contract_number(app_id, on: datetime) -> str:
+    """Номер кредитного договора для клиента: год и начало id заявки — при повторе выдачи тот же самый."""
+    return f"КД-{on.year}/{str(app_id).replace('-', '')[:6].upper()}"
 
 
 async def abs_disburse(client: httpx.AsyncClient, app: dict) -> dict:

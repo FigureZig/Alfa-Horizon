@@ -265,7 +265,7 @@
           ]
         },
         {
-          "name": "0.6 своя компания с недоимкой",
+          "name": "0.6 своя компания простыми ответами: пекарня, партнёры, бухгалтер, недоимка",
           "request": {
             "method": "POST",
             "header": [
@@ -286,7 +286,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"full_name\": \"Олег Петров\",\n  \"organization\": \"ООО «Пекарня у дома»\",\n  \"okved\": \"10.71\",\n  \"flags\": [\n    \"tax_debt\"\n  ]\n}"
+              "raw": "{\n  \"full_name\": \"Олег Петров\",\n  \"organization\": \"Пекарня у дома\",\n  \"industry\": \"bakery\",\n  \"structure\": \"partners\",\n  \"accountant\": true,\n  \"flags\": [\n    \"tax_debt\"\n  ]\n}"
             }
           },
           "event": [
@@ -296,7 +296,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
-                  "pm.test(\"сценарий из флага\", () => pm.expect(pm.response.json().data.scenario).to.include(\"недоимка\"));"
+                  "pm.test(\"карточка — кто это, без исхода\", () => { const c = pm.response.json().data; pm.expect(c.badge).to.eql(\"Директор\"); pm.expect(c.role_title).to.include(\"Пекарня у дома\"); pm.expect(JSON.stringify(c)).to.not.include(\"недоимк\"); });"
                 ]
               }
             }
@@ -440,6 +440,47 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.4a подбор от задачи: закрыть кассовый разрыв",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_s7}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/companies/770100000079/offers?goal=cash_gap",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "companies",
+                "770100000079",
+                "offers"
+              ],
+              "query": [
+                {
+                  "key": "goal",
+                  "value": "cash_gap"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"банк советует овердрафт\", () => pm.expect(pm.response.json().data.recommended).to.eql(\"OVERDRAFT\"));"
                 ]
               }
             }
@@ -727,6 +768,39 @@
               "path": [
                 "bank",
                 "queue"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1a.3a все заявки банка, включая решённые движком",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_bank}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/bank/applications",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "bank",
+                "applications"
               ]
             }
           },

@@ -45,9 +45,13 @@ def daily_inflow(operations: list[dict], today: date, skip: set[str]) -> Decimal
     return (total / days).quantize(Decimal("0.01"))
 
 
-def forecast(operations: list[dict], balance: Decimal, today: date, *, skip: set[str], horizon: int = HORIZON_DAYS) -> dict:
-    """operations — операции счёта: {date, amount (со знаком), purpose, category}; balance — остаток на сегодня."""
-    regular, inflow = regular_outflows(operations, today), daily_inflow(operations, today, skip)
+def forecast(operations: list[dict], balance: Decimal, today: date, *, skip: set[str], horizon: int = HORIZON_DAYS,
+             extra_regular: tuple | list = (), credit_line: Decimal | None = None) -> dict:
+    """operations — операции счёта: {date, amount (со знаком), purpose, category}; balance — остаток на сегодня.
+    extra_regular — платежи, которых в истории ещё нет (кредит, только что выданный банком): {purpose, day, amount};
+    credit_line — подключённый овердрафт: минус в его пределах — не разрыв, а «покроет лимит» (COVERED)."""
+    regular = sorted([*regular_outflows(operations, today), *extra_regular], key=lambda r: (r["day"], r["purpose"]))
+    inflow = daily_inflow(operations, today, skip)
     points, scheduled, running = [{"date": today, "balance": balance}], [], balance
     for step in range(1, horizon + 1):
         day = today + timedelta(days=step)
@@ -60,9 +64,20 @@ def forecast(operations: list[dict], balance: Decimal, today: date, *, skip: set
     gap = deepest["balance"] < 0
     first_negative = next((p["date"] for p in points if p["balance"] < 0), None)
     cash_gap = {"date": deepest["date"], "amount": -deepest["balance"], "first_negative_date": first_negative}
+    covered = gap and credit_line is not None and -deepest["balance"] <= credit_line
     return {
-        "status": "CASH_GAP" if gap else "HEALTHY", "horizon_days": horizon, "balance": balance, "daily_inflow": inflow,
-        "points": points, "regular_outflows": regular, "cash_gap": cash_gap if gap else None,
+        "status": "COVERED" if covered else "CASH_GAP" if gap else "HEALTHY", "horizon_days": horizon, "balance": balance,
+        "daily_inflow": inflow, "points": points, "regular_outflows": regular, "cash_gap": cash_gap if gap else None,
+        "credit_line": credit_line,
         "operations": [op for op in scheduled if op["date"] <= deepest["date"]] if gap else [],
         "upcoming": scheduled,
     }
+
+
+def cover_cost(points: list[dict], annual_pct) -> dict | None:
+    """Сколько стоит закрыть разрыв овердрафтом: проценты только за дни в минусе и только на сумму минуса."""
+    negative = [-p["balance"] for p in points if p["balance"] < 0]
+    if not negative:
+        return None
+    interest = sum(negative, Decimal(0)) * Decimal(str(annual_pct)) / 100 / 365
+    return {"amount": max(negative), "days": len(negative), "interest": interest.quantize(Decimal("1"))}

@@ -5,7 +5,7 @@
 Без токена кабинет компании открывает её пользователь (deps.current_actor) — так фронт входит по ИНН.
 """
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Annotated, Literal
 
@@ -13,13 +13,13 @@ from fastapi import APIRouter, Path, Query
 
 from .. import clock, company, lifecycle, personas, store
 from ..config import settings
-from ..domain import catalog, engine, forecast, levers
+from ..domain import catalog, engine, forecast, levers, matching
 from ..domain import repayment as repay
 from ..domain.scoring import explain_factor
 from ..features import INFLOW_SKIP, account_operations, person_links
 from ..policy import load as load_policy
 from . import schemas as S
-from .deps import Me, access, feature, require
+from .deps import NO_RIGHT, Me, access, feature, require, voter
 from .http import Problem, ok
 from .schemas import doc
 
@@ -44,11 +44,12 @@ TASKS = {   # действие → (тип в контракте фронта, �
 CARDS = {
     "ru": {"balance": "Остаток на счёте", "outflow": "Спишется до {date}", "inflow": "Поступит до {date}",
            "account": "Расчётный счёт ·· {tail}", "acquiring": "Эквайринг по картам покупателей",
-           "customers": "Оплаты покупателей по договорам", "none": "Регулярных списаний нет"},
+           "customers": "Оплаты покупателей по договорам", "none": "Регулярных списаний нет",
+           "credit_line": " · овердрафт до {limit} ₽"},
     "en": {"balance": "Account balance", "outflow": "Outgoing by {date}", "inflow": "Incoming by {date}",
            "account": "Current account ·· {tail}", "acquiring": "Card acquiring",
            "customers": "Customer payments under contracts",
-           "none": "No regular payments"},
+           "none": "No regular payments", "credit_line": " · overdraft up to ₽{limit}"},
 }
 
 
@@ -65,11 +66,30 @@ async def _snapshot(conn, inn: str, source: str) -> dict | None:
     return snap["payload"] if snap and snap["payload"] is not None else None
 
 
-async def _forecast(conn, inn: str) -> dict | None:
+async def _forecast(conn, inn: str, facts: dict | None = None) -> dict | None:
+    """K1 по выписке плюс кредиты, которые банк уже выдал: срочный — деньги на счёте и платёж каждый месяц,
+    овердрафт — лимит, который прикрывает минус (в выписке их ещё нет)."""
     tx = await _snapshot(conn, inn, "bank_tx")
     if not tx:
         return None
-    return forecast.forecast(account_operations(tx), Decimal(tx["balance"]["amount"]), await clock.today(conn), skip=INFLOW_SKIP)
+    today, loans = await clock.today(conn), (facts or {}).get("own_loans", [])
+    term = [loan for loan in loans if loan["repayment"] != "revolving"]
+    balance = Decimal(tx["balance"]["amount"]) + sum((loan["amount"] for loan in term), Decimal(0))
+    extra = [{"purpose": f"Платёж по кредиту {loan['number'] or ''}".strip(), "day": _payment_day(loan, today),
+              "amount": loan["payment"], "repeats": 0} for loan in term]
+    return forecast.forecast(account_operations(tx), balance, today, skip=INFLOW_SKIP, extra_regular=extra,
+                             credit_line=(facts or {}).get("credit_line"))
+
+
+def _payment_day(loan: dict, today) -> int:
+    """Платёж по кредиту — в день выдачи каждого месяца."""
+    issued = loan.get("disbursed_at")
+    return datetime.fromisoformat(issued).astimezone(clock.TZ).day if issued else today.day
+
+
+def _gap(fc: dict | None) -> dict | None:
+    """Разрыв, который нужно закрывать: в пределах подключённого овердрафта минус уже прикрыт (COVERED)."""
+    return fc["cash_gap"] if fc and fc["status"] == "CASH_GAP" else None
 
 
 def _product_cards(facts: dict, gap: dict | None, lang: str) -> list[dict]:
@@ -140,9 +160,10 @@ async def _bank_cards(conn, inn: str, lang: str) -> list[dict]:
     t, pol = BANK_CARDS[lang], load_policy()
     queue = await store.queue(conn)
     pending = [a for a in queue if a["data"].get("pending_decision")]
-    today = (await clock.now(conn)).date().isoformat()
+    today = await clock.today(conn)
     issued = [a for a in await store.queue(conn, ("ISSUED",))
-              if ((a["data"].get("loan") or {}).get("disbursed_at") or "")[:10] == today]
+              if (a["data"].get("loan") or {}).get("disbursed_at")
+              and datetime.fromisoformat(a["data"]["loan"]["disbursed_at"]).astimezone(clock.TZ).date() == today]
     limit = f"{pol['params']['specialist_authority_max']:,}".replace(",", " ")
     late = sum("SLA_BREACH" in a["flags"] for a in queue)
     return [
@@ -177,17 +198,21 @@ async def insights(inn: Inn, who: Me, lang: Lang = "ru"):
     pool = await store.pool()
     async with pool.acquire() as conn:
         _, facts = await require(conn, who, inn, "view")
-        fc = await _forecast(conn, inn)
+        fc = await _forecast(conn, inn, facts)
     if fc is None:
         return ok({"inn": inn, "cash_forecast": None, "offer": None, "contract": None})
     gap = fc["cash_gap"]
-    cards = _product_cards(facts, gap, lang)
+    cards = _product_cards(facts, _gap(fc), lang)
     offer = next((p for p in cards if p["is_recommended"]), None)
+    if offer and offer["product"] == "OVERDRAFT":     # сколько стоит закрыть разрыв: проценты только за дни в минусе
+        cost = forecast.cover_cost(fc["points"], offer["rate"])
+        offer["cover"] = cost and {"amount": num(cost["amount"]), "days": cost["days"], "interest": num(cost["interest"])}
     return ok({"inn": inn, "offer": offer, "contract": _contract_signal(facts, cards), "cash_forecast": {
         "status": fc["status"], "horizon_days": fc["horizon_days"], "currency": CURRENCY,
         "points": [{"date": p["date"], "balance": num(p["balance"])} for p in fc["points"]],
         "cash_gap": {"date": gap["date"], "amount": num(gap["amount"]), "first_negative_date": gap["first_negative_date"]}
         if gap else None,
+        "credit_line": num(fc["credit_line"]),
         "operations": [{"id": f"op-{op['date']}-{abs(op['amount'])}", "date": op["date"], "title": op["title"],
                         "amount": num(op["amount"])} for op in fc["operations"]],
         "daily_inflow": num(fc["daily_inflow"]),
@@ -222,8 +247,45 @@ async def products(inn: Inn, who: Me, lang: Lang = "ru"):
     pool = await store.pool()
     async with pool.acquire() as conn:
         _, facts = await require(conn, who, inn, "view")
-        fc = await _forecast(conn, inn)
-    return ok(_product_cards(facts, fc and fc["cash_gap"], lang))
+        fc = await _forecast(conn, inn, facts)
+    return ok(_product_cards(facts, _gap(fc), lang))
+
+
+NEEDS = {"ru": {"consent_bki": "согласие на запрос кредитной истории — без него условия предварительные",
+                "corporate_approval": "согласие участников на крупную сделку (14-ФЗ ст. 46)",
+                "collateral": "залог — укажете его стоимость в заявке", "guarantor": "поручитель (ГК ст. 361)",
+                "specialist": "решение примет кредитный специалист"},
+         "en": {"consent_bki": "consent to the credit history check — without it the terms are provisional",
+                "corporate_approval": "the members' consent to a major transaction", "collateral": "collateral — you will "
+                "state its value in the application", "guarantor": "a guarantor", "specialist": "a loan officer decides"}}
+Goal = Literal["cash_gap", "stock", "equipment", "growth", "contract"]
+
+
+@router.get("/companies/{inn}/offers", dependencies=[feature("K2")],
+            **doc(S.OffersResponse, 401, 403, 409, summary="Подбор от задачи: что банк готов дать этой компании"))
+async def offers(inn: Inn, who: Me, goal: Annotated[Goal | None, Query(description="на что деньги")] = None,
+                 amount: Annotated[float | None, Query(gt=0, description="сколько нужно, ₽; нет — максимум продукта, "
+                                                                         "для кассового разрыва — сумма разрыва")] = None,
+                 term_months: Annotated[int | None, Query(ge=1, le=120, description="на сколько месяцев")] = None,
+                 lang: Lang = "ru"):
+    """Клиент говорит, на что нужны деньги, — банк по своим данным показывает продукты этой компании: доступен ли,
+    сколько максимум, условия на нужную сумму (ставка своя, по классу риска и отрасли), что понадобится и почему нет.
+    Без goal — весь каталог с личными ставками. Стоп-факторы компании — в blockers, с причиной."""
+    if _is_bank(who, inn):
+        raise Problem(404, "NOT_A_CLIENT", "подбор — для клиента, это рабочее место сотрудника")
+    pool = await store.pool()
+    async with pool.acquire() as conn:
+        _, facts = await require(conn, who, inn, "view")
+        fc = await _forecast(conn, inn, facts)
+    gap = _gap(fc)
+    if amount is None and goal == "cash_gap" and gap:          # «закрыть разрыв» — ровно на сумму разрыва
+        amount = float(catalog.round_up(gap["amount"], load_policy()["params"]["amount_step_small"]))
+    result = matching.match(facts, load_policy(), goal, amount, term_months)
+    for option in result["options"]:
+        option["needs"] = [{"code": n, "text": NEEDS[lang][n]} for n in option["needs"]]
+        option["recommended"] = option["product"] == result["recommended"]
+    return ok({"inn": inn, "goal": goal, "amount": amount, "term_months": term_months, "bki_known": bool(facts.get("bki_known")),
+               "blockers": result["blockers"], "options": result["options"], "recommended": result["recommended"]})
 
 
 REPAY_WHY = {
@@ -237,12 +299,20 @@ REPAY_WHY = {
 }
 
 
+REPAY_SAVING = {
+    "ru": ". Доля поступлений дешевле на {saving} ₽ и закроет долг за {months} мес., но в сильные месяцы платёж выше",
+    "en": ". A share of inflows costs ₽{saving} less and repays in {months} months, but payments are higher in strong months",
+}
+
+
 @router.get("/companies/{inn}/repayment", dependencies=[feature("K4")],
             **doc(S.RepaymentResponse, 401, 403, 404, 409, 422, summary="K4: фиксированный график или доля поступлений"))
 async def repayment(inn: Inn, who: Me, amount: Annotated[float, Query(gt=0, description="сумма кредита, ₽")],
                     term_months: Annotated[int, Query(ge=1, le=120, description="срок для графика, мес.")] = 12,
                     rate: Annotated[float | None, Query(gt=0, le=100, description="ставка, %; нет — по отрасли и классу "
                                                                                     "риска компании")] = None,
+                    product: Annotated[str | None, Query(description="продукт: у овердрафта графика нет — сравнивать нечего")]
+                    = None,
                     lang: Lang = "ru"):
     """Погашение из поступлений (K4): на истории счёта за 12 месяцев сравниваем фиксированный аннуитет и списание доли
     каждого поступления (не меньше минимума); стресс-тест — платёж к средним поступлениям трёх худших месяцев.
@@ -250,6 +320,9 @@ async def repayment(inn: Inn, who: Me, amount: Annotated[float, Query(gt=0, desc
     if _is_bank(who, inn):
         raise Problem(404, "NOT_A_CLIENT", "у банка нет графика погашения — это рабочее место сотрудника")
     pol = load_policy()
+    if product and product in pol["products"] and pol["products"][product]["repayment"] != "annuity":
+        raise Problem(422, "REPAYMENT_NOT_APPLICABLE", "у этого продукта нет графика платежей: овердрафт гасится сам из "
+                      "поступлений, кредит под контракт — в конце срока", product=product)
     pool = await store.pool()
     async with pool.acquire() as conn:
         _, facts = await require(conn, who, inn, "view")
@@ -266,16 +339,21 @@ async def repayment(inn: Inn, who: Me, amount: Annotated[float, Query(gt=0, desc
     why = REPAY_WHY[lang][plan["recommendation"]].format(
         payment=f"{fixed['payment']:,.0f}".replace(",", " " if lang == "ru" else ","),
         share=round((fixed["worst3_share"] or 0) * 100))
+    saving = fixed["total_interest"] - plan["from_inflows"]["total_interest"]
+    if plan["recommendation"] == "fixed" and saving > 0:      # дешевле — доля поступлений: честно говорим, чем платим
+        why += REPAY_SAVING[lang].format(saving=f"{saving:,.0f}".replace(",", " " if lang == "ru" else ","),
+                                         months=plan["from_inflows"]["months"] or "—")
     return ok({"inn": inn, "amount": amount, "rate": rate, "term_months": term_months,
                "fixed": {**fixed, "payment": num(fixed["payment"]), "total_interest": num(fixed["total_interest"]),
                          "worst3_inflow_avg": num(fixed["worst3_inflow_avg"])},
                "from_inflows": {**plan["from_inflows"], **{k: num(plan["from_inflows"][k]) for k in
                                                            ("min_payment", "total_interest", "max_payment", "min_paid")}},
-               "recommendation": plan["recommendation"], "why": why, "stress_max": plan["stress_max"]})
+               "recommendation": plan["recommendation"], "why": why, "stress_max": plan["stress_max"],
+               "saving": num(max(saving, Decimal(0)))})
 
 
-DATA_SOURCES = {"EGRUL": ("egrul", "egrip"), "FNS": ("rsmp", "sshr", "paytax", "debtam", "snr"), "BANK_ACCOUNT": ("bank_tx",),
-                "CREDIT_BUREAU": ("bki",)}
+DATA_SOURCES = {"EGRUL": ("egrul",), "EGRIP": ("egrip",), "FNS": ("rsmp", "sshr", "paytax", "debtam", "snr"),
+                "BANK_ACCOUNT": ("bank_tx",), "CREDIT_BUREAU": ("bki",)}   # у ИП реестр — ЕГРИП, у ООО и АО — ЕГРЮЛ
 
 
 @router.get("/companies/{inn}/profile", **doc(S.ProfileResponse, 401, 403, 409, summary="Что банк знает о компании и откуда"))
@@ -289,7 +367,7 @@ async def profile(inn: Inn, who: Me, lang: Lang = "ru"):
     async with pool.acquire() as conn:
         granted, facts, provenance = await access(conn, who, inn)
     if not granted["can"]["view"]:
-        raise Problem(403, "FORBIDDEN", "у вас нет связи с этой компанией")
+        raise Problem(403, "FORBIDDEN", NO_RIGHT["view"], right="view", roles=granted["roles"])
     ok_sources = {p["source"] for p in provenance if p["used"]}
     fetched = [p["fetched_at"] for p in provenance if p["used"]]
     return ok({"inn": inn, "name": facts.get("name"), "legal_form": facts.get("segment"),
@@ -308,13 +386,18 @@ async def tasks_for(conn, who, inn: str | None = None, lang: str = "ru") -> list
         rows = [(app, None) for app in await store.queue(conn)]
     else:
         card = await _snapshot(conn, who.inn, "bank_person")
-        inns = [inn] if inn else [link["inn"] for link in person_links(card)]
+        persona = await personas.get(conn, who.persona_id)       # участник ООО связан с компанией реестром, не ДБО
+        inns = [inn] if inn else list(dict.fromkeys([link["inn"] for link in person_links(card)]
+                                                    + [c["inn"] for c in (persona or {}).get("companies", [])]))
         for company_inn in inns:
             facts, provenance = await company.facts(conn, company_inn)
             if not provenance:
                 continue
             granted = (await access(conn, who, company_inn))[0]
-            rows += [(app, granted["can"]) for app in await store.applications(conn, company_inn)]
+            apps = await store.applications(conn, company_inn)
+            if not granted["can"]["view"]:                       # без доступа к счёту — только где ждут его голос
+                apps = [a for a in apps if voter(a, who, granted)]
+            rows += [(app, granted["can"]) for app in apps]
     out = []
     for app, can in rows:
         for action in lifecycle.actions(app, can, role=who.role, person_inn=who.inn):
@@ -347,8 +430,12 @@ async def applications_summary(inn: Inn, who: Me, lang: Lang = "ru"):
         if _is_bank(who, inn):                   # у сотрудника — очередь банка
             rows, tasks = await store.queue(conn), await tasks_for(conn, who, lang=lang)
         else:
-            await require(conn, who, inn, "view")
+            granted, _, _ = await access(conn, who, inn)
+            if not granted["can"]["view"] and not granted["can"]["approve"]:
+                raise Problem(403, "FORBIDDEN", NO_RIGHT["view"], right="view", roles=granted["roles"])
             rows = await store.applications(conn, inn)
+            if not granted["can"]["view"]:       # участник ООО — только заявки, где банк просит его голос
+                rows = [a for a in rows if voter(a, who, granted)]
             tasks = await tasks_for(conn, who, inn, lang)
     apps = []
     for app in rows:
@@ -383,6 +470,7 @@ async def cabinet_user(inn: Inn, who: Me, lang: Lang = "ru"):
     pool = await store.pool()
     async with pool.acquire() as conn:
         persona = await _persona_for(conn, who, inn)
+        today = await clock.today(conn)
     card = personas.card(persona, lang)
     first, last = card["full_name"].split(" ", 1)
     if persona["kind"] == "bank":
@@ -392,7 +480,7 @@ async def cabinet_user(inn: Inn, who: Me, lang: Lang = "ru"):
         organization = personas.short_name(main, lang) if lang == "en" else main["name"]
     return ok({"inn": inn, "first_name": first, "last_name": last, "initials": (first[:1] + last[:1]).upper(),
                "organization_name": organization, "user_id": persona["id"], "role": card["role"],
-               "person_inn": card.get("person_inn")})
+               "person_inn": card.get("person_inn"), "today": today})
 
 
 @router.get("/demo-personas/{inn}/dashboard/summary",
@@ -406,9 +494,9 @@ async def dashboard_cards(inn: Inn, who: Me, lang: Lang = "ru"):
         async with pool.acquire() as conn:
             return ok(await _bank_cards(conn, inn, lang))
     async with pool.acquire() as conn:
-        await require(conn, who, inn, "view")
+        _, facts = await require(conn, who, inn, "view")
         tx = await _snapshot(conn, inn, "bank_tx")
-        fc = await _forecast(conn, inn)
+        fc = await _forecast(conn, inn, facts)
         today = await clock.today(conn)
     if fc is None:
         raise Problem(409, "COMPANY_NOT_LOADED", "выписки по счёту ещё нет — банк её загружает", inn=inn)
@@ -418,7 +506,9 @@ async def dashboard_cards(inn: Inn, who: Me, lang: Lang = "ru"):
     retail = any(item.get("category") == "acquiring" for item in tx["items"][-60:])
     return ok([
         {"id": f"{inn}-balance", "type": "balance", "title": t["balance"], "amount": num(fc["balance"]), "currency": CURRENCY,
-         "description": t["account"].format(tail=tx["account"][-4:])},
+         "description": t["account"].format(tail=tx["account"][-4:])
+         + (t["credit_line"].format(limit=f"{int(fc['credit_line']):,}".replace(",", " ")) if fc["credit_line"] else ""),
+         "credit_line": num(fc["credit_line"])},
         {"id": f"{inn}-outflow", "type": "outflow", "title": t["outflow"].format(date=_date(until, lang)),
          "amount": num(-sum((op["amount"] for op in upcoming), Decimal(0))), "currency": CURRENCY,
          "description": ", ".join(dict.fromkeys(titles[:3])) or t["none"], "date": until},

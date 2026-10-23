@@ -57,18 +57,25 @@ class CompanyLink(Schema):
 
 
 class PersonaCard(Schema):
-    """Карточка пользователя для экрана входа (контракт фронта SandboxPersonaDto) — права и профиль посчитаны из мира."""
-    id: str = Field(examples=["s7"])
-    code: str = Field(examples=["S7"])
+    """Карточка пользователя для экрана входа простым языком: кто это и чем занимается компания — без сценариев и
+    исходов. Права и профиль посчитаны из мира. Поля code, scenario, preview — прежний контракт фронта (SandboxPersonaDto):
+    в них те же значок, роль и описание."""
+    id: str = Field(examples=["s7"], description="ID для входа")
+    badge: str = Field(examples=["ИП"], description="значок роли: ИП, Директор, Участник, Сотрудник, По доверенности, "
+                                                     "Специалист банка, Риск-менеджер")
+    role_title: str = Field(examples=["Индивидуальный предприниматель"], description="кто этот человек в компании")
+    about: str = Field(examples=["Кофейня: 9 сотрудников, гости платят картами, бизнесу 2 года"],
+                       description="чем занимается компания (у сотрудника банка — что он делает)")
+    code: str = Field(examples=["ИП"], description="то же, что badge (прежнее поле)")
     kind: Literal["client", "bank"]
     full_name: str = Field(examples=["Анна Смирнова"])
     inn: str = Field(description="ИНН основной компании: по нему открывается кабинет", examples=["770100000079"])
     organization: str
-    scenario: str
+    scenario: str = Field(description="то же, что role_title (прежнее поле)")
     permissions: str
     profile: str
-    registries: str
-    preview: str
+    registries: str = Field(description="отвечают ли источники; находки реестров на экране входа не раскрываются")
+    preview: str = Field(description="то же, что about (прежнее поле)")
     login_label: str
     role: str = Field(description="client · loan_officer · risk_manager")
     person_inn: str | None = None
@@ -263,7 +270,12 @@ class Loan(Schema):
     rate: str
     term_months: int
     status: str = Field(examples=["DISBURSED"])
-    disbursed_at: str
+    disbursed_at: str = Field(description="время выдачи по часам мира")
+    number: str | None = Field(None, examples=["КД-2026/DFDC6D"], description="номер кредитного договора")
+    product: Product | None = None
+    repayment: str | None = Field(None, description="annuity · revolving · bullet · seasonal")
+    kind: Literal["loan", "limit"] | None = Field(None, description="loan — деньги на счёте; limit — овердрафт: подключён "
+                                                                   "лимит, деньги берутся по мере нужды")
 
 
 class InfoRequest(Schema):
@@ -300,12 +312,21 @@ class ApplicationView(Schema):
     available_actions: list[Action] = Field(description="кнопки, которые этот пользователь может нажать сейчас")
 
 
+class EventAuthor(Schema):
+    kind: Literal["client", "bank", "system"]
+    name: str | None = Field(examples=["Анна Смирнова"], description="человек по имени; у шагов конвейера и сроков — «Банк»")
+    role: str | None = Field(None, description="у сотрудника банка: loan_officer · risk_manager")
+    title: str | None = Field(None, description="у сотрудника банка: должность")
+    detail: str | None = Field(None, description="у шагов банка: проверка данных, автоматическое решение, истёк срок")
+
+
 class ApplicationEvent(Schema):
     id: int
-    at: str
+    at: str = Field(description="время по часам мира симулятора")
     type: str = Field(examples=["application.status_changed"])
-    actor: str = Field(examples=["client:770100000079"])
+    actor: str = Field(examples=["client:770100000079"], description="техническая метка автора")
     payload: dict[str, Any]
+    by: EventAuthor | None = Field(None, description="кто сделал шаг — для истории заявки")
 
 
 class ExplainFactor(Contribution):
@@ -343,6 +364,7 @@ class CabinetUser(Schema):
     user_id: str
     role: str
     person_inn: str | None
+    today: str = Field(description="сегодня по часам мира симулятора — для приветствия и подписей «сегодня»")
 
 
 class SummaryCard(Schema):
@@ -376,7 +398,9 @@ class ForecastOperation(Schema):
 
 class CashForecast(Schema):
     """K1: прогноз остатка по дням, разрыв и платежи, которые к нему ведут."""
-    status: Literal["CASH_GAP", "HEALTHY"]
+    status: Literal["CASH_GAP", "COVERED", "HEALTHY"] = Field(
+        description="CASH_GAP — не хватит денег; COVERED — минус в пределах подключённого овердрафта; HEALTHY — всё в порядке")
+    credit_line: float | None = Field(None, description="лимит подключённого овердрафта, ₽")
     horizon_days: int
     currency: str
     points: list[ForecastPoint]
@@ -400,8 +424,38 @@ class CreditProductCard(Schema):
     is_recommended: bool = Field(description="закрывает найденный кассовый разрыв")
     product: Product | None = None
     label: str | None = Field(None, description="PREAPPROVED · CONDITIONAL")
-    payment: float | None = None
+    payment: float | None = Field(None, description="платёж в месяц; у овердрафта — проценты, если занят весь лимит")
     conditions: list[str] = []
+    cover: dict[str, Any] | None = Field(None, description="у предложения под разрыв: amount — сколько взять, days — на сколько "
+                                                         "дней, interest — проценты за эти дни, ₽")
+
+
+class MatchOption(Schema):
+    """Продукт в подборе от задачи — для этой компании: доступен ли, сколько, на каких условиях, что понадобится."""
+    product: Product
+    name: str
+    repayment: str
+    available: bool = Field(description="false — продукт этой компании не дать: причина в why")
+    label: str = Field(description="PREAPPROVED · CONDITIONAL · REVIEW · UNAVAILABLE")
+    outcome: Outcome
+    max_amount: Money | None = Field(description="сколько максимум по данным банка")
+    offer: dict[str, Any] | None = Field(description="условия на нужную сумму: amount, term_months, rate, payment, repayment")
+    counter: list[str] = Field(description="что пришлось изменить: AMOUNT · TERM · PRODUCT")
+    needs: list[dict[str, str]] = Field(description="что понадобится: code и текст")
+    why: list[str] = Field(description="почему нет или почему так — тексты причин")
+    recommended: bool
+
+
+class Offers(Schema):
+    """Подбор от задачи: продукты компании с личными условиями; стоп-факторы — в blockers."""
+    inn: str
+    goal: str | None
+    amount: float | None = Field(description="сколько нужно; для кассового разрыва без суммы — сумма разрыва")
+    term_months: int | None
+    bki_known: bool = Field(description="есть ли полный отчёт БКИ: без него условия предварительные")
+    blockers: list[Reason] = Field(description="стоп-факторы компании: пока они есть, кредита не будет")
+    options: list[MatchOption]
+    recommended: Product | None
 
 
 class Insights(Schema):
@@ -544,10 +598,12 @@ class ProductCatalog(Schema):
 class LoanCalc(Schema):
     rate: str
     rate_parts: dict[str, Any] | None
-    repayment: str
-    payment: Money
-    overpayment: Money
+    repayment: str = Field(description="annuity · revolving · bullet · seasonal")
+    payment: Money = Field(description="платёж в месяц; у овердрафта — проценты, если весь лимит занят весь месяц")
+    overpayment: Money | None = Field(description="проценты за весь срок; у овердрафта null — платят за занятые дни")
     schedule: list[dict[str, Any]]
+    usage_example: dict[str, Any] | None = Field(None, description="у овердрафта: amount, days, interest, text — сколько "
+                                                                 "стоит взять сумму на несколько дней")
 
 
 # ── банк ─────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -565,6 +621,24 @@ class QueueItem(Schema):
     pending_decision: BankNote | None
     available_actions: list[Action]
     sla_until: str | None
+    updated_at: str
+
+
+class BankApplication(Schema):
+    """Заявка в реестре банка: кто решал, что предложено, класс риска — досье открывается по id."""
+    id: str
+    inn: str
+    company_name: str
+    status: Status
+    flags: list[str]
+    request: dict[str, Any] | None
+    outcome: Outcome | None = Field(description="исход движка")
+    decided_by: Literal["engine", "bank"] | None = Field(description="решил движок сам или специалист")
+    offer: Offer | None
+    score: int | None
+    risk_class: str | None
+    loan: Loan | None
+    created_at: str
     updated_at: str
 
 
@@ -639,10 +713,17 @@ class WorkerState(Schema):
 
 
 class PersonaOptions(Schema):
+    """Вопросы конструктора своей компании простым языком и что значит каждый ответ."""
     forms: list[dict[str, Any]]
+    industries: list[dict[str, Any]] = Field(description="чем занимается: id, title, okved, okved_name, seasonality, channel")
+    structures: list[dict[str, Any]] = Field(description="как устроена: id, title, means — кто подписывает и кто одобряет "
+                                                         "крупную сделку, с нормой; forms")
+    people: list[dict[str, Any]] = Field(description="кто ещё работает в кабинете: бухгалтер, представитель по МЧД")
+    choices: dict[str, list[dict[str, Any]]] = Field(description="ответы на вопросы: seasonality, stability, trend, channel, "
+                                                                 "loans, delays — id и title")
     groups: list[dict[str, Any]]
-    flags: list[dict[str, Any]] = Field(description="id, group, title, effect, forms")
-    params: list[dict[str, Any]] = Field(description="id, type, default, description, ge/le")
+    flags: list[dict[str, Any]] = Field(description="особенности фактами: id, group, title, effect, forms")
+    params: list[dict[str, Any]] = Field(description="точные цифры, если нужны: id, type, default, description, ge/le")
 
 
 class ScenarioStep(Schema):
@@ -692,6 +773,7 @@ ExplanationResponse = _named("ExplanationResponse", Explanation)
 CabinetUserResponse = _named("CabinetUserResponse", CabinetUser)
 SummaryCardsResponse = _named("SummaryCardsResponse", list[SummaryCard])
 InsightsResponse = _named("InsightsResponse", Insights)
+OffersResponse = _named("OffersResponse", Offers)
 ProductsResponse = _named("ProductsResponse", list[CreditProductCard])
 ScoreResponse = _named("ScoreResponse", Score)
 ProfileResponse = _named("ProfileResponse", CompanyProfile)
@@ -703,6 +785,7 @@ CatalogResponse = _named("CatalogResponse", Catalog)
 LoanCalcResponse = _named("LoanCalcResponse", LoanCalc)
 ProductCatalogResponse = _named("ProductCatalogResponse", ProductCatalog)
 QueueResponse = _named("QueueResponse", list[QueueItem])
+BankApplicationsResponse = _named("BankApplicationsResponse", list[BankApplication])
 DossierResponse = _named("DossierResponse", Dossier)
 DecisionResponse = _named("DecisionResponse", Decision)
 PresetsResponse = _named("PresetsResponse", list[Preset])

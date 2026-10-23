@@ -32,7 +32,8 @@ async def test_home_widgets_and_forecast(stand):
     assert len(recommended) == 1 and recommended[0]["amount"] >= abs(fc["cash_gap"]["amount"])
 
     profile = await stand.call("GET", f"/companies/{SMIRNOVA}/profile", headers)
-    assert profile["legal_form"] == "IP" and set(profile["sources"]) <= {"EGRUL", "FNS", "BANK_ACCOUNT", "CREDIT_BUREAU"}
+    assert profile["legal_form"] == "IP" and set(profile["sources"]) <= {"EGRIP", "FNS", "BANK_ACCOUNT", "CREDIT_BUREAU"}
+    assert "EGRIP" in profile["sources"]                                 # у ИП реестр — ЕГРИП, не ЕГРЮЛ
     assert profile["tax_regime"] in {"USN", "OSN", "PSN", "ESHN", "AUSN", None} and profile["activity"]["okved_code"]
 
     score = await stand.call("GET", f"/companies/{SMIRNOVA}/score", headers)
@@ -40,6 +41,29 @@ async def test_home_widgets_and_forecast(stand):
 
     plan = await stand.call("GET", f"/companies/{SMIRNOVA}/repayment", headers, params={"amount": 400000, "term_months": 12})
     assert plan["recommendation"] in ("fixed", "from_inflows") and plan["fixed"]["payment"] > 0 and plan["why"]
+    revolving = await stand.api.get(f"/companies/{SMIRNOVA}/repayment", headers=headers,
+                                    params={"amount": 400000, "product": "OVERDRAFT"})
+    assert revolving.status_code == 422 and revolving.json()["code"] == "REPAYMENT_NOT_APPLICABLE"   # у лимита графика нет
+
+
+async def test_matching_starts_from_the_task(stand):
+    """Подбор от задачи: «закрыть разрыв» — ровно на сумму разрыва; продукты не для отрасли — с причиной;
+    заявку можно подать без продукта — его подберёт банк."""
+    headers = await stand.login("s7")
+    gap = await stand.call("GET", f"/companies/{SMIRNOVA}/offers", headers, params={"goal": "cash_gap"})
+    assert gap["amount"] == 40000 and gap["recommended"] == "OVERDRAFT" and not gap["blockers"]   # разрыв 36 196 → 40 000
+    best = next(o for o in gap["options"] if o["recommended"])
+    assert best["available"] and float(best["offer"]["amount"]) == 100000 and best["offer"]["rate"]   # лимит — от минимума
+    everything = await stand.call("GET", f"/companies/{SMIRNOVA}/offers", headers)
+    assert len(everything["options"]) == 6
+    agro = next(o for o in everything["options"] if o["product"] == "AGRO_SEASONAL")
+    assert not agro["available"] and agro["why"]                                 # кофейне агрокредит не дать — и почему
+    app = await stand.call("POST", "/applications", headers, expect=201,
+                           json={"inn": SMIRNOVA, "amount": 40000, "goal": "cash_gap", "consent_bki": True})
+    assert app["request"]["product"] == "OVERDRAFT" and app["request"]["product_chosen_by"] == "bank"
+    assert float(app["request"]["amount"]) == 100000 and float(app["request"]["need"]) == 40000
+    no_goal = await stand.api.post("/applications", headers=headers, json={"inn": SMIRNOVA, "amount": 40000})
+    assert no_goal.status_code == 422 and no_goal.json()["code"] == "GOAL_REQUIRED"
 
 
 async def test_applications_summary_and_tasks(stand):

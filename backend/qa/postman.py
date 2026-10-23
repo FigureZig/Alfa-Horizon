@@ -86,7 +86,8 @@ def _login(user: str, n: str) -> dict:
 
 
 def _simulator() -> dict:
-    flagged = {"full_name": "Олег Петров", "organization": "ООО «Пекарня у дома»", "okved": "10.71", "flags": ["tax_debt"]}
+    flagged = {"full_name": "Олег Петров", "organization": "Пекарня у дома", "industry": "bakery", "structure": "partners",
+               "accountant": True, "flags": ["tax_debt"]}
     return _folder("0. Вход и мир симулятора", [
         _item("0.0 продукты для главной страницы", "GET", "/catalog/products?lang=ru", tests=_expect(200)),
         _item("0.1 сбросить мир", "POST", "/sandbox/reset", tests=_expect(200)),
@@ -96,8 +97,11 @@ def _simulator() -> dict:
         _item("0.4 мои компании и права", "GET", "/me", user="s7", tests=_expect(200)),
         _item("0.5 своя компания: параметры и флаги", "GET", "/sandbox/persona-options?lang=ru", tests=_expect(200)),
         _item("0.5a гид: сценарии по ролям", "GET", "/sandbox/scenarios?lang=ru", tests=_expect(200)),
-        _item("0.6 своя компания с недоимкой", "POST", "/sandbox/personas", body=flagged, tests=[*_expect(201), _js(
-            'pm.test("сценарий из флага", () => pm.expect(pm.response.json().data.scenario).to.include("недоимка"));')[0]]),
+        _item("0.6 своя компания простыми ответами: пекарня, партнёры, бухгалтер, недоимка", "POST", "/sandbox/personas",
+              body=flagged, tests=[*_expect(201), _js(
+                  'pm.test("карточка — кто это, без исхода", () => { const c = pm.response.json().data; '
+                  'pm.expect(c.badge).to.eql("Директор"); pm.expect(c.role_title).to.include("Пекарня у дома"); '
+                  'pm.expect(JSON.stringify(c)).to.not.include("недоимк"); });')[0]]),
     ], "Вход по ID → токен в переменную token_<id>. Перелогин — тот же вход другим пользователем.")
 
 
@@ -109,6 +113,8 @@ def _officer() -> dict:
         _item("1a.2 карточки: очередь, второй ключ, выдачи", "GET", f"/demo-personas/{bank}/dashboard/summary", user="bank",
               tests=_expect(200)),
         _item("1a.3 очередь заявок", "GET", "/bank/queue", user="bank", tests=_expect(200)),
+        _item("1a.3a все заявки банка, включая решённые движком", "GET", "/bank/applications", user="bank",
+              tests=_expect(200)),
         _item("1a.4 метрики конвейера: STP и время решения", "GET", "/bank/metrics", user="bank", tests=_expect(200)),
         _item("1a.5 журнал аудита: цепочка хэшей цела", "GET", "/bank/audit", user="bank", tests=[*_expect(200), _js(
             'pm.test("цепочка цела", () => pm.expect(pm.response.json().data.intact).to.eql(true));')[0]]),
@@ -124,6 +130,9 @@ def _cabinet() -> dict:
             *_expect(200), 'pm.test("разрыв 28.10", () => pm.expect(pm.response.json().data.cash_forecast.cash_gap.date)'
                            '.to.eql("2026-10-28"));']),
         _item("1.4 предодобренные продукты", "GET", f"{c}/products", user="s7", tests=_expect(200)),
+        _item("1.4a подбор от задачи: закрыть кассовый разрыв", "GET", f"{c}/offers?goal=cash_gap", user="s7", tests=[
+            *_expect(200), 'pm.test("банк советует овердрафт", () => pm.expect(pm.response.json().data.recommended)'
+                           '.to.eql("OVERDRAFT"));']),
         _item("1.5 кредитное здоровье: балл и рычаги", "GET", f"{c}/score", user="s7", tests=_expect(200)),
         _item("1.5a как гасить: график или доля поступлений", "GET", f"{c}/repayment?amount=400000&term_months=12", user="s7",
               tests=_expect(200)),

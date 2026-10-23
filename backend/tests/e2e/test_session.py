@@ -1,19 +1,28 @@
 """Вход персоной, права из реестров, главная, своя персона из конструктора фронта и предварительная оферта (N1)."""
 
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 import pytest
 
 pytestmark = [pytest.mark.e2e, pytest.mark.anyio]
 
 SMIRNOVA, HLEB, SKLAD, LENTA = "770100000079", "7701000040", "7701000058", "7701000065"
+MSK = ZoneInfo("Europe/Moscow")
 
 
 async def test_personas_list_matches_frontend_contract(stand):
     items = await stand.call("GET", "/sandbox/personas", params={"lang": "en"})
-    fields = {"id", "code", "kind", "full_name", "organization", "scenario", "permissions", "profile", "registries",
-              "preview", "login_label"}
+    fields = {"id", "badge", "role_title", "about", "code", "kind", "full_name", "organization", "scenario", "permissions",
+              "profile", "registries", "preview", "login_label"}
     assert all(fields <= set(item) for item in items)
-    assert {i["id"] for i in items} >= {"s7", "s3", "s2", "s4", "r8", "n1", "bank"}
+    ids = {i["id"] for i in items}
+    assert ids >= {"s7", "s3", "s2", "s4", "bank", "u-kotov"} and not ids & {"n1", "n2", "r8"}   # без сценариев отказов и дублей
     assert next(i for i in items if i["id"] == "bank")["kind"] == "bank"
+    ru = await stand.call("GET", "/sandbox/personas")
+    assert not any(i["code"] in {"S7", "N1", "R12"} or "Что увидите" in i["preview"] for i in ru)        # не тест-кейсы
+    assert next(i for i in ru if i["id"] == "s4")["registries"] == "Все источники отвечают"           # исход не подсказываем
+    assert next(i for i in ru if i["id"] == "bank")["permissions"].endswith("до 15 млн ₽")           # полномочия из политики
 
 
 async def test_one_person_three_companies_different_rights(stand):
@@ -81,10 +90,19 @@ async def test_custom_company_members_can_approve_a_large_deal(stand):
         member_headers = await stand.login(member["id"])
         me = await stand.call("GET", "/me", member_headers)
         assert me["companies"][0]["can"]["approve"] and not me["companies"][0]["can"]["prepare"]
+        # счёт компании участник без доступа в ДБО не видит — только заявку, где банк просит его голос
+        assert not me["companies"][0]["can"]["view"]
+        denied = await stand.api.get(f"/companies/{owner['inn']}/insights", headers=member_headers)
+        assert denied.status_code == 403 and denied.json()["code"] == "FORBIDDEN"
+        summary = await stand.call("GET", f"/companies/{owner['inn']}/applications/summary", member_headers)
+        assert [a["id"] for a in summary["applications"]] == [app["id"]]
+        assert [t["action"] for t in summary["all_tasks"]] == ["vote"]
         visible = await stand.call("GET", path, member_headers)
         assert "vote" in visible["available_actions"] and "sign" not in visible["available_actions"]
         voted = await stand.call("POST", f"{path}/approvals/vote", member_headers, json={"vote": "for"})
     assert voted["status"] == "CHECKING"
+    authors = {e["by"]["name"] for e in await stand.call("GET", f"{path}/events", owner_headers) if e["by"]["kind"] == "client"}
+    assert "Олег Петров" in authors and len(authors) == 3                         # кто голосовал — по имени, не «вы»
 
     await stand.pump()
     offered = await stand.call("GET", path, owner_headers)
@@ -98,6 +116,92 @@ async def test_custom_company_members_can_approve_a_large_deal(stand):
     await stand.call("POST", f"{path}/signatures", owner_headers)
     await stand.pump()
     assert (await stand.call("GET", path, owner_headers))["status"] == "ISSUED"
+
+
+async def test_builder_company_structure_drives_the_flow(stand):
+    """Своя компания простыми ответами: два директора подписывают вместе (ГК ст. 53 п. 1), бухгалтер готовит, но не
+    подписывает, доверенность одного представителя при совместных директорах не работает — путь заявки следует из устава."""
+    options = await stand.call("GET", "/sandbox/persona-options")
+    assert {"industries", "structures", "people", "choices"} <= set(options)
+    assert next(s for s in options["structures"] if s["id"] == "two_directors_joint")["means"].endswith("(ГК ст. 53 п. 1)")
+    conflict = await stand.api.post("/sandbox/personas", json={"structure": "owner_director", "flags": ["large_deal"]})
+    assert conflict.status_code == 422 and conflict.json()["code"] == "STRUCTURE_CONFLICT"   # один владелец ≠ три участника
+    jsc = await stand.api.post("/sandbox/personas", json={"form": "JSC", "structure": "partners"})
+    assert jsc.status_code == 422 and jsc.json()["code"] == "STRUCTURE_NOT_APPLICABLE"       # акционеров нет в ЕГРЮЛ
+    owner = await stand.call("POST", "/sandbox/personas", expect=201, json={
+        "full_name": "Ольга Петрова", "organization": "Пекарня у дома", "industry": "bakery", "structure": "two_directors_joint",
+        "accountant": True, "representative": True, "seasonality": "flat", "channel": "invoices", "loans": "none"})
+    cards = [c for c in await stand.call("GET", "/sandbox/personas") if c["company_inn"] == owner["inn"]]
+    by_badge = {c["badge"]: c for c in cards}
+    assert owner["role_title"] == "Генеральный директор «Пекарня у дома», доля 60%" and len(cards) == 4
+    assert {"Директор", "Бухгалтер", "Сотрудник"} <= set(by_badge)          # второй директор, бухгалтер, представитель
+    second = next(c for c in cards if c["id"] != owner["id"] and c["badge"] == "Директор")
+
+    accountant = await stand.login(by_badge["Бухгалтер"]["id"])
+    app = await stand.call("POST", "/applications", accountant, expect=201,
+                           json={"inn": owner["inn"], "product": "OVERDRAFT", "amount": 300000, "goal": "cash_gap",
+                                 "consent_bki": True})
+    path = f"/applications/{app['id']}"
+    await stand.call("POST", f"{path}/submit", accountant)
+    await stand.pump()
+    offered = await stand.call("GET", path, accountant)
+    assert offered["status"] == "OFFERED" and "accept_offer" in offered["available_actions"]
+    await stand.call("POST", f"{path}/offer/accept", accountant)
+    denied = await stand.api.post(f"{path}/signatures", headers=accountant)
+    assert denied.status_code == 403                                         # бухгалтер не подписывает
+
+    representative = await stand.login(by_badge["Сотрудник"]["id"])
+    assert "sign" not in (await stand.call("GET", path, representative))["available_actions"]
+    first = await stand.login(owner["id"])
+    signed_once = await stand.call("POST", f"{path}/signatures", first)
+    assert signed_once["status"] == "SIGNING" and signed_once["signers"]["mode"] == "joint"   # ждём второго директора
+    assert "sign" not in signed_once["available_actions"]                    # кнопки у подписавшего больше нет
+    both = await stand.call("POST", f"{path}/signatures", await stand.login(second["id"]))
+    assert both["status"] == "SIGNED"
+    await stand.pump()
+    assert (await stand.call("GET", path, first))["status"] == "ISSUED"
+
+
+async def test_issued_overdraft_changes_the_cabinet(stand):
+    """Выданное не теряется: подключённый овердрафт прикрывает разрыв и второй раз не предлагается, выдача — по часам мира."""
+    await stand.advance(24 * 3600)                         # выдача после перемотки: сброс вернёт часы назад, а кредит забудет
+    headers = await stand.login("s7")
+    before = await stand.call("GET", f"/companies/{SMIRNOVA}/insights", headers)
+    assert before["cash_forecast"]["status"] == "CASH_GAP" and before["offer"]["product"] == "OVERDRAFT"
+    cover = before["offer"]["cover"]
+    assert cover["amount"] == before["cash_forecast"]["cash_gap"]["amount"] and 0 < cover["interest"] < 1000
+    app = await stand.call("POST", "/applications", headers, expect=201,
+                           json={"inn": SMIRNOVA, "product": "OVERDRAFT", "amount": before["offer"]["amount"],
+                                 "goal": "cash_gap", "consent_bki": True})
+    path = f"/applications/{app['id']}"
+    await stand.call("POST", f"{path}/submit", headers)
+    await stand.pump()
+    await stand.call("POST", f"{path}/offer/accept", headers)
+    await stand.call("POST", f"{path}/signatures", headers)
+    await stand.pump()
+    issued = await stand.call("GET", path, headers)
+    assert issued["status"] == "ISSUED" and issued["loan"]["kind"] == "limit" and issued["loan"]["number"].startswith("КД-")
+    today = (await stand.call("GET", "/sandbox/clock"))["today"]
+    assert datetime.fromisoformat(issued["loan"]["disbursed_at"]).astimezone(MSK).date().isoformat() == today
+
+    after = await stand.call("GET", f"/companies/{SMIRNOVA}/insights", headers)
+    assert after["cash_forecast"]["status"] == "COVERED" and after["offer"] is None
+    assert after["cash_forecast"]["credit_line"] == before["offer"]["amount"]
+    assert "OVERDRAFT" not in {p["product"] for p in await stand.call("GET", f"/companies/{SMIRNOVA}/products", headers)}
+
+    bank = await stand.login("bank")                       # банк видит и то, что движок решил сам, а не только очередь
+    register = await stand.call("GET", "/bank/applications", bank, params={"q": "смирнова"})
+    row = next(r for r in register if r["id"] == app["id"])
+    assert row["decided_by"] == "engine" and row["status"] == "ISSUED" and row["loan"]["kind"] == "limit"
+    assert not [r for r in await stand.call("GET", "/bank/applications", bank, params={"decided_by": "bank"})
+                if r["id"] == app["id"]]
+    assert (await stand.call("GET", f"/bank/applications/{app['id']}/dossier", bank))["application"]["id"] == app["id"]
+
+    await stand.call("POST", "/sandbox/reset")             # мир как сначала: заявка в истории, кредит в прогнозе не учитывается
+    headers = await stand.login("s7")
+    again = await stand.call("GET", f"/companies/{SMIRNOVA}/insights", headers)
+    assert again["cash_forecast"]["status"] == "CASH_GAP" and again["offer"]["product"] == "OVERDRAFT"
+    assert (await stand.call("GET", path, headers))["status"] == "ISSUED"
 
 
 async def test_provisional_offer_signs_only_after_credit_history(stand):

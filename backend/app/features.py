@@ -40,6 +40,7 @@ def _registry(f: dict, egrul: dict | None, egrip: dict | None) -> None:
         f.update(
             segment=OPF.get(ul.get("@КодОПФ"), "LLC"),
             name=ul["СвНаимЮЛ"]["@НаимЮЛПолн"],
+            short_name=ul["СвНаимЮЛ"].get("@НаимЮЛСокр") or ul["СвНаимЮЛ"]["@НаимЮЛПолн"],
             ogrn=ul["@ОГРН"],
             registered=ul["@ДатаОГРН"],
             okved=ul["СвОКВЭД"]["СвОКВЭДОсн"]["@КодОКВЭД"],
@@ -56,7 +57,7 @@ def _registry(f: dict, egrul: dict | None, egrip: dict | None) -> None:
     elif egrip:
         ip = egrip["СвИП"]
         fio = _fio(ip["СвФЛ"]["ФИОРус"])
-        f.update(segment="IP", name=f"ИП {fio}", ogrn=ip["@ОГРНИП"], registered=ip["@ДатаОГРНИП"],
+        f.update(segment="IP", name=f"ИП {fio}", short_name=f"ИП {fio}", ogrn=ip["@ОГРНИП"], registered=ip["@ДатаОГРНИП"],
                  okved=ip["СвОКВЭД"]["СвОКВЭДОсн"]["@КодОКВЭД"], okved_name=ip["СвОКВЭД"]["СвОКВЭДОсн"].get("@НаимОКВЭД"),
                  liquidation=False, eio_mode="independent",
                  eio=[{"inn": ip["@ИННФЛ"], "fio": fio, "title": "Индивидуальный предприниматель"}], participants=[])
@@ -191,7 +192,10 @@ def company_facts(inn: str, snaps: dict, today: date) -> dict:
         f["bank_access"] = [{"inn": p["personInn"], "fio": p["fio"], "level": p["level"]} for p in access["persons"]]
         kyc_director = access.get("kycDirectorInn")
         if kyc_director and f["eio"] and kyc_director not in {e["inn"] for e in f["eio"]}:
-            f["conflicts"].append("руководитель в ЕГРЮЛ и в анкете банка разный")
+            kyc_fio = access.get("kycDirectorFio") or next(
+                (p["fio"] for p in access["persons"] if p["personInn"] == kyc_director), f"ИНН {kyc_director}")
+            f["conflicts"].append(f"руководитель по ЕГРЮЛ — {', '.join(e['fio'] for e in f['eio'])}, "
+                                  f"в анкете банка — {kyc_fio}")
     if charter := snaps.get("bank_charter"):
         f["charter"] = {"decisionMethod": charter.get("decisionMethod"), "limits": charter.get("limits", [])}
     if eis := snaps.get("eis"):

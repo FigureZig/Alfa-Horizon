@@ -169,6 +169,10 @@ erDiagram
         int term_months
         str status
         str disbursed_at
+        str number
+        enum product
+        str repayment
+        enum kind
     }
     Deadline {
         enum status

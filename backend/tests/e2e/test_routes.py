@@ -5,6 +5,8 @@
 в ACTIONS — тест упадёт и скажет, какого.
 """
 
+from datetime import datetime
+
 import pytest
 
 from qa import graph
@@ -78,7 +80,11 @@ async def answer_documents(run, nxt):
 
 
 async def expire(run, nxt):
-    await run.stand.advance(3600)
+    """Перемотка часов мира ровно за срок текущего статуса: сроки как в бою (дни), ждать их тест не может."""
+    deadline = (await run.application())["deadline"]
+    now = (await run.stand.call("GET", "/sandbox/clock"))["now"]
+    left = datetime.fromisoformat(deadline["at"]) - datetime.fromisoformat(now)
+    await run.stand.advance(int(left.total_seconds()) + 60)
 
 
 async def bank(run, nxt, action):
@@ -177,3 +183,10 @@ async def test_route(stand, route):
             f"{src} → {dst}: ждали {route[len(seen):]}, получили {new}; пройдено {seen}"
         seen += new
     assert seen == route
+    # реестр банка: «решил специалист» — только если на маршруте было его решение, «решил движок» — только окончательный исход
+    row = next(r for r in await stand.call("GET", "/bank/applications", bank_headers, params={"q": company["inn"]})
+               if r["id"] == run.app_id)
+    banked = any(a == "UNDER_REVIEW" and b in ("OFFERED", "INFO_REQUESTED", "REJECTED")
+                 for a, b in zip(route, route[1:], strict=False))
+    assert (row["decided_by"] == "bank") == banked
+    assert row["decided_by"] != "engine" or row["outcome"] in {"APPROVE", "APPROVE_WITH_CONDITIONS", "COUNTER_OFFER", "REJECT"}

@@ -1,9 +1,15 @@
 """Каталог и цена: какие продукты доступны отрасли, из чего складывается ставка, сколько можно дать (docs/13)."""
 
-from decimal import Decimal
+from decimal import ROUND_CEILING, Decimal
 
 from .calc import dec, floor_to, max_principal, round_to
 from .okved import okved_class
+
+
+def round_up(x, step) -> Decimal:
+    """Вверх до шага: разрыв 36 196 ₽ → 40 000 ₽ при шаге 10 000."""
+    step = dec(step)
+    return (dec(x) / step).to_integral_value(ROUND_CEILING) * step
 
 
 def term_bucket(term_months: int, params: dict) -> str:
@@ -67,7 +73,8 @@ def caps(product: dict, facts: dict, term_months: int, rate_total: Decimal, pol:
     """Все ограничения суммы; value=None — данных нет, движок спросит (docs/04 §3, COLLECT MIN)."""
     p = pol["params"]
     inflow = facts.get("inflow_avg")
-    available = None if inflow is None else dec(p["p_payment"]) * dec(inflow) - dec(facts.get("debt_payments") or 0)
+    paying = dec(facts.get("debt_payments") or 0) + dec(facts.get("own_payments") or 0)    # БКИ + кредиты нашего банка
+    available = None if inflow is None else dec(p["p_payment"]) * dec(inflow) - paying
     out = []
     for code in product["caps"]:
         if code == "PRODUCT_MAX":
