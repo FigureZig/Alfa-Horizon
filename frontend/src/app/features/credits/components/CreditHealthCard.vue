@@ -41,8 +41,16 @@ const emit = defineEmits<{
   retry: []
 }>()
 
-const { t } = useI18n({ useScope: 'global' })
-const { formatCurrency, formatPercent } = useFormatters()
+// Фактор, который нельзя ускорить: он улучшается только со временем
+const TIME_ONLY_FACTOR = 'F1_business_age'
+
+const { t, te, locale } = useI18n({ useScope: 'global' })
+const { formatCurrency } = useFormatters()
+
+// Целые проценты: «22 %», а не «21,73 %» — клиенту важен порядок, а не сотые доли
+function formatWholePercent(value: number): string {
+  return new Intl.NumberFormat(locale.value, { style: 'percent', maximumFractionDigits: 0 }).format(value)
+}
 
 const isSkeletonVisible = computed(() => props.isLoading && !props.creditScore)
 
@@ -55,12 +63,20 @@ function formatFactorValue(factor: string, value: Nullable<number>): string {
     case 'days':
       return t('credits.score.unit.days', { value })
     case 'percent':
-      return formatPercent(value * 100)
+      return formatWholePercent(value)
     case 'rub':
       return formatCurrency(value, 'RUB')
     default:
       return String(value)
   }
+}
+
+// «Выручка колеблется на 22 % от месяца к месяцу» вместо сухого «21,73 %»
+function describeFactor(factor: string, value: Nullable<number>): string {
+  const raw = formatFactorValue(factor, value)
+  const key = `credits.score.factorValue.${factor}`
+
+  return value !== null && te(key) ? t(key, { value: raw }) : raw
 }
 
 const classChips = computed(() =>
@@ -77,7 +93,7 @@ const factors = computed(() =>
   (props.creditScore?.factors ?? []).map((factor) => ({
     factor: factor.factor,
     title: factor.title,
-    value: formatFactorValue(factor.factor, factor.value),
+    value: describeFactor(factor.factor, factor.value),
     points: factor.effect === CreditScoreEffectEnum.Unknown
       ? '—'
       : factor.points > 0 ? `+${factor.points}` : String(factor.points),
@@ -89,15 +105,21 @@ const factors = computed(() =>
   })),
 )
 
-const levers = computed(() =>
+const allLevers = computed(() =>
   (props.creditScore?.levers ?? []).map((lever) => ({
     factor: lever.factor,
     title: lever.title,
-    now: formatFactorValue(lever.factor, lever.value),
-    goal: t(`credits.score.lever.${lever.way}`, { target: formatFactorValue(lever.factor, lever.target) }),
+    text: t(`credits.score.leverText.${lever.way}`, {
+      now: formatFactorValue(lever.factor, lever.value),
+      target: formatFactorValue(lever.factor, lever.target),
+    }),
     gain: t('credits.score.gain', { gain: lever.gain }),
   })),
 )
+
+// Что клиент может улучшить сам и что придёт только со временем
+const levers = computed(() => allLevers.value.filter((lever) => lever.factor !== TIME_ONLY_FACTOR))
+const timeLevers = computed(() => allLevers.value.filter((lever) => lever.factor === TIME_ONLY_FACTOR))
 
 function handleRetry() {
   emit('retry')
@@ -230,7 +252,35 @@ function handleRetry() {
             </div>
 
             <p class="mt-0.5 break-words text-xs text-fino-text-muted">
-              {{ t('credits.score.leverNow', { now: lever.now, goal: lever.goal }) }}
+              {{ lever.text }}
+            </p>
+          </li>
+        </ul>
+      </div>
+
+      <div v-if="timeLevers.length">
+        <h3 class="text-xs font-semibold uppercase tracking-wide text-fino-text-muted">
+          {{ t('credits.score.timeLevers') }}
+        </h3>
+
+        <ul class="mt-2 flex flex-col gap-2">
+          <li
+            v-for="lever in timeLevers"
+            :key="lever.factor"
+            class="rounded-xl border border-dashed border-fino-border p-3 text-sm"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <p class="min-w-0 break-words font-semibold text-fino-text">
+                {{ lever.title }}
+              </p>
+
+              <span class="shrink-0 font-semibold text-fino-text-muted">
+                {{ lever.gain }}
+              </span>
+            </div>
+
+            <p class="mt-0.5 break-words text-xs text-fino-text-muted">
+              {{ lever.text }}
             </p>
           </li>
         </ul>
