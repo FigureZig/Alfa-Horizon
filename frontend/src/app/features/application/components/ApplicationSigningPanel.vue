@@ -17,6 +17,8 @@ const props = defineProps<{
   canSign: boolean
   pendingAction: Nullable<ApplicationActionEnum>
   deadlineAt: Nullable<string>
+  // Кого ещё ждём при совместной подписи (имена из профиля компании)
+  pendingSigners: string[]
 }>()
 
 const emit = defineEmits<{
@@ -88,6 +90,24 @@ function handleSign() {
         <span class="shrink-0 text-xs text-fino-text-muted">
           {{ signature.at }}
         </span>
+      </li>
+    </ul>
+
+    <ul
+      v-if="pendingSigners.length"
+      class="flex flex-col gap-2"
+    >
+      <li
+        v-for="name in pendingSigners"
+        :key="name"
+        class="flex items-center gap-3 rounded-2xl border border-dashed border-fino-border px-4 py-3 text-sm"
+      >
+        <i
+          class="pi pi-clock text-fino-text-muted"
+          aria-hidden="true"
+        />
+        <span class="min-w-0 flex-1 break-words text-fino-text">{{ name }}</span>
+        <span class="shrink-0 text-xs text-fino-text-muted">{{ t('application.signing.waiting') }}</span>
       </li>
     </ul>
 

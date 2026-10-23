@@ -1,4 +1,5 @@
 import { BankNoteMapper } from '@/app/mappers/bank-note.mapper'
+import { ApplicationProductChoiceEnum } from '@/app/types/application/application-product-choice-enum'
 import type {
   ApplicationDecisionDto,
   ApplicationDto,
@@ -92,7 +93,7 @@ export class ApplicationMapper {
 
     return {
       inn,
-      product: form.product,
+      product: form.product === ApplicationProductChoiceEnum.BankChoice ? undefined : form.product,
       amount: form.amount,
       term_months: form.termMonths ?? undefined,
       goal: form.goal ?? undefined,

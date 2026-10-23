@@ -6,6 +6,7 @@ import { useToast } from 'primevue/usetoast'
 import Dialog from 'primevue/dialog'
 import AppErrorState from '@/app/components/AppErrorState.vue'
 import AppHeader from '@/app/components/layout/AppHeader.vue'
+import SandboxLoginById from '@/app/features/sandbox/components/SandboxLoginById.vue'
 import SandboxPersonaCardSkeleton from '@/app/features/sandbox/components/SandboxPersonaCardSkeleton.vue'
 import SandboxPersonaGroup from '@/app/features/sandbox/components/SandboxPersonaGroup.vue'
 import { useApiFetch } from '@/app/composables/useApiFetch'
@@ -188,6 +189,9 @@ watch(locale, loadPersonas)
           {{ t('login.description') }}
         </p>
       </div>
+
+      <!-- Вход без выбора карточки: по ID пользователя или ИНН -->
+      <SandboxLoginById />
 
       <!-- Своя компания: главный способ попробовать кабинет на своём бизнесе -->
       <RouterLink

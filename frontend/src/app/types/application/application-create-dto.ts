@@ -4,7 +4,8 @@ import type { CreditProductCodeEnum } from '@/app/types/application/credit-produ
 /** Тело POST v1/applications — черновик заявки. Подача — отдельной командой submit. */
 export interface ApplicationCreateDto {
   inn: string
-  product: CreditProductCodeEnum
+  // Без продукта банк подберёт его сам по задаче (`goal` тогда обязателен)
+  product?: CreditProductCodeEnum
   amount: number
   term_months?: number
   goal?: CreditGoalEnum

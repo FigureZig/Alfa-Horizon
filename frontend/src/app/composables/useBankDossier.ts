@@ -49,7 +49,14 @@ export function useBankDossier(applicationId: MaybeRefOrGetter<string>, version:
   }
 
   watch(() => toValue(applicationId), onApplicationChange, { immediate: true })
-  watch(() => toValue(version), loadDossier)
+  // Версия появляется вместе с заявкой, когда досье уже грузится; перечитываем только при её смене
+  function onVersionChange(_: Nullable<string>, previousVersion: Nullable<string>) {
+    if (!previousVersion) return
+
+    loadDossier()
+  }
+
+  watch(() => toValue(version), onVersionChange)
 
   return { dossier, isLoading, error, loadDossier }
 }

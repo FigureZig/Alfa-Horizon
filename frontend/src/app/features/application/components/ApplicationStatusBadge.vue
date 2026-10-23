@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { ApplicationDetailStatusEnum } from '@/app/types/application/application-detail-status-enum'
 
 const SUCCESS_CLASS = 'bg-green-500/10 text-green-700 dark:text-green-400'
-const ATTENTION_CLASS = 'bg-fino-accent text-primary'
+const ATTENTION_CLASS = 'bg-fino-accent text-primary dark:text-red-300'
 const DANGER_CLASS = 'bg-red-500/10 text-red-700 dark:text-red-400'
 const NEUTRAL_CLASS = 'bg-fino-surface-secondary text-fino-text-muted'
 

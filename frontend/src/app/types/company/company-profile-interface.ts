@@ -8,6 +8,12 @@ export interface CompanyActivityInterface {
   name: Nullable<string>
 }
 
+export interface CompanyDirectorInterface {
+  inn: string
+  fullName: string
+  title: string
+}
+
 export interface CompanyProfileInterface {
   legalForm: Nullable<LegalFormEnum>
   registeredAt: Nullable<string>
@@ -19,4 +25,5 @@ export interface CompanyProfileInterface {
   updatedAt: Nullable<string>
   // Раздел ОКВЭД (буква): от него зависит отраслевой спред ставки
   section: Nullable<string>
+  directors: CompanyDirectorInterface[]
 }

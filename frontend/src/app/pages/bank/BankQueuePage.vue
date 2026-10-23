@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppErrorState from '@/app/components/AppErrorState.vue'
-import BankQueueCard from '@/app/features/bank/components/BankQueueCard.vue'
+import BankQueueTable from '@/app/features/bank/components/BankQueueTable.vue'
 import BankQueueCardSkeleton from '@/app/features/bank/components/BankQueueCardSkeleton.vue'
 import DashboardSummarySection from '@/app/features/dashboard/components/DashboardSummarySection.vue'
 import { useBankQueue } from '@/app/composables/useBankQueue'
@@ -137,21 +137,10 @@ const roleLabel = computed(() => (demoPersona.value ? t(`bank.role.${demoPersona
           <span class="text-fino-text-muted">· {{ myCards.length }}</span>
         </h2>
 
-        <ul class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <li
-            v-for="card in myCards"
-            :key="card.item.id"
-            class="flex"
-          >
-            <BankQueueCard
-              class="w-full"
-              :item="card.item"
-              :inn="inn"
-              :company-name="card.companyName"
-              :is-mine="card.isMine"
-            />
-          </li>
-        </ul>
+        <BankQueueTable
+          :inn="inn"
+          :rows="myCards"
+        />
       </section>
 
       <p
@@ -171,21 +160,10 @@ const roleLabel = computed(() => (demoPersona.value ? t(`bank.role.${demoPersona
           <span class="text-fino-text-muted">· {{ colleaguesCards.length }}</span>
         </h2>
 
-        <ul class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <li
-            v-for="card in colleaguesCards"
-            :key="card.item.id"
-            class="flex"
-          >
-            <BankQueueCard
-              class="w-full"
-              :item="card.item"
-              :inn="inn"
-              :company-name="card.companyName"
-              :is-mine="card.isMine"
-            />
-          </li>
-        </ul>
+        <BankQueueTable
+          :inn="inn"
+          :rows="colleaguesCards"
+        />
       </section>
     </template>
   </div>

@@ -1,5 +1,5 @@
 import { useI18n } from 'vue-i18n'
-import { getApiErrorCode } from '@/app/composables/useApiFetch'
+import { getApiErrorCode, getApiProblem } from '@/app/composables/useApiFetch'
 import { ApiErrorCodeEnum } from '@/app/types/api-error-code-enum'
 
 // Коды ошибок команд заявки → ключ локализованного текста: технические сообщения API пользователю не показываем
@@ -16,6 +16,7 @@ const ERROR_KEYS: Record<string, string> = {
   [ApiErrorCodeEnum.BankOnly]: 'bankOnly',
   [ApiErrorCodeEnum.RoleRequired]: 'roleRequired',
   [ApiErrorCodeEnum.AmountRequired]: 'amountRequired',
+  [ApiErrorCodeEnum.GoalRequired]: 'goalRequired',
 }
 
 export function useApplicationError() {
@@ -23,6 +24,14 @@ export function useApplicationError() {
 
   function getApplicationErrorMessage(err: unknown): string {
     const code = getApiErrorCode(err)
+
+    // Подбор без продукта не нашёл варианта: текст с бэкенда уже человеческий, в нём — что мешает
+    if (code === ApiErrorCodeEnum.NoProductForGoal) {
+      const problem = getApiProblem(err)
+      const blockers = Array.isArray(problem?.blockers) ? (problem.blockers as { text: string }[]) : []
+
+      return [problem?.detail, blockers[0]?.text].filter(Boolean).join(': ')
+    }
 
     return t(`application.errors.${(code && ERROR_KEYS[code]) || 'generic'}`)
   }

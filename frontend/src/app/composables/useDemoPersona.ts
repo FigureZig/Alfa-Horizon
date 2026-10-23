@@ -17,6 +17,10 @@ const error = ref(false)
 // Номер последнего запроса: ответы устаревших запросов (другая персона или язык) отбрасываем
 let lastRequestId = 0
 
+// Layout и страница просят одну и ту же персону одновременно — второй запрос не нужен
+let pendingKey = ''
+let pendingRequest: Nullable<Promise<void>> = null
+
 function resetDemoPersona() {
   lastRequestId++
   demoPersona.value = null
@@ -30,7 +34,20 @@ export function useDemoPersona() {
   const router = useRouter()
   const { t, locale } = useI18n({ useScope: 'global' })
 
-  async function loadDemoPersona(inn: string) {
+  function loadDemoPersona(inn: string) {
+    const key = `${inn}:${locale.value}`
+
+    if (pendingRequest && pendingKey === key) return pendingRequest
+
+    pendingKey = key
+    pendingRequest = requestDemoPersona(inn).finally(() => {
+      if (pendingKey === key) pendingRequest = null
+    })
+
+    return pendingRequest
+  }
+
+  async function requestDemoPersona(inn: string) {
     const requestId = ++lastRequestId
 
     // Не показываем данные предыдущей персоны, пока грузится новая

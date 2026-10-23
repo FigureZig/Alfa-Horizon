@@ -1,11 +1,48 @@
+import type { CreditGoalEnum } from '@/app/types/application/credit-goal-enum'
+import type { CreditProductCodeEnum } from '@/app/types/application/credit-product-code-enum'
+import type { Nullable } from '@/app/types/nullable'
+
 // Что мешает банку предложить кредит всей компании: недоимка, банкротство, недостоверный директор, лимит нагрузки…
 export interface CompanyBlockerDto {
   code: string
   text: string
 }
 
-/** Ответ GET v1/companies/{inn}/offers без цели: подбор по всем продуктам, здесь нужны только стоп-факторы. */
+// Деньги в подборе приходят строками («1500000.00»): число получает маппер
+export interface CompanyOfferTermsDto {
+  amount: string
+  term_months: number
+  rate: string
+  payment: string
+  repayment: string
+}
+
+export interface CompanyOfferOptionDto {
+  product: CreditProductCodeEnum
+  name: string
+  repayment: string
+  available: boolean
+  // PREAPPROVED · CONDITIONAL · REVIEW · UNAVAILABLE
+  label: string
+  max_amount: Nullable<string>
+  offer: Nullable<CompanyOfferTermsDto>
+  // Что понадобится, чтобы получить продукт: поручитель, залог, документы
+  needs: Array<string | { text: string }>
+  // Почему продукт не подходит компании
+  why: string[]
+  recommended: boolean
+}
+
+/**
+ * Ответ GET v1/companies/{inn}/offers: все продукты компании с личными условиями.
+ * Без цели — общий подбор; с целью, суммой и сроком условия считаются под них.
+ */
 export interface CompanyOffersDto {
   inn: string
+  goal: Nullable<CreditGoalEnum>
+  amount: Nullable<number>
+  term_months: Nullable<number>
   blockers: CompanyBlockerDto[]
+  options: CompanyOfferOptionDto[]
+  recommended: Nullable<CreditProductCodeEnum>
 }

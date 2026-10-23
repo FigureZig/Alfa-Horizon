@@ -23,6 +23,8 @@ const props = defineProps<{
   summary: Nullable<ApplicationsSummaryInterface>
   isLoading: boolean
   hasError: boolean
+  // Сегодняшняя дата мира: срок задачи показываем в днях
+  today: Nullable<string>
 }>()
 
 const emit = defineEmits<{
@@ -30,7 +32,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
-const { formatCurrency, formatDate } = useFormatters()
+const { formatCurrency, formatDate, getDaysLeft } = useFormatters()
 
 const isSkeletonVisible = computed(() => props.isLoading && !props.summary)
 
@@ -61,9 +63,11 @@ const tasks = computed(() =>
       : null,
     meta: [
       t(`applicationsTasks.taskType.${task.type}`),
-      task.dueDate
-        ? t('applicationsTasks.dueDate', { date: formatDate(task.dueDate, { day: 'numeric', month: 'long' }) })
-        : '',
+      task.dueDate && props.today
+        ? t('applicationsTasks.daysLeft', getDaysLeft(task.dueDate, props.today))
+        : task.dueDate
+          ? t('applicationsTasks.dueDate', { date: formatDate(task.dueDate, { day: 'numeric', month: 'long' }) })
+          : '',
     ].filter(Boolean).join(' · '),
   })),
 )
