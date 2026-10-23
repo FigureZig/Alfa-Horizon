@@ -11,7 +11,7 @@ export class CompanyProfileMapper {
       legalForm: data.legal_form,
       registeredAt: data.registered_at,
       activity: data.activity
-        ? { okvedCode: data.activity.okved_code, name: data.activity.name }
+        ? { okvedCode: data.activity.okved_code, name: data.activity.name, title: data.activity.title ?? null }
         : null,
       taxRegime: data.tax_regime,
       monthlyRevenue: data.monthly_revenue,

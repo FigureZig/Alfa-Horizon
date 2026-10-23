@@ -31,6 +31,9 @@ export function useCashForecast(inn: MaybeRefOrGetter<string>) {
   const hasCashGap = computed(() => forecast.value?.status === CashForecastStatusEnum.CashGap)
 
   async function loadForecast() {
+    // Пустой ИНН — прогноз выключен на фронте (флаг K1): не запрашиваем
+    if (!toValue(inn)) return
+
     const requestId = ++lastRequestId
 
     isForecastLoading.value = true

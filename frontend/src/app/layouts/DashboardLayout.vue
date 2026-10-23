@@ -17,12 +17,19 @@ const props = defineProps<{
 const BANK_ROUTE_PREFIX = 'bank-'
 const VOTES_ROUTE_NAMES = ['votes', 'vote']
 
-const { locale } = useI18n({ useScope: 'global' })
+const { t, locale } = useI18n({ useScope: 'global' })
 const route = useRoute()
 const router = useRouter()
 const { demoPersona, error: demoPersonaError, loadDemoPersona } = useDemoPersona()
 
-const { me, isVotesOnly, error: accessError, loadAccess } = useCompanyAccess(() => props.inn)
+const { me, company, isVotesOnly, error: accessError, loadAccess } = useCompanyAccess(() => props.inn)
+
+// Подпись под именем в шапке: роль в этой компании, у сотрудника банка — роль в банке
+const roleCaption = computed(() => {
+  if (demoPersona.value?.isBankStaff) return t(`bank.role.${demoPersona.value.role}`)
+
+  return company.value ? t(`demoPersona.role.${company.value.role}`) : t('demoPersona.caption')
+})
 
 // Создатель своей компании (id вида c12) может её менять
 const ownerId = computed(() => (/^c\d+$/.test(demoPersona.value?.userId ?? '') ? demoPersona.value?.userId ?? null : null))
@@ -77,7 +84,7 @@ watch([demoPersona, me, () => route.name], redirectByRole, { immediate: true })
             :companies="me?.companies ?? []"
             :owner-id="ownerId"
           />
-          <DemoPersonaProfile />
+          <DemoPersonaProfile :caption="roleCaption" />
         </div>
       </template>
     </AppHeader>

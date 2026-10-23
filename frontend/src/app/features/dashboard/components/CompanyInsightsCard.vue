@@ -32,14 +32,11 @@ function getRegistrationBadge(profile: CompanyProfileInterface): string {
     : form
 }
 
+// Вид деятельности словами клиента: «Кофейня», а не формулировка ОКВЭД
 function getActivityBadge(profile: CompanyProfileInterface): string {
   const activity = profile.activity
 
-  if (!activity) return ''
-
-  return activity.name
-    ? t('companyInsights.activity', { name: activity.name, code: activity.okvedCode })
-    : t('companyInsights.activityCode', { code: activity.okvedCode })
+  return activity?.title ?? activity?.name ?? ''
 }
 
 // Бейдж показываем, только если значение пришло от API
@@ -67,7 +64,7 @@ const badges = computed(() => {
   ].filter((badge) => badge.label)
 })
 
-// «ЕГРЮЛ, ФНС и счёт в банке · 21.10, 14:02»
+// «Откуда данные: реестр компаний, налоговая и счёт в банке · 21.10, 14:02»
 const sourcesLine = computed(() => {
   const profile = props.profile
 
@@ -78,10 +75,15 @@ const sourcesLine = computed(() => {
     ? formatDateTime(profile.updatedAt, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
     : ''
 
-  return [sources.length ? formatList(sources) : '', updatedAt].filter(Boolean).join(' · ')
+  return [sources.length ? t('companyInsights.sourcesLine', { list: formatList(sources) }) : '', updatedAt]
+    .filter(Boolean)
+    .join(' · ')
 })
 
 const isEmpty = computed(() => !badges.value.length && !sourcesLine.value)
+
+// Кратко в заголовке свёрнутого блока: чем занимается компания
+const preview = computed(() => (props.profile ? getActivityBadge(props.profile) : ''))
 
 function handleRetry() {
   emit('retry')
@@ -89,55 +91,70 @@ function handleRetry() {
 </script>
 
 <template>
-  <article
-    class="flex min-w-0 flex-col gap-4 rounded-3xl border border-fino-border
-           bg-fino-surface p-5 shadow-sm"
-  >
-    <h2 class="text-sm font-semibold text-fino-text">
-      {{ t('companyInsights.title') }}
-    </h2>
-
-    <CompanyInsightsCardSkeleton v-if="isSkeletonVisible" />
-
-    <AppErrorState
-      v-else-if="hasError"
-      :message="t('companyInsights.loadError')"
-      is-inline
-      @retry="handleRetry"
-    />
-
-    <p
-      v-else-if="isEmpty"
-      class="text-sm text-fino-text-muted"
+  <!-- Подробности по запросу: свёрнуто, как «Как посчитали» -->
+  <details class="group min-w-0 rounded-3xl border border-fino-border bg-fino-surface shadow-sm">
+    <summary
+      class="flex cursor-pointer items-center justify-between gap-3 rounded-3xl px-5 py-4 marker:content-none
+             focus-visible:outline-2 focus-visible:outline-primary"
     >
-      {{ t('companyInsights.empty') }}
-    </p>
+      <span class="flex min-w-0 flex-wrap items-baseline gap-x-2">
+        <span class="text-sm font-semibold text-fino-text">{{ t('companyInsights.title') }}</span>
+        <span
+          v-if="preview"
+          class="truncate text-sm text-fino-text-muted"
+        >{{ preview }}</span>
+      </span>
 
-    <template v-else>
-      <ul
-        v-if="badges.length"
-        class="flex flex-wrap gap-2"
-      >
-        <li
-          v-for="badge in badges"
-          :key="badge.key"
-          class="max-w-full break-words rounded-lg bg-fino-surface-secondary px-2.5 py-1
-                 text-xs font-medium text-fino-text"
-        >
-          {{ badge.label }}
-        </li>
-      </ul>
+      <i
+        class="pi pi-chevron-down text-xs text-fino-text-muted transition-transform duration-200
+               group-open:rotate-180 motion-reduce:transition-none"
+        aria-hidden="true"
+      />
+    </summary>
+
+    <div class="flex flex-col gap-4 px-5 pb-5">
+      <CompanyInsightsCardSkeleton v-if="isSkeletonVisible" />
+
+      <AppErrorState
+        v-else-if="hasError"
+        :message="t('companyInsights.loadError')"
+        is-inline
+        @retry="handleRetry"
+      />
 
       <p
-        v-if="sourcesLine"
-        class="mt-auto flex items-start gap-1.5 text-xs text-fino-text-muted"
+        v-else-if="isEmpty"
+        class="text-sm text-fino-text-muted"
       >
-        <i
-          class="pi pi-database mt-0.5 text-xs"
-          aria-hidden="true"
-        />
-        <span class="min-w-0 break-words">{{ sourcesLine }}</span>
+        {{ t('companyInsights.empty') }}
       </p>
-    </template>
-  </article>
+
+      <template v-else>
+        <ul
+          v-if="badges.length"
+          class="flex flex-wrap gap-2"
+        >
+          <li
+            v-for="badge in badges"
+            :key="badge.key"
+            class="max-w-full break-words rounded-lg bg-fino-surface-secondary px-2.5 py-1
+                   text-xs font-medium text-fino-text"
+          >
+            {{ badge.label }}
+          </li>
+        </ul>
+
+        <p
+          v-if="sourcesLine"
+          class="flex items-start gap-1.5 text-xs text-fino-text-muted"
+        >
+          <i
+            class="pi pi-database mt-0.5 text-xs"
+            aria-hidden="true"
+          />
+          <span class="min-w-0 break-words">{{ sourcesLine }}</span>
+        </p>
+      </template>
+    </div>
+  </details>
 </template>

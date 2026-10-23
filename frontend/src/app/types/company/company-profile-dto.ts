@@ -6,6 +6,8 @@ import type { Nullable } from '@/app/types/nullable'
 export interface CompanyActivityDto {
   okved_code: string
   name: Nullable<string>
+  // Коротко, по-человечески: «Пекарня, хлебозавод»
+  title?: Nullable<string>
 }
 
 // Руководитель по ЕГРЮЛ/ЕГРИП: по ИНН подписи заявки видно, кого ждём

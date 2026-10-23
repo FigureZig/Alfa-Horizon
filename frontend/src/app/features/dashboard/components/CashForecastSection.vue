@@ -7,41 +7,51 @@ import CashForecastCard from './CashForecastCard.vue'
 import CashForecastCardSkeleton from './CashForecastCardSkeleton.vue'
 import CloseGapDialog from './CloseGapDialog.vue'
 import CompanyContractCard from './CompanyContractCard.vue'
-import CreditOfferCard from './CreditOfferCard.vue'
 import { useApplicationCreate } from '@/app/composables/useApplicationCreate'
-import { useCashForecast } from '@/app/composables/useCashForecast'
-import { useFeatureFlags } from '@/app/composables/useFeatureFlags'
+import { useDashboardSummary } from '@/app/composables/useDashboardSummary'
 import { CreditGoalEnum } from '@/app/types/application/credit-goal-enum'
+import { DashboardSummaryCardTypeEnum } from '@/app/types/dashboard/dashboard-summary-card-type-enum'
+import type { CashForecastInterface, CashGapOfferInterface } from '@/app/types/company/cash-forecast-interface'
+import type { Nullable } from '@/app/types/nullable'
+
+const FLOW_TYPES = [DashboardSummaryCardTypeEnum.Outflow, DashboardSummaryCardTypeEnum.Inflow]
 
 const props = defineProps<{
   inn: string
+  forecast: Nullable<CashForecastInterface>
+  // Предложение под разрыв, если банк его посчитал
+  offer: Nullable<CashGapOfferInterface>
+  isLoading: boolean
+  hasError: boolean
+}>()
+
+const emit = defineEmits<{
+  retry: []
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
 const router = useRouter()
 
-const { isK2Enabled } = useFeatureFlags()
-const {
-  forecast,
-  isForecastLoading,
-  forecastError,
-  isForecastDisabled,
-  hasCashGap,
-  loadForecast,
-} = useCashForecast(() => props.inn)
 const { isSubmitting, errorMessage, createAndSubmit } = useApplicationCreate(props.inn)
+// Сколько спишется и поступит до даты разрыва — свёрнуто в карточке денег
+const { cards } = useDashboardSummary(() => props.inn)
 
 const isCloseGapVisible = ref(false)
 
-// Кредит предлагаем, только если K1 нашёл разрыв, а K2 посчитал предложение под него
-const offer = computed(() => (hasCashGap.value && isK2Enabled ? forecast.value?.offer ?? null : null))
+const flows = computed(() =>
+  cards.value
+    .filter((card) => FLOW_TYPES.includes(card.type))
+    .map((card) => ({
+      id: card.id,
+      title: card.title,
+      value: card.value,
+      description: card.description,
+      isOutflow: card.type === DashboardSummaryCardTypeEnum.Outflow,
+    })),
+)
 
-const contract = computed(() => forecast.value?.contract ?? null)
-
-const isForecastSkeletonVisible = computed(() => isForecastLoading.value && !forecast.value)
-
-// Колонка предложения нужна только при разрыве; без предложения график занимает всю ширину
-const isOfferVisible = computed(() => Boolean(offer.value))
+const contract = computed(() => props.forecast?.contract ?? null)
+const isSkeletonVisible = computed(() => props.isLoading && !props.forecast)
 
 function openCloseGap() {
   isCloseGapVisible.value = true
@@ -53,7 +63,7 @@ function handleCloseGapVisibleChange(visible: boolean) {
 
 // Одно подтверждение с ценой: заявка создаётся и подаётся, дальше — страница заявки
 async function confirmCloseGap(consentBki: boolean) {
-  const current = offer.value
+  const current = props.offer
 
   if (!current) return
 
@@ -71,62 +81,56 @@ async function confirmCloseGap(consentBki: boolean) {
   await router.push({ name: 'application', params: { inn: props.inn, applicationId: application.id } })
 }
 
+// Без посчитанного предложения — подбор сразу с задачей «закрыть разрыв»
 function showCreditOptions() {
-  router.push({ name: 'credits', params: { inn: props.inn } })
+  router.push({ name: 'credits', params: { inn: props.inn }, query: { goal: CreditGoalEnum.CashGap } })
+}
+
+function handleRetry() {
+  emit('retry')
 }
 </script>
 
 <template>
   <section
-    v-if="!isForecastDisabled"
-    class="flex flex-col gap-4"
+    class="flex min-w-0 flex-col gap-4"
     :aria-label="t('cashForecast.sectionLabel')"
   >
+    <CashForecastCardSkeleton v-if="isSkeletonVisible" />
+
+    <AppErrorState
+      v-else-if="hasError"
+      :message="t('cashForecast.loadError')"
+      @retry="handleRetry"
+    />
+
+    <CashForecastCard
+      v-else-if="forecast"
+      :forecast="forecast"
+      :offer="offer"
+      :flows="flows"
+      @close-gap="openCloseGap"
+      @show-options="showCreditOptions"
+    />
+
     <div
-      class="grid grid-cols-1 items-stretch gap-4"
-      :class="{ 'xl:grid-cols-[minmax(0,1fr)_22rem]': isOfferVisible }"
+      v-else
+      class="flex flex-col items-center rounded-3xl border border-dashed
+             border-fino-border bg-fino-surface px-6 py-10 text-center"
     >
-      <!-- K1: прогноз остатка -->
-      <CashForecastCardSkeleton v-if="isForecastSkeletonVisible" />
-
-      <AppErrorState
-        v-else-if="forecastError"
-        :message="t('cashForecast.loadError')"
-        @retry="loadForecast"
-      />
-
-      <CashForecastCard
-        v-else-if="forecast"
-        :forecast="forecast"
-      />
-
-      <div
-        v-else
-        class="flex flex-col items-center rounded-3xl border border-dashed
-               border-fino-border bg-fino-surface px-6 py-10 text-center"
-      >
-        <div class="flex size-12 items-center justify-center rounded-2xl bg-fino-accent text-primary">
-          <i
-            class="pi pi-chart-line text-xl"
-            aria-hidden="true"
-          />
-        </div>
-
-        <p class="mt-4 max-w-sm text-sm text-fino-text-muted">
-          {{ t('cashForecast.empty') }}
-        </p>
+      <div class="flex size-12 items-center justify-center rounded-2xl bg-fino-accent text-primary">
+        <i
+          class="pi pi-chart-line text-xl"
+          aria-hidden="true"
+        />
       </div>
 
-      <!-- K2: предложение под разрыв -->
-      <CreditOfferCard
-        v-if="offer"
-        :offer="offer"
-        @close-gap="openCloseGap"
-        @show-options="showCreditOptions"
-      />
+      <p class="mt-4 max-w-sm text-sm text-fino-text-muted">
+        {{ t('cashForecast.empty') }}
+      </p>
     </div>
 
-    <!-- K5: госконтракт -->
+    <!-- Госконтракт: под него банк даёт кредит на исполнение -->
     <CompanyContractCard
       v-if="contract"
       :inn="inn"
