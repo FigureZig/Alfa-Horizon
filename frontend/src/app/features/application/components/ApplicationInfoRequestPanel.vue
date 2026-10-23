@@ -41,10 +41,14 @@ const form = reactive({
 })
 
 const isSubmitted = ref(false)
+// Готовое решение собрания загружают отдельным явным действием, а не рядом с голосованием
+const isAnswerOpen = ref(false)
 
 const asks = computed(() => props.infoRequest?.asks ?? [])
 const isCorpApprovalAsked = computed(() => asks.value.includes(ApplicationAskEnum.CorpApproval))
 const isCollateralAsked = computed(() => asks.value.includes(ApplicationAskEnum.CollateralValue))
+// Банк просит согласие участников, и они голосуют в продукте
+const isVoting = computed(() => Boolean(props.approval) && isCorpApprovalAsked.value)
 const isBusy = computed(() => props.pendingAction !== null)
 const isAnswering = computed(() => props.pendingAction === ApplicationActionEnum.AnswerInfo)
 
@@ -81,6 +85,10 @@ function handleSubmit() {
   })
 }
 
+function openAnswer() {
+  isAnswerOpen.value = true
+}
+
 function handleVote(choice: ApplicationVoteEnum) {
   emit('vote', choice)
 }
@@ -88,7 +96,15 @@ function handleVote(choice: ApplicationVoteEnum) {
 
 <template>
   <section class="flex flex-col gap-5">
-    <div>
+    <!-- При голосовании заголовок уже в блоке статуса сверху: здесь только пояснение -->
+    <p
+      v-if="isVoting"
+      class="text-sm text-fino-text-muted"
+    >
+      {{ t('application.infoRequest.votingNote') }}
+    </p>
+
+    <div v-else>
       <h2 class="text-lg font-bold tracking-tight text-fino-text">
         {{ t('application.infoRequest.title') }}
       </h2>
@@ -99,7 +115,7 @@ function handleVote(choice: ApplicationVoteEnum) {
     </div>
 
     <ul
-      v-if="askTexts.length"
+      v-if="askTexts.length && !isVoting"
       class="flex flex-col gap-2"
     >
       <li
@@ -131,8 +147,18 @@ function handleVote(choice: ApplicationVoteEnum) {
       @vote="handleVote"
     />
 
+    <button
+      v-if="canAnswer && isVoting && !isAnswerOpen"
+      type="button"
+      class="w-fit cursor-pointer text-sm font-semibold text-primary transition-opacity hover:opacity-80
+             focus-visible:outline-2 focus-visible:outline-primary"
+      @click="openAnswer"
+    >
+      {{ t('application.infoRequest.uploadDecision') }}
+    </button>
+
     <form
-      v-if="canAnswer"
+      v-if="canAnswer && (!isVoting || isAnswerOpen)"
       class="flex flex-col gap-4"
       novalidate
       @submit.prevent="handleSubmit"

@@ -391,7 +391,7 @@ export default {
             UNDER_REVIEW: { title: 'A specialist is reviewing', now: 'It could not be decided automatically — a credit specialist reviews the application, usually within 4 hours.' },
             OFFERED: { title: 'The bank approved — see the terms', now: 'Accept the offer or decline it. The terms are valid for a limited time.' },
             SIGNING: { title: 'Sign the contract', now: 'Check the terms and sign — the bank issues the money after that.' },
-            SIGNING_JOINT: { now: 'All directors sign the contract together. {done} of {total} signed.' },
+            SIGNING_JOINT: { title: 'Waiting for signature: {names}', now: 'All directors sign the contract together. {done} of {total} signed.', waiting: 'Waiting for signature: {names}. {done} of {total} signed.' },
             SIGNED: { title: 'Issuing', now: 'The contract is signed. We are re-checking the data before issuing.' },
             DISBURSING: { title: 'Issuing', now: 'The money will reach your account any moment.' },
             ISSUED: { title: 'Money on your account', now: 'The loan is issued and the money is on your account.' },
@@ -503,6 +503,8 @@ export default {
         infoRequest: {
             title: 'The bank needs more data',
             description: 'Reply to the request — the application will go back for review.',
+            votingNote: 'The participants vote themselves, under their own sign-ins. You can also attach a ready meeting decision.',
+            uploadDecision: 'Already have the meeting decision? Upload it',
             ask: {
                 REQ_CORP_APPROVAL: 'Members’ consent to a major transaction is required',
                 REQ_COLLATERAL_VALUE: 'Specify the collateral value',
@@ -533,6 +535,7 @@ export default {
         },
         signing: {
             title: 'Signing the agreement',
+            waiting: 'Waiting',
             sign: 'Sign the agreement',
             provisional: 'The terms are preliminary: signing becomes available after the credit history check.',
             noRight: 'The agreement can be signed by the director without restrictions or by the sole proprietor.',

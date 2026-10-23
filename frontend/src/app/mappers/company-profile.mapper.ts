@@ -19,6 +19,11 @@ export class CompanyProfileMapper {
       sources: data.sources,
       updatedAt: data.updated_at,
       section: data.facts?.section ?? null,
+      directors: (data.facts?.eio ?? []).map((director) => ({
+        inn: director.inn,
+        fullName: director.fio,
+        title: director.title,
+      })),
     }
   }
 }

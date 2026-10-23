@@ -8,6 +8,13 @@ export interface CompanyActivityDto {
   name: Nullable<string>
 }
 
+// Руководитель по ЕГРЮЛ/ЕГРИП: по ИНН подписи заявки видно, кого ждём
+export interface CompanyDirectorDto {
+  inn: string
+  fio: string
+  title: string
+}
+
 /**
  * Ответ GET v1/companies/{inn}/profile — что банк знает о компании.
  * Любое поле может быть null. Сверх DTO API отдаёт name, msp_category, headcount, facts, source_details.
@@ -23,5 +30,5 @@ export interface CompanyProfileDto {
   sources: DataSourceEnum[]
   updated_at: Nullable<string>
   // Все факты компании; нужен только раздел ОКВЭД (`section`) для расчёта ставки
-  facts: { section?: Nullable<string> }
+  facts: { section?: Nullable<string>, eio?: CompanyDirectorDto[] }
 }

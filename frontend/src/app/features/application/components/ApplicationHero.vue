@@ -42,6 +42,8 @@ const props = defineProps<{
   application: ApplicationInterface
   // Сегодняшняя дата мира, YYYY-MM-DD: срок считается по ней, а не по часам браузера
   today: Nullable<string>
+  // Кого ещё ждём при совместной подписи
+  pendingSigners: string[]
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
@@ -71,10 +73,18 @@ const isJointSigning = computed(
 
 const headline = computed(() => t(`application.hero.${textKey.value}.title`))
 
-const now = computed(() =>
-  isJointSigning.value
-    ? t('application.hero.SIGNING_JOINT.now', { done: signedCount.value, total: requiredCount.value })
-    : t(`application.hero.${textKey.value}.now`),
+const now = computed(() => {
+  if (!isJointSigning.value) return t(`application.hero.${textKey.value}.now`)
+
+  return props.pendingSigners.length
+    ? t('application.hero.SIGNING_JOINT.waiting', { names: props.pendingSigners.join(', '), done: signedCount.value, total: requiredCount.value })
+    : t('application.hero.SIGNING_JOINT.now', { done: signedCount.value, total: requiredCount.value })
+})
+
+const headlineText = computed(() =>
+  isJointSigning.value && props.pendingSigners.length
+    ? t('application.hero.SIGNING_JOINT.title', { names: props.pendingSigners.join(', ') })
+    : headline.value,
 )
 
 // Сколько дней осталось на текущем шаге
@@ -112,7 +122,7 @@ const isUrgent = computed(() => daysLeft.value !== null && daysLeft.value <= URG
 
       <div class="min-w-0 flex-1">
         <h2 class="break-words text-xl font-bold tracking-tight text-balance text-fino-text sm:text-3xl">
-          {{ headline }}
+          {{ headlineText }}
         </h2>
 
         <p class="mt-2 max-w-2xl break-words text-sm leading-relaxed text-fino-text-muted sm:text-base">

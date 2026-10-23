@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import InputNumber from 'primevue/inputnumber'
+import type { InputNumberInputEvent } from 'primevue/inputnumber'
 import { CreditGoalEnum } from '@/app/types/application/credit-goal-enum'
 import type { Nullable } from '@/app/types/nullable'
 
@@ -31,6 +32,15 @@ function handleAmountChange(amount: number | null) {
 
 function handleTermChange(termMonths: number | null) {
   emit('update:termMonths', termMonths)
+}
+
+// Подбор пересчитывается по мере ввода, а не только после ухода из поля
+function handleAmountInput(event: InputNumberInputEvent) {
+  emit('update:amount', typeof event.value === 'number' ? event.value : null)
+}
+
+function handleTermInput(event: InputNumberInputEvent) {
+  emit('update:termMonths', typeof event.value === 'number' ? event.value : null)
 }
 </script>
 
@@ -89,6 +99,7 @@ function handleTermChange(termMonths: number | null) {
           :placeholder="t('credits.goal.optional')"
           fluid
           @update:model-value="handleAmountChange"
+          @input="handleAmountInput"
         />
       </div>
 
@@ -111,6 +122,7 @@ function handleTermChange(termMonths: number | null) {
           :placeholder="t('credits.goal.optional')"
           fluid
           @update:model-value="handleTermChange"
+          @input="handleTermInput"
         />
       </div>
     </div>

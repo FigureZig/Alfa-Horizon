@@ -16,6 +16,7 @@ import ApplicationStatusPanel from '@/app/features/application/components/Applic
 import ApplicationTimeline from '@/app/features/application/components/ApplicationTimeline.vue'
 import { useApplication } from '@/app/composables/useApplication'
 import { useApplicationExplanation } from '@/app/composables/useApplicationExplanation'
+import { useCompanyProfile } from '@/app/composables/useCompanyProfile'
 import { useDemoPersona } from '@/app/composables/useDemoPersona'
 import { useFormatters } from '@/app/composables/useFormatters'
 import { ApplicationActionEnum } from '@/app/types/application/application-action-enum'
@@ -38,6 +39,7 @@ const props = defineProps<{
 
 const { t } = useI18n({ useScope: 'global' })
 const { demoPersona } = useDemoPersona()
+const { profile } = useCompanyProfile(() => props.inn)
 const { formatCurrency, formatDateTime } = useFormatters()
 
 const {
@@ -80,6 +82,19 @@ const isConfirmVisible = computed({
 })
 
 const status = computed(() => application.value?.status ?? null)
+
+// Совместная подпись: кого ещё ждём — по ИНН из заявки и руководителям из профиля компании
+const pendingSigners = computed(() => {
+  const current = application.value
+
+  if (!current?.signers || current.signers.required.length < 2) return []
+
+  const signedInns = current.signatures.map((signature) => signature.inn)
+
+  return current.signers.required
+    .filter((inn) => !signedInns.includes(inn))
+    .map((inn) => profile.value?.directors.find((director) => director.inn === inn)?.fullName ?? inn)
+})
 
 // Условия, которые человек подписывает: принятое предложение
 const signOffer = computed(() => application.value?.offer ?? application.value?.offers[0] ?? null)
@@ -235,6 +250,7 @@ async function confirmAction() {
       <ApplicationHero
         :application="application"
         :today="demoPersona?.today ?? null"
+        :pending-signers="pendingSigners"
       />
 
       <div class="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
@@ -273,6 +289,7 @@ async function confirmAction() {
               :can-sign="hasAction(ApplicationActionEnum.Sign)"
               :pending-action="pendingAction"
               :deadline-at="deadlineAt"
+              :pending-signers="pendingSigners"
               @sign="handleSign"
             />
 
