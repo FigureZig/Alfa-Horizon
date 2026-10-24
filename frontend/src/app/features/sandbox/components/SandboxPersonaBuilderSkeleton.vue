@@ -25,47 +25,60 @@ defineProps<{
       <Skeleton
         v-for="section in 5"
         :key="section"
-        height="3rem"
+        height="3.75rem"
         border-radius="1rem"
       />
     </div>
   </div>
 
-  <!-- Карточка вопроса интервью: прогресс, вопрос и плитки ответов -->
+  <!-- Интервью: шаги сверху и карточка вопроса с плитками ответов -->
   <div
     v-else
-    class="flex max-w-4xl flex-col gap-6 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm sm:p-8"
+    class="flex flex-col gap-6"
     aria-busy="true"
   >
-    <div class="flex items-center justify-between gap-3">
-      <Skeleton
-        width="6rem"
-        height="0.875rem"
-      />
-
-      <div class="flex gap-1.5">
+    <div class="flex items-start">
+      <div
+        v-for="step in 4"
+        :key="step"
+        class="flex flex-1 flex-col items-center gap-1.5"
+      >
         <Skeleton
-          v-for="step in 3"
-          :key="step"
-          width="2rem"
-          height="0.375rem"
-          border-radius="9999px"
+          shape="circle"
+          size="2rem"
+        />
+        <Skeleton
+          width="5rem"
+          height="0.75rem"
+          class="hidden sm:block"
         />
       </div>
     </div>
 
-    <Skeleton
-      width="45%"
-      height="1.75rem"
-    />
+    <div class="flex flex-col gap-6 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm sm:p-8 lg:p-10">
+      <div class="flex flex-col gap-2">
+        <Skeleton
+          width="6rem"
+          height="0.875rem"
+        />
+        <Skeleton
+          width="45%"
+          height="2rem"
+        />
+        <Skeleton
+          width="70%"
+          height="1rem"
+        />
+      </div>
 
-    <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-      <Skeleton
-        v-for="tile in 16"
-        :key="tile"
-        height="3.5rem"
-        border-radius="1rem"
-      />
+      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <Skeleton
+          v-for="tile in 16"
+          :key="tile"
+          height="4rem"
+          border-radius="1rem"
+        />
+      </div>
     </div>
   </div>
 </template>

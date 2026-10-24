@@ -18,7 +18,9 @@ import SandboxPersonaFlagsPicker from '@/app/features/sandbox/components/Sandbox
 import SandboxPersonaGroup from '@/app/features/sandbox/components/SandboxPersonaGroup.vue'
 import SandboxPersonaPreview from '@/app/features/sandbox/components/SandboxPersonaPreview.vue'
 import SandboxPersonaPreviewBar from '@/app/features/sandbox/components/SandboxPersonaPreviewBar.vue'
+import SandboxPersonaRefineSection from '@/app/features/sandbox/components/SandboxPersonaRefineSection.vue'
 import { getApiProblem, useApiFetch } from '@/app/composables/useApiFetch'
+import { useFormatters } from '@/app/composables/useFormatters'
 import { useSandboxPersonaPreview } from '@/app/composables/useSandboxPersonaPreview'
 import { useSession } from '@/app/composables/useSession'
 import { sandboxService } from '@/app/services/sandbox/sandbox.service'
@@ -40,9 +42,32 @@ const INN_PATTERN = /^(\d{10}|\d{12})$/
 const CHOICE_FIELDS = ['seasonality', 'stability', 'trend', 'channel', 'loans', 'delays'] as const
 
 type BuilderStage = 'interview' | 'result'
+type ChoiceField = (typeof CHOICE_FIELDS)[number]
 
 // Интервью вместо бланка: три вопроса до первого результата, остальное — в «Уточнить»
 const INTERVIEW_QUESTIONS = 3
+const QUESTION_KEYS = ['industry', 'revenue', 'team'] as const
+
+// Значки отраслей: плитки читаются с одного взгляда; отрасль без значка — с портфелем
+const INDUSTRY_ICONS: Record<string, string> = {
+  coffee: 'pi-shop',
+  restaurant: 'pi-shopping-bag',
+  bakery: 'pi-apple',
+  retail_food: 'pi-shopping-cart',
+  online_shop: 'pi-globe',
+  wholesale: 'pi-box',
+  construction: 'pi-building',
+  renovation: 'pi-hammer',
+  it: 'pi-code',
+  trucking: 'pi-truck',
+  warehouse: 'pi-warehouse',
+  farm: 'pi-sun',
+  cleaning: 'pi-sparkles',
+  beauty: 'pi-palette',
+  dental: 'pi-face-smile',
+  education: 'pi-graduation-cap',
+}
+const DEFAULT_INDUSTRY_ICON = 'pi-briefcase'
 
 // Сколько приходит на счёт — диапазонами; в расчёт идёт середина диапазона
 const REVENUE_RANGES = [
@@ -51,15 +76,18 @@ const REVENUE_RANGES = [
   { id: 'upTo10m', value: 5_000_000 },
   { id: 'over10m', value: 15_000_000 },
 ] as const
+// Столбики шкалы: чем больше оборот, тем больше закрашено
+const REVENUE_BAR_HEIGHTS = ['h-2.5', 'h-3.5', 'h-4.5', 'h-6'] as const
 
 // Кто в компании — словами человека; форма и устройство компании выводятся из ответа
 const TEAM_OPTIONS = [
-  { id: 'solo', form: LegalFormEnum.SoleProprietor, structure: null },
-  { id: 'partners', form: LegalFormEnum.Llc, structure: 'partners' },
-  { id: 'hiredDirector', form: LegalFormEnum.Llc, structure: 'hired_director' },
-  { id: 'jointDirectors', form: LegalFormEnum.Llc, structure: 'two_directors_joint' },
-  { id: 'independentDirectors', form: LegalFormEnum.Llc, structure: 'two_directors_independent' },
+  { id: 'solo', form: LegalFormEnum.SoleProprietor, structure: null, icon: 'pi-user' },
+  { id: 'partners', form: LegalFormEnum.Llc, structure: 'partners', icon: 'pi-users' },
+  { id: 'hiredDirector', form: LegalFormEnum.Llc, structure: 'hired_director', icon: 'pi-briefcase' },
+  { id: 'jointDirectors', form: LegalFormEnum.Llc, structure: 'two_directors_joint', icon: 'pi-link' },
+  { id: 'independentDirectors', form: LegalFormEnum.Llc, structure: 'two_directors_independent', icon: 'pi-arrows-h' },
 ] as const
+const SOLO_TEAM = 'solo'
 
 type RevenueRange = (typeof REVENUE_RANGES)[number]
 type TeamOption = (typeof TEAM_OPTIONS)[number]
@@ -87,6 +115,7 @@ const router = useRouter()
 const toast = useToast()
 const $fetch = useApiFetch()
 const { enterCabinet } = useSession()
+const { formatAge, formatMoney } = useFormatters()
 
 const options = ref<Nullable<SandboxPersonaOptionsInterface>>(null)
 const isOptionsLoading = ref(false)
@@ -98,6 +127,7 @@ const innServerError = ref<Nullable<string>>(null)
 const highlightedFields = ref<string[]>([])
 const readyGroup = ref<Nullable<SandboxPersonaGroupInterface>>(null)
 const previewRef = useTemplateRef<HTMLElement>('preview')
+const questionTitleRef = useTemplateRef<HTMLElement>('questionTitle')
 
 const form = reactive<SandboxPersonaFormInterface>({
   fullName: '',
@@ -144,6 +174,63 @@ const { preview, conflict, isLoading: isPreviewLoading, error: previewError, loa
 
 const industryOptions = computed(() => options.value?.industries ?? [])
 
+// Интервью и готовая компания — узкой колонкой по центру; результат — шире, в две колонки
+const containerClass = computed(() => (readyGroup.value || stage.value === 'interview' ? 'max-w-5xl' : 'max-w-6xl'))
+
+const industryTiles = computed(() =>
+  industryOptions.value.map((industry) => ({
+    id: industry.id,
+    title: industry.title,
+    icon: `pi ${INDUSTRY_ICONS[industry.id] ?? DEFAULT_INDUSTRY_ICON}`,
+    isSelected: form.industry === industry.id,
+  })),
+)
+
+const questionKey = computed(() => QUESTION_KEYS[question.value - 1] ?? QUESTION_KEYS[0])
+
+const isQuestionAnswered = computed(() => {
+  switch (questionKey.value) {
+    case 'industry':
+      return Boolean(form.industry)
+    case 'revenue':
+      return Boolean(selectedRevenue.value)
+    default:
+      return Boolean(selectedTeam.value)
+  }
+})
+
+// Шаги сверху: ответ под названием шага, к отвеченному можно вернуться одним нажатием
+const interviewSteps = computed(() => {
+  const answers = [
+    industryOptions.value.find((industry) => industry.id === form.industry)?.title ?? '',
+    selectedRevenue.value ? t(`sandbox.builder.interview.revenueRanges.${selectedRevenue.value}`) : '',
+    selectedTeam.value ? t(`sandbox.builder.interview.teams.${selectedTeam.value}.title`) : '',
+  ]
+
+  return QUESTION_KEYS.map((key, index) => {
+    const number = index + 1
+    const isCurrent = number === question.value
+    const isDone = Boolean(answers[index]) && !isCurrent
+
+    return {
+      number,
+      title: t(`sandbox.builder.interview.steps.${key}`),
+      answer: answers[index],
+      isCurrent,
+      isDone,
+      isReachable: answers.slice(0, index).every(Boolean),
+      circleClass: isCurrent
+        ? 'border-2 border-primary bg-fino-surface text-primary'
+        : isDone
+          ? 'bg-primary text-primary-contrast'
+          : 'border border-fino-border bg-fino-surface text-fino-text-muted',
+    }
+  })
+})
+
+// Представитель по доверенности бывает только у ООО
+const isRepresentativeAllowed = computed(() => selectedTeam.value !== SOLO_TEAM)
+
 const applicableStructures = computed(() =>
   (options.value?.structures ?? []).filter((structure) => structure.forms.includes(form.form)),
 )
@@ -174,6 +261,45 @@ const applicableFlags = computed(() =>
 
 // Просрочка бывает только по кредиту: без кредитов вопрос не показываем
 const isDelaysVisible = computed(() => form.loans !== 'none')
+
+function choiceTitle(field: ChoiceField, id: Nullable<string>): Nullable<string> {
+  return options.value?.choices[field].find((choice) => choice.id === id)?.title.toLocaleLowerCase(locale.value) ?? null
+}
+
+function joinSummary(parts: Nullable<string>[]): string {
+  return parts.filter(Boolean).join(' · ')
+}
+
+// Свёрнутые разделы «Уточнить» показывают текущие ответы одной строкой: открывать, чтобы понять, не нужно
+const refineSummary = computed(() => {
+  const industryTitle = industryOptions.value.find((industry) => industry.id === form.industry)?.title ?? null
+  const structureTitle = applicableStructures.value.find((structure) => structure.id === form.structure)?.title ?? null
+  const exactCount = EXACT_FIELDS.filter((field) => form[field.key] !== null).length + (form.inn.trim() ? 1 : 0)
+
+  return {
+    company: joinSummary([
+      industryTitle,
+      form.headcount ? t('sandbox.builder.refine.people', form.headcount) : null,
+      form.ageMonths ? formatAge(form.ageMonths) : null,
+    ]),
+    team: joinSummary([
+      form.form === LegalFormEnum.SoleProprietor ? t('sandbox.builder.refine.solo') : structureTitle,
+      form.accountant ? t('sandbox.builder.refine.withAccountant') : null,
+      form.representative ? t('sandbox.builder.refine.withRepresentative') : null,
+    ]),
+    money: joinSummary([
+      form.inflowAvg ? t('sandbox.builder.refine.perMonth', { amount: formatMoney(form.inflowAvg) }) : null,
+      choiceTitle('stability', form.stability),
+      choiceTitle('trend', form.trend),
+    ]),
+    flags: form.flags.length
+      ? t('sandbox.builder.refine.flagsCount', { n: form.flags.length })
+      : t('sandbox.builder.refine.flagsNone'),
+    exact: exactCount
+      ? t('sandbox.builder.refine.exactCount', { n: exactCount })
+      : t('sandbox.builder.refine.exactAuto'),
+  }
+})
 
 // Имя и название необязательны: бэкенд придумает их сам («ООО «Кофейня 7»»)
 const errors = computed(() => {
@@ -431,7 +557,7 @@ function backToForm() {
   readyGroup.value = null
 }
 
-// ── Интервью: три вопроса, каждый ответ — сразу следующий шаг ──
+// ── Интервью: три вопроса; ответ на первые два — сразу следующий шаг, после третьего — явная кнопка ──
 
 function chooseIndustry(industryId: string) {
   form.industry = industryId
@@ -444,15 +570,29 @@ function chooseRevenue(range: RevenueRange) {
   question.value = 3
 }
 
-// Третий ответ — и сразу результат: что скажет банк
+// Третий ответ не уводит со страницы: ещё можно отметить бухгалтера и представителя
 function chooseTeam(option: TeamOption) {
   selectedTeam.value = option.id
   form.form = option.form
   form.structure = option.structure
 
   if (option.form === LegalFormEnum.SoleProprietor) form.representative = false
+}
 
-  stage.value = 'result'
+function showResult() {
+  if (selectedTeam.value) stage.value = 'result'
+}
+
+function openQuestion(number: number) {
+  question.value = number
+}
+
+function goForward() {
+  if (question.value < INTERVIEW_QUESTIONS) {
+    question.value++
+  } else {
+    showResult()
+  }
 }
 
 function goBackInInterview() {
@@ -461,6 +601,11 @@ function goBackInInterview() {
   } else {
     router.push({ name: 'login' })
   }
+}
+
+// Новый вопрос — фокус на его заголовок: клавиатура и экранный диктор продолжают с него
+function focusQuestion() {
+  questionTitleRef.value?.focus()
 }
 
 function restartInterview() {
@@ -488,658 +633,799 @@ onMounted(loadOptions)
       <template #profile />
     </AppHeader>
 
-    <main class="mx-auto flex max-w-[1600px] flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
-      <div class="max-w-2xl">
-        <RouterLink
-          :to="{ name: 'login' }"
-          class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-opacity hover:opacity-80"
-        >
-          <i
-            class="pi pi-arrow-left text-xs"
-            aria-hidden="true"
-          />
-          {{ t('sandbox.builder.back') }}
-        </RouterLink>
-
-        <h1 class="mt-4 text-3xl font-bold tracking-tight text-fino-text sm:text-4xl">
-          {{ isEdit ? t('sandbox.builder.editTitle') : t('sandbox.builder.title') }}
-        </h1>
-
-        <p class="mt-3 text-sm leading-relaxed text-fino-text-muted sm:text-base">
-          {{ stage === 'interview' ? t('sandbox.builder.interview.description') : t('sandbox.builder.description') }}
-        </p>
-      </div>
-
-      <!-- Компания готова: люди, под которыми можно войти -->
-      <section
-        v-if="readyGroup"
-        class="flex flex-col gap-6"
+    <!-- Снизу место под полосу предпросмотра и кнопку «Как проверить»: последние кнопки они не закрывают -->
+    <main class="mx-auto flex max-w-[1600px] flex-col px-4 pt-8 pb-40 sm:px-6 sm:pt-10 lg:pb-24">
+      <!-- Всё по центру: интервью — одной колонкой, результат — шире, в две колонки -->
+      <div
+        class="mx-auto flex w-full flex-col gap-8"
+        :class="containerClass"
       >
-        <div class="flex flex-col gap-1 rounded-3xl border border-green-500/30 bg-green-500/5 p-5">
-          <p class="flex items-center gap-2 text-base font-bold text-fino-text">
+        <div>
+          <RouterLink
+            :to="{ name: 'login' }"
+            class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-opacity hover:opacity-80"
+          >
             <i
-              class="pi pi-check-circle text-green-600 dark:text-green-400"
+              class="pi pi-arrow-left text-xs"
               aria-hidden="true"
             />
-            {{ t('sandbox.builder.ready.title') }}
-          </p>
+            {{ t('sandbox.builder.back') }}
+          </RouterLink>
 
-          <p class="text-sm text-fino-text-muted">
-            {{ t('sandbox.builder.ready.text') }}
-          </p>
-        </div>
-
-        <SandboxPersonaGroup
-          :group="readyGroup"
-          :is-busy="isLoggingIn"
-          @login="loginAsPersona"
-        />
-
-        <div>
-          <button
-            type="button"
-            class="cursor-pointer rounded-xl border border-fino-border bg-fino-surface px-5 py-3 text-sm font-semibold
-                   text-fino-text transition-colors hover:bg-fino-surface-hover motion-reduce:transition-none"
-            @click="backToForm"
+          <h1
+            class="mt-4 text-3xl font-bold tracking-tight text-fino-text sm:text-4xl"
+            :class="{ 'sm:text-center': stage === 'interview' }"
           >
-            {{ t('sandbox.builder.ready.edit') }}
-          </button>
-        </div>
-      </section>
+            {{ isEdit ? t('sandbox.builder.editTitle') : t('sandbox.builder.title') }}
+          </h1>
 
-      <SandboxPersonaBuilderSkeleton
-        v-else-if="isOptionsLoading && !options"
-        :is-result="stage === 'result'"
-      />
-
-      <AppErrorState
-        v-else-if="optionsError"
-        :message="t('sandbox.builder.optionsLoadError')"
-        @retry="loadOptions"
-      />
-
-      <!-- Интервью: три вопроса до первого результата -->
-      <section
-        v-else-if="options && stage === 'interview'"
-        class="flex max-w-4xl flex-col gap-6 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm sm:p-8"
-        :aria-label="t('sandbox.builder.interview.label')"
-      >
-        <div class="flex items-center justify-between gap-3">
-          <p class="text-sm font-semibold text-fino-text-muted">
-            {{ t('sandbox.builder.interview.progress', { current: question, total: INTERVIEW_QUESTIONS }) }}
-          </p>
-
-          <ol
-            class="flex gap-1.5"
-            aria-hidden="true"
+          <p
+            v-if="!readyGroup"
+            class="mt-3 text-sm leading-relaxed text-fino-text-muted sm:text-base"
+            :class="{ 'sm:text-center': stage === 'interview' }"
           >
-            <li
-              v-for="step in INTERVIEW_QUESTIONS"
-              :key="step"
-              class="h-1.5 w-8 rounded-full transition-colors duration-300 motion-reduce:transition-none"
-              :class="step <= question ? 'bg-primary' : 'bg-fino-surface-secondary'"
-            />
-          </ol>
+            {{ stage === 'interview' ? t('sandbox.builder.interview.description') : t('sandbox.builder.description') }}
+          </p>
         </div>
 
-        <!-- 1. Чем занимаетесь — без значения по умолчанию -->
-        <div
-          v-if="question === 1"
-          class="flex flex-col gap-4"
+        <!-- Компания готова: люди, под которыми можно войти -->
+        <section
+          v-if="readyGroup"
+          class="flex flex-col gap-6"
         >
-          <h2 class="text-xl font-bold tracking-tight text-fino-text sm:text-2xl">
-            {{ t('sandbox.builder.interview.industry') }}
-          </h2>
-
-          <ul class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-            <li
-              v-for="industry in industryOptions"
-              :key="industry.id"
-            >
-              <button
-                type="button"
-                class="flex h-full min-h-14 w-full cursor-pointer items-center rounded-2xl border px-4 py-3 text-left text-sm
-                       font-semibold text-fino-text transition-colors duration-200 hover:border-primary hover:bg-fino-accent
-                       focus-visible:outline-2 focus-visible:outline-primary motion-reduce:transition-none"
-                :class="form.industry === industry.id ? 'border-primary bg-fino-accent' : 'border-fino-border'"
-                :aria-pressed="form.industry === industry.id"
-                @click="chooseIndustry(industry.id)"
-              >
-                {{ industry.title }}
-              </button>
-            </li>
-          </ul>
-        </div>
-
-        <!-- 2. Сколько приходит на счёт — диапазонами -->
-        <div
-          v-else-if="question === 2"
-          class="flex flex-col gap-4"
-        >
-          <h2 class="text-xl font-bold tracking-tight text-fino-text sm:text-2xl">
-            {{ t('sandbox.builder.interview.revenue') }}
-          </h2>
-
-          <ul class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <li
-              v-for="range in REVENUE_RANGES"
-              :key="range.id"
-            >
-              <button
-                type="button"
-                class="flex min-h-16 w-full cursor-pointer items-center rounded-2xl border px-5 py-4 text-left text-base
-                       font-bold text-fino-text transition-colors duration-200 hover:border-primary hover:bg-fino-accent
-                       focus-visible:outline-2 focus-visible:outline-primary motion-reduce:transition-none"
-                :class="selectedRevenue === range.id ? 'border-primary bg-fino-accent' : 'border-fino-border'"
-                :aria-pressed="selectedRevenue === range.id"
-                @click="chooseRevenue(range)"
-              >
-                {{ t(`sandbox.builder.interview.revenueRanges.${range.id}`) }}
-              </button>
-            </li>
-          </ul>
-        </div>
-
-        <!-- 3. Кто в компании — карточки словами человека; бухгалтер и доверенность — по желанию -->
-        <div
-          v-else
-          class="flex flex-col gap-4"
-        >
-          <h2 class="text-xl font-bold tracking-tight text-fino-text sm:text-2xl">
-            {{ t('sandbox.builder.interview.team') }}
-          </h2>
-
-          <!-- По желанию: бухгалтер и представитель — переключатели до выбора карточки -->
-          <div class="flex flex-wrap items-center gap-2 text-sm">
-            <span class="mr-1 font-semibold text-fino-text-muted">{{ t('sandbox.builder.interview.also') }}</span>
-
-            <label
-              class="inline-flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-fino-text
-                     transition-colors duration-200 hover:border-primary motion-reduce:transition-none"
-              :class="form.accountant ? 'border-primary bg-fino-accent' : 'border-fino-border bg-fino-surface'"
-            >
-              <Checkbox
-                v-model="form.accountant"
-                binary
-              />
-              {{ t('sandbox.builder.interview.accountant') }}
-            </label>
-
-            <label
-              class="inline-flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-fino-text
-                     transition-colors duration-200 hover:border-primary motion-reduce:transition-none"
-              :class="form.representative ? 'border-primary bg-fino-accent' : 'border-fino-border bg-fino-surface'"
-            >
-              <Checkbox
-                v-model="form.representative"
-                binary
-              />
-              {{ t('sandbox.builder.interview.representative') }}
-            </label>
-          </div>
-
-          <ul class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <li
-              v-for="option in TEAM_OPTIONS"
-              :key="option.id"
-            >
-              <button
-                type="button"
-                class="flex h-full w-full cursor-pointer flex-col gap-1 rounded-2xl border px-5 py-4 text-left
-                       transition-colors duration-200 hover:border-primary hover:bg-fino-accent
-                       focus-visible:outline-2 focus-visible:outline-primary motion-reduce:transition-none"
-                :class="selectedTeam === option.id ? 'border-primary bg-fino-accent' : 'border-fino-border'"
-                :aria-pressed="selectedTeam === option.id"
-                @click="chooseTeam(option)"
-              >
-                <span class="text-base font-bold text-fino-text">{{ t(`sandbox.builder.interview.teams.${option.id}.title`) }}</span>
-                <span class="text-sm text-fino-text-muted">{{ t(`sandbox.builder.interview.teams.${option.id}.hint`) }}</span>
-              </button>
-            </li>
-          </ul>
-        </div>
-
-        <button
-          type="button"
-          class="inline-flex w-fit cursor-pointer items-center gap-2 text-sm font-semibold text-fino-text-muted
-                 transition-colors hover:text-fino-text focus-visible:outline-2 focus-visible:outline-primary"
-          @click="goBackInInterview"
-        >
-          <i
-            class="pi pi-arrow-left text-xs"
-            aria-hidden="true"
-          />
-          {{ question > 1 ? t('sandbox.builder.interview.back') : t('sandbox.builder.cancel') }}
-        </button>
-      </section>
-
-      <!-- Результат: что скажет банк — и «Уточнить» рядом; каждое изменение пересчитывает предпросмотр -->
-      <div
-        v-else-if="options"
-        class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_28rem]"
-      >
-        <div
-          ref="preview"
-          class="min-w-0 scroll-mt-24 lg:sticky lg:top-28"
-        >
-          <SandboxPersonaPreview
-            :preview="preview"
-            :is-loading="isPreviewLoading"
-            :has-error="previewError"
-            :has-representative="form.representative"
-            @highlight="handleHighlight"
-            @retry="loadPreview"
-          />
-        </div>
-
-        <!-- Снизу место под полосу предпросмотра и кнопку «Как проверить»: кнопки формы они не закрывают -->
-        <form
-          class="flex min-w-0 flex-col gap-3 pb-32 lg:pb-16"
-          novalidate
-          :aria-busy="isSubmitting"
-          @submit.prevent="submit"
-        >
-          <div class="flex items-center justify-between gap-3">
-            <h2 class="text-lg font-bold tracking-tight text-fino-text">
-              {{ t('sandbox.builder.refine.title') }}
-            </h2>
-
-            <button
-              v-if="!isEdit"
-              type="button"
-              class="cursor-pointer text-sm font-semibold text-fino-text-muted transition-colors hover:text-primary"
-              @click="restartInterview"
-            >
-              {{ t('sandbox.builder.refine.restart') }}
-            </button>
-          </div>
-
-          <!-- О компании: имя и название — по желанию -->
-          <details class="group rounded-2xl border border-fino-border bg-fino-surface">
-            <summary
-              class="flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold
-                     text-fino-text marker:content-none focus-visible:outline-2 focus-visible:outline-primary"
-            >
-              {{ t('sandbox.builder.refine.company') }}
+          <div class="flex flex-col gap-1 rounded-3xl border border-green-500/30 bg-green-500/5 p-5">
+            <p class="flex items-center gap-2 text-base font-bold text-fino-text">
               <i
-                class="pi pi-chevron-down text-xs text-fino-text-muted transition-transform duration-200
-                       group-open:rotate-180 motion-reduce:transition-none"
+                class="pi pi-check-circle text-green-600 dark:text-green-400"
                 aria-hidden="true"
               />
-            </summary>
+              {{ t('sandbox.builder.ready.title') }}
+            </p>
 
-            <div class="grid grid-cols-1 gap-4 px-4 pb-4">
-              <SandboxPersonaField
-                input-id="persona-fullName"
-                :label="t('sandbox.builder.fields.fullName')"
-                :error="null"
+            <p class="text-sm text-fino-text-muted">
+              {{ t('sandbox.builder.ready.text') }}
+            </p>
+          </div>
+
+          <SandboxPersonaGroup
+            :group="readyGroup"
+            :is-busy="isLoggingIn"
+            @login="loginAsPersona"
+          />
+
+          <div>
+            <button
+              type="button"
+              class="cursor-pointer rounded-xl border border-fino-border bg-fino-surface px-5 py-3 text-sm font-semibold
+                     text-fino-text transition-colors hover:bg-fino-surface-hover motion-reduce:transition-none"
+              @click="backToForm"
+            >
+              {{ t('sandbox.builder.ready.edit') }}
+            </button>
+          </div>
+        </section>
+
+        <SandboxPersonaBuilderSkeleton
+          v-else-if="isOptionsLoading && !options"
+          :is-result="stage === 'result'"
+        />
+
+        <AppErrorState
+          v-else-if="optionsError"
+          :message="t('sandbox.builder.optionsLoadError')"
+          @retry="loadOptions"
+        />
+
+        <!-- Интервью: шаги сверху, вопрос крупно, ответы — плитками -->
+        <section
+          v-else-if="options && stage === 'interview'"
+          class="flex flex-col gap-6"
+          :aria-label="t('sandbox.builder.interview.label')"
+        >
+          <!-- Шаги: ответ под названием шага; к отвеченному вопросу можно вернуться -->
+          <ol
+            class="flex items-start"
+            :aria-label="t('sandbox.builder.interview.steps.label')"
+          >
+            <li
+              v-for="step in interviewSteps"
+              :key="step.number"
+              class="relative flex min-w-0 flex-1 flex-col items-center"
+            >
+              <span
+                class="absolute top-4 right-[calc(-50%+1.5rem)] left-[calc(50%+1.5rem)] h-0.5 rounded-full
+                       transition-colors duration-300 motion-reduce:transition-none"
+                :class="step.isDone ? 'bg-primary' : 'bg-fino-border'"
+                aria-hidden="true"
+              />
+
+              <button
+                type="button"
+                class="flex max-w-full cursor-pointer flex-col items-center gap-1.5 rounded-xl px-2 text-center
+                       disabled:cursor-default focus-visible:outline-2 focus-visible:outline-primary"
+                :disabled="!step.isReachable || step.isCurrent"
+                :aria-current="step.isCurrent ? 'step' : undefined"
+                @click="openQuestion(step.number)"
               >
-                <InputText
-                  id="persona-fullName"
-                  v-model="form.fullName"
-                  :maxlength="FULL_NAME_MAX_LENGTH"
-                  :placeholder="t('sandbox.builder.fields.optional')"
-                  :disabled="isBusy"
-                  fluid
-                />
-              </SandboxPersonaField>
-
-              <SandboxPersonaField
-                input-id="persona-organization"
-                :label="t('sandbox.builder.fields.organization')"
-                :error="null"
-              >
-                <InputText
-                  id="persona-organization"
-                  v-model="form.organization"
-                  :placeholder="t('sandbox.builder.fields.organizationAuto')"
-                  :disabled="isBusy"
-                  fluid
-                />
-              </SandboxPersonaField>
-
-              <SandboxPersonaField
-                input-id="persona-form"
-                :label="t('sandbox.builder.fields.form')"
-                :error="null"
-              >
-                <SelectButton
-                  v-model="form.form"
-                  :options="options.forms"
-                  option-label="title"
-                  option-value="id"
-                  :allow-empty="false"
-                  :disabled="isBusy"
-                  :aria-label="t('sandbox.builder.fields.form')"
-                />
-              </SandboxPersonaField>
-
-              <SandboxPersonaField
-                input-id="persona-industry"
-                :label="t('sandbox.builder.fields.industry')"
-                :error="null"
-                :is-highlighted="isHighlighted('industry')"
-              >
-                <Select
-                  v-model="form.industry"
-                  input-id="persona-industry"
-                  :options="industryOptions"
-                  option-label="title"
-                  option-value="id"
-                  filter
-                  :disabled="isBusy"
-                  fluid
-                />
-              </SandboxPersonaField>
-
-              <SandboxPersonaField
-                input-id="persona-inflowAvg"
-                :label="t('sandbox.builder.fields.inflowAvg')"
-                :error="null"
-                :is-highlighted="isHighlighted('inflow_avg')"
-              >
-                <InputNumber
-                  v-model="form.inflowAvg"
-                  input-id="persona-inflowAvg"
-                  :min="1"
-                  :max-fraction-digits="0"
-                  suffix=" ₽"
-                  :locale="locale"
-                  :disabled="isBusy"
-                  fluid
-                />
-              </SandboxPersonaField>
-
-              <div class="grid grid-cols-2 gap-4">
-                <SandboxPersonaField
-                  input-id="persona-headcount"
-                  :label="t('sandbox.builder.fields.headcount')"
-                  :error="null"
-                  :is-highlighted="isHighlighted('headcount')"
+                <span
+                  class="flex size-8 items-center justify-center rounded-full text-sm font-bold transition-colors
+                         duration-300 motion-reduce:transition-none"
+                  :class="step.circleClass"
                 >
-                  <InputNumber
-                    v-model="form.headcount"
-                    input-id="persona-headcount"
-                    :min="1"
-                    :max-fraction-digits="0"
-                    :locale="locale"
+                  <i
+                    v-if="step.isDone"
+                    class="pi pi-check text-xs"
+                    aria-hidden="true"
+                  />
+                  <template v-else>{{ step.number }}</template>
+                </span>
+
+                <span
+                  class="hidden text-xs font-semibold sm:block"
+                  :class="step.isCurrent ? 'text-fino-text' : 'text-fino-text-muted'"
+                >{{ step.title }}</span>
+
+                <span
+                  v-if="step.answer"
+                  class="hidden max-w-full truncate text-xs text-fino-text-muted sm:block"
+                >{{ step.answer }}</span>
+              </button>
+            </li>
+
+            <!-- Конец пути — ответ банка -->
+            <li class="flex min-w-0 flex-1 flex-col items-center gap-1.5 px-2 text-center">
+              <span
+                class="flex size-8 items-center justify-center rounded-full border border-dashed border-fino-border
+                       bg-fino-surface text-fino-text-muted"
+              >
+                <i
+                  class="pi pi-flag text-xs"
+                  aria-hidden="true"
+                />
+              </span>
+
+              <span class="hidden text-xs font-semibold text-fino-text-muted sm:block">
+                {{ t('sandbox.builder.interview.steps.result') }}
+              </span>
+            </li>
+          </ol>
+
+          <div class="rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm sm:p-8 lg:p-10">
+            <Transition
+              mode="out-in"
+              enter-active-class="transition duration-200 ease-out motion-reduce:transition-none"
+              enter-from-class="translate-x-3 opacity-0"
+              leave-active-class="transition duration-150 ease-in motion-reduce:transition-none"
+              leave-to-class="-translate-x-3 opacity-0"
+              @after-enter="focusQuestion"
+            >
+              <div
+                :key="question"
+                class="flex flex-col gap-6"
+              >
+                <div>
+                  <p class="text-sm font-semibold text-primary">
+                    {{ t('sandbox.builder.interview.progress', { current: question, total: INTERVIEW_QUESTIONS }) }}
+                  </p>
+
+                  <h2
+                    ref="questionTitle"
+                    tabindex="-1"
+                    class="mt-1 text-2xl font-bold tracking-tight text-fino-text outline-none sm:text-3xl"
+                  >
+                    {{ t(`sandbox.builder.interview.${questionKey}`) }}
+                  </h2>
+
+                  <p class="mt-2 text-sm leading-relaxed text-fino-text-muted sm:text-base">
+                    {{ t(`sandbox.builder.interview.hints.${questionKey}`) }}
+                  </p>
+                </div>
+
+                <!-- 1. Чем занимаетесь — без значения по умолчанию -->
+                <ul
+                  v-if="questionKey === 'industry'"
+                  class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"
+                >
+                  <li
+                    v-for="industry in industryTiles"
+                    :key="industry.id"
+                  >
+                    <button
+                      type="button"
+                      class="group flex h-full w-full cursor-pointer flex-col items-start gap-2 rounded-2xl border p-3
+                             text-left text-sm font-semibold text-fino-text transition-colors duration-200
+                             hover:border-primary hover:bg-fino-accent focus-visible:outline-2 focus-visible:outline-primary
+                             motion-reduce:transition-none lg:flex-row lg:items-center lg:gap-3"
+                      :class="industry.isSelected ? 'border-primary bg-fino-accent' : 'border-fino-border'"
+                      :aria-pressed="industry.isSelected"
+                      @click="chooseIndustry(industry.id)"
+                    >
+                      <span
+                        class="flex size-10 shrink-0 items-center justify-center rounded-xl transition-colors duration-200
+                               motion-reduce:transition-none"
+                        :class="industry.isSelected
+                          ? 'bg-primary text-primary-contrast'
+                          : 'bg-fino-surface-secondary text-fino-text-muted group-hover:text-primary'"
+                        aria-hidden="true"
+                      >
+                        <i :class="industry.icon" />
+                      </span>
+
+                      <span class="min-w-0 break-words">{{ industry.title }}</span>
+                    </button>
+                  </li>
+                </ul>
+
+                <!-- 2. Сколько приходит на счёт — диапазонами; шкала растёт вместе с оборотом -->
+                <ul
+                  v-else-if="questionKey === 'revenue'"
+                  class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
+                >
+                  <li
+                    v-for="(range, index) in REVENUE_RANGES"
+                    :key="range.id"
+                  >
+                    <button
+                      type="button"
+                      class="flex h-full w-full cursor-pointer flex-col items-start gap-4 rounded-2xl border p-4 text-left
+                             transition-colors duration-200 hover:border-primary hover:bg-fino-accent
+                             focus-visible:outline-2 focus-visible:outline-primary motion-reduce:transition-none"
+                      :class="selectedRevenue === range.id ? 'border-primary bg-fino-accent' : 'border-fino-border'"
+                      :aria-pressed="selectedRevenue === range.id"
+                      @click="chooseRevenue(range)"
+                    >
+                      <span
+                        class="flex h-6 items-end gap-1"
+                        aria-hidden="true"
+                      >
+                        <span
+                          v-for="(height, bar) in REVENUE_BAR_HEIGHTS"
+                          :key="height"
+                          class="w-1.5 rounded-full"
+                          :class="[height, bar <= index ? 'bg-primary' : 'bg-fino-border']"
+                        />
+                      </span>
+
+                      <span class="text-base font-bold text-fino-text">
+                        {{ t(`sandbox.builder.interview.revenueRanges.${range.id}`) }}
+                      </span>
+                    </button>
+                  </li>
+                </ul>
+
+                <!-- 3. Кто в компании: «Я один» — отдельно, ниже — варианты ООО; бухгалтер и представитель — по желанию -->
+                <div
+                  v-else
+                  class="flex flex-col gap-5"
+                >
+                  <ul
+                    class="grid grid-cols-1 gap-3 sm:grid-cols-2"
+                    role="radiogroup"
+                    :aria-label="t('sandbox.builder.interview.team')"
+                  >
+                    <li
+                      v-for="option in TEAM_OPTIONS"
+                      :key="option.id"
+                      :class="{ 'sm:col-span-2': option.id === SOLO_TEAM }"
+                    >
+                      <button
+                        type="button"
+                        role="radio"
+                        :aria-checked="selectedTeam === option.id"
+                        class="flex h-full w-full cursor-pointer items-center gap-4 rounded-2xl border p-4 text-left
+                               transition-colors duration-200 hover:border-primary hover:bg-fino-accent
+                               focus-visible:outline-2 focus-visible:outline-primary motion-reduce:transition-none"
+                        :class="selectedTeam === option.id ? 'border-primary bg-fino-accent' : 'border-fino-border'"
+                        @click="chooseTeam(option)"
+                      >
+                        <span
+                          class="flex size-10 shrink-0 items-center justify-center rounded-xl transition-colors duration-200
+                                 motion-reduce:transition-none"
+                          :class="selectedTeam === option.id
+                            ? 'bg-primary text-primary-contrast'
+                            : 'bg-fino-surface-secondary text-fino-text-muted'"
+                          aria-hidden="true"
+                        >
+                          <i :class="['pi', option.icon]" />
+                        </span>
+
+                        <span class="min-w-0 flex-1">
+                          <span class="block text-sm font-bold text-fino-text sm:text-base">
+                            {{ t(`sandbox.builder.interview.teams.${option.id}.title`) }}
+                          </span>
+                          <span class="mt-0.5 block text-sm text-fino-text-muted">
+                            {{ t(`sandbox.builder.interview.teams.${option.id}.hint`) }}
+                          </span>
+                        </span>
+
+                        <span
+                          class="flex size-5 shrink-0 items-center justify-center rounded-full border-2"
+                          :class="selectedTeam === option.id ? 'border-primary bg-primary' : 'border-fino-border'"
+                          aria-hidden="true"
+                        >
+                          <i
+                            v-if="selectedTeam === option.id"
+                            class="pi pi-check text-[10px] text-primary-contrast"
+                          />
+                        </span>
+                      </button>
+                    </li>
+                  </ul>
+
+                  <!-- По желанию: бухгалтер и представитель -->
+                  <div class="flex flex-col gap-2 rounded-2xl bg-fino-surface-secondary p-4 sm:flex-row sm:flex-wrap sm:items-center">
+                    <span class="text-sm font-semibold text-fino-text-muted sm:mr-1">
+                      {{ t('sandbox.builder.interview.also') }}
+                    </span>
+
+                    <label
+                      class="inline-flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm text-fino-text
+                             transition-colors duration-200 hover:border-primary motion-reduce:transition-none"
+                      :class="form.accountant ? 'border-primary bg-fino-accent' : 'border-fino-border bg-fino-surface'"
+                    >
+                      <Checkbox
+                        v-model="form.accountant"
+                        binary
+                      />
+                      {{ t('sandbox.builder.interview.accountant') }}
+                    </label>
+
+                    <label
+                      v-if="isRepresentativeAllowed"
+                      class="inline-flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm text-fino-text
+                             transition-colors duration-200 hover:border-primary motion-reduce:transition-none"
+                      :class="form.representative ? 'border-primary bg-fino-accent' : 'border-fino-border bg-fino-surface'"
+                    >
+                      <Checkbox
+                        v-model="form.representative"
+                        binary
+                      />
+                      {{ t('sandbox.builder.interview.representative') }}
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </Transition>
+
+            <!-- Подвал карточки: назад — слева, дальше — справа -->
+            <div
+              class="mt-8 flex flex-col-reverse gap-3 border-t border-fino-border pt-5 sm:flex-row sm:items-center
+                     sm:justify-between"
+            >
+              <button
+                type="button"
+                class="inline-flex w-fit cursor-pointer items-center gap-2 text-sm font-semibold text-fino-text-muted
+                       transition-colors hover:text-fino-text focus-visible:outline-2 focus-visible:outline-primary"
+                @click="goBackInInterview"
+              >
+                <i
+                  class="pi pi-arrow-left text-xs"
+                  aria-hidden="true"
+                />
+                {{ question > 1 ? t('sandbox.builder.interview.back') : t('sandbox.builder.cancel') }}
+              </button>
+
+              <button
+                v-if="questionKey === 'team'"
+                type="button"
+                class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3
+                       text-sm font-semibold text-primary-contrast transition-all duration-200 hover:opacity-90
+                       active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none
+                       focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                :disabled="!selectedTeam"
+                @click="showResult"
+              >
+                {{ t('sandbox.builder.interview.showResult') }}
+                <i
+                  class="pi pi-arrow-right text-xs"
+                  aria-hidden="true"
+                />
+              </button>
+
+              <button
+                v-else-if="isQuestionAnswered"
+                type="button"
+                class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border
+                       border-fino-border bg-fino-surface px-6 py-3 text-sm font-semibold text-fino-text transition-colors
+                       duration-200 hover:bg-fino-surface-hover motion-reduce:transition-none
+                       focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                @click="goForward"
+              >
+                {{ t('sandbox.builder.interview.next') }}
+                <i
+                  class="pi pi-arrow-right text-xs"
+                  aria-hidden="true"
+                />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Результат: что скажет банк — и «Уточнить» рядом; каждое изменение пересчитывает предпросмотр -->
+        <div
+          v-else-if="options"
+          class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_28rem]"
+        >
+          <div
+            ref="preview"
+            class="min-w-0 scroll-mt-24 lg:sticky lg:top-28"
+          >
+            <SandboxPersonaPreview
+              :preview="preview"
+              :is-loading="isPreviewLoading"
+              :has-error="previewError"
+              :has-representative="form.representative"
+              @highlight="handleHighlight"
+              @retry="loadPreview"
+            />
+          </div>
+
+          <form
+            class="flex min-w-0 flex-col gap-3"
+            novalidate
+            :aria-busy="isSubmitting"
+            @submit.prevent="submit"
+          >
+            <div class="flex items-center justify-between gap-3">
+              <h2 class="text-lg font-bold tracking-tight text-fino-text">
+                {{ t('sandbox.builder.refine.title') }}
+              </h2>
+
+              <button
+                v-if="!isEdit"
+                type="button"
+                class="cursor-pointer text-sm font-semibold text-fino-text-muted transition-colors hover:text-primary"
+                @click="restartInterview"
+              >
+                {{ t('sandbox.builder.refine.restart') }}
+              </button>
+            </div>
+
+            <!-- О компании: имя и название — по желанию -->
+            <SandboxPersonaRefineSection
+              icon="pi pi-building"
+              :title="t('sandbox.builder.refine.company')"
+              :summary="refineSummary.company"
+            >
+              <div class="grid grid-cols-1 gap-4 px-4 pb-4">
+                <SandboxPersonaField
+                  input-id="persona-fullName"
+                  :label="t('sandbox.builder.fields.fullName')"
+                  :error="null"
+                >
+                  <InputText
+                    id="persona-fullName"
+                    v-model="form.fullName"
+                    :maxlength="FULL_NAME_MAX_LENGTH"
+                    :placeholder="t('sandbox.builder.fields.optional')"
                     :disabled="isBusy"
                     fluid
                   />
                 </SandboxPersonaField>
 
                 <SandboxPersonaField
-                  input-id="persona-ageMonths"
-                  :label="t('sandbox.builder.fields.ageMonths')"
+                  input-id="persona-organization"
+                  :label="t('sandbox.builder.fields.organization')"
                   :error="null"
-                  :is-highlighted="isHighlighted('age_months', 'flags.young_business')"
+                >
+                  <InputText
+                    id="persona-organization"
+                    v-model="form.organization"
+                    :placeholder="t('sandbox.builder.fields.organizationAuto')"
+                    :disabled="isBusy"
+                    fluid
+                  />
+                </SandboxPersonaField>
+
+                <SandboxPersonaField
+                  input-id="persona-form"
+                  :label="t('sandbox.builder.fields.form')"
+                  :error="null"
+                >
+                  <SelectButton
+                    v-model="form.form"
+                    :options="options.forms"
+                    option-label="title"
+                    option-value="id"
+                    :allow-empty="false"
+                    :disabled="isBusy"
+                    :aria-label="t('sandbox.builder.fields.form')"
+                  />
+                </SandboxPersonaField>
+
+                <SandboxPersonaField
+                  input-id="persona-industry"
+                  :label="t('sandbox.builder.fields.industry')"
+                  :error="null"
+                  :is-highlighted="isHighlighted('industry')"
+                >
+                  <Select
+                    v-model="form.industry"
+                    input-id="persona-industry"
+                    :options="industryOptions"
+                    option-label="title"
+                    option-value="id"
+                    filter
+                    :disabled="isBusy"
+                    fluid
+                  />
+                </SandboxPersonaField>
+
+                <SandboxPersonaField
+                  input-id="persona-inflowAvg"
+                  :label="t('sandbox.builder.fields.inflowAvg')"
+                  :error="null"
+                  :is-highlighted="isHighlighted('inflow_avg')"
                 >
                   <InputNumber
-                    v-model="form.ageMonths"
-                    input-id="persona-ageMonths"
+                    v-model="form.inflowAvg"
+                    input-id="persona-inflowAvg"
                     :min="1"
                     :max-fraction-digits="0"
-                    :suffix="monthsSuffix"
+                    suffix=" ₽"
                     :locale="locale"
+                    :disabled="isBusy"
+                    fluid
+                  />
+                </SandboxPersonaField>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <SandboxPersonaField
+                    input-id="persona-headcount"
+                    :label="t('sandbox.builder.fields.headcount')"
+                    :error="null"
+                    :is-highlighted="isHighlighted('headcount')"
+                  >
+                    <InputNumber
+                      v-model="form.headcount"
+                      input-id="persona-headcount"
+                      :min="1"
+                      :max-fraction-digits="0"
+                      :locale="locale"
+                      :disabled="isBusy"
+                      fluid
+                    />
+                  </SandboxPersonaField>
+
+                  <SandboxPersonaField
+                    input-id="persona-ageMonths"
+                    :label="t('sandbox.builder.fields.ageMonths')"
+                    :error="null"
+                    :is-highlighted="isHighlighted('age_months', 'flags.young_business')"
+                  >
+                    <InputNumber
+                      v-model="form.ageMonths"
+                      input-id="persona-ageMonths"
+                      :min="1"
+                      :max-fraction-digits="0"
+                      :suffix="monthsSuffix"
+                      :locale="locale"
+                      :disabled="isBusy"
+                      fluid
+                    />
+                  </SandboxPersonaField>
+                </div>
+              </div>
+            </SandboxPersonaRefineSection>
+
+            <!-- Кто в компании: нормы закона — только во всплывающей «i» -->
+            <SandboxPersonaRefineSection
+              icon="pi pi-users"
+              :title="t('sandbox.builder.refine.team')"
+              :summary="refineSummary.team"
+              :is-open="Boolean(conflictFor('structure'))"
+            >
+              <div class="flex flex-col gap-3 px-4 pb-4">
+                <SandboxPersonaField
+                  v-if="applicableStructures.length"
+                  input-id="persona-structure"
+                  :label="t('sandbox.builder.fields.structure')"
+                  :error="conflictFor('structure')"
+                  :is-highlighted="isHighlighted('structure')"
+                >
+                  <div
+                    class="flex flex-col gap-2"
+                    role="radiogroup"
+                    :aria-label="t('sandbox.builder.fields.structure')"
+                  >
+                    <label
+                      v-for="structure in applicableStructures"
+                      :key="structure.id"
+                      class="flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors
+                             duration-200 hover:bg-fino-surface-hover motion-reduce:transition-none"
+                      :class="form.structure === structure.id ? 'border-primary bg-fino-accent' : 'border-fino-border'"
+                    >
+                      <RadioButton
+                        v-model="form.structure"
+                        :value="structure.id"
+                        name="persona-structure"
+                        :disabled="isBusy"
+                        class="shrink-0"
+                      />
+
+                      <span class="min-w-0 flex-1 break-words text-sm font-semibold text-fino-text">{{ structure.title }}</span>
+
+                      <i
+                        class="pi pi-info-circle shrink-0 text-xs text-fino-text-muted"
+                        :title="structure.means"
+                        :aria-label="structure.means"
+                      />
+                    </label>
+                  </div>
+                </SandboxPersonaField>
+
+                <label
+                  v-if="accountantOption"
+                  class="flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors duration-200
+                         hover:bg-fino-surface-hover motion-reduce:transition-none"
+                  :class="form.accountant ? 'border-primary bg-fino-accent' : 'border-fino-border'"
+                >
+                  <Checkbox
+                    v-model="form.accountant"
+                    binary
+                    :disabled="isBusy"
+                    class="shrink-0"
+                  />
+                  <span class="min-w-0 flex-1 text-sm font-semibold text-fino-text">{{ t('sandbox.builder.interview.accountant') }}</span>
+                  <i
+                    class="pi pi-info-circle shrink-0 text-xs text-fino-text-muted"
+                    :title="accountantOption.means"
+                    :aria-label="accountantOption.means"
+                  />
+                </label>
+
+                <label
+                  v-if="representativeOption"
+                  class="flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors duration-200
+                         hover:bg-fino-surface-hover motion-reduce:transition-none"
+                  :class="form.representative ? 'border-primary bg-fino-accent' : 'border-fino-border'"
+                >
+                  <Checkbox
+                    v-model="form.representative"
+                    binary
+                    :disabled="isBusy"
+                    class="shrink-0"
+                  />
+                  <span class="min-w-0 flex-1 text-sm font-semibold text-fino-text">{{ t('sandbox.builder.interview.representative') }}</span>
+                  <i
+                    class="pi pi-info-circle shrink-0 text-xs text-fino-text-muted"
+                    :title="representativeOption.means"
+                    :aria-label="representativeOption.means"
+                  />
+                </label>
+              </div>
+            </SandboxPersonaRefineSection>
+
+            <!-- Деньги: сезонность, ровность, тренд, канал, кредиты, просрочки -->
+            <SandboxPersonaRefineSection
+              icon="pi pi-wallet"
+              :title="t('sandbox.builder.refine.money')"
+              :summary="refineSummary.money"
+            >
+              <div class="flex flex-col gap-4 px-4 pb-4">
+                <template
+                  v-for="field in CHOICE_FIELDS"
+                  :key="field"
+                >
+                  <SandboxPersonaField
+                    v-if="field !== 'delays' || isDelaysVisible"
+                    :input-id="`persona-${field}`"
+                    :label="t(`sandbox.builder.fields.${field}`)"
+                    :error="conflictFor(field)"
+                    :is-highlighted="isHighlighted(field)"
+                  >
+                    <SandboxPersonaChoice
+                      v-model="form[field]"
+                      :options="options.choices[field]"
+                      :label="t(`sandbox.builder.fields.${field}`)"
+                      :is-disabled="isBusy"
+                    />
+                  </SandboxPersonaField>
+                </template>
+              </div>
+            </SandboxPersonaRefineSection>
+
+            <!-- Особенности: факты о компании, без исхода -->
+            <SandboxPersonaRefineSection
+              icon="pi pi-star"
+              :title="t('sandbox.builder.flagsTitle')"
+              :summary="refineSummary.flags"
+            >
+              <div class="px-4 pb-4">
+                <p
+                  v-if="conflictFor('flags.large_deal')"
+                  class="mb-3 text-sm text-red-600 dark:text-red-400"
+                >
+                  {{ conflictFor('flags.large_deal') }}
+                </p>
+
+                <SandboxPersonaFlagsPicker
+                  :groups="options.groups"
+                  :flags="applicableFlags"
+                  :selected="form.flags"
+                  :is-disabled="isBusy"
+                  :highlighted="highlightedFlagIds"
+                  @change="handleFlagsChange"
+                />
+              </div>
+            </SandboxPersonaRefineSection>
+
+            <!-- Точные цифры: пустые бэкенд выведет из ответов выше -->
+            <SandboxPersonaRefineSection
+              icon="pi pi-calculator"
+              :title="t('sandbox.builder.exactTitle')"
+              :summary="refineSummary.exact"
+            >
+              <div class="grid grid-cols-1 gap-4 px-4 pb-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                <SandboxPersonaField
+                  input-id="persona-inn"
+                  :label="t('sandbox.builder.fields.inn')"
+                  :hint="t('sandbox.builder.fields.innHint')"
+                  :error="errors.inn ?? null"
+                >
+                  <InputText
+                    id="persona-inn"
+                    v-model="form.inn"
+                    inputmode="numeric"
+                    :maxlength="12"
+                    :invalid="Boolean(errors.inn)"
+                    :disabled="isBusy"
+                    fluid
+                  />
+                </SandboxPersonaField>
+
+                <SandboxPersonaField
+                  v-for="field in EXACT_FIELDS"
+                  :key="field.key"
+                  :input-id="`persona-${field.key}`"
+                  :label="t(`sandbox.builder.exact.${field.key}`)"
+                  :error="null"
+                  :is-highlighted="isHighlighted(field.field)"
+                >
+                  <InputNumber
+                    v-model="form[field.key]"
+                    :input-id="`persona-${field.key}`"
+                    :min="0"
+                    :max="field.max"
+                    :max-fraction-digits="field.fractionDigits"
+                    :locale="locale"
+                    :placeholder="t('sandbox.builder.exactAuto')"
                     :disabled="isBusy"
                     fluid
                   />
                 </SandboxPersonaField>
               </div>
-            </div>
-          </details>
+            </SandboxPersonaRefineSection>
 
-          <!-- Кто в компании: нормы закона — только во всплывающей «i» -->
-          <details
-            class="group rounded-2xl border border-fino-border bg-fino-surface"
-            :open="Boolean(conflictFor('structure'))"
-          >
-            <summary
-              class="flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold
-                     text-fino-text marker:content-none focus-visible:outline-2 focus-visible:outline-primary"
-            >
-              {{ t('sandbox.builder.refine.team') }}
-              <i
-                class="pi pi-chevron-down text-xs text-fino-text-muted transition-transform duration-200
-                       group-open:rotate-180 motion-reduce:transition-none"
-                aria-hidden="true"
-              />
-            </summary>
-
-            <div class="flex flex-col gap-3 px-4 pb-4">
-              <SandboxPersonaField
-                v-if="applicableStructures.length"
-                input-id="persona-structure"
-                :label="t('sandbox.builder.fields.structure')"
-                :error="conflictFor('structure')"
-                :is-highlighted="isHighlighted('structure')"
+            <div class="mt-2 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end lg:flex-col-reverse xl:flex-row">
+              <button
+                type="button"
+                class="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-xl border border-fino-border
+                       bg-fino-surface px-5 py-3 text-sm font-semibold text-fino-text transition-colors duration-200
+                       hover:bg-fino-surface-hover disabled:cursor-not-allowed disabled:opacity-60
+                       motion-reduce:transition-none"
+                :disabled="isBusy"
+                @click="cancelBuilding"
               >
-                <div
-                  class="flex flex-col gap-2"
-                  role="radiogroup"
-                  :aria-label="t('sandbox.builder.fields.structure')"
-                >
-                  <label
-                    v-for="structure in applicableStructures"
-                    :key="structure.id"
-                    class="flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors
-                           duration-200 hover:bg-fino-surface-hover motion-reduce:transition-none"
-                    :class="form.structure === structure.id ? 'border-primary bg-fino-accent' : 'border-fino-border'"
-                  >
-                    <RadioButton
-                      v-model="form.structure"
-                      :value="structure.id"
-                      name="persona-structure"
-                      :disabled="isBusy"
-                      class="shrink-0"
-                    />
+                {{ t('sandbox.builder.cancel') }}
+              </button>
 
-                    <span class="min-w-0 flex-1 break-words text-sm font-semibold text-fino-text">{{ structure.title }}</span>
-
-                    <i
-                      class="pi pi-info-circle shrink-0 text-xs text-fino-text-muted"
-                      :title="structure.means"
-                      :aria-label="structure.means"
-                    />
-                  </label>
-                </div>
-              </SandboxPersonaField>
-
-              <label
-                v-if="accountantOption"
-                class="flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors duration-200
-                       hover:bg-fino-surface-hover motion-reduce:transition-none"
-                :class="form.accountant ? 'border-primary bg-fino-accent' : 'border-fino-border'"
+              <button
+                type="submit"
+                class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3
+                       text-sm font-semibold text-primary-contrast transition-all duration-200 hover:opacity-90
+                       active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
+                :disabled="isBusy"
               >
-                <Checkbox
-                  v-model="form.accountant"
-                  binary
-                  :disabled="isBusy"
-                  class="shrink-0"
-                />
-                <span class="min-w-0 flex-1 text-sm font-semibold text-fino-text">{{ t('sandbox.builder.interview.accountant') }}</span>
+                {{ submitLabel }}
                 <i
-                  class="pi pi-info-circle shrink-0 text-xs text-fino-text-muted"
-                  :title="accountantOption.means"
-                  :aria-label="accountantOption.means"
+                  class="pi pi-arrow-right text-xs"
+                  aria-hidden="true"
                 />
-              </label>
-
-              <label
-                v-if="representativeOption"
-                class="flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors duration-200
-                       hover:bg-fino-surface-hover motion-reduce:transition-none"
-                :class="form.representative ? 'border-primary bg-fino-accent' : 'border-fino-border'"
-              >
-                <Checkbox
-                  v-model="form.representative"
-                  binary
-                  :disabled="isBusy"
-                  class="shrink-0"
-                />
-                <span class="min-w-0 flex-1 text-sm font-semibold text-fino-text">{{ t('sandbox.builder.interview.representative') }}</span>
-                <i
-                  class="pi pi-info-circle shrink-0 text-xs text-fino-text-muted"
-                  :title="representativeOption.means"
-                  :aria-label="representativeOption.means"
-                />
-              </label>
+              </button>
             </div>
-          </details>
-
-          <!-- Деньги: сезонность, ровность, тренд, канал, кредиты, просрочки -->
-          <details class="group rounded-2xl border border-fino-border bg-fino-surface">
-            <summary
-              class="flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold
-                     text-fino-text marker:content-none focus-visible:outline-2 focus-visible:outline-primary"
-            >
-              {{ t('sandbox.builder.refine.money') }}
-              <i
-                class="pi pi-chevron-down text-xs text-fino-text-muted transition-transform duration-200
-                       group-open:rotate-180 motion-reduce:transition-none"
-                aria-hidden="true"
-              />
-            </summary>
-
-            <div class="flex flex-col gap-4 px-4 pb-4">
-              <template
-                v-for="field in CHOICE_FIELDS"
-                :key="field"
-              >
-                <SandboxPersonaField
-                  v-if="field !== 'delays' || isDelaysVisible"
-                  :input-id="`persona-${field}`"
-                  :label="t(`sandbox.builder.fields.${field}`)"
-                  :error="conflictFor(field)"
-                  :is-highlighted="isHighlighted(field)"
-                >
-                  <SandboxPersonaChoice
-                    v-model="form[field]"
-                    :options="options.choices[field]"
-                    :label="t(`sandbox.builder.fields.${field}`)"
-                    :is-disabled="isBusy"
-                  />
-                </SandboxPersonaField>
-              </template>
-            </div>
-          </details>
-
-          <!-- Особенности: факты о компании, без исхода -->
-          <details class="group rounded-2xl border border-fino-border bg-fino-surface">
-            <summary
-              class="flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold
-                     text-fino-text marker:content-none focus-visible:outline-2 focus-visible:outline-primary"
-            >
-              {{ t('sandbox.builder.flagsTitle') }}
-              <i
-                class="pi pi-chevron-down text-xs text-fino-text-muted transition-transform duration-200
-                       group-open:rotate-180 motion-reduce:transition-none"
-                aria-hidden="true"
-              />
-            </summary>
-
-            <div class="px-4 pb-4">
-              <p
-                v-if="conflictFor('flags.large_deal')"
-                class="mb-3 text-sm text-red-600 dark:text-red-400"
-              >
-                {{ conflictFor('flags.large_deal') }}
-              </p>
-
-              <SandboxPersonaFlagsPicker
-                :groups="options.groups"
-                :flags="applicableFlags"
-                :selected="form.flags"
-                :is-disabled="isBusy"
-                :highlighted="highlightedFlagIds"
-                @change="handleFlagsChange"
-              />
-            </div>
-          </details>
-
-          <!-- Точные цифры: пустые бэкенд выведет из ответов выше -->
-          <details class="group rounded-2xl border border-fino-border bg-fino-surface">
-            <summary
-              class="flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold
-                     text-fino-text marker:content-none focus-visible:outline-2 focus-visible:outline-primary"
-            >
-              {{ t('sandbox.builder.exactTitle') }}
-              <i
-                class="pi pi-chevron-down text-xs text-fino-text-muted transition-transform duration-200
-                       group-open:rotate-180 motion-reduce:transition-none"
-                aria-hidden="true"
-              />
-            </summary>
-
-            <div class="grid grid-cols-1 gap-4 px-4 pb-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              <SandboxPersonaField
-                input-id="persona-inn"
-                :label="t('sandbox.builder.fields.inn')"
-                :hint="t('sandbox.builder.fields.innHint')"
-                :error="errors.inn ?? null"
-              >
-                <InputText
-                  id="persona-inn"
-                  v-model="form.inn"
-                  inputmode="numeric"
-                  :maxlength="12"
-                  :invalid="Boolean(errors.inn)"
-                  :disabled="isBusy"
-                  fluid
-                />
-              </SandboxPersonaField>
-
-              <SandboxPersonaField
-                v-for="field in EXACT_FIELDS"
-                :key="field.key"
-                :input-id="`persona-${field.key}`"
-                :label="t(`sandbox.builder.exact.${field.key}`)"
-                :error="null"
-                :is-highlighted="isHighlighted(field.field)"
-              >
-                <InputNumber
-                  v-model="form[field.key]"
-                  :input-id="`persona-${field.key}`"
-                  :min="0"
-                  :max="field.max"
-                  :max-fraction-digits="field.fractionDigits"
-                  :locale="locale"
-                  :placeholder="t('sandbox.builder.exactAuto')"
-                  :disabled="isBusy"
-                  fluid
-                />
-              </SandboxPersonaField>
-            </div>
-          </details>
-
-          <div class="mt-2 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end lg:flex-col-reverse xl:flex-row">
-            <button
-              type="button"
-              class="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-xl border border-fino-border
-                     bg-fino-surface px-5 py-3 text-sm font-semibold text-fino-text transition-colors duration-200
-                     hover:bg-fino-surface-hover disabled:cursor-not-allowed disabled:opacity-60
-                     motion-reduce:transition-none"
-              :disabled="isBusy"
-              @click="cancelBuilding"
-            >
-              {{ t('sandbox.builder.cancel') }}
-            </button>
-
-            <button
-              type="submit"
-              class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3
-                     text-sm font-semibold text-primary-contrast transition-all duration-200 hover:opacity-90
-                     active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
-              :disabled="isBusy"
-            >
-              {{ submitLabel }}
-              <i
-                class="pi pi-arrow-right text-xs"
-                aria-hidden="true"
-              />
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
 
       <SandboxPersonaPreviewBar
