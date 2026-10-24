@@ -10,6 +10,9 @@
     --fino-blue-soft: #E3E8FF;
     --fino-amber: #FFB800;
     --fino-amber-soft: #FFF1C7;
+    --fino-green: #1FB45A;
+    /* Фиолетовый для текста-ссылок: в тёмной теме — светлее, иначе не читается */
+    --fino-violet-ink: #7A1FE0;
 
     /* Поверхности */
     --fino-surface: #FFFFFF;
@@ -29,8 +32,15 @@
     --fino-grid: rgba(17, 17, 17, 0.1);
 }
 
+/* Тёмная тема: обводки и тени приглушены, акценты темнее — иначе они спорят с текстом карточек */
 .app-dark {
     --fino-accent: #3A1210;
+    --fino-lime: #8CC21A;
+    --fino-violet: #7A3BD0;
+    --fino-blue: #3550D6;
+    --fino-amber: #D9A21C;
+    --fino-green: #1C9E50;
+    --fino-violet-ink: #C29BFF;
     --fino-accent-hover: #4D1915;
     --fino-lime-soft: #22300A;
     --fino-violet-soft: #2A1745;
@@ -41,12 +51,12 @@
     --fino-surface-secondary: #0B0B0B;
     --fino-surface-hover: #222222;
 
-    --fino-border: #2E2E2E;
-    --fino-line: #F4F4F4;
-    --fino-shadow: #4A4A4A;
+    --fino-border: #2A2A2A;
+    --fino-line: #4A4A4A;
+    --fino-shadow: #2A2A2A;
 
     --fino-text: #F4F4F4;
-    --fino-text-muted: #B8B8B8;
+    --fino-text-muted: #A8A8A8;
 
     --fino-grid: rgba(255, 255, 255, 0.08);
 }

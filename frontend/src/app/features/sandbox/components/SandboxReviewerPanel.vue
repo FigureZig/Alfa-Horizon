@@ -14,20 +14,19 @@ import SandboxScenarioTracker from './SandboxScenarioTracker.vue'
 import SandboxWorldControls from './SandboxWorldControls.vue'
 import { useApiFetch } from '@/app/composables/useApiFetch'
 import { useReviewerPanel } from '@/app/composables/useReviewerPanel'
+import { useScenarioRun } from '@/app/composables/useScenarioRun'
 import { applicationsService } from '@/app/services/application/applications.service'
 import { ApplicationMapper } from '@/app/mappers/application.mapper'
-import type { ApplicationDetailStatusEnum } from '@/app/types/application/application-detail-status-enum'
 import type { Nullable } from '@/app/types/nullable'
 
 
 const { t } = useI18n({ useScope: 'global' })
 const route = useRoute()
 const $fetch = useApiFetch()
-const { isVisible, openScenarioId, activeScenario, openPanel: showPanel, closePanel } = useReviewerPanel()
+const { isVisible, openScenarioId, openPanel: showPanel, closePanel } = useReviewerPanel()
+const { scenario: activeScenario } = useScenarioRun()
 
 const activeTab = ref('scenarios')
-const applicationStatus = ref<Nullable<ApplicationDetailStatusEnum>>(null)
-const loadedApplicationInn = ref<Nullable<string>>(null)
 // Срок текущего шага заявки на экране: к нему можно перемотать время мира
 const deadlineAt = ref<Nullable<string>>(null)
 
@@ -36,11 +35,6 @@ const inn = computed(() => (typeof route.params.inn === 'string' ? route.params.
 
 // События и отказы относятся к компании клиента; на рабочем месте банка ИНН компании подставлять не из чего
 const eventInn = computed(() => (route.meta.area === 'bank' ? undefined : inn.value))
-
-// Компания открытой заявки — из самой заявки; участнику её не открыть (403), тогда — из адреса кабинета
-const applicationInn = computed(() =>
-  loadedApplicationInn.value ?? (applicationId.value ? eventInn.value ?? null : null),
-)
 
 // В кабинете снизу мобильная навигация: кнопка стоит над ней
 const positionClass = computed(() => {
@@ -59,10 +53,8 @@ function handleVisibleChange(visible: boolean) {
   isVisible.value = visible
 }
 
-// Статус заявки на экране — для галочек в сценариях; чужая заявка (403) просто не отмечается
+// Срок текущего шага открытой заявки — для перемотки времени во вкладке «Мир»; чужая заявка (403) пропускается
 async function loadApplicationStatus() {
-  applicationStatus.value = null
-  loadedApplicationInn.value = null
   deadlineAt.value = null
 
   if (!applicationId.value) return
@@ -71,8 +63,6 @@ async function loadApplicationStatus() {
     const { data } = await applicationsService.fetchApplication($fetch, applicationId.value)
     const application = ApplicationMapper.toEntity(data.data)
 
-    applicationStatus.value = application.status
-    loadedApplicationInn.value = application.companyInn
     deadlineAt.value = application.deadline?.status === application.status ? application.deadline.at : null
   } catch (err: unknown) {
     console.error('Reviewer application status loading failed:', err)
@@ -91,7 +81,7 @@ watch(openScenarioId, (scenarioId) => {
 
 <template>
   <div
-    class="fixed right-4 z-40 flex flex-col items-end gap-3 sm:right-6"
+    class="fixed right-4 z-40 flex items-end gap-2 sm:right-6 sm:flex-col sm:gap-3"
     :class="positionClass"
   >
     <!-- Идёт сценарий: что сделать сейчас и кнопка следующего шага -->
@@ -148,12 +138,7 @@ watch(openScenarioId, (scenarioId) => {
 
       <TabPanels>
         <TabPanel value="scenarios">
-          <SandboxReviewerScenarios
-            :application-id="applicationId"
-            :application-inn="applicationInn"
-            :application-status="applicationStatus"
-            @navigated="closePanel"
-          />
+          <SandboxReviewerScenarios @navigated="closePanel" />
         </TabPanel>
 
         <TabPanel value="world">

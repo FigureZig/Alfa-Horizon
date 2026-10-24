@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RiskClassEnum } from '@/app/types/company/risk-class-enum'
 import type { CreditScoreClassInterface } from '@/app/types/company/credit-score-interface'
@@ -8,9 +8,17 @@ import type { CreditScoreClassInterface } from '@/app/types/company/credit-score
 const SCALE_MIN = 300
 const SCALE_MAX = 900
 
-// Чем выше класс, тем «заряженнее» цвет шкалы
-const CLASS_STROKES: Record<RiskClassEnum, string> = {
-  [RiskClassEnum.A]: 'var(--fino-lime)',
+// Шкала всегда от красного к зелёному; заряд открывает её до балла
+const GRADIENT_STOPS = [
+  { offset: '0%', color: 'var(--p-primary-color)' },
+  { offset: '45%', color: 'var(--fino-amber)' },
+  { offset: '72%', color: 'var(--fino-lime)' },
+  { offset: '100%', color: 'var(--fino-green)' },
+]
+
+// Плашка класса — цветом своего участка шкалы
+const CLASS_COLORS: Record<RiskClassEnum, string> = {
+  [RiskClassEnum.A]: 'var(--fino-green)',
   [RiskClassEnum.B]: 'var(--fino-lime)',
   [RiskClassEnum.C]: 'var(--fino-amber)',
   [RiskClassEnum.D]: 'var(--p-primary-color)',
@@ -28,6 +36,7 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
+const gradientId = `score-gradient-${useId()}`
 
 function toPercent(value: number): number {
   const clamped = Math.min(Math.max(value, SCALE_MIN), SCALE_MAX)
@@ -39,7 +48,7 @@ function toPercent(value: number): number {
 const isCharged = ref(false)
 
 const percent = computed(() => (isCharged.value ? toPercent(props.score) : 0))
-const stroke = computed(() => CLASS_STROKES[props.riskClass])
+const classColor = computed(() => CLASS_COLORS[props.riskClass])
 const needleAngle = computed(() => percent.value * 1.8 - 90)
 
 // Засечки на границах классов и подписи классов посередине своего участка
@@ -93,6 +102,25 @@ onMounted(() => {
       class="w-full overflow-visible"
       aria-hidden="true"
     >
+      <defs>
+        <!-- Градиент по горизонтали: у полукруга угол растёт вместе с x -->
+        <linearGradient
+          :id="gradientId"
+          x1="20"
+          y1="0"
+          x2="220"
+          y2="0"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop
+            v-for="stop in GRADIENT_STOPS"
+            :key="stop.offset"
+            :offset="stop.offset"
+            :stop-color="stop.color"
+          />
+        </linearGradient>
+      </defs>
+
       <!-- Корпус шкалы: чёрная обводка и пустая дорожка -->
       <path
         :d="ARC_PATH"
@@ -113,7 +141,7 @@ onMounted(() => {
       <path
         :d="ARC_PATH"
         fill="none"
-        :stroke="stroke"
+        :stroke="`url(#${gradientId})`"
         stroke-width="18"
         stroke-linecap="round"
         pathLength="100"
@@ -176,8 +204,8 @@ onMounted(() => {
 
       <span
         class="mb-1 rounded-lg border-2 border-fino-line px-2 py-0.5 font-mono text-xs font-bold"
-        :style="{ backgroundColor: stroke }"
-        :class="riskClass === RiskClassEnum.D ? 'text-white' : 'text-[#111]'"
+        :style="{ backgroundColor: classColor }"
+        :class="riskClass === RiskClassEnum.D || riskClass === RiskClassEnum.A ? 'text-white' : 'text-[#111]'"
       >
         {{ t('credits.score.riskClass', { riskClass }) }}
       </span>

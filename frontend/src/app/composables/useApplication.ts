@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useToast } from 'primevue/usetoast'
 import type { AxiosResponse } from 'axios'
 import { getSessionToken, isNotFoundError, useApiFetch } from '@/app/composables/useApiFetch'
+import { useScenarioRun } from '@/app/composables/useScenarioRun'
 import { createIdempotencyKey } from '@/app/composables/useApplicationCreate'
 import { useApplicationError } from '@/app/composables/useApplicationError'
 import { applicationsService } from '@/app/services/application/applications.service'
@@ -54,6 +55,7 @@ type ApplicationResponse = AxiosResponse<ApiResponse<ApplicationDto>>
  * Страница обновляется сама: по событиям потока SSE, а при его сбое — опросом, пока заявка не завершена.
  */
 export function useApplication(applicationId: MaybeRefOrGetter<string>) {
+  const { reportAction, reportStatus } = useScenarioRun()
   const $fetch = useApiFetch()
   const toast = useToast()
   const { t } = useI18n({ useScope: 'global' })
@@ -232,6 +234,8 @@ export function useApplication(applicationId: MaybeRefOrGetter<string>) {
       const { data } = await request()
 
       application.value = ApplicationMapper.toEntity(data.data)
+      // Идёт сценарий проверки — он узнает, что шаг сделан, и перейдёт к следующему
+      reportAction(action, application.value.id, application.value.status)
 
       toast.add({
         severity: 'success',
@@ -307,6 +311,8 @@ export function useApplication(applicationId: MaybeRefOrGetter<string>) {
   // Поток нужен, пока заявка не завершена: у конечных статусов бэкенд сам закрывает поток
   function onStatusChange() {
     if (!application.value) return
+
+    reportStatus(application.value.id, application.value.status)
 
     if (isFinished.value) {
       closeLiveUpdates()

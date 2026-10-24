@@ -117,7 +117,7 @@ watch(() => props.visible, (visible) => {
         {{ t('closeGap.note') }}
       </p>
 
-      <label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-fino-border p-3 text-sm">
+      <label class="flex cursor-pointer items-start gap-3 rounded-2xl p-3 text-sm border-2 border-fino-line">
         <Checkbox
           v-model="consentBki"
           binary

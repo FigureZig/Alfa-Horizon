@@ -24,7 +24,7 @@ const { t } = useI18n({ useScope: 'global' })
       <li
         v-for="row in ROWS"
         :key="row.key"
-        class="flex items-start gap-3 rounded-2xl border border-fino-border bg-fino-surface p-3"
+        class="flex items-start gap-3 rounded-2xl bg-fino-surface p-3 border-2 border-fino-line"
       >
         <span class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-fino-accent text-primary border-2 border-fino-line">
           <i

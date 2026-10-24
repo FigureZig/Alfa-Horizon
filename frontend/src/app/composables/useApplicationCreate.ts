@@ -2,6 +2,7 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'primevue/usetoast'
 import { useApiFetch } from '@/app/composables/useApiFetch'
+import { useScenarioRun } from '@/app/composables/useScenarioRun'
 import { useApplicationError } from '@/app/composables/useApplicationError'
 import { applicationsService } from '@/app/services/application/applications.service'
 import { ApplicationMapper } from '@/app/mappers/application.mapper'
@@ -23,6 +24,7 @@ export function useApplicationCreate(inn: string) {
   const toast = useToast()
   const { t } = useI18n({ useScope: 'global' })
   const { getApplicationErrorMessage } = useApplicationError()
+  const { reportAction } = useScenarioRun()
 
   const isSubmitting = ref(false)
   const errorMessage = ref<Nullable<string>>(null)
@@ -39,6 +41,7 @@ export function useApplicationCreate(inn: string) {
       const { data } = await applicationsService.createApplication($fetch, ApplicationMapper.toCreatePayload(inn, form))
 
       draft = ApplicationMapper.toEntity(data.data)
+      reportAction('create', draft.id, draft.status)
     } catch (err: unknown) {
       console.error('Application creation failed:', err)
       errorMessage.value = getApplicationErrorMessage(err)
@@ -49,6 +52,9 @@ export function useApplicationCreate(inn: string) {
 
     try {
       const { data } = await applicationsService.submitApplication($fetch, draft.id, createIdempotencyKey())
+      const submitted = ApplicationMapper.toEntity(data.data)
+
+      reportAction('submit', submitted.id, submitted.status)
 
       toast.add({
         severity: 'success',
@@ -57,7 +63,7 @@ export function useApplicationCreate(inn: string) {
         life: 4000,
       })
 
-      return ApplicationMapper.toEntity(data.data)
+      return submitted
     } catch (err: unknown) {
       console.error('Application submit failed:', err)
 

@@ -64,9 +64,9 @@ onBeforeUnmount(() => clearTimeout(flashTimer))
 <template>
   <button
     type="button"
-    class="flex w-full min-w-0 cursor-pointer items-center gap-3 rounded-2xl border border-fino-border px-4 py-3
-           text-left transition-all duration-300 hover:border-primary/40 focus-visible:outline-2
-           focus-visible:outline-primary motion-reduce:transition-none"
+    class="flex w-full min-w-0 cursor-pointer items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all
+           duration-300 hover:border-primary/40 focus-visible:outline-2 focus-visible:outline-primary
+           motion-reduce:transition-none border-2 border-fino-line"
     :class="[isDimmed ? 'opacity-60' : '', isFlashing ? 'bg-fino-accent' : 'bg-fino-surface']"
     :title="isDimmed ? reasons : undefined"
     @mouseenter="handleHighlight"

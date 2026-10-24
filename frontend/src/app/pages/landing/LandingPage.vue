@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import AppDotField from '@/app/components/AppDotField.vue'
 import AppErrorState from '@/app/components/AppErrorState.vue'
 import AppHeader from '@/app/components/layout/AppHeader.vue'
 import LandingHeroPreview from '@/app/features/landing/components/LandingHeroPreview.vue'
@@ -23,7 +24,10 @@ const { products, isLoading, error, loadProducts } = useCatalogProducts()
 </script>
 
 <template>
-  <div class="min-h-screen bg-fino-surface-secondary bg-dots">
+  <!-- isolate: фон из точек (z -10) рисуется над цветом страницы, но под содержимым -->
+  <div class="relative isolate min-h-screen bg-fino-surface-secondary">
+    <AppDotField />
+
     <AppHeader>
       <template #profile>
         <RouterLink

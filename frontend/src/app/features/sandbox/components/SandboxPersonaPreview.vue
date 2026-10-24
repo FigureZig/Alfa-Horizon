@@ -142,7 +142,7 @@ function handleRetry() {
       <!-- Стоп для всей компании -->
       <div
         v-if="preview.blockers.length"
-        class="rounded-3xl border border-red-500/30 bg-red-500/5 p-4"
+        class="rounded-3xl bg-fino-accent p-4 border-2 border-fino-line"
         tabindex="0"
         @mouseenter="handleBlockersHighlight"
         @mouseleave="handleClearHighlight"

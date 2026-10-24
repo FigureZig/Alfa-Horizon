@@ -1,22 +1,26 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useConfetti } from '@/app/composables/useConfetti'
 
 const { t } = useI18n({ useScope: 'global' })
+const { burst } = useConfetti()
+
+// Превью кабинета: нажали «Закрыть разрыв» — хлопушка и разрыв закрыт
+const isGapClosed = ref(false)
+
+function closeGap(event: MouseEvent) {
+  burst(event.currentTarget as HTMLElement)
+  isGapClosed.value = true
+}
 </script>
 
 <template>
   <div
     class="relative mx-auto w-full max-w-md lg:max-w-none"
-    role="img"
+    role="group"
     :aria-label="t('landing.preview.label')"
   >
-    <!-- Мягкое свечение за карточками -->
-    <div
-      class="pointer-events-none absolute -inset-6 rounded-[3rem] bg-linear-to-br
-             from-primary/15 via-transparent to-primary/5 blur-2xl"
-      aria-hidden="true"
-    />
-
     <!-- Прогноз остатка -->
     <div
       class="relative card-key p-5 sm:p-6"
@@ -93,19 +97,24 @@ const { t } = useI18n({ useScope: 'global' })
 
       <button
         type="button"
-        tabindex="-1"
-        class="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold
-               text-primary-contrast btn-key"
+        class="mt-4 inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 text-sm
+               font-semibold btn-key focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        :class="isGapClosed ? 'bg-fino-lime text-[#111]' : 'bg-primary text-primary-contrast'"
+        @click="closeGap"
       >
-        {{ t('landing.preview.closeGap') }}
-        <i class="pi pi-arrow-right text-xs" />
+        {{ isGapClosed ? t('landing.preview.gapClosed') : t('landing.preview.closeGap') }}
+        <i
+          :class="isGapClosed ? 'pi pi-check' : 'pi pi-arrow-right'"
+          class="text-xs"
+          aria-hidden="true"
+        />
       </button>
     </div>
 
     <!-- Предодобренное предложение -->
     <div
-      class="relative -mt-6 ml-6 flex items-center gap-4 rounded-2xl border border-fino-border
-             bg-fino-surface p-4 shadow-lg motion-safe:animate-fade-up sm:ml-12 sm:p-5"
+      class="relative -mt-6 ml-6 flex items-center gap-4 rounded-2xl bg-fino-surface p-4 shadow-lg
+             motion-safe:animate-fade-up sm:ml-12 sm:p-5 border-2 border-fino-line"
       aria-hidden="true"
     >
       <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-fino-accent text-primary border-2 border-fino-line">

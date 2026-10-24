@@ -62,7 +62,7 @@ const rows = computed<SignerRowInterface[]>(() => {
 
     <ul
       v-if="rows.length"
-      class="flex flex-col divide-y divide-fino-border rounded-2xl border border-fino-border px-4"
+      class="flex flex-col divide-y divide-fino-border rounded-2xl px-4 border-2 border-fino-line"
     >
       <li
         v-for="row in rows"

@@ -100,7 +100,8 @@ const isEmpty = computed(() => !isLoading.value && !error.value && !applications
 
     <div
       v-else-if="isEmpty"
-      class="flex flex-col items-center rounded-3xl border border-dashed border-fino-border bg-fino-surface px-6 py-14 text-center"
+      class="flex flex-col items-center rounded-3xl border-dashed bg-fino-surface px-6 py-14 text-center border-2
+          border-fino-line/40"
     >
       <span class="flex size-14 items-center justify-center rounded-2xl bg-fino-accent text-primary border-2 border-fino-line">
         <i

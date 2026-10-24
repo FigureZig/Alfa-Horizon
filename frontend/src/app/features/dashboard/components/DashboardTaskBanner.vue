@@ -114,7 +114,7 @@ function toggleOthers() {
 <template>
   <section
     v-if="mainTask"
-    class="animate-fade-up rounded-3xl border border-amber-500/30 bg-fino-amber-soft p-4 motion-reduce:animate-none sm:p-5"
+    class="animate-fade-up rounded-3xl bg-fino-amber-soft p-4 motion-reduce:animate-none sm:p-5 border-2 border-fino-line"
     :aria-label="t('dashboardTasks.label')"
   >
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center">

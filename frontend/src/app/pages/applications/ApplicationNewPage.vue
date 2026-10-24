@@ -386,7 +386,7 @@ watch(() => form.product, applyProductBounds)
             />
           </SandboxPersonaField>
 
-          <label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-fino-border p-3 text-sm text-fino-text">
+          <label class="flex cursor-pointer items-start gap-3 rounded-2xl p-3 text-sm text-fino-text border-2 border-fino-line">
             <Checkbox
               v-model="form.consentBki"
               binary

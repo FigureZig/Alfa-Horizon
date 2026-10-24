@@ -25,7 +25,7 @@ const proposalText = computed(() =>
 
 <template>
   <!-- Подсказка машины — после фактов и свёрнута: сначала своё суждение специалиста -->
-  <details class="group min-w-0 rounded-3xl border border-fino-border bg-fino-surface shadow-sm">
+  <details class="group min-w-0 rounded-3xl card-key">
     <summary
       class="flex cursor-pointer items-center justify-between gap-3 rounded-3xl px-5 py-4 marker:content-none
              focus-visible:outline-2 focus-visible:outline-primary"

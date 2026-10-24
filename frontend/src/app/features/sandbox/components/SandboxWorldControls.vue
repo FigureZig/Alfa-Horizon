@@ -272,9 +272,9 @@ watch(() => props.inn, (inn) => {
       <button
         v-if="secondsToDeadline"
         type="button"
-        class="flex cursor-pointer items-center gap-3 rounded-2xl border border-amber-500/30 bg-fino-amber-soft px-4 py-3
-               text-left transition-colors hover:bg-amber-500/15 disabled:cursor-not-allowed disabled:opacity-50
-               motion-reduce:transition-none"
+        class="flex cursor-pointer items-center gap-3 rounded-2xl bg-fino-amber-soft px-4 py-3 text-left transition-colors
+               hover:bg-amber-500/15 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none border-2
+               border-fino-line"
         :disabled="isBusy"
         @click="handleAdvanceToDeadline"
       >
@@ -503,9 +503,9 @@ watch(() => props.inn, (inn) => {
 
       <button
         type="button"
-        class="cursor-pointer rounded-xl border border-red-500/40 px-4 py-2.5 text-sm font-semibold
-                 text-red-600 transition-colors hover:bg-red-500/10 dark:text-red-400
-                 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+        class="cursor-pointer rounded-xl px-4 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-500/10
+                 dark:text-red-400 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none border-2
+                 border-fino-line"
         :disabled="isBusy"
         @click="openResetConfirm"
       >

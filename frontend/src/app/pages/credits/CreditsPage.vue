@@ -243,7 +243,7 @@ watch(() => props.inn, onInnChange)
           <!-- Стоп для всей компании: причина и действие вместо списка «не подходит» и калькулятора -->
           <div
             v-else-if="isBlocked"
-            class="flex flex-col gap-4 rounded-3xl border border-red-500/30 bg-red-500/5 p-5 sm:p-6"
+            class="flex flex-col gap-4 rounded-3xl bg-fino-accent p-5 sm:p-6 border-2 border-fino-line"
           >
             <div class="flex items-start gap-3">
               <span
@@ -366,7 +366,7 @@ watch(() => props.inn, onInnChange)
 
             <p
               v-else
-              class="rounded-3xl border border-dashed border-fino-border bg-fino-surface p-6 text-sm text-fino-text-muted"
+              class="rounded-3xl border-dashed bg-fino-surface p-6 text-sm text-fino-text-muted border-2 border-fino-line/40"
             >
               {{ t('credits.options.none') }}
             </p>
@@ -413,7 +413,7 @@ watch(() => props.inn, onInnChange)
             <!-- Не подходит компании: свёрнуто, с причиной -->
             <details
               v-if="unavailableOptions.length"
-              class="group rounded-2xl border border-fino-border bg-fino-surface"
+              class="group card-key"
             >
               <summary
                 class="flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold

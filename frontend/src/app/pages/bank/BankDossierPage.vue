@@ -143,8 +143,8 @@ const backLabel = computed(() => (isFromApplications.value ? t('bank.dossier.bac
 
     <div
       v-else-if="isNotFound"
-      class="flex flex-col items-center rounded-3xl border border-dashed border-fino-border
-             bg-fino-surface px-6 py-12 text-center"
+      class="flex flex-col items-center rounded-3xl border-dashed bg-fino-surface px-6 py-12 text-center border-2
+             border-fino-line/40"
     >
       <div class="flex size-14 items-center justify-center rounded-2xl bg-fino-accent text-primary border-2 border-fino-line">
         <i
@@ -216,8 +216,8 @@ const backLabel = computed(() => (isFromApplications.value ? t('bank.dossier.bac
       <!-- Решение принято — сразу следующая заявка, без возврата в очередь -->
       <section
         v-if="isNextShown"
-        class="flex animate-fade-up flex-col gap-3 rounded-3xl border border-green-500/30 bg-fino-lime-soft p-4
-               motion-reduce:animate-none sm:flex-row sm:items-center sm:justify-between sm:p-5"
+        class="flex animate-fade-up flex-col gap-3 rounded-3xl bg-fino-lime-soft p-4 motion-reduce:animate-none sm:flex-row
+               sm:items-center sm:justify-between sm:p-5 border-2 border-fino-line"
         role="status"
       >
         <div class="min-w-0">

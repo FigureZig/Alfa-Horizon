@@ -38,7 +38,7 @@ const secondKeyText = computed(() => {
 </script>
 
 <template>
-  <article class="flex flex-col gap-2 rounded-2xl border border-fino-border p-4">
+  <article class="flex flex-col gap-2 rounded-2xl p-4 border-2 border-fino-line">
     <div class="flex flex-wrap items-center justify-between gap-2">
       <p class="text-sm font-semibold text-fino-text">
         {{ title }}

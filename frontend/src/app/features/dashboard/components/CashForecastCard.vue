@@ -225,7 +225,7 @@ function handleShowOptions() {
       <!-- Что спишется и поступит: подробности по запросу -->
       <details
         v-if="hasFlows"
-        class="group rounded-2xl border border-fino-border"
+        class="group rounded-2xl border-2 border-fino-line"
       >
         <summary
           class="flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold
@@ -287,7 +287,7 @@ function handleShowOptions() {
       <!-- Как посчитали: подробности по запросу -->
       <details
         v-if="dailyInflow || outflows.length"
-        class="group rounded-2xl border border-fino-border"
+        class="group rounded-2xl border-2 border-fino-line"
       >
         <summary
           class="flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold

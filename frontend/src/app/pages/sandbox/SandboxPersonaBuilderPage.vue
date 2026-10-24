@@ -673,7 +673,7 @@ onMounted(loadOptions)
           v-if="readyGroup"
           class="flex flex-col gap-6"
         >
-          <div class="flex flex-col gap-1 rounded-3xl border border-green-500/30 bg-green-500/5 p-5">
+          <div class="flex flex-col gap-1 rounded-3xl bg-fino-lime-soft p-5 border-2 border-fino-line">
             <p class="flex items-center gap-2 text-base font-bold text-fino-text">
               <i
                 class="pi pi-check-circle text-green-600 dark:text-green-400"
@@ -775,8 +775,8 @@ onMounted(loadOptions)
             <!-- Конец пути — ответ банка -->
             <li class="flex min-w-0 flex-1 flex-col items-center gap-1.5 px-2 text-center">
               <span
-                class="flex size-8 items-center justify-center rounded-full border border-dashed border-fino-border
-                       bg-fino-surface text-fino-text-muted"
+                class="flex size-8 items-center justify-center rounded-full border-dashed bg-fino-surface text-fino-text-muted
+                       border-2 border-fino-line/40"
               >
                 <i
                   class="pi pi-flag text-xs"

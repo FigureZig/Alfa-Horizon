@@ -307,10 +307,10 @@ function handleVote(choice: ApplicationVoteEnum) {
 
         <button
           type="button"
-          class="inline-flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-xl border border-dashed
-                 border-fino-border px-4 py-2.5 text-sm font-semibold text-fino-text transition-colors duration-200
-                 hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60
-                 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-primary"
+          class="inline-flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-xl border-dashed px-4 py-2.5 text-sm
+                 font-semibold text-fino-text transition-colors duration-200 hover:border-primary hover:text-primary
+                 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none focus-visible:outline-2
+                 focus-visible:outline-primary border-2 border-fino-line/40"
           :disabled="isBusy"
           @click="openFilePicker"
         >

@@ -10,7 +10,7 @@ defineProps<{
 
 <template>
   <details
-    class="group rounded-2xl border border-fino-border bg-fino-surface"
+    class="group rounded-2xl bg-fino-surface border-2 border-fino-line"
     :open="isOpen"
   >
     <summary

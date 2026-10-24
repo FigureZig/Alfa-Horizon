@@ -176,9 +176,8 @@ function isDecidedByBank(decidedBy: BankDecidedByEnum | null) {
       >
         <RouterLink
           :to="getRoute(inn, item.id)"
-          class="flex flex-col gap-3 rounded-2xl border border-fino-border bg-fino-surface p-4 shadow-sm
-                 transition-colors hover:border-primary/40 focus-visible:outline-2 focus-visible:outline-primary
-                 motion-reduce:transition-none"
+          class="flex flex-col gap-3 rounded-2xl bg-fino-surface p-4 transition-colors hover:border-primary/40
+                 focus-visible:outline-2 focus-visible:outline-primary motion-reduce:transition-none border-2 border-fino-line"
         >
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">

@@ -115,8 +115,8 @@ function handleRetry() {
 
     <div
       v-else
-      class="flex flex-col items-center rounded-3xl border border-dashed
-             border-fino-border bg-fino-surface px-6 py-10 text-center"
+      class="flex flex-col items-center rounded-3xl border-dashed bg-fino-surface px-6 py-10 text-center border-2
+             border-fino-line/40"
     >
       <div class="flex size-12 items-center justify-center rounded-2xl bg-fino-accent text-primary border-2 border-fino-line">
         <i

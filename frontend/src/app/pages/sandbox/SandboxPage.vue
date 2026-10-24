@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import Dialog from 'primevue/dialog'
+import AppDotField from '@/app/components/AppDotField.vue'
 import AppErrorState from '@/app/components/AppErrorState.vue'
 import AppHeader from '@/app/components/layout/AppHeader.vue'
 import SandboxCompanyTile from '@/app/features/sandbox/components/SandboxCompanyTile.vue'
@@ -233,7 +234,10 @@ watch(locale, loadPersonas)
 </script>
 
 <template>
-  <div class="min-h-screen bg-fino-surface-secondary bg-dots">
+  <!-- isolate: фон из точек (z -10) рисуется над цветом страницы, но под содержимым -->
+  <div class="relative isolate min-h-screen bg-fino-surface-secondary">
+    <AppDotField />
+
     <AppHeader>
       <template #profile />
     </AppHeader>
@@ -252,7 +256,7 @@ watch(locale, loadPersonas)
 
           <button
             type="button"
-            class="mt-3 inline-flex cursor-pointer items-center gap-2 text-sm font-bold text-fino-violet
+            class="mt-3 inline-flex cursor-pointer items-center gap-2 text-sm font-bold text-fino-violet-ink
                    underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-primary"
             @click="showOnboarding"
           >
@@ -402,8 +406,8 @@ watch(locale, loadPersonas)
 
           <p
             v-if="isEmpty"
-            class="rounded-3xl border border-dashed border-fino-border bg-fino-surface px-6 py-12 text-center
-                   text-sm text-fino-text-muted"
+            class="rounded-3xl border-dashed bg-fino-surface px-6 py-12 text-center text-sm text-fino-text-muted border-2
+                   border-fino-line/40"
           >
             {{ t('login.empty') }}
           </p>

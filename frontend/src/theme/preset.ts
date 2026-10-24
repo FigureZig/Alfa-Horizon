@@ -91,12 +91,13 @@ export const FinoPreset = definePreset(Aura, {
                 },
             },
 
+            // Красный в тёмной теме на тон глубже: яркий #EF3124 на чёрном слишком кричит
             dark: {
                 primary: {
-                    color: '{primary.500}',
+                    color: '{primary.700}',
                     contrastColor: '#ffffff',
-                    hoverColor: '{primary.400}',
-                    activeColor: '{primary.600}',
+                    hoverColor: '{primary.600}',
+                    activeColor: '{primary.800}',
                 },
 
                 surface: {
@@ -126,8 +127,8 @@ export const FinoPreset = definePreset(Aura, {
                     filledBackground: '{surface.900}',
                     filledHoverBackground: '{surface.900}',
                     filledFocusBackground: '{surface.900}',
-                    borderColor: '#F4F4F4',
-                    hoverBorderColor: '#F4F4F4',
+                    borderColor: '#4A4A4A',
+                    hoverBorderColor: '#6B6B6B',
                     focusBorderColor: '#8B2CF5',
                 },
             },

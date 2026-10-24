@@ -28,12 +28,10 @@ const hasAction = computed(() => props.application.availableActions.length > 0)
 <template>
   <RouterLink
     :to="route"
-    class="group flex min-w-0 flex-col gap-4 rounded-3xl border
-           bg-fino-surface p-5 shadow-sm transition-all duration-300
-           hover:-translate-y-1 hover:shadow-md
-           focus-visible:outline-2 focus-visible:outline-primary
-           motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-    :class="hasAction ? 'border-primary/40' : 'border-fino-border'"
+    class="group flex min-w-0 flex-col gap-4 p-5 transition-transform duration-200 hover:-translate-y-1
+           focus-visible:outline-2 focus-visible:outline-primary motion-reduce:transition-none
+           motion-reduce:hover:translate-y-0 card-key"
+    :class="hasAction ? 'bg-fino-amber-soft' : ''"
   >
     <div class="flex items-start justify-between gap-3">
       <p class="min-w-0 break-words text-base font-bold tracking-tight text-fino-text">

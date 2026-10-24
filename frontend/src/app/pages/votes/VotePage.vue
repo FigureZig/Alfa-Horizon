@@ -53,11 +53,11 @@ const outcome = computed(() => {
 const outcomeClass = computed(() => {
   switch (outcome.value) {
     case 'approved':
-      return 'border-green-500/30 bg-green-500/5'
+      return 'bg-fino-lime-soft'
     case 'rejected':
-      return 'border-red-500/30 bg-red-500/5'
+      return 'bg-fino-accent'
     default:
-      return 'border-fino-border bg-fino-surface-secondary'
+      return 'bg-fino-surface'
   }
 })
 
@@ -141,8 +141,8 @@ const notVotedText = computed(() => {
 
       <!-- Почему спрашивают — одной строкой; норма закона — во всплывающей «i» -->
       <p
-        class="flex items-start gap-3 rounded-2xl border border-fino-border bg-fino-surface p-4 text-sm
-               leading-relaxed text-fino-text-muted"
+        class="flex items-start gap-3 rounded-2xl bg-fino-surface p-4 text-sm leading-relaxed text-fino-text-muted border-2
+               border-fino-line"
       >
         <i
           class="pi pi-info-circle mt-0.5 shrink-0 text-primary"
@@ -153,7 +153,7 @@ const notVotedText = computed(() => {
       </p>
 
       <div
-        class="rounded-2xl border p-4 text-sm text-fino-text"
+        class="rounded-2xl border-2 border-fino-line p-4 text-sm text-fino-text"
         :class="outcomeClass"
         role="status"
       >

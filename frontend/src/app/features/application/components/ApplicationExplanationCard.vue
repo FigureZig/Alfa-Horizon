@@ -235,7 +235,7 @@ function handleRetry() {
 
 <template>
   <details
-    class="group min-w-0 rounded-3xl border border-fino-border bg-fino-surface shadow-sm"
+    class="group min-w-0 rounded-3xl card-key"
     :open="isOpenByDefault"
   >
     <!-- Первый уровень: всегда видно — почему, одной строкой с цифрами, и границы объяснения -->
@@ -449,7 +449,7 @@ function handleRetry() {
         <!-- Третий уровень: для любопытных и специалистов -->
         <details
           v-if="hasExpertDetails"
-          class="group/expert rounded-2xl border border-fino-border"
+          class="group/expert rounded-2xl border-2 border-fino-line"
         >
           <summary
             class="flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold

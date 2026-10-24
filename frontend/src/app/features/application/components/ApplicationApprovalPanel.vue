@@ -56,7 +56,7 @@ function handleVoteAgainst() {
 
 <template>
   <section
-    class="flex flex-col gap-4 rounded-2xl border border-fino-border p-4"
+    class="flex flex-col gap-4 card-key p-5"
     :aria-label="t('application.approval.title')"
   >
     <!-- Правило голосования — один раз, во всплывающей «i»; на полосе — отметка порога -->

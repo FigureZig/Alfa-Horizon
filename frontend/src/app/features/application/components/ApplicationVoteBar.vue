@@ -33,7 +33,7 @@ const thresholdText = computed(() => formatPercent(props.thresholdPercent))
       role="img"
       :aria-label="t('application.approval.barLabel', { for: forText, against: againstText, threshold: thresholdText })"
     >
-      <div class="flex h-2.5 justify-between overflow-hidden rounded-full bg-fino-surface-secondary">
+      <div class="flex h-3.5 justify-between overflow-hidden rounded-full border-2 border-fino-line bg-fino-surface-secondary">
         <div
           class="bg-green-500 transition-[width] duration-500 ease-out motion-reduce:transition-none"
           :style="forWidth"

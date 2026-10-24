@@ -60,7 +60,7 @@ const steps = computed(() =>
           ? 'bg-fino-lime text-[#111] motion-safe:animate-pulse-ring scale-110'
           : 'bg-fino-surface text-fino-text-muted',
       labelClass: isActive
-        ? 'bg-fino-line text-fino-surface px-2 py-0.5 rounded-md'
+        ? 'bg-fino-text text-fino-surface px-2 py-0.5 rounded-md'
         : isDone ? 'text-fino-text' : 'text-fino-text-muted',
     }
   }),

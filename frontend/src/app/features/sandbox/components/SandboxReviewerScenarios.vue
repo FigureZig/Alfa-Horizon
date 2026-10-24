@@ -1,24 +1,18 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
-import type { RouteLocationRaw } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import Dialog from 'primevue/dialog'
 import Skeleton from 'primevue/skeleton'
 import AppErrorState from '@/app/components/AppErrorState.vue'
 import { useApiFetch } from '@/app/composables/useApiFetch'
 import { useReviewerPanel } from '@/app/composables/useReviewerPanel'
-import { useSession } from '@/app/composables/useSession'
+import { EVENT_ACTION, FORBIDDEN_ACTION, useScenarioRun } from '@/app/composables/useScenarioRun'
 import { sandboxService } from '@/app/services/sandbox/sandbox.service'
 import { SandboxScenarioMapper } from '@/app/mappers/sandbox-scenario.mapper'
 import { ApplicationDetailStatusEnum } from '@/app/types/application/application-detail-status-enum'
-import { SandboxPersonaKindEnum } from '@/app/types/sandbox/sandbox-persona-kind-enum'
 import type { AppLocale } from '@/app/i18n'
-import type { CompanyAccessInterface } from '@/app/types/company/company-access-interface'
 import type { Nullable } from '@/app/types/nullable'
-import type { SandboxEventCreateDto } from '@/app/types/sandbox/sandbox-world-dto'
-import type { SandboxPersonaInterface } from '@/app/types/sandbox/sandbox-persona-interface'
 import type {
   SandboxScenarioInterface,
   SandboxScenarioStepInterface,
@@ -30,53 +24,42 @@ interface ScenarioPersonInterface {
   initials: string
 }
 
-const ACTION_EVENT = 'event'
 const ACTION_VOTE = 'vote'
-const HTTP_FORBIDDEN = 403
 const SKELETON_CARDS = 4
 // Нормы закона в описании сценария — в скобках; на карточке их не показываем
 const LAW_REFERENCE_PATTERN = /\s*\([^()]*(?:ст\.|ФЗ|ГК|art\.|Art\.)[^()]*\)/g
 
-// Ожидаемый статус теми же словами, что увидит пользователь на странице заявки
+// Ожидаемый статус — цветом, как его увидит пользователь на странице заявки
 const STATUS_TONES: Partial<Record<ApplicationDetailStatusEnum, string>> = {
-  [ApplicationDetailStatusEnum.Issued]: 'border-2 border-fino-line bg-fino-lime text-[#111]',
-  [ApplicationDetailStatusEnum.Signed]: 'border-2 border-fino-line bg-fino-lime text-[#111]',
-  [ApplicationDetailStatusEnum.Rejected]: 'border-2 border-fino-line bg-primary text-primary-contrast',
-  [ApplicationDetailStatusEnum.Withdrawn]: 'border-2 border-fino-line bg-primary text-primary-contrast',
-  [ApplicationDetailStatusEnum.Offered]: 'border-2 border-fino-line bg-fino-amber text-[#111]',
-  [ApplicationDetailStatusEnum.Signing]: 'border-2 border-fino-line bg-fino-amber text-[#111]',
-  [ApplicationDetailStatusEnum.InfoRequested]: 'border-2 border-fino-line bg-fino-amber text-[#111]',
+  [ApplicationDetailStatusEnum.Issued]: 'bg-fino-lime text-[#111]',
+  [ApplicationDetailStatusEnum.Signed]: 'bg-fino-lime text-[#111]',
+  [ApplicationDetailStatusEnum.Rejected]: 'bg-primary text-primary-contrast',
+  [ApplicationDetailStatusEnum.Withdrawn]: 'bg-primary text-primary-contrast',
+  [ApplicationDetailStatusEnum.Offered]: 'bg-fino-amber text-[#111]',
+  [ApplicationDetailStatusEnum.Signing]: 'bg-fino-amber text-[#111]',
+  [ApplicationDetailStatusEnum.InfoRequested]: 'bg-fino-amber text-[#111]',
 }
-const NEUTRAL_TONE = 'bg-fino-surface-secondary text-fino-text-muted'
-
-const props = defineProps<{
-  // Заявка на текущем экране: по её статусу отмечаем шаги, которые уже совпали
-  applicationId: Nullable<string>
-  // Компания открытой заявки: к заявке ведём, только если она из этого сценария
-  applicationInn: Nullable<string>
-  applicationStatus: Nullable<ApplicationDetailStatusEnum>
-}>()
+const NEUTRAL_TONE = 'bg-fino-surface-secondary text-fino-text'
 
 const emit = defineEmits<{
   navigated: []
 }>()
 
 const { t, locale } = useI18n({ useScope: 'global' })
-const router = useRouter()
 const toast = useToast()
 const $fetch = useApiFetch()
-const { loginAsPersona } = useSession()
 // Открытый сценарий общий с панелью: экран входа открывает её сразу на нужном
-const { openScenarioId, activeScenario, doneStepNumber, markStepDone } = useReviewerPanel()
+const { openScenarioId } = useReviewerPanel()
+const run = useScenarioRun()
 
 const scenarios = ref<SandboxScenarioInterface[]>([])
 const isLoading = ref(false)
 const hasError = ref(false)
-// Шаг, который сейчас выполняется: вход, событие мира или сброс (0)
-const busyStepNumber = ref<Nullable<number>>(null)
-const isResetConfirmVisible = ref(false)
+const isResetting = ref(false)
+const scenarioToRestart = ref<Nullable<SandboxScenarioInterface>>(null)
+const isRestartConfirmVisible = ref(false)
 
-const isBusy = computed(() => busyStepNumber.value !== null)
+const isBusy = computed(() => run.isBusy.value || isResetting.value)
 
 const cards = computed(() =>
   scenarios.value.map((scenario) => ({
@@ -84,6 +67,7 @@ const cards = computed(() =>
     about: scenario.about.replace(LAW_REFERENCE_PATTERN, ''),
     people: getPeople(scenario),
     isVoting: scenario.steps.some((step) => step.action === ACTION_VOTE),
+    isActive: run.scenario.value?.id === scenario.id,
   })),
 )
 
@@ -124,30 +108,27 @@ function toggleScenario(scenarioId: string) {
   openScenarioId.value = openScenarioId.value === scenarioId ? null : scenarioId
 }
 
-function isForbiddenStep(step: SandboxScenarioStepInterface) {
-  return step.expectedHttp === HTTP_FORBIDDEN
+function isActiveStep(scenario: SandboxScenarioInterface, step: SandboxScenarioStepInterface) {
+  return run.scenario.value?.id === scenario.id && run.isStepCurrent(step)
 }
 
-function isEventStep(step: SandboxScenarioStepInterface) {
-  return step.action === ACTION_EVENT && Boolean(step.request.body)
-}
-
-// Следующий шаг сценария, который сейчас проходят: подсвечиваем, чтобы не искать глазами
-function isNextStep(scenario: SandboxScenarioInterface, step: SandboxScenarioStepInterface) {
-  if (activeScenario.value?.id !== scenario.id) return false
-
-  return step.number === scenario.steps.find((item) => item.number > doneStepNumber.value)?.number
+function isDoneStep(scenario: SandboxScenarioInterface, step: SandboxScenarioStepInterface) {
+  return run.scenario.value?.id === scenario.id && run.isStepDone(step)
 }
 
 function getStepClass(scenario: SandboxScenarioInterface, step: SandboxScenarioStepInterface) {
-  if (isNextStep(scenario, step)) return 'border-fino-line bg-fino-lime-soft shadow-[3px_3px_0_var(--fino-shadow)]'
+  if (isActiveStep(scenario, step)) return 'border-fino-line bg-fino-lime-soft shadow-[3px_3px_0_var(--fino-shadow)]'
+  if (isDoneStep(scenario, step)) return 'border-fino-border opacity-70'
 
-  return isStatusMatched(step) ? 'border-green-500/40' : 'border-fino-border'
+  return 'border-fino-border'
 }
 
-// Статус заявки на экране совпал с ожидаемым после шага: ставим галочку
-function isStatusMatched(step: SandboxScenarioStepInterface) {
-  return Boolean(props.applicationStatus && step.expectedStatus === props.applicationStatus)
+function isEventStep(step: SandboxScenarioStepInterface) {
+  return step.action === EVENT_ACTION && Boolean(step.request.body)
+}
+
+function isForbiddenStep(step: SandboxScenarioStepInterface) {
+  return step.action === FORBIDDEN_ACTION
 }
 
 // Голосование и дозапрос — один статус, но человек видит разное: «Ждём решения участников» или «Банк просит данные»
@@ -165,111 +146,95 @@ function getExpectedTone(step: SandboxScenarioStepInterface): string {
   return (step.expectedStatus && STATUS_TONES[step.expectedStatus]) || NEUTRAL_TONE
 }
 
-function askReset() {
-  isResetConfirmVisible.value = true
-}
-
-function cancelReset() {
-  isResetConfirmVisible.value = false
-}
-
-// Сценарии мешают друг другу: события реестров и отказы живут до сброса мира
-async function confirmReset() {
-  isResetConfirmVisible.value = false
-
-  if (isBusy.value) return
-
-  busyStepNumber.value = 0
-
-  try {
-    await sandboxService.reset($fetch)
-
-    toast.add({ severity: 'success', summary: t('toast.success'), detail: t('sandbox.scenarios.resetDone'), life: 3000 })
-  } catch (err: unknown) {
-    console.error('Reviewer world reset failed:', err)
-
-    toast.add({ severity: 'error', summary: t('toast.error'), detail: t('sandbox.world.commandError'), life: 4000 })
-  } finally {
-    busyStepNumber.value = null
-  }
-}
-
-// Куда вести после входа: к открытой заявке сценария — в том виде, в каком её видит этот человек
-function getStepRoute(
-  scenario: SandboxScenarioInterface,
-  persona: SandboxPersonaInterface,
-  companies: CompanyAccessInterface[],
-): RouteLocationRaw {
-  const companyInn = scenario.company.inn
-  const applicationId = props.applicationInn === companyInn ? props.applicationId : null
-
-  // Сотрудник банка — в досье этой заявки, без неё — в очередь
-  if (persona.kind === SandboxPersonaKindEnum.Bank) {
-    return applicationId
-      ? { name: 'bank-dossier', params: { inn: persona.inn, applicationId } }
-      : { name: 'bank-queue', params: { inn: persona.inn } }
-  }
-
-  const access = companies.find((company) => company.inn === companyInn)
-
-  // Участник без доступа к счёту видит только голосование
-  if (access && !access.canView && access.canApprove) {
-    return applicationId
-      ? { name: 'vote', params: { inn: companyInn, applicationId } }
-      : { name: 'votes', params: { inn: companyInn } }
-  }
-
-  return applicationId
-    ? { name: 'application', params: { inn: companyInn, applicationId } }
-    : { name: 'applications', params: { inn: companyInn } }
-}
-
+// Войти человеком шага: сценарий запоминает, на каком шаге мы, и дальше идёт сам
 async function loginAtStep(scenario: SandboxScenarioInterface, step: SandboxScenarioStepInterface) {
   if (!step.user || isBusy.value) return
 
-  busyStepNumber.value = step.number
+  run.start(scenario, step.number)
 
   try {
-    const { persona, companies } = await loginAsPersona(step.user.id)
-
-    // Тот же адрес другим человеком — кабинет сам перечитает шапку, права и страницу
-    await router.push(getStepRoute(scenario, persona, companies))
+    await run.goToStep(step)
 
     toast.add({
       severity: 'success',
       summary: t('toast.success'),
-      detail: t('sandbox.scenarios.loggedInAs', { name: persona.fullName }),
+      detail: t('sandbox.scenarios.loggedInAs', { name: step.user.fullName }),
       life: 3000,
     })
 
-    markStepDone(scenario, step.number)
     emit('navigated')
   } catch (err: unknown) {
     console.error('Reviewer scenario login failed:', err)
 
     toast.add({ severity: 'error', summary: t('toast.error'), detail: t('toast.loginError'), life: 4000 })
-  } finally {
-    busyStepNumber.value = null
   }
 }
 
 async function applyEventAtStep(scenario: SandboxScenarioInterface, step: SandboxScenarioStepInterface) {
-  if (!step.request.body || isBusy.value) return
+  if (isBusy.value) return
 
-  busyStepNumber.value = step.number
+  if (run.scenario.value?.id !== scenario.id) run.start(scenario, step.number)
 
   try {
-    await sandboxService.createEvent($fetch, step.request.body as unknown as SandboxEventCreateDto)
-    markStepDone(scenario, step.number)
+    await run.applyEvent(step)
 
     toast.add({ severity: 'success', summary: t('toast.success'), detail: t('sandbox.scenarios.eventApplied'), life: 4000 })
   } catch (err: unknown) {
     console.error('Reviewer scenario event failed:', err)
 
     toast.add({ severity: 'error', summary: t('toast.error'), detail: t('sandbox.scenarios.eventError'), life: 4000 })
-  } finally {
-    busyStepNumber.value = null
   }
+}
+
+// Начать (или продолжить) сценарий: сразу входим человеком текущего шага
+function continueScenario(scenario: SandboxScenarioInterface) {
+  const isActive = run.scenario.value?.id === scenario.id
+  const step = isActive && run.currentStep.value ? run.currentStep.value : scenario.steps[0]
+
+  if (!step) return
+
+  if (step.user) {
+    loginAtStep(scenario, step)
+  } else if (!isActive) {
+    run.start(scenario, step.number)
+  }
+}
+
+function askRestart(scenario: SandboxScenarioInterface) {
+  scenarioToRestart.value = scenario
+  isRestartConfirmVisible.value = true
+}
+
+function cancelRestart() {
+  isRestartConfirmVisible.value = false
+}
+
+// Пройти заново: мир — как в начале (без событий, отказов и перемотки времени), сценарий — с шага 1
+async function confirmRestart() {
+  const scenario = scenarioToRestart.value
+
+  isRestartConfirmVisible.value = false
+
+  if (!scenario || isBusy.value) return
+
+  isResetting.value = true
+
+  try {
+    await sandboxService.reset($fetch)
+    run.start(scenario, 1)
+
+    toast.add({ severity: 'success', summary: t('toast.success'), detail: t('sandbox.scenarios.restart.done'), life: 4000 })
+  } catch (err: unknown) {
+    console.error('Reviewer world reset failed:', err)
+
+    toast.add({ severity: 'error', summary: t('toast.error'), detail: t('sandbox.world.commandError'), life: 4000 })
+
+    return
+  } finally {
+    isResetting.value = false
+  }
+
+  continueScenario(scenario)
 }
 
 function getScenarioElementId(scenarioId: string) {
@@ -325,8 +290,8 @@ watch([openScenarioId, scenarios], scrollToOpenScenario)
         v-for="card in cards"
         :id="getScenarioElementId(card.scenario.id)"
         :key="card.scenario.id"
-        class="rounded-2xl border bg-fino-surface transition-colors motion-reduce:transition-none"
-        :class="openScenarioId === card.scenario.id ? 'border-primary/40' : 'border-fino-border'"
+        class="rounded-2xl border-2 bg-fino-surface transition-colors motion-reduce:transition-none"
+        :class="openScenarioId === card.scenario.id ? 'border-fino-line' : 'border-fino-border'"
       >
         <!-- Карточка сценария: название, о чём и кто по очереди -->
         <button
@@ -337,7 +302,16 @@ watch([openScenarioId, scenarios], scrollToOpenScenario)
           @click="toggleScenario(card.scenario.id)"
         >
           <span class="min-w-0 flex-1">
-            <span class="block break-words text-sm font-bold text-fino-text">{{ card.scenario.title }}</span>
+            <span class="flex flex-wrap items-center gap-2">
+              <span class="break-words font-display text-base font-extrabold text-fino-text">{{ card.scenario.title }}</span>
+              <span
+                v-if="card.isActive"
+                class="rounded-md border-2 border-fino-line bg-fino-lime px-1.5 font-mono text-[10px] font-bold uppercase
+                       text-[#111]"
+              >
+                {{ run.isFinished.value ? t('sandbox.scenarios.badgeDone') : t('sandbox.scenarios.badgeActive') }}
+              </span>
+            </span>
             <span
               class="mt-1 block break-words text-xs leading-relaxed text-fino-text-muted"
               :class="{ 'line-clamp-2': openScenarioId !== card.scenario.id }"
@@ -350,8 +324,8 @@ watch([openScenarioId, scenarios], scrollToOpenScenario)
               <span
                 v-for="person in card.people"
                 :key="person.id"
-                class="-ml-1.5 flex size-7 items-center justify-center rounded-full border-2 border-fino-surface
-                       bg-fino-accent text-[10px] font-bold text-primary first:ml-0"
+                class="-ml-1.5 flex size-7 items-center justify-center rounded-full border-2 border-fino-line
+                       bg-fino-lime text-[10px] font-bold text-[#111] first:ml-0"
                 :title="person.fullName"
               >
                 {{ person.initials }}
@@ -371,22 +345,43 @@ watch([openScenarioId, scenarios], scrollToOpenScenario)
           v-if="openScenarioId === card.scenario.id"
           class="flex flex-col gap-3 px-4 pb-4"
         >
-          <!-- Сценарии мешают друг другу: начинать лучше с чистого мира -->
-          <button
-            type="button"
-            class="inline-flex min-h-10 w-fit cursor-pointer items-center gap-2 rounded-xl border border-fino-border
-                   px-3.5 text-xs font-semibold text-fino-text transition-colors hover:bg-fino-surface-hover
-                   disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-            :disabled="isBusy"
-            @click="askReset"
-          >
-            <i
-              :class="busyStepNumber === 0 ? 'pi pi-spinner pi-spin' : 'pi pi-refresh'"
-              class="text-xs"
-              aria-hidden="true"
-            />
-            {{ t('sandbox.scenarios.reset') }}
-          </button>
+          <!-- Главное действие: начать или продолжить с текущего шага; «заново» — со сбросом мира -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              class="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold
+                     text-primary-contrast btn-key disabled:cursor-not-allowed disabled:opacity-60"
+              :disabled="isBusy || (card.isActive && run.isFinished.value)"
+              @click="continueScenario(card.scenario)"
+            >
+              {{ card.isActive && run.currentStep.value
+                ? t('sandbox.scenarios.continue', { number: run.currentStep.value.number })
+                : t('sandbox.scenarios.start') }}
+              <i
+                class="pi pi-arrow-right text-xs"
+                aria-hidden="true"
+              />
+            </button>
+
+            <button
+              type="button"
+              class="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-fino-surface px-3.5 text-sm
+                     font-semibold text-fino-text btn-key disabled:cursor-not-allowed disabled:opacity-60"
+              :disabled="isBusy"
+              @click="askRestart(card.scenario)"
+            >
+              <i
+                :class="isResetting ? 'pi pi-spinner pi-spin' : 'pi pi-refresh'"
+                class="text-xs"
+                aria-hidden="true"
+              />
+              {{ t('sandbox.scenarios.restart.button') }}
+            </button>
+          </div>
+
+          <p class="text-xs leading-relaxed text-fino-text-muted">
+            {{ t('sandbox.scenarios.restart.hint') }}
+          </p>
 
           <p class="break-words text-xs font-semibold text-fino-text-muted">
             {{ t('sandbox.scenarios.company', { name: card.scenario.company.name }) }}
@@ -396,16 +391,18 @@ watch([openScenarioId, scenarios], scrollToOpenScenario)
             <li
               v-for="step in card.scenario.steps"
               :key="step.number"
-              class="flex gap-3 rounded-xl border-2 p-3"
+              class="flex gap-3 rounded-xl border-2 p-3 transition-colors motion-reduce:transition-none"
               :class="getStepClass(card.scenario, step)"
+              :aria-current="isActiveStep(card.scenario, step) ? 'step' : undefined"
             >
               <span
-                class="flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
-                :class="isStatusMatched(step) ? 'bg-green-500 text-white' : 'bg-fino-surface-secondary text-fino-text'"
+                class="flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-fino-line text-[11px]
+                       font-bold"
+                :class="isDoneStep(card.scenario, step) ? 'bg-primary text-primary-contrast' : 'bg-fino-surface text-fino-text'"
               >
                 <i
-                  v-if="isStatusMatched(step)"
-                  class="pi pi-check text-[10px]"
+                  v-if="isDoneStep(card.scenario, step)"
+                  class="pi pi-check text-[10px] motion-safe:animate-tick-pop"
                   aria-hidden="true"
                 />
                 <template v-else>
@@ -429,7 +426,8 @@ watch([openScenarioId, scenarios], scrollToOpenScenario)
                 <div class="flex flex-wrap items-center gap-2">
                   <span
                     v-if="isForbiddenStep(step)"
-                    class="rounded-lg bg-fino-accent px-2 py-0.5 text-xs font-semibold text-red-700 dark:text-red-400"
+                    class="rounded-lg border-2 border-fino-line bg-primary px-2 py-0.5 text-xs font-semibold
+                           text-primary-contrast"
                   >
                     {{ t('sandbox.scenarios.expectedForbidden') }}
                   </span>
@@ -437,7 +435,7 @@ watch([openScenarioId, scenarios], scrollToOpenScenario)
                   <template v-else-if="step.expectedStatus">
                     <span class="text-xs text-fino-text-muted">{{ t('sandbox.scenarios.expectedStatus') }}</span>
                     <span
-                      class="rounded-lg px-2 py-0.5 text-xs font-semibold"
+                      class="rounded-lg border-2 border-fino-line px-2 py-0.5 text-xs font-semibold"
                       :class="getExpectedTone(step)"
                     >
                       {{ getExpectedLabel(step, card.isVoting) }}
@@ -449,8 +447,9 @@ watch([openScenarioId, scenarios], scrollToOpenScenario)
                   <button
                     v-if="step.user"
                     type="button"
-                    class="cursor-pointer rounded-xl bg-primary px-3.5 py-2 text-xs font-semibold text-primary-contrast
-                           disabled:cursor-not-allowed disabled:opacity-50 btn-key"
+                    class="cursor-pointer rounded-xl px-3.5 py-2 text-xs font-semibold btn-key disabled:cursor-not-allowed
+                           disabled:opacity-50"
+                    :class="isActiveStep(card.scenario, step) ? 'bg-primary text-primary-contrast' : 'bg-fino-surface text-fino-text'"
                     :disabled="isBusy"
                     @click="loginAtStep(card.scenario, step)"
                   >
@@ -460,9 +459,8 @@ watch([openScenarioId, scenarios], scrollToOpenScenario)
                   <button
                     v-else
                     type="button"
-                    class="cursor-pointer rounded-xl border border-fino-border px-3.5 py-2 text-xs font-semibold
-                           text-fino-text transition-colors hover:bg-fino-surface-hover disabled:cursor-not-allowed
-                           disabled:opacity-50 motion-reduce:transition-none"
+                    class="cursor-pointer rounded-xl bg-fino-surface px-3.5 py-2 text-xs font-semibold text-fino-text btn-key
+                           disabled:cursor-not-allowed disabled:opacity-50"
                     :disabled="isBusy"
                     @click="applyEventAtStep(card.scenario, step)"
                   >
@@ -477,31 +475,31 @@ watch([openScenarioId, scenarios], scrollToOpenScenario)
     </ul>
 
     <Dialog
-      v-model:visible="isResetConfirmVisible"
+      v-model:visible="isRestartConfirmVisible"
       modal
-      :header="t('sandbox.world.reset.confirmTitle')"
-      :style="{ width: '26rem', maxWidth: '92vw' }"
+      :header="t('sandbox.scenarios.restart.title')"
+      :style="{ width: '28rem', maxWidth: '92vw' }"
     >
       <p class="text-sm leading-relaxed text-fino-text-muted">
-        {{ t('sandbox.world.reset.confirmText') }}
+        {{ t('sandbox.scenarios.restart.text') }}
       </p>
 
       <template #footer>
         <button
           type="button"
-          class="cursor-pointer rounded-xl border border-fino-border px-4 py-2 text-sm font-semibold
-                 text-fino-text transition-colors hover:bg-fino-surface-hover motion-reduce:transition-none"
-          @click="cancelReset"
+          class="cursor-pointer rounded-xl px-4 py-2 text-sm font-semibold text-fino-text transition-colors
+                 hover:bg-fino-surface-hover motion-reduce:transition-none"
+          @click="cancelRestart"
         >
-          {{ t('sandbox.world.reset.cancel') }}
+          {{ t('sandbox.scenarios.restart.cancel') }}
         </button>
 
         <button
           type="button"
           class="cursor-pointer rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-contrast btn-key"
-          @click="confirmReset"
+          @click="confirmRestart"
         >
-          {{ t('sandbox.world.reset.confirm') }}
+          {{ t('sandbox.scenarios.restart.confirm') }}
         </button>
       </template>
     </Dialog>

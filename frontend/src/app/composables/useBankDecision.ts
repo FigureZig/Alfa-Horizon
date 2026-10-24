@@ -3,6 +3,7 @@ import type { MaybeRefOrGetter } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'primevue/usetoast'
 import { useApiFetch } from '@/app/composables/useApiFetch'
+import { useScenarioRun } from '@/app/composables/useScenarioRun'
 import { useApplicationError } from '@/app/composables/useApplicationError'
 import { bankService } from '@/app/services/bank/bank.service'
 import { BankDecisionActionEnum } from '@/app/types/bank/bank-decision-action-enum'
@@ -21,6 +22,7 @@ export function useBankDecision(applicationId: MaybeRefOrGetter<string>, onDone:
   const toast = useToast()
   const { t } = useI18n({ useScope: 'global' })
   const { getApplicationErrorMessage } = useApplicationError()
+  const { reportAction } = useScenarioRun()
 
   const pendingCommand = ref<Nullable<BankCommand>>(null)
 
@@ -31,6 +33,7 @@ export function useBankDecision(applicationId: MaybeRefOrGetter<string>, onDone:
 
     try {
       await request()
+      reportAction(command, toValue(applicationId))
 
       toast.add({
         severity: 'success',

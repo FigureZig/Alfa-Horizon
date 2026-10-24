@@ -348,7 +348,7 @@ watch(() => [form.amount, form.termMonths], emitChange)
 
         <div
           v-if="result.schedule.length"
-          class="rounded-2xl border border-fino-border p-4"
+          class="rounded-2xl p-4 border-2 border-fino-line"
         >
           <h3 class="mb-2 text-sm font-semibold text-fino-text">
             {{ t('credits.schedule.title') }}
