@@ -827,8 +827,23 @@ export default {
             risk_manager: 'Risk manager',
             client: 'Client',
         },
+        engine: {
+            title: 'What the engine proposed',
+            hint: 'Machine suggestion — look at it after the facts',
+            proposal: '{amount} for {term} at {rate}',
+            none: 'The engine made no proposal — the decision is yours',
+        },
+        next: {
+            done: 'Decision sent',
+            item: 'Next: {name} — {product}, {amount}',
+            empty: 'No more applications in the queue',
+            open: 'Open the next one',
+            toQueue: 'To the queue',
+        },
         sla: {
-            until: 'Due by {date}',
+            until: 'Answer by {date}',
+            hoursLeft: '{hours} h {minutes} min left',
+            minutesLeft: '{minutes} min left',
             breached: 'Overdue',
         },
         queue: {
@@ -842,15 +857,12 @@ export default {
             toMetrics: 'View pipeline metrics',
             loadError: 'Failed to load the application queue.',
             companyInn: 'TIN {inn}',
-            proposal: 'The engine proposed {amount} at {rate}',
             columns: {
                 request: 'Request',
                 reason: 'Why a human is needed',
-                proposal: 'What the engine proposed',
                 sla: 'Deadline',
             },
             moreReasons: '{n} more',
-            noProposal: 'The engine could not propose terms',
             score: 'Score {score} · class {riskClass}',
             waitingSecondKey: 'Awaiting second key',
             open: 'Open dossier',
@@ -872,8 +884,6 @@ export default {
         decision: {
             title: 'Application decision',
             description: 'Approve on the same terms or change the amount and term, request data from the client, or decline.',
-            engineProposal: 'The engine proposed: {amount} for {term} at {rate}.',
-            noEngineProposal: 'The engine could not propose terms — enter the amount and term yourself.',
             action: {
                 approve: 'Approve',
                 request_info: 'Request data',
@@ -920,16 +930,6 @@ export default {
             },
             secondKeyApproved: 'Confirmed with the second key',
             secondKeyReturned: 'Returned with the second key',
-        },
-        reasonKind: {
-            stop: 'Stop factor',
-            policy: 'Policy',
-            score: 'Scoring',
-            cap: 'Amount limit',
-            manual: 'Manual review',
-            ask: 'Data request',
-            condition: 'Condition',
-            flag: 'Flag',
         },
         facts: {
             title: 'Company facts',

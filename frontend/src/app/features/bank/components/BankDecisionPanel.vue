@@ -7,13 +7,9 @@ import Message from 'primevue/message'
 import SelectButton from 'primevue/selectbutton'
 import Textarea from 'primevue/textarea'
 import SandboxPersonaField from '@/app/features/sandbox/components/SandboxPersonaField.vue'
-import { useFormatters } from '@/app/composables/useFormatters'
 import { ApplicationAskEnum } from '@/app/types/application/application-ask-enum'
 import { BankDecisionActionEnum } from '@/app/types/bank/bank-decision-action-enum'
-import type {
-  ApplicationOfferInterface,
-  ApplicationRequestInterface,
-} from '@/app/types/application/application-interface'
+import type { ApplicationRequestInterface } from '@/app/types/application/application-interface'
 import type { BankDecisionFormInterface } from '@/app/types/bank/bank-decision-form-interface'
 import type { Nullable } from '@/app/types/nullable'
 
@@ -30,7 +26,6 @@ const ASK_OPTIONS = [
 ]
 
 const props = defineProps<{
-  proposal: Nullable<ApplicationOfferInterface>
   request: ApplicationRequestInterface
   pendingCommand: Nullable<string>
 }>()
@@ -40,13 +35,12 @@ const emit = defineEmits<{
 }>()
 
 const { t, locale } = useI18n({ useScope: 'global' })
-const { formatCurrency, formatPercent } = useFormatters()
 
-// Условия подставляем из предложения движка, а если его нет — из запроса клиента
+// Условия по умолчанию — то, что просил клиент: подсказка движка не задаёт якорь решению специалиста
 const form = reactive<BankDecisionFormInterface>({
   action: BankDecisionActionEnum.Approve,
-  amount: props.proposal?.amount ?? props.request.amount,
-  termMonths: props.proposal?.termMonths ?? props.request.termMonths ?? DEFAULT_TERM_MONTHS,
+  amount: props.request.amount,
+  termMonths: props.request.termMonths ?? DEFAULT_TERM_MONTHS,
   asks: [ApplicationAskEnum.Documents],
   comment: '',
 })
@@ -65,16 +59,6 @@ const actionOptions = computed(() => [
 ])
 
 const askOptions = computed(() => ASK_OPTIONS.map((ask) => ({ value: ask, label: t(`application.infoRequest.ask.${ask}`) })))
-
-const proposalText = computed(() =>
-  props.proposal
-    ? t('bank.decision.engineProposal', {
-      amount: formatCurrency(props.proposal.amount, 'RUB'),
-      term: t('application.term', props.proposal.termMonths),
-      rate: formatPercent(props.proposal.rate),
-    })
-    : t('bank.decision.noEngineProposal'),
-)
 
 const errorText = computed(() => {
   if (!isSubmitted.value) return null
@@ -121,14 +105,6 @@ function handleSubmit() {
         {{ t('bank.decision.description') }}
       </p>
     </div>
-
-    <p class="flex items-start gap-2 rounded-2xl bg-fino-surface-secondary p-3 text-sm text-fino-text">
-      <i
-        class="pi pi-cog mt-0.5 text-primary"
-        aria-hidden="true"
-      />
-      <span class="min-w-0 break-words">{{ proposalText }}</span>
-    </p>
 
     <SelectButton
       v-model="form.action"

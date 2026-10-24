@@ -5,6 +5,7 @@ import BankQueueCard from './BankQueueCard.vue'
 import BankSlaBadge from './BankSlaBadge.vue'
 import { useFormatters } from '@/app/composables/useFormatters'
 import type { BankQueueItemInterface } from '@/app/types/bank/bank-queue-item-interface'
+import type { Nullable } from '@/app/types/nullable'
 
 interface QueueRowInterface {
   item: BankQueueItemInterface
@@ -16,11 +17,13 @@ interface QueueRowInterface {
 defineProps<{
   inn: string
   rows: QueueRowInterface[]
+  // «Сейчас» по часам мира — для отсчёта «осталось 3 ч 40 мин»
+  now: Nullable<number>
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
 const router = useRouter()
-const { formatCurrency, formatPercent } = useFormatters()
+const { formatCurrency, formatTerm } = useFormatters()
 
 function getRoute(inn: string, applicationId: string) {
   return { name: 'bank-dossier', params: { inn, applicationId } }
@@ -31,16 +34,11 @@ function openApplication(inn: string, applicationId: string) {
 }
 
 function getRequestText(item: BankQueueItemInterface) {
-  const term = item.request.termMonths ? ` · ${t('application.term', item.request.termMonths)}` : ''
+  const term = item.request.termMonths ? ` · ${formatTerm(item.request.termMonths)}` : ''
 
   return `${formatCurrency(item.request.amount, 'RUB')}${term}`
 }
 
-function getProposalText(item: BankQueueItemInterface) {
-  return item.proposal
-    ? t('bank.queue.proposal', { amount: formatCurrency(item.proposal.amount, 'RUB'), rate: formatPercent(item.proposal.rate) })
-    : t('bank.queue.noProposal')
-}
 </script>
 
 <template>
@@ -67,12 +65,6 @@ function getProposalText(item: BankQueueItemInterface) {
               class="px-4 py-3"
             >
               {{ t('bank.queue.columns.reason') }}
-            </th>
-            <th
-              scope="col"
-              class="px-4 py-3"
-            >
-              {{ t('bank.queue.columns.proposal') }}
             </th>
             <th
               scope="col"
@@ -130,14 +122,11 @@ function getProposalText(item: BankQueueItemInterface) {
               </p>
             </td>
 
-            <td class="px-4 py-3.5 text-fino-text-muted">
-              {{ getProposalText(row.item) }}
-            </td>
-
             <td class="px-5 py-3.5 text-right">
               <BankSlaBadge
                 :sla-until="row.item.slaUntil"
                 :flags="row.item.flags"
+                :now="now"
               />
             </td>
           </tr>
@@ -158,6 +147,7 @@ function getProposalText(item: BankQueueItemInterface) {
           :inn="inn"
           :company-name="row.companyName"
           :is-mine="row.isMine"
+          :now="now"
         />
       </li>
     </ul>

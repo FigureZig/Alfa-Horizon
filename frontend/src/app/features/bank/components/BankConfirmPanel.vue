@@ -20,7 +20,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
-const { formatCurrency, formatPercent, formatDateTime } = useFormatters()
+const { formatCurrency, formatPercent, formatDateTime, formatTerm } = useFormatters()
 
 const comment = ref('')
 
@@ -34,7 +34,7 @@ const offerText = computed(() => {
   return t('bank.confirm.offer', {
     product: offer.productName,
     amount: formatCurrency(offer.amount, 'RUB'),
-    term: t('application.term', offer.termMonths),
+    term: formatTerm(offer.termMonths),
     rate: formatPercent(offer.rate),
   })
 })

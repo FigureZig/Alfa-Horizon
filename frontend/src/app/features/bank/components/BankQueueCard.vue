@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import BankSlaBadge from './BankSlaBadge.vue'
 import { useFormatters } from '@/app/composables/useFormatters'
 import type { BankQueueItemInterface } from '@/app/types/bank/bank-queue-item-interface'
+import type { Nullable } from '@/app/types/nullable'
 
 const props = defineProps<{
   item: BankQueueItemInterface
@@ -11,10 +12,12 @@ const props = defineProps<{
   companyName: string
   // Задача текущего сотрудника: бэкенд отдал ему действие по заявке
   isMine: boolean
+  // «Сейчас» по часам мира — для отсчёта срока
+  now: Nullable<number>
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
-const { formatCurrency, formatPercent } = useFormatters()
+const { formatCurrency, formatTerm } = useFormatters()
 
 const route = computed(() => ({ name: 'bank-dossier', params: { inn: props.inn, applicationId: props.item.id } }))
 
@@ -23,19 +26,10 @@ const subtitle = computed(() => (props.companyName ? t('bank.queue.companyInn', 
 
 const request = computed(() => {
   const { request: current } = props.item
-  const term = current.termMonths ? ` · ${t('application.term', current.termMonths)}` : ''
+  const term = current.termMonths ? ` · ${formatTerm(current.termMonths)}` : ''
 
   return `${t(`application.product.${current.product}`)} · ${formatCurrency(current.amount, 'RUB')}${term}`
 })
-
-const proposal = computed(() =>
-  props.item.proposal
-    ? t('bank.queue.proposal', {
-      amount: formatCurrency(props.item.proposal.amount, 'RUB'),
-      rate: formatPercent(props.item.proposal.rate),
-    })
-    : t('bank.queue.noProposal'),
-)
 
 const reasons = computed(() => props.item.reasons.map((reason) => reason.text))
 
@@ -68,16 +62,13 @@ const isWaitingSecondKey = computed(() => Boolean(props.item.pendingDecision))
       <BankSlaBadge
         :sla-until="item.slaUntil"
         :flags="item.flags"
+        :now="now"
       />
     </div>
 
     <div>
       <p class="break-words text-sm font-semibold text-fino-text">
         {{ request }}
-      </p>
-
-      <p class="mt-1 break-words text-xs text-fino-text-muted">
-        {{ proposal }}
       </p>
     </div>
 

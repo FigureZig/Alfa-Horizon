@@ -37,6 +37,11 @@ export function useFormatters() {
     return months % 12 === 0 ? t('common.years', months / 12) : t('common.months', months)
   }
 
+  // Возраст бизнеса: «9 лет», а не «112 месяцев»; меньше года — в месяцах
+  function formatAge(months: number): string {
+    return months < 12 ? t('common.months', months) : t('common.years', Math.floor(months / 12))
+  }
+
   function formatPercent(value: number): string {
     return new Intl.NumberFormat(locale.value, {
       style: 'percent',
@@ -91,6 +96,7 @@ export function useFormatters() {
     formatCurrency,
     formatMoney,
     formatTerm,
+    formatAge,
     formatPercent,
     formatDate,
     formatDateTime,

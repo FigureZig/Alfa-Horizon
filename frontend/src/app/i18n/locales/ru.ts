@@ -563,10 +563,10 @@ export default {
         product: {
             OVERDRAFT: 'Овердрафт',
             EXPRESS: 'Экспресс-кредит',
-            WORKING_CAPITAL: 'Кредит на оборотные средства',
+            WORKING_CAPITAL: 'Оборотный кредит',
             INVESTMENT: 'Инвестиционный кредит',
-            CONTRACT: 'Кредит под контракт',
-            AGRO_SEASONAL: 'Сезонный агрокредит',
+            CONTRACT: 'Кредит на исполнение контракта',
+            AGRO_SEASONAL: 'Сезонный кредит аграриям',
         },
         goal: {
             cash_gap: 'Закрыть кассовый разрыв',
@@ -828,8 +828,23 @@ export default {
             client: 'Клиент',
         },
         sla: {
-            until: 'Срок до {date}',
-            breached: 'Срок просрочен',
+            until: 'Ответ до {date}',
+            hoursLeft: 'осталось {hours} ч {minutes} мин',
+            minutesLeft: 'осталось {minutes} мин',
+            breached: 'Срок вышел',
+        },
+        engine: {
+            title: 'Что предлагал движок',
+            hint: 'Подсказка машины — смотрите после фактов',
+            proposal: '{amount} на {term} под {rate}',
+            none: 'Своего предложения у движка нет — решение за вами',
+        },
+        next: {
+            done: 'Решение отправлено',
+            item: 'Следующая: {name} — {product}, {amount}',
+            empty: 'В очереди больше нет заявок',
+            open: 'Открыть следующую',
+            toQueue: 'К очереди',
         },
         queue: {
             title: 'Очередь заявок',
@@ -842,15 +857,12 @@ export default {
             toMetrics: 'Смотреть метрики конвейера',
             loadError: 'Не удалось загрузить очередь заявок.',
             companyInn: 'ИНН {inn}',
-            proposal: 'Движок предложил {amount} под {rate}',
             columns: {
                 request: 'Запрос',
                 reason: 'Почему нужен человек',
-                proposal: 'Что предлагал движок',
                 sla: 'Срок',
             },
             moreReasons: 'ещё {n}',
-            noProposal: 'Движок не смог предложить условия',
             score: 'Балл {score} · класс {riskClass}',
             waitingSecondKey: 'Ждёт второго ключа',
             open: 'Открыть досье',
@@ -872,8 +884,6 @@ export default {
         decision: {
             title: 'Решение по заявке',
             description: 'Одобрите на тех же условиях или измените сумму и срок, запросите данные у клиента либо откажите.',
-            engineProposal: 'Движок предлагал: {amount} на {term} под {rate}.',
-            noEngineProposal: 'Движок не смог предложить условия — укажите сумму и срок сами.',
             action: {
                 approve: 'Одобрить',
                 request_info: 'Запросить данные',
@@ -920,16 +930,6 @@ export default {
             },
             secondKeyApproved: 'Подтверждено вторым ключом',
             secondKeyReturned: 'Возвращено вторым ключом',
-        },
-        reasonKind: {
-            stop: 'Стоп-фактор',
-            policy: 'Политика',
-            score: 'Скоринг',
-            cap: 'Ограничение суммы',
-            manual: 'Ручное рассмотрение',
-            ask: 'Запрос данных',
-            condition: 'Условие',
-            flag: 'Отметка',
         },
         facts: {
             title: 'Факты о компании',
