@@ -97,7 +97,11 @@ function handleDelete() {
           {{ title }}
         </h2>
 
-        <p class="mt-1 line-clamp-1 text-sm leading-relaxed text-fino-text-muted sm:line-clamp-2">
+        <!-- Полное описание — во всплывающей подсказке: в карточке оно обрезано -->
+        <p
+          class="mt-1 line-clamp-2 text-sm leading-relaxed text-fino-text-muted sm:line-clamp-3"
+          :title="about"
+        >
           {{ about }}
         </p>
       </div>

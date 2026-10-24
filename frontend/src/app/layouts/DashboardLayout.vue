@@ -10,6 +10,7 @@ import DemoPersonaProfile from '@/app/features/demo-persona/components/DemoPerso
 import { currentSessionToken } from '@/app/composables/useApiFetch'
 import { useCompanyAccess } from '@/app/composables/useCompanyAccess'
 import { useDemoPersona } from '@/app/composables/useDemoPersona'
+import { CompanyRoleEnum } from '@/app/types/company/company-role-enum'
 
 const props = defineProps<{
   inn: string
@@ -25,11 +26,18 @@ const { demoPersona, error: demoPersonaError, loadDemoPersona } = useDemoPersona
 
 const { me, company, isVotesOnly, error: accessError, loadAccess } = useCompanyAccess(() => props.inn)
 
-// Подпись под именем в шапке: роль в этой компании, у сотрудника банка — роль в банке
+// Подпись под именем в шапке: роль и где — «Директор · ООО «Вектор-Трейд»», у сотрудника банка — роль в банке
 const roleCaption = computed(() => {
-  if (demoPersona.value?.isBankStaff) return t(`bank.role.${demoPersona.value.role}`)
+  if (demoPersona.value?.isBankStaff) {
+    return `${t(`bank.role.${demoPersona.value.role}`)} · ${t('login.bankTile.title')}`
+  }
 
-  return company.value ? t(`demoPersona.role.${company.value.role}`) : t('demoPersona.caption')
+  if (!company.value) return t('demoPersona.caption')
+
+  // У ИП роль уже в названии: «ИП Смирнова А. С.», без повтора «ИП · ИП …»
+  if (company.value.role === CompanyRoleEnum.Owner) return company.value.shortName
+
+  return `${t(`demoPersona.role.${company.value.role}`)} · ${company.value.shortName}`
 })
 
 // Создатель своей компании (id вида c12) может её менять

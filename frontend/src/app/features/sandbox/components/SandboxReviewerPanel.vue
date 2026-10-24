@@ -12,6 +12,7 @@ import SandboxReviewerGuide from './SandboxReviewerGuide.vue'
 import SandboxReviewerScenarios from './SandboxReviewerScenarios.vue'
 import SandboxWorldControls from './SandboxWorldControls.vue'
 import { useApiFetch } from '@/app/composables/useApiFetch'
+import { useReviewerPanel } from '@/app/composables/useReviewerPanel'
 import { applicationsService } from '@/app/services/application/applications.service'
 import { ApplicationMapper } from '@/app/mappers/application.mapper'
 import type { ApplicationDetailStatusEnum } from '@/app/types/application/application-detail-status-enum'
@@ -23,8 +24,8 @@ const BANK_ROUTE_PREFIX = 'bank-'
 const { t } = useI18n({ useScope: 'global' })
 const route = useRoute()
 const $fetch = useApiFetch()
+const { isVisible, openScenarioId, openPanel: showPanel, closePanel } = useReviewerPanel()
 
-const isVisible = ref(false)
 const activeTab = ref('scenarios')
 const applicationStatus = ref<Nullable<ApplicationDetailStatusEnum>>(null)
 const loadedApplicationInn = ref<Nullable<string>>(null)
@@ -55,9 +56,6 @@ const applicationInn = computed(() =>
 // Подсказка проверяющему — один раз и только на экране входа, рядом с кнопкой
 const isHintVisible = computed(() => route.name === 'login' && !isHintDismissed.value && !isVisible.value)
 
-// После первого показа кнопка сжимается до иконки и не закрывает карточки
-const isLabelVisible = computed(() => !isHintDismissed.value)
-
 // В кабинете снизу мобильная навигация: кнопка стоит над ней
 const positionClass = computed(() => {
   // В конструкторе снизу полоса предпросмотра
@@ -67,11 +65,7 @@ const positionClass = computed(() => {
 })
 
 function openPanel() {
-  isVisible.value = true
-}
-
-function closePanel() {
-  isVisible.value = false
+  showPanel()
 }
 
 function handleVisibleChange(visible: boolean) {
@@ -111,6 +105,11 @@ async function loadApplicationStatus() {
 watch([isVisible, applicationId], ([visible]) => {
   if (visible) loadApplicationStatus()
 })
+
+// Открыли на конкретном сценарии (например, с экрана входа) — показываем вкладку сценариев
+watch(openScenarioId, (scenarioId) => {
+  if (scenarioId) activeTab.value = 'scenarios'
+})
 </script>
 
 <template>
@@ -149,8 +148,7 @@ watch([isVisible, applicationId], ([visible]) => {
       class="flex h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-full border border-fino-border
              bg-fino-surface text-sm font-semibold text-fino-text shadow-md transition-all duration-200
              hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg active:scale-95 focus-visible:outline-2
-             focus-visible:outline-primary motion-reduce:transition-none"
-      :class="isLabelVisible ? 'px-3.5' : 'px-0'"
+             focus-visible:outline-primary motion-reduce:transition-none sm:px-3.5"
       :aria-label="t('reviewer.open')"
       :title="t('reviewer.open')"
       @click="openPanel"
@@ -160,10 +158,7 @@ watch([isVisible, applicationId], ([visible]) => {
         aria-hidden="true"
       />
 
-      <span
-        v-if="isLabelVisible"
-        class="hidden sm:inline"
-      >{{ t('reviewer.open') }}</span>
+      <span class="hidden sm:inline">{{ t('reviewer.open') }}</span>
     </button>
   </div>
 

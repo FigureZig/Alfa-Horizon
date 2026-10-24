@@ -15,8 +15,8 @@ const router = useRouter()
 const { demoPersona, isLoading, resetDemoPersona } = useDemoPersona()
 const { logout: endSession } = useSession()
 
-// Завершаем демо-сессию: токен забывается, данные персоны сбрасываются
-async function logout() {
+// Сменить пользователя = выйти и выбрать другого на экране входа: токен забывается, данные персоны сбрасываются
+async function switchUser() {
   await endSession()
   resetDemoPersona()
   await router.push({ name: 'login' })
@@ -39,11 +39,11 @@ async function logout() {
       </div>
 
       <div class="sr-only min-w-0 flex-col md:not-sr-only md:flex">
-        <span class="max-w-48 truncate text-sm font-semibold text-fino-text">
+        <span class="max-w-56 truncate text-sm font-semibold text-fino-text">
           {{ demoPersona.fullName }}
         </span>
 
-        <span class="text-xs text-fino-text-muted">
+        <span class="max-w-56 truncate text-xs text-fino-text-muted">
           {{ caption }}
         </span>
       </div>
@@ -53,21 +53,23 @@ async function logout() {
 
     <button
       type="button"
-      class="flex size-10 shrink-0 cursor-pointer items-center justify-center
-             rounded-xl bg-fino-surface-secondary text-fino-text
+      class="flex h-10 min-w-10 shrink-0 cursor-pointer items-center justify-center gap-2
+             rounded-xl bg-fino-surface-secondary text-fino-text sm:px-3
              transition-all duration-200
              hover:-translate-y-0.5 hover:bg-fino-surface-hover hover:text-primary
              active:scale-95
              focus-visible:outline-2 focus-visible:outline-primary
              motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-      :aria-label="t('demoPersona.logout')"
-      :title="t('demoPersona.logout')"
-      @click="logout"
+      :aria-label="t('demoPersona.switchUser')"
+      :title="t('demoPersona.switchUser')"
+      @click="switchUser"
     >
       <i
-        class="pi pi-sign-out"
+        class="pi pi-users"
         aria-hidden="true"
       />
+
+      <span class="hidden text-sm font-semibold sm:inline">{{ t('demoPersona.switchShort') }}</span>
     </button>
   </div>
 </template>

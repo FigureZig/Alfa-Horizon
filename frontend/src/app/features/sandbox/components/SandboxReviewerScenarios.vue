@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import type { RouteLocationRaw } from 'vue-router'
@@ -8,6 +8,7 @@ import Dialog from 'primevue/dialog'
 import Skeleton from 'primevue/skeleton'
 import AppErrorState from '@/app/components/AppErrorState.vue'
 import { useApiFetch } from '@/app/composables/useApiFetch'
+import { useReviewerPanel } from '@/app/composables/useReviewerPanel'
 import { useSession } from '@/app/composables/useSession'
 import { sandboxService } from '@/app/services/sandbox/sandbox.service'
 import { SandboxScenarioMapper } from '@/app/mappers/sandbox-scenario.mapper'
@@ -65,9 +66,10 @@ const router = useRouter()
 const toast = useToast()
 const $fetch = useApiFetch()
 const { loginAsPersona } = useSession()
+// Открытый сценарий общий с панелью: экран входа открывает её сразу на нужном
+const { openScenarioId } = useReviewerPanel()
 
 const scenarios = ref<SandboxScenarioInterface[]>([])
-const openScenarioId = ref<Nullable<string>>(null)
 const isLoading = ref(false)
 const hasError = ref(false)
 // Шаг, который сейчас выполняется: вход, событие мира или сброс (0)
@@ -255,7 +257,20 @@ async function applyEventAtStep(step: SandboxScenarioStepInterface) {
   }
 }
 
+function getScenarioElementId(scenarioId: string) {
+  return `reviewer-scenario-${scenarioId}`
+}
+
+// Сценарий, открытый снаружи, — прокручиваем к нему, когда список уже на экране
+async function scrollToOpenScenario() {
+  if (!openScenarioId.value || !scenarios.value.length) return
+
+  await nextTick()
+  document.getElementById(getScenarioElementId(openScenarioId.value))?.scrollIntoView({ block: 'start' })
+}
+
 onMounted(loadScenarios)
+watch([openScenarioId, scenarios], scrollToOpenScenario)
 </script>
 
 <template>
@@ -293,6 +308,7 @@ onMounted(loadScenarios)
     >
       <li
         v-for="card in cards"
+        :id="getScenarioElementId(card.scenario.id)"
         :key="card.scenario.id"
         class="rounded-2xl border bg-fino-surface transition-colors motion-reduce:transition-none"
         :class="openScenarioId === card.scenario.id ? 'border-primary/40' : 'border-fino-border'"

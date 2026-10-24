@@ -8,6 +8,7 @@ import AppErrorState from '@/app/components/AppErrorState.vue'
 import AppHeader from '@/app/components/layout/AppHeader.vue'
 import SandboxCompanyTile from '@/app/features/sandbox/components/SandboxCompanyTile.vue'
 import SandboxPersonaCardSkeleton from '@/app/features/sandbox/components/SandboxPersonaCardSkeleton.vue'
+import SandboxScenarioShortcuts from '@/app/features/sandbox/components/SandboxScenarioShortcuts.vue'
 import { useApiFetch } from '@/app/composables/useApiFetch'
 import { useSession } from '@/app/composables/useSession'
 import { sandboxService } from '@/app/services/sandbox/sandbox.service'
@@ -19,6 +20,12 @@ import type { SandboxPersonaGroupInterface } from '@/app/types/sandbox/sandbox-p
 import type { SandboxPersonaInterface } from '@/app/types/sandbox/sandbox-persona-interface'
 
 const PERSONA_SKELETON_COUNT = 7
+// Как устроен вход — три шага над плитками
+const STEPS = [
+  { key: 'pick', icon: 'pi pi-building' },
+  { key: 'act', icon: 'pi pi-briefcase' },
+  { key: 'switch', icon: 'pi pi-users' },
+] as const
 // Сколько компаний видно сразу: остальные — по кнопке «Ещё N компаний»
 const VISIBLE_COMPANIES = 6
 // Создатель своей компании — id вида c12, её люди — c12-p1: удаляют и правят компанию через создателя
@@ -195,15 +202,57 @@ watch(locale, loadPersonas)
 
     <!-- Снизу место под кнопку «Как проверить»: последнюю плитку она не закрывает -->
     <main class="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 pt-6 pb-24 sm:gap-8 sm:px-6 sm:pt-10">
-      <div class="max-w-2xl motion-safe:animate-fade-up">
-        <h1 class="text-3xl font-bold tracking-tight text-fino-text sm:text-4xl">
-          {{ t('login.title') }}
-        </h1>
+      <div class="flex flex-col gap-5 motion-safe:animate-fade-up">
+        <div class="max-w-2xl">
+          <h1 class="text-3xl font-bold tracking-tight text-fino-text sm:text-4xl">
+            {{ t('login.title') }}
+          </h1>
 
-        <p class="mt-3 text-sm leading-relaxed text-fino-text-muted sm:text-base">
-          {{ t('login.description') }}
-        </p>
+          <p class="mt-3 text-sm leading-relaxed text-fino-text-muted sm:text-base">
+            {{ t('login.description') }}
+          </p>
+        </div>
+
+        <!-- Как это устроено: без этого непонятно, зачем выбирать человека и как потом сменить роль -->
+        <ol class="grid grid-cols-1 gap-3 md:grid-cols-3">
+          <li
+            v-for="(step, index) in STEPS"
+            :key="step.key"
+            class="flex items-start gap-3 rounded-2xl border border-fino-border bg-fino-surface p-4"
+          >
+            <span
+              class="flex size-8 shrink-0 items-center justify-center rounded-full bg-fino-accent text-sm font-bold
+                     text-primary"
+              aria-hidden="true"
+            >
+              {{ index + 1 }}
+            </span>
+
+            <span class="min-w-0">
+              <span class="block text-sm font-bold text-fino-text">{{ t(`login.steps.${step.key}.title`) }}</span>
+              <span class="mt-0.5 block text-xs leading-relaxed text-fino-text-muted">
+                {{ t(`login.steps.${step.key}.text`) }}
+              </span>
+            </span>
+          </li>
+        </ol>
+
+        <a
+          href="#login-scenarios"
+          class="inline-flex w-fit items-center gap-2 text-sm font-semibold text-primary transition-opacity
+                 hover:opacity-80 focus-visible:outline-2 focus-visible:outline-primary motion-reduce:transition-none"
+        >
+          <i
+            class="pi pi-compass"
+            aria-hidden="true"
+          />
+          {{ t('login.scenarios.jump') }}
+        </a>
       </div>
+
+      <h2 class="-mb-2 text-xl font-bold tracking-tight text-fino-text sm:-mb-4">
+        {{ t('login.companiesTitle') }}
+      </h2>
 
       <!-- Скелетоны при загрузке -->
       <div
@@ -323,6 +372,11 @@ watch(locale, loadPersonas)
           {{ t('login.empty') }}
         </p>
       </div>
+
+      <SandboxScenarioShortcuts
+        id="login-scenarios"
+        class="scroll-mt-28 pt-4"
+      />
     </main>
 
     <Dialog

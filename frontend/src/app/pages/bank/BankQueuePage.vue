@@ -8,6 +8,7 @@ import DashboardSummarySection from '@/app/features/dashboard/components/Dashboa
 import { useBankQueue } from '@/app/composables/useBankQueue'
 import { useCompanyNames } from '@/app/composables/useCompanyNames'
 import { useDemoPersona } from '@/app/composables/useDemoPersona'
+import { useReviewerPanel } from '@/app/composables/useReviewerPanel'
 import { useWorldClock } from '@/app/composables/useWorldClock'
 import { ApplicationActionEnum } from '@/app/types/application/application-action-enum'
 import type { BankQueueItemInterface } from '@/app/types/bank/bank-queue-item-interface'
@@ -24,6 +25,7 @@ const { queue, isLoading, error, loadQueue } = useBankQueue()
 const { getCompanyName, isLoading: isNamesLoading } = useCompanyNames()
 // Срок рассмотрения — отсчётом по часам мира
 const { now } = useWorldClock()
+const { openPanel } = useReviewerPanel()
 
 // Задача сотрудника — заявка, по которой бэкенд отдал ему решение или подтверждение
 function isMine(item: BankQueueItemInterface): boolean {
@@ -48,6 +50,11 @@ const summaryKey = computed(() =>
 )
 
 const roleLabel = computed(() => (demoPersona.value ? t(`bank.role.${demoPersona.value.role}`) : ''))
+
+// Пустая очередь — тупик для проверяющего: сценарии со специалистом лежат в панели «Как проверить»
+function openScenarios() {
+  openPanel()
+}
 </script>
 
 <template>
@@ -117,16 +124,37 @@ const roleLabel = computed(() => (demoPersona.value ? t(`bank.role.${demoPersona
         {{ t('bank.queue.emptyHint') }}
       </p>
 
-      <RouterLink
-        :to="{ name: 'bank-metrics', params: { inn } }"
-        class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary transition-opacity hover:opacity-80"
-      >
-        {{ t('bank.queue.toMetrics') }}
-        <i
-          class="pi pi-arrow-right text-xs"
-          aria-hidden="true"
-        />
-      </RouterLink>
+      <p class="mt-3 max-w-md text-sm text-fino-text-muted">
+        {{ t('bank.queue.howToFill') }}
+      </p>
+
+      <div class="mt-1 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+        <button
+          type="button"
+          class="mt-3 inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-xl border border-fino-border
+                 bg-fino-surface px-3.5 text-sm font-semibold text-fino-text transition-colors
+                 hover:bg-fino-surface-hover focus-visible:outline-2 focus-visible:outline-primary
+                 motion-reduce:transition-none"
+          @click="openScenarios"
+        >
+          <i
+            class="pi pi-compass text-primary"
+            aria-hidden="true"
+          />
+          {{ t('bank.queue.openScenarios') }}
+        </button>
+
+        <RouterLink
+          :to="{ name: 'bank-metrics', params: { inn } }"
+          class="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary transition-opacity hover:opacity-80"
+        >
+          {{ t('bank.queue.toMetrics') }}
+          <i
+            class="pi pi-arrow-right text-xs"
+            aria-hidden="true"
+          />
+        </RouterLink>
+      </div>
     </div>
 
     <template v-else>
@@ -147,12 +175,33 @@ const roleLabel = computed(() => (demoPersona.value ? t(`bank.role.${demoPersona
         />
       </section>
 
-      <p
+      <div
         v-else
-        class="rounded-3xl border border-dashed border-fino-border bg-fino-surface p-6 text-sm text-fino-text-muted"
+        class="rounded-3xl border border-dashed border-fino-border bg-fino-surface p-6"
       >
-        {{ t('bank.queue.nothingForYou') }}
-      </p>
+        <p class="text-sm font-semibold text-fino-text">
+          {{ t('bank.queue.nothingForYou') }}
+        </p>
+
+        <p class="mt-1 text-sm text-fino-text-muted">
+          {{ t('bank.queue.howToFill') }}
+        </p>
+
+        <button
+          type="button"
+          class="mt-3 inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-xl border border-fino-border
+                 bg-fino-surface px-3.5 text-sm font-semibold text-fino-text transition-colors
+                 hover:bg-fino-surface-hover focus-visible:outline-2 focus-visible:outline-primary
+                 motion-reduce:transition-none"
+          @click="openScenarios"
+        >
+          <i
+            class="pi pi-compass text-primary"
+            aria-hidden="true"
+          />
+          {{ t('bank.queue.openScenarios') }}
+        </button>
+      </div>
 
       <section
         v-if="colleaguesCards.length"
