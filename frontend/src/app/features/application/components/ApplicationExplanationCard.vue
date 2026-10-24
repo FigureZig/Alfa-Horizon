@@ -25,6 +25,8 @@ const props = defineProps<{
   hasError: boolean
   // Специалисту путь к одобрению не нужен: это совет клиенту
   isPathHidden?: boolean
+  // Из чего складывается балл — только для сотрудника банка; клиент видит риск словами
+  isScoreBreakdownVisible?: boolean
   // Сколько просили — для полосы «дают / предел / просили»
   requestedAmount?: Nullable<number>
   // Сколько показывал подбор до заявки: если банк дал меньше, объясняем почему
@@ -198,7 +200,7 @@ const riskLine = computed(() => {
 
 // Сначала факторы, которые тянут оценку вниз, затем самые весомые плюсы
 const factors = computed(() =>
-  [...(props.explanation?.factors ?? [])]
+  [...(props.isScoreBreakdownVisible ? props.explanation?.factors ?? [] : [])]
     .filter((factor) => factor.effect === 'minus' || factor.effect === 'plus')
     .sort((a, b) => a.points - b.points)
     .slice(0, MAX_FACTORS)
@@ -242,7 +244,7 @@ function handleRetry() {
              focus-visible:outline-2 focus-visible:outline-primary"
     >
       <span class="flex min-w-0 items-start gap-3">
-        <span class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-fino-accent text-primary">
+        <span class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-fino-accent text-primary border-2 border-fino-line">
           <i
             class="pi pi-question-circle"
             aria-hidden="true"

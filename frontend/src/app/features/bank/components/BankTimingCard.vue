@@ -31,7 +31,7 @@ const isWithinTarget = computed(() => props.timing.withinTargetShare === 1)
 </script>
 
 <template>
-  <article class="flex min-w-0 flex-col gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
+  <article class="flex min-w-0 flex-col gap-4 card-key p-5">
     <div>
       <h2 class="text-sm font-semibold text-fino-text">
         {{ title }}
@@ -55,7 +55,7 @@ const isWithinTarget = computed(() => props.timing.withinTargetShare === 1)
           <dt class="text-xs text-fino-text-muted">
             {{ t('bank.metrics.median') }}
           </dt>
-          <dd class="mt-0.5 text-2xl font-bold tracking-tight text-fino-text">
+          <dd class="mt-0.5 text-2xl font-display font-black text-fino-text">
             {{ median }}
           </dd>
         </div>
@@ -64,7 +64,7 @@ const isWithinTarget = computed(() => props.timing.withinTargetShare === 1)
           <dt class="text-xs text-fino-text-muted">
             {{ t('bank.metrics.p95') }}
           </dt>
-          <dd class="mt-0.5 text-2xl font-bold tracking-tight text-fino-text">
+          <dd class="mt-0.5 text-2xl font-display font-black text-fino-text">
             {{ p95 }}
           </dd>
         </div>
@@ -73,7 +73,7 @@ const isWithinTarget = computed(() => props.timing.withinTargetShare === 1)
       <p
         class="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl p-3 text-xs"
         :class="isWithinTarget
-          ? 'bg-green-500/10 text-green-700 dark:text-green-400'
+          ? 'border-2 border-fino-line bg-fino-lime text-[#111]'
           : 'bg-fino-surface-secondary text-fino-text-muted'"
       >
         <i

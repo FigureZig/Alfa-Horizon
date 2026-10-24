@@ -17,15 +17,15 @@ watchEffect(() => {
   document.title = typeof titleKey === 'string' ? `${t(titleKey)} · ${BRAND}` : BRAND
 })
 
-// Уведомления снизу справа, над кнопкой «Как проверить»: шапку и профиль не закрывают
-const TOAST_STYLE = { bottom: '5rem' }
-// На телефоне — во всю ширину и выше нижнего меню кабинета
-const TOAST_BREAKPOINTS = { '1023px': { width: 'calc(100vw - 2rem)', right: '1rem', bottom: '9.5rem' } }
+// Уведомления сверху справа, под шапкой: низ экрана занят плашкой сценария и кнопкой «Как проверить»
+const TOAST_STYLE = { top: '6.5rem' }
+// На телефоне — во всю ширину
+const TOAST_BREAKPOINTS = { '1023px': { width: 'calc(100vw - 2rem)', right: '1rem', top: '6rem' } }
 </script>
 
 <template>
   <Toast
-    position="bottom-right"
+    position="top-right"
     :style="TOAST_STYLE"
     :breakpoints="TOAST_BREAKPOINTS"
   />

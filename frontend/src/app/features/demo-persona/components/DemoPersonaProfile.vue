@@ -27,11 +27,11 @@ async function switchUser() {
   <div class="flex min-w-0 items-center gap-1.5 sm:gap-2">
     <div
       v-if="demoPersona"
-      class="flex min-w-0 items-center gap-3 sm:border-l sm:border-fino-border sm:pl-3"
+      class="flex min-w-0 items-center gap-3 sm:border-l-2 sm:border-fino-line sm:pl-3"
     >
       <div
-        class="flex size-10 shrink-0 items-center justify-center rounded-full
-               bg-fino-accent text-sm font-bold text-primary"
+        class="flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-fino-line
+               bg-fino-lime font-display text-sm font-black text-[#111]"
         :title="demoPersona.fullName"
         aria-hidden="true"
       >
@@ -54,12 +54,8 @@ async function switchUser() {
     <button
       type="button"
       class="flex h-10 min-w-10 shrink-0 cursor-pointer items-center justify-center gap-2
-             rounded-xl bg-fino-surface-secondary text-fino-text sm:px-3
-             transition-all duration-200
-             hover:-translate-y-0.5 hover:bg-fino-surface-hover hover:text-primary
-             active:scale-95
-             focus-visible:outline-2 focus-visible:outline-primary
-             motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+             rounded-xl bg-fino-surface text-fino-text sm:px-3 btn-key
+             focus-visible:outline-2 focus-visible:outline-primary"
       :aria-label="t('demoPersona.switchUser')"
       :title="t('demoPersona.switchUser')"
       @click="switchUser"

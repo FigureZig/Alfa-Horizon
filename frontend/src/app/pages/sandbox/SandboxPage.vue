@@ -7,6 +7,7 @@ import Dialog from 'primevue/dialog'
 import AppErrorState from '@/app/components/AppErrorState.vue'
 import AppHeader from '@/app/components/layout/AppHeader.vue'
 import SandboxCompanyTile from '@/app/features/sandbox/components/SandboxCompanyTile.vue'
+import SandboxOnboardingDialog from '@/app/features/sandbox/components/SandboxOnboardingDialog.vue'
 import SandboxPersonaCardSkeleton from '@/app/features/sandbox/components/SandboxPersonaCardSkeleton.vue'
 import { useApiFetch } from '@/app/composables/useApiFetch'
 import { useReviewerPanel } from '@/app/composables/useReviewerPanel'
@@ -20,6 +21,8 @@ import type { SandboxPersonaGroupInterface } from '@/app/types/sandbox/sandbox-p
 import type { SandboxPersonaInterface } from '@/app/types/sandbox/sandbox-persona-interface'
 
 const PERSONA_SKELETON_COUNT = 7
+// Инструкция показывается сама один раз — при первом визите
+const ONBOARDING_STORAGE_KEY = 'fino-onboarding-seen'
 // Сколько компаний видно сразу: остальные — по кнопке «Ещё N компаний»
 const VISIBLE_COMPANIES = 6
 // Создатель своей компании — id вида c12, её люди — c12-p1: удаляют и правят компанию через создателя
@@ -33,6 +36,34 @@ const { enterCabinet } = useSession()
 const { openPanel } = useReviewerPanel()
 
 const lastPersonaId = readLastPersonaId()
+
+function readOnboardingSeen(): boolean {
+  try {
+    return localStorage.getItem(ONBOARDING_STORAGE_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
+const isOnboardingVisible = ref(!readOnboardingSeen())
+
+function rememberOnboardingSeen() {
+  try {
+    localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true')
+  } catch {
+    // Хранилище недоступно: инструкция покажется снова при следующем визите
+  }
+}
+
+function showOnboarding() {
+  isOnboardingVisible.value = true
+}
+
+function handleOnboardingVisible(visible: boolean) {
+  isOnboardingVisible.value = visible
+
+  if (!visible) rememberOnboardingSeen()
+}
 
 const personas = ref<SandboxPersonaInterface[]>([])
 const isLoading = ref(false)
@@ -202,7 +233,7 @@ watch(locale, loadPersonas)
 </script>
 
 <template>
-  <div class="min-h-screen bg-fino-surface-secondary">
+  <div class="min-h-screen bg-fino-surface-secondary bg-dots">
     <AppHeader>
       <template #profile />
     </AppHeader>
@@ -211,23 +242,35 @@ watch(locale, loadPersonas)
     <main class="mx-auto flex max-w-[1600px] flex-col gap-8 px-4 pt-6 pb-24 sm:gap-10 sm:px-6 sm:pt-10">
       <div class="flex flex-col gap-5 motion-safe:animate-fade-up">
         <div class="max-w-2xl">
-          <h1 class="text-3xl font-bold tracking-tight text-balance text-fino-text sm:text-4xl">
+          <h1 class="text-4xl font-black text-balance text-fino-text sm:text-6xl">
             {{ t('login.title') }}
           </h1>
 
           <p class="mt-3 text-sm leading-relaxed text-fino-text-muted sm:text-base">
             {{ t('login.description') }}
           </p>
+
+          <button
+            type="button"
+            class="mt-3 inline-flex cursor-pointer items-center gap-2 text-sm font-bold text-fino-violet
+                   underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-primary"
+            @click="showOnboarding"
+          >
+            <i
+              class="pi pi-question-circle"
+              aria-hidden="true"
+            />
+            {{ t('onboarding.open') }}
+          </button>
         </div>
 
         <!-- Два способа начать: по сценарию с подсказками или со своей компанией. Главный — сценарий -->
         <div class="grid grid-cols-1 gap-3 md:grid-cols-[3fr_2fr]">
           <button
             type="button"
-            class="group flex cursor-pointer items-center gap-4 rounded-3xl bg-primary p-5 text-left
-                   text-primary-contrast shadow-sm transition-shadow duration-200 hover:shadow-lg
-                   focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
-                   motion-reduce:transition-none sm:p-6"
+            class="group flex cursor-pointer items-center gap-4 rounded-3xl bg-primary p-5 text-left text-primary-contrast
+                   transition-shadow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:p-6
+                   btn-key"
             @click="openScenarios"
           >
             <span class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-xl">
@@ -238,7 +281,7 @@ watch(locale, loadPersonas)
             </span>
 
             <span class="min-w-0 flex-1">
-              <span class="block text-lg font-bold tracking-tight">{{ t('login.start.scenario.title') }}</span>
+              <span class="block font-display text-2xl font-black tracking-tight">{{ t('login.start.scenario.title') }}</span>
               <span class="mt-1 block text-sm leading-relaxed opacity-90">{{ t('login.start.scenario.text') }}</span>
             </span>
 
@@ -251,11 +294,10 @@ watch(locale, loadPersonas)
 
           <RouterLink
             :to="{ name: 'login-company' }"
-            class="group flex items-center gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5
-                   transition-colors duration-200 hover:border-primary/50 focus-visible:outline-2
-                   focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none sm:p-6"
+            class="group flex items-center gap-4 rounded-3xl bg-fino-lime p-5 text-[#111] btn-key
+                   focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:p-6"
           >
-            <span class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-fino-accent text-xl text-primary">
+            <span class="flex size-12 shrink-0 items-center justify-center rounded-2xl border-2 border-[#111] bg-white text-xl">
               <i
                 class="pi pi-plus"
                 aria-hidden="true"
@@ -263,12 +305,12 @@ watch(locale, loadPersonas)
             </span>
 
             <span class="min-w-0 flex-1">
-              <span class="block text-lg font-bold tracking-tight text-fino-text">{{ t('login.start.own.title') }}</span>
-              <span class="mt-1 block text-sm leading-relaxed text-fino-text-muted">{{ t('login.start.own.text') }}</span>
+              <span class="block font-display text-2xl font-black tracking-tight">{{ t('login.start.own.title') }}</span>
+              <span class="mt-1 block text-sm leading-relaxed">{{ t('login.start.own.text') }}</span>
             </span>
 
             <i
-              class="pi pi-arrow-right shrink-0 text-primary transition-transform duration-200 group-hover:translate-x-1
+              class="pi pi-arrow-right shrink-0 transition-transform duration-200 group-hover:translate-x-1
                      motion-reduce:transition-none"
               aria-hidden="true"
             />
@@ -346,9 +388,9 @@ watch(locale, loadPersonas)
           <button
             v-if="hiddenCount"
             type="button"
-            class="mx-auto inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-fino-border
-                   bg-fino-surface px-5 text-sm font-semibold text-fino-text transition-colors hover:bg-fino-surface-hover
-                   focus-visible:outline-2 focus-visible:outline-primary motion-reduce:transition-none"
+            class="mx-auto inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-fino-surface px-5 text-sm
+                   font-semibold text-fino-text hover:bg-fino-surface-hover focus-visible:outline-2
+                   focus-visible:outline-primary btn-key"
             @click="showAllCompanies"
           >
             {{ t('login.moreCompanies', hiddenCount) }}
@@ -368,6 +410,12 @@ watch(locale, loadPersonas)
         </div>
       </section>
     </main>
+
+    <SandboxOnboardingDialog
+      :visible="isOnboardingVisible"
+      @update:visible="handleOnboardingVisible"
+      @start="openScenarios"
+    />
 
     <Dialog
       v-model:visible="isDeleteDialogVisible"
@@ -392,8 +440,7 @@ watch(locale, loadPersonas)
         <button
           type="button"
           class="cursor-pointer rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-contrast
-                 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60
-                 motion-reduce:transition-none"
+                 disabled:cursor-not-allowed disabled:opacity-60 btn-key"
           :disabled="isDeleting"
           @click="confirmDelete"
         >

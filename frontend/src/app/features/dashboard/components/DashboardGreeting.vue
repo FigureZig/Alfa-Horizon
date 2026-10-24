@@ -58,7 +58,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="min-w-0">
-    <h1 class="break-words text-2xl font-bold tracking-tight text-fino-text sm:text-3xl">
+    <h1 class="break-words text-3xl font-black text-fino-text sm:text-5xl">
       {{ greeting }}
     </h1>
 

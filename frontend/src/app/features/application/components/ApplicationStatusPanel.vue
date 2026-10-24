@@ -20,7 +20,7 @@ const { t } = useI18n({ useScope: 'global' })
       <li
         v-for="reason in reasons"
         :key="reason.code"
-        class="flex items-start gap-2 rounded-xl bg-red-500/10 px-3 py-2 text-sm text-fino-text"
+        class="flex items-start gap-2 rounded-xl bg-fino-accent px-3 py-2 text-sm text-fino-text"
       >
         <i
           class="pi pi-exclamation-triangle mt-0.5 text-red-600 dark:text-red-400"

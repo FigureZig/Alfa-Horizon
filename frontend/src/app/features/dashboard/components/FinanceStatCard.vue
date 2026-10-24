@@ -9,10 +9,7 @@ defineProps<{
 
 <template>
   <article
-    class="group flex min-w-0 flex-col gap-6
-           rounded-3xl border border-fino-border bg-fino-surface
-           p-5 shadow-sm transition-all duration-300
-           hover:-translate-y-1 hover:shadow-md sm:p-6
+    class="group flex min-w-0 flex-col gap-6 card-key p-5 transition-all duration-300 hover:-translate-y-1 sm:p-6
            motion-reduce:transition-none motion-reduce:hover:translate-y-0"
   >
     <div class="flex items-start justify-between gap-3">
@@ -23,7 +20,7 @@ defineProps<{
       <div
         class="flex size-11 shrink-0 items-center justify-center
                rounded-2xl bg-fino-accent text-primary
-               transition-transform group-hover:scale-110"
+               transition-transform group-hover:scale-110 border-2 border-fino-line"
       >
         <i
           :class="icon"
@@ -34,7 +31,7 @@ defineProps<{
     </div>
 
     <div class="min-w-0">
-      <p class="break-words text-2xl font-bold tracking-tight text-fino-text sm:text-3xl">
+      <p class="break-words text-2xl font-display font-black text-fino-text sm:text-3xl">
         {{ value }}
       </p>
 

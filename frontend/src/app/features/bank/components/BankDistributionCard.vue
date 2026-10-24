@@ -28,7 +28,7 @@ const bars = computed(() =>
 </script>
 
 <template>
-  <article class="flex min-w-0 flex-col gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
+  <article class="flex min-w-0 flex-col gap-4 card-key p-5">
     <h2 class="text-sm font-semibold text-fino-text">
       {{ title }}
     </h2>

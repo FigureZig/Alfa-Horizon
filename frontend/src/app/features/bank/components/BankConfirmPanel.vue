@@ -111,11 +111,9 @@ function handleReturn() {
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <button
         type="button"
-        class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary
-               px-5 py-3 text-sm font-semibold text-primary-contrast transition-all duration-200
-               hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60
-               motion-reduce:transition-none
-               focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm
+               font-semibold text-primary-contrast disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2
+               focus-visible:outline-offset-2 focus-visible:outline-primary btn-key"
         :disabled="isBusy"
         :aria-busy="pendingCommand === 'confirm'"
         @click="handleApprove"
@@ -130,11 +128,10 @@ function handleReturn() {
 
       <button
         type="button"
-        class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border
-               border-fino-border bg-fino-surface px-5 py-3 text-sm font-semibold text-fino-text
-               transition-colors duration-200 hover:bg-fino-surface-hover
-               disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none
-               focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl bg-fino-surface px-5 py-3
+               text-sm font-semibold text-fino-text hover:bg-fino-surface-hover disabled:cursor-not-allowed
+               disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
+               btn-key"
         :disabled="isBusy"
         :aria-busy="pendingCommand === 'return'"
         @click="handleReturn"

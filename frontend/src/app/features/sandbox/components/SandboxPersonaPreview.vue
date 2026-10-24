@@ -114,7 +114,7 @@ function handleRetry() {
 
     <template v-else>
       <!-- Компания -->
-      <div class="rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
+      <div class="card-key p-5">
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0">
             <p class="text-xs font-semibold uppercase tracking-wide text-fino-text-muted">
@@ -168,7 +168,7 @@ function handleRetry() {
       </div>
 
       <!-- Продукты: строки переезжают между состояниями -->
-      <div class="rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
+      <div class="card-key p-5">
         <h3 class="text-sm font-bold text-fino-text">
           {{ t('sandbox.builder.preview.products') }}
         </h3>
@@ -195,7 +195,7 @@ function handleRetry() {
 
       <!-- Класс риска -->
       <div
-        class="flex items-center gap-5 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm"
+        class="flex items-center gap-5 card-key p-5"
         tabindex="0"
         @mouseenter="handleScoreHighlight"
         @mouseleave="handleClearHighlight"
@@ -208,7 +208,7 @@ function handleRetry() {
           </p>
 
           <p
-            class="mt-0.5 text-2xl font-bold tracking-tight transition-colors duration-300 first-letter:uppercase
+            class="mt-0.5 text-2xl font-display font-black transition-colors duration-300 first-letter:uppercase
                    motion-reduce:transition-none"
             :class="classTone"
             :title="scoreTitle"
@@ -230,7 +230,7 @@ function handleRetry() {
       </div>
 
       <!-- Кто подписывает и люди -->
-      <div class="rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
+      <div class="card-key p-5">
         <p
           class="flex items-start gap-2 text-sm leading-relaxed text-fino-text-muted"
           :title="preview.pathMeans"
@@ -245,7 +245,7 @@ function handleRetry() {
         <!-- Последствие устройства: при совместной подписи доверенность одного директора не работает -->
         <p
           v-if="isRepresentativeBlocked"
-          class="mt-3 flex items-start gap-2 rounded-2xl bg-amber-500/10 p-3 text-sm text-fino-text"
+          class="mt-3 flex items-start gap-2 rounded-2xl bg-fino-amber-soft p-3 text-sm text-fino-text"
           :title="t('sandbox.builder.preview.representativeLaw')"
         >
           <i

@@ -118,7 +118,7 @@ function handleRetry() {
       class="flex flex-col items-center rounded-3xl border border-dashed
              border-fino-border bg-fino-surface px-6 py-10 text-center"
     >
-      <div class="flex size-12 items-center justify-center rounded-2xl bg-fino-accent text-primary">
+      <div class="flex size-12 items-center justify-center rounded-2xl bg-fino-accent text-primary border-2 border-fino-line">
         <i
           class="pi pi-chart-line text-xl"
           aria-hidden="true"

@@ -28,10 +28,8 @@ function handleLogin() {
 
 <template>
   <article
-    class="group relative flex h-full min-w-0 flex-col gap-4 rounded-3xl border border-fino-border
-           bg-fino-surface p-5 shadow-sm transition-all duration-300
-           hover:-translate-y-1 hover:border-primary/40 hover:shadow-md
-           has-focus-visible:outline-2 has-focus-visible:outline-primary
+    class="group relative flex h-full min-w-0 flex-col gap-4 card-key p-5 transition-all duration-300
+           hover:-translate-y-1 hover:border-primary/40 has-focus-visible:outline-2 has-focus-visible:outline-primary
            motion-reduce:transition-none motion-reduce:hover:translate-y-0"
   >
     <div class="flex items-start justify-between gap-3">

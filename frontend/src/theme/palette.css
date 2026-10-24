@@ -1,31 +1,52 @@
 :root {
-    /* Акцентные цвета */
-    --fino-accent: #FFF1F0;
-    --fino-accent-hover: #FFE0DD;
+    /* Акцентные цвета: красный — бренд, остальные — смысловые акценты по макету */
+    --fino-accent: #FFE3E0;
+    --fino-accent-hover: #FFD0CA;
+    --fino-lime: #A6F000;
+    --fino-lime-soft: #EEFFC7;
+    --fino-violet: #8B2CF5;
+    --fino-violet-soft: #F1E6FF;
+    --fino-blue: #1F3CFF;
+    --fino-blue-soft: #E3E8FF;
+    --fino-amber: #FFB800;
+    --fino-amber-soft: #FFF1C7;
 
     /* Поверхности */
     --fino-surface: #FFFFFF;
-    --fino-surface-secondary: #F3F4F5;
-    --fino-surface-hover: #EBECEF;
+    --fino-surface-secondary: #EDEDED;
+    --fino-surface-hover: #F5F5F5;
 
-    /* Границы */
-    --fino-border: #E7E8EB;
+    /* Границы: мягкий разделитель и жирная обводка «клавиш» с жёсткой тенью */
+    --fino-border: #DADADA;
+    --fino-line: #111111;
+    --fino-shadow: #111111;
 
     /* Текст */
-    --fino-text: #212124;
-    --fino-text-muted: #75757E;
+    --fino-text: #111111;
+    --fino-text-muted: #4A4A4A;
+
+    /* Точечная сетка фона */
+    --fino-grid: rgba(17, 17, 17, 0.1);
 }
 
 .app-dark {
-    --fino-accent: #3B211F;
-    --fino-accent-hover: #512925;
+    --fino-accent: #3A1210;
+    --fino-accent-hover: #4D1915;
+    --fino-lime-soft: #22300A;
+    --fino-violet-soft: #2A1745;
+    --fino-blue-soft: #141E4D;
+    --fino-amber-soft: #3A2C05;
 
-    --fino-surface: #1C1C20;
-    --fino-surface-secondary: #26262B;
-    --fino-surface-hover: #333338;
+    --fino-surface: #171717;
+    --fino-surface-secondary: #0B0B0B;
+    --fino-surface-hover: #222222;
 
-    --fino-border: #333338;
+    --fino-border: #2E2E2E;
+    --fino-line: #F4F4F4;
+    --fino-shadow: #4A4A4A;
 
-    --fino-text: #FFFFFF;
-    --fino-text-muted: #8D8D93;
+    --fino-text: #F4F4F4;
+    --fino-text-muted: #B8B8B8;
+
+    --fino-grid: rgba(255, 255, 255, 0.08);
 }

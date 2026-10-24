@@ -9,7 +9,7 @@ defineProps<{
 </script>
 
 <template>
-  <article class="flex min-w-0 flex-col gap-3 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
+  <article class="flex min-w-0 flex-col gap-3 card-key p-5">
     <div class="flex items-start justify-between gap-3">
       <p class="text-sm font-medium text-fino-text-muted">
         {{ label }}
@@ -17,7 +17,7 @@ defineProps<{
 
       <span
         class="flex size-10 shrink-0 items-center justify-center rounded-2xl"
-        :class="isAlert ? 'bg-red-500/10 text-red-700 dark:text-red-400' : 'bg-fino-accent text-primary'"
+        :class="isAlert ? 'border-2 border-fino-line bg-primary text-primary-contrast' : 'bg-fino-accent text-primary'"
         aria-hidden="true"
       >
         <i
@@ -28,7 +28,7 @@ defineProps<{
     </div>
 
     <div class="min-w-0">
-      <p class="break-words text-3xl font-bold tracking-tight text-fino-text">
+      <p class="break-words text-3xl font-display font-black text-fino-text">
         {{ value }}
       </p>
 

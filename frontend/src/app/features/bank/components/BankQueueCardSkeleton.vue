@@ -4,7 +4,7 @@ import Skeleton from 'primevue/skeleton'
 
 <template>
   <div
-    class="flex flex-col gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5"
+    class="flex flex-col gap-4 card-key p-5"
     aria-busy="true"
   >
     <div class="flex items-start justify-between gap-3">

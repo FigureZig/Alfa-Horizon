@@ -19,7 +19,7 @@ defineProps<{
     >
       <span
         class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-fino-surface-secondary text-fino-text-muted
-               transition-colors duration-200 group-open:bg-fino-accent group-open:text-primary motion-reduce:transition-none"
+               transition-colors duration-200 group-open:bg-fino-accent group-open:text-primary motion-reduce:transition-none border-2 border-fino-line"
         aria-hidden="true"
       >
         <i :class="icon" />

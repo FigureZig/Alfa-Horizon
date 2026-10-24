@@ -44,7 +44,7 @@ function getRequestText(item: BankQueueItemInterface) {
 <template>
   <div>
     <!-- Десктоп: плотная таблица, строка открывает досье -->
-    <div class="hidden overflow-hidden rounded-3xl border border-fino-border bg-fino-surface shadow-sm lg:block">
+    <div class="hidden overflow-hidden card-key lg:block">
       <table class="w-full border-collapse text-left text-sm">
         <thead class="bg-fino-surface-secondary text-xs font-semibold uppercase tracking-wide text-fino-text-muted">
           <tr>

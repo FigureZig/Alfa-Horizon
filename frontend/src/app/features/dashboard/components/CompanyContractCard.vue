@@ -31,10 +31,9 @@ function showContractCredit() {
 
 <template>
   <article
-    class="flex min-w-0 flex-col gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm
-           sm:flex-row sm:items-center sm:p-6"
+    class="flex min-w-0 flex-col gap-4 card-key p-5 sm:flex-row sm:items-center sm:p-6"
   >
-    <span class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-fino-accent text-primary">
+    <span class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-fino-accent text-primary border-2 border-fino-line">
       <i
         class="pi pi-file-check text-lg"
         aria-hidden="true"
@@ -53,10 +52,9 @@ function showContractCredit() {
 
     <button
       type="button"
-      class="inline-flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary
-             px-5 text-sm font-semibold text-primary-contrast transition-all duration-200 hover:opacity-90
-             active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
-             motion-reduce:transition-none"
+      class="inline-flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-5
+             text-sm font-semibold text-primary-contrast focus-visible:outline-2 focus-visible:outline-offset-2
+             focus-visible:outline-primary btn-key"
       @click="showContractCredit"
     >
       {{ t('contractCard.action') }}

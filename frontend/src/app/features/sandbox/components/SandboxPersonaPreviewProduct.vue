@@ -33,8 +33,8 @@ const labelClass = computed(() => {
   if (props.isStopped || !props.product.isAvailable) return 'bg-fino-surface-secondary text-fino-text-muted'
 
   return props.product.rank === 0
-    ? 'bg-green-500/10 text-green-700 dark:text-green-400'
-    : 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
+    ? 'border-2 border-fino-line bg-fino-lime text-[#111]'
+    : 'border-2 border-fino-line bg-fino-amber text-[#111]'
 })
 
 const stateLabel = computed(() =>

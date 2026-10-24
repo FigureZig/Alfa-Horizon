@@ -22,9 +22,8 @@ function isItemActive(exact: boolean, isActive: boolean, isExactActive: boolean)
 <template>
   <nav
     class="fixed inset-x-0 bottom-0 z-50
-           border-t border-fino-border bg-fino-surface
+           border-t-2 border-fino-line bg-fino-surface
            px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)]
-           shadow-[0_-4px_24px_rgba(0,0,0,0.05)]
            lg:hidden"
     :aria-label="t('nav.menu')"
   >
@@ -56,7 +55,9 @@ function isItemActive(exact: boolean, isActive: boolean, isExactActive: boolean)
             class="flex h-9 w-12 items-center justify-center
                    rounded-xl transition-colors duration-200"
             :class="
-              isItemActive(item.exact, isActive, isExactActive) ? 'bg-fino-accent' : 'bg-transparent'
+              isItemActive(item.exact, isActive, isExactActive)
+                ? 'border-2 border-fino-line bg-primary text-primary-contrast'
+                : 'bg-transparent'
             "
           >
             <i

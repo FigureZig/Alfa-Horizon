@@ -122,7 +122,7 @@ function handleDecline() {
         <li
           v-for="condition in conditions"
           :key="condition"
-          class="rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-400"
+          class="rounded-lg bg-fino-amber-soft px-2.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-400"
         >
           {{ condition }}
         </li>
@@ -168,7 +168,7 @@ function handleDecline() {
           </span>
         </span>
 
-        <span class="break-words text-2xl font-bold tracking-tight text-fino-text sm:text-3xl">
+        <span class="break-words text-2xl font-display font-black text-fino-text sm:text-3xl">
           {{ card.amount }}
         </span>
 
@@ -191,9 +191,8 @@ function handleDecline() {
         v-if="canAccept && selectedCard"
         type="button"
         class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm
-               font-semibold text-primary-contrast transition-all duration-200 hover:opacity-90 active:scale-95
-               disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none
-               focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+               font-semibold text-primary-contrast disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2
+               focus-visible:outline-offset-2 focus-visible:outline-primary btn-key"
         :disabled="isBusy"
         :aria-busy="isAccepting"
         @click="handleAccept"

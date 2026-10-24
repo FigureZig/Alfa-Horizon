@@ -194,7 +194,7 @@ function handleSubmit() {
 
     <p
       v-else
-      class="rounded-2xl bg-red-500/10 p-3 text-sm text-fino-text"
+      class="rounded-2xl bg-fino-accent p-3 text-sm text-fino-text"
     >
       {{ t('bank.decision.rejectHint') }}
     </p>

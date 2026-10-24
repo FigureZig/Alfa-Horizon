@@ -6,7 +6,7 @@ const ROW_COUNT = 6
 
 <template>
   <div
-    class="overflow-hidden rounded-3xl border border-fino-border bg-fino-surface"
+    class="overflow-hidden card-key"
     aria-busy="true"
   >
     <div

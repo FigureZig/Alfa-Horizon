@@ -1,13 +1,29 @@
 @import 'tailwindcss';
 @import 'tailwindcss-primeui';
+@import '@fontsource-variable/golos-text';
+@import '@fontsource-variable/inter-tight';
+@import '@fontsource-variable/jetbrains-mono';
 @import './theme/palette.css';
 
 @custom-variant dark (&:where(.app-dark, .app-dark *));
 
 @theme inline {
+    /* Шрифты: текст — Golos, крупные заголовки и числа — Inter Tight, подписи-метки — JetBrains Mono */
+    --font-sans: 'Golos Text Variable', system-ui, sans-serif;
+    --font-display: 'Inter Tight Variable', 'Golos Text Variable', sans-serif;
+    --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+
     /* Акценты */
     --color-fino-accent: var(--fino-accent);
     --color-fino-accent-hover: var(--fino-accent-hover);
+    --color-fino-lime: var(--fino-lime);
+    --color-fino-lime-soft: var(--fino-lime-soft);
+    --color-fino-violet: var(--fino-violet);
+    --color-fino-violet-soft: var(--fino-violet-soft);
+    --color-fino-blue: var(--fino-blue);
+    --color-fino-blue-soft: var(--fino-blue-soft);
+    --color-fino-amber: var(--fino-amber);
+    --color-fino-amber-soft: var(--fino-amber-soft);
 
     /* Поверхности */
     --color-fino-surface: var(--fino-surface);
@@ -16,14 +32,17 @@
 
     /* Границы */
     --color-fino-border: var(--fino-border);
+    --color-fino-line: var(--fino-line);
 
     /* Текст */
     --color-fino-text: var(--fino-text);
     --color-fino-text-muted: var(--fino-text-muted);
 
-    /* Анимации появления: шапка и секции страниц */
+    /* Анимации: появление шапки и секций, пружинный вход, отметка шага, пульс текущего шага */
     --animate-header-appear: header-appear 450ms ease-out both;
-    --animate-fade-up: fade-up 600ms ease-out both;
+    --animate-fade-up: fade-up 440ms cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+    --animate-tick-pop: tick-pop 480ms cubic-bezier(0.2, 1.6, 0.4, 1) both;
+    --animate-pulse-ring: pulse-ring 1.4s ease-out infinite;
 
     @keyframes header-appear {
         from { opacity: 0; transform: translateY(-0.75rem); }
@@ -31,13 +50,130 @@
     }
 
     @keyframes fade-up {
-        from { opacity: 0; transform: translateY(1rem); }
-        to { opacity: 1; transform: translateY(0); }
+        0% { opacity: 0; transform: translateY(2rem) scale(0.98); }
+        60% { opacity: 1; transform: translateY(-0.25rem) scale(1.005); }
+        100% { opacity: 1; transform: none; }
+    }
+
+    @keyframes tick-pop {
+        0% { transform: scale(0.2) rotate(-35deg); }
+        55% { transform: scale(1.3) rotate(8deg); }
+        100% { transform: scale(1) rotate(0); }
+    }
+
+    @keyframes pulse-ring {
+        0% { box-shadow: 0 0 0 0 rgb(239 49 36 / 0.55); }
+        100% { box-shadow: 0 0 0 14px rgb(239 49 36 / 0); }
     }
 }
 
-body {
-    margin: 0;
-    min-width: 320px;
+/* Карточка-«клавиша»: жирная обводка и жёсткая тень со смещением — главный приём макета */
+@utility card-key {
+    border-radius: 1.5rem;
+    border: 2px solid var(--fino-line);
+    background-color: var(--fino-surface);
+    box-shadow: 6px 6px 0 var(--fino-shadow);
 }
 
+/* Карточка поспокойнее: та же обводка без тени — для вложенных блоков и списков */
+@utility card-flat {
+    border-radius: 1.25rem;
+    border: 2px solid var(--fino-line);
+    background-color: var(--fino-surface);
+}
+
+/* Кнопка-клавиша: при наведении приподнимается, при нажатии «вдавливается» в тень */
+@utility btn-key {
+    border: 2px solid var(--fino-line);
+    box-shadow: 4px 4px 0 var(--fino-shadow);
+    transition: transform 120ms ease-out, box-shadow 120ms ease-out, background-color 200ms, opacity 200ms;
+
+    &:hover:not(:disabled) {
+        transform: translate(-2px, -2px);
+        box-shadow: 6px 6px 0 var(--fino-shadow);
+    }
+
+    &:active:not(:disabled) {
+        transform: translate(4px, 4px);
+        box-shadow: 0 0 0 var(--fino-shadow);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+
+        &:hover:not(:disabled), &:active:not(:disabled) {
+            transform: none;
+        }
+    }
+}
+
+/* Точечная «LED»-сетка фона */
+@utility bg-dots {
+    background-image: radial-gradient(circle, var(--fino-grid) 1.6px, transparent 1.8px);
+    background-size: 12px 12px;
+}
+
+@layer base {
+    body {
+        margin: 0;
+        min-width: 320px;
+        font-family: var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* Заголовки — плотные и крупные, как в макете */
+    h1, h2, h3 {
+        font-family: var(--font-display);
+        letter-spacing: -0.03em;
+    }
+
+    h1 {
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        line-height: 0.95;
+    }
+
+    ::selection {
+        background: var(--fino-lime);
+        color: #111111;
+    }
+
+    :focus-visible {
+        outline-color: var(--fino-violet);
+    }
+}
+
+/* Смена темы: старая картинка «утекает» в кнопку темы (View Transitions API) */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+    z-index: 2;
+}
+
+::view-transition-new(root) {
+    z-index: 1;
+}
+
+/* Поля и окна PrimeVue — с обводкой 2px, как в макете; вне слоёв, чтобы перебить тему PrimeVue */
+.p-inputtext,
+.p-select,
+.p-inputnumber-input,
+.p-textarea,
+.p-multiselect,
+.p-datepicker-input {
+    border-width: 2px;
+}
+
+.p-dialog,
+.p-toast-message {
+    border: 2px solid var(--fino-line) !important;
+    box-shadow: 8px 8px 0 var(--fino-shadow) !important;
+}
+
+.p-drawer {
+    border-left: 2px solid var(--fino-line);
+}

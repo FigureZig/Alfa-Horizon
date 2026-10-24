@@ -257,7 +257,7 @@ watch(() => form.product, applyProductBounds)
         {{ t('application.back') }}
       </RouterLink>
 
-      <h1 class="mt-3 text-2xl font-bold tracking-tight text-fino-text sm:text-3xl">
+      <h1 class="mt-3 text-3xl font-black text-fino-text sm:text-5xl">
         {{ t('application.new.title') }}
       </h1>
 
@@ -267,7 +267,7 @@ watch(() => form.product, applyProductBounds)
     </div>
 
     <div class="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
-      <div class="min-w-0 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm sm:p-6">
+      <div class="min-w-0 card-key p-5 sm:p-6">
         <AppErrorState
           v-if="catalogError"
           :message="t('application.new.catalogError')"
@@ -304,7 +304,7 @@ watch(() => form.product, applyProductBounds)
           <!-- Сумма варианта меньше желаемой — говорим прямо и даём подать на всю -->
           <div
             v-if="isWantedNoticeVisible"
-            class="flex flex-col gap-3 rounded-2xl bg-amber-500/10 p-4 text-sm text-fino-text"
+            class="flex flex-col gap-3 rounded-2xl bg-fino-amber-soft p-4 text-sm text-fino-text"
             role="status"
           >
             <p class="leading-relaxed">
@@ -313,9 +313,9 @@ watch(() => form.product, applyProductBounds)
 
             <button
               type="button"
-              class="inline-flex min-h-10 w-fit cursor-pointer items-center gap-2 rounded-xl border border-fino-border
-                     bg-fino-surface px-4 text-sm font-semibold text-fino-text transition-colors hover:bg-fino-surface-hover
-                     disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
+              class="inline-flex min-h-10 w-fit cursor-pointer items-center gap-2 rounded-xl bg-fino-surface px-4 text-sm
+                     font-semibold text-fino-text hover:bg-fino-surface-hover disabled:cursor-not-allowed
+                     disabled:opacity-60 btn-key"
               :disabled="isSubmitting"
               @click="applyWantedAmount"
             >
@@ -413,11 +413,10 @@ watch(() => form.product, applyProductBounds)
           <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <button
               type="button"
-              class="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-xl border
-                     border-fino-border bg-fino-surface px-5 py-3 text-sm font-semibold text-fino-text
-                     transition-colors duration-200 hover:bg-fino-surface-hover
-                     disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none
-                     focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              class="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-xl bg-fino-surface px-5 py-3 text-sm
+                     font-semibold text-fino-text hover:bg-fino-surface-hover disabled:cursor-not-allowed
+                     disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
+                     btn-key"
               :disabled="isSubmitting"
               @click="handleCancel"
             >
@@ -426,11 +425,9 @@ watch(() => form.product, applyProductBounds)
 
             <button
               type="submit"
-              class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl
-                     bg-primary px-5 py-3 text-sm font-semibold text-primary-contrast
-                     transition-all duration-200 hover:opacity-90 active:scale-95
-                     disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none
-                     focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm
+                     font-semibold text-primary-contrast disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2
+                     focus-visible:outline-offset-2 focus-visible:outline-primary btn-key"
               :disabled="isSubmitting || isCatalogLoading"
               :aria-busy="isSubmitting"
             >
@@ -447,7 +444,7 @@ watch(() => form.product, applyProductBounds)
 
       <!-- Данные компании и продукта подставляются автоматически -->
       <aside class="flex min-w-0 flex-col gap-4">
-        <article class="rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
+        <article class="card-key p-5">
           <h2 class="text-sm font-semibold text-fino-text">
             {{ t('application.new.company') }}
           </h2>
@@ -463,7 +460,7 @@ watch(() => form.product, applyProductBounds)
 
         <article
           v-if="selectedProduct"
-          class="rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm"
+          class="card-key p-5"
         >
           <h2 class="text-sm font-semibold text-fino-text">
             {{ selectedProduct.name }}

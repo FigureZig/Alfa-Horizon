@@ -12,9 +12,9 @@ import type { Nullable } from '@/app/types/nullable'
 const TONE_CLASSES: Record<ApplicationStatusToneEnum, string> = {
   [ApplicationStatusToneEnum.Neutral]: 'bg-fino-surface-secondary text-fino-text-muted',
   [ApplicationStatusToneEnum.Busy]: 'bg-fino-surface-secondary text-fino-text-muted',
-  [ApplicationStatusToneEnum.Action]: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
-  [ApplicationStatusToneEnum.Success]: 'bg-green-500/10 text-green-700 dark:text-green-400',
-  [ApplicationStatusToneEnum.Danger]: 'bg-red-500/10 text-red-700 dark:text-red-400',
+  [ApplicationStatusToneEnum.Action]: 'border-2 border-fino-line bg-fino-amber text-[#111]',
+  [ApplicationStatusToneEnum.Success]: 'border-2 border-fino-line bg-fino-lime text-[#111]',
+  [ApplicationStatusToneEnum.Danger]: 'border-2 border-fino-line bg-primary text-primary-contrast',
 }
 
 const props = defineProps<{
@@ -54,7 +54,7 @@ const applicationsRoute = computed(() => ({ name: 'applications', params: { inn:
 
 <template>
   <article
-    class="flex min-w-0 flex-col gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm"
+    class="flex min-w-0 flex-col gap-4 card-key p-5"
     :aria-label="t('dashboardOffers.applicationLabel')"
   >
     <h2 class="text-sm font-semibold text-fino-text">
@@ -105,10 +105,9 @@ const applicationsRoute = computed(() => ({ name: 'applications', params: { inn:
       <div class="mt-auto flex flex-col gap-2">
         <RouterLink
           :to="applicationRoute"
-          class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm
-                 font-semibold text-primary-contrast transition-all duration-200 hover:opacity-90 active:scale-95
-                 motion-reduce:transition-none
-                 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold
+                 text-primary-contrast focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
+                 btn-key"
         >
           {{ t('dashboardOffers.openApplication') }}
           <i

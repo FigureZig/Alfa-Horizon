@@ -81,9 +81,9 @@ function handleRetry() {
 
 <template>
   <article
-    class="flex min-w-0 flex-col gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm"
+    class="flex min-w-0 flex-col gap-4 card-key bg-fino-lime-soft p-5"
   >
-    <h2 class="text-sm font-semibold text-fino-text">
+    <h2 class="font-mono text-xs font-bold uppercase tracking-wider text-fino-text">
       {{ t('dashboardOffers.title') }}
     </h2>
 
@@ -103,7 +103,7 @@ function handleRetry() {
     >
       <div class="flex items-start gap-3">
         <span
-          class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-700
+          class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-fino-accent text-red-700
                  dark:text-red-400"
           aria-hidden="true"
         >
@@ -170,14 +170,14 @@ function handleRetry() {
     </div>
 
     <template v-else>
-      <ul class="flex flex-col divide-y divide-fino-border">
+      <ul class="flex flex-col divide-y-2 divide-fino-line/15">
         <li
           v-for="offer in offers"
           :key="offer.product.id"
           class="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
         >
           <div class="min-w-0 flex-1">
-            <p class="break-words text-sm font-semibold text-fino-text">
+            <p class="break-words font-display text-base font-extrabold text-fino-text">
               {{ offer.product.name }}
             </p>
 
@@ -188,10 +188,8 @@ function handleRetry() {
 
           <button
             type="button"
-            class="shrink-0 cursor-pointer rounded-lg border border-fino-border px-3 py-1.5 text-xs font-semibold
-                   text-fino-text transition-colors duration-200 hover:border-primary hover:text-primary
-                   focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
-                   motion-reduce:transition-none"
+            class="shrink-0 cursor-pointer rounded-xl bg-primary px-3.5 py-2 text-xs font-bold text-primary-contrast
+                   btn-key focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             :aria-label="offer.applyLabel"
             @click="handleApply(offer.product)"
           >

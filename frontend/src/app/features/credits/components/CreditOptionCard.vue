@@ -54,8 +54,8 @@ const conditions = computed(() => {
 
 const stateClass = computed(() =>
   props.option.rank === 0
-    ? 'bg-green-500/10 text-green-700 dark:text-green-400'
-    : 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
+    ? 'border-2 border-fino-line bg-fino-lime text-[#111]'
+    : 'border-2 border-fino-line bg-fino-amber text-[#111]',
 )
 
 function handleSelect() {
@@ -69,25 +69,27 @@ function handleToggleCalculator() {
 
 <template>
   <article
-    class="flex min-w-0 flex-col gap-4 rounded-3xl border p-5 shadow-sm transition-shadow duration-500 sm:p-6
+    class="relative flex min-w-0 flex-col gap-4 card-key p-5 transition-shadow duration-500 sm:p-6
            motion-reduce:transition-none"
     :class="[
-      isFeatured ? 'border-primary/30 bg-linear-to-br from-fino-accent to-fino-surface' : 'border-fino-border bg-fino-surface',
-      { 'ring-4 ring-primary/20': isHighlighted },
+      isFeatured ? 'bg-fino-lime-soft' : '',
+      { 'ring-4 ring-fino-violet/40': isHighlighted },
     ]"
   >
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div class="min-w-0">
         <h3
-          class="break-words font-bold tracking-tight text-fino-text"
-          :class="isFeatured ? 'text-xl' : 'text-base'"
+          class="break-words font-extrabold text-fino-text"
+          :class="isFeatured ? 'text-2xl' : 'text-lg'"
         >
           {{ option.name }}
         </h3>
 
+        <!-- Рекомендация банка — наклонным стикером, как в макете -->
         <p
           v-if="isFeatured"
-          class="mt-1 inline-flex items-center gap-1.5 text-xs font-semibold text-primary"
+          class="mt-2 inline-flex -rotate-2 items-center gap-1.5 rounded-xl border-2 border-fino-line bg-fino-lime px-3
+                 py-1 font-display text-sm font-black text-[#111] shadow-[3px_3px_0_var(--fino-shadow)]"
         >
           <i
             class="pi pi-star-fill text-xs"
@@ -98,7 +100,7 @@ function handleToggleCalculator() {
       </div>
 
       <span
-        class="shrink-0 rounded-full px-3 py-1 text-xs font-semibold"
+        class="shrink-0 rounded-full px-3 py-1 font-mono text-xs font-bold"
         :class="stateClass"
       >
         {{ t(`credits.options.state.${option.label}`) }}
@@ -107,8 +109,8 @@ function handleToggleCalculator() {
 
     <div>
       <p
-        class="break-words font-bold tracking-tight text-fino-text"
-        :class="isFeatured ? 'text-3xl sm:text-4xl' : 'text-2xl'"
+        class="break-words font-display font-black tracking-tight text-fino-text tabular-nums"
+        :class="isFeatured ? 'text-4xl sm:text-5xl' : 'text-3xl'"
       >
         {{ amountText }}
       </p>
@@ -142,9 +144,8 @@ function handleToggleCalculator() {
       <button
         type="button"
         class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm
-               font-semibold text-primary-contrast transition-all duration-200 hover:opacity-90 active:scale-95
-               focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
-               motion-reduce:transition-none"
+               font-semibold text-primary-contrast focus-visible:outline-2 focus-visible:outline-offset-2
+               focus-visible:outline-primary btn-key"
         :aria-label="t('credits.options.selectLabel', { name: option.name })"
         @click="handleSelect"
       >

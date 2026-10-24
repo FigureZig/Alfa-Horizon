@@ -7,10 +7,10 @@ import { BankDecidedByEnum } from '@/app/types/bank/bank-decided-by-enum'
 import type { BankApplicationInterface } from '@/app/types/bank/bank-application-interface'
 
 const RISK_TONES: Record<string, string> = {
-  A: 'bg-green-500/10 text-green-700 dark:text-green-400',
-  B: 'bg-green-500/10 text-green-700 dark:text-green-400',
-  C: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
-  D: 'bg-red-500/10 text-red-700 dark:text-red-400',
+  A: 'border-2 border-fino-line bg-fino-lime text-[#111]',
+  B: 'border-2 border-fino-line bg-fino-lime text-[#111]',
+  C: 'border-2 border-fino-line bg-fino-amber text-[#111]',
+  D: 'border-2 border-fino-line bg-primary text-primary-contrast',
 }
 
 defineProps<{
@@ -51,7 +51,7 @@ function isDecidedByBank(decidedBy: BankDecidedByEnum | null) {
   <div>
     <!-- Десктоп: таблица -->
     <!-- Таблица — с xl: на lg рядом сайдбар и колонки не помещаются; прокрутка внутри — страховка от обрезки -->
-    <div class="hidden overflow-x-auto rounded-3xl border border-fino-border bg-fino-surface shadow-sm xl:block">
+    <div class="hidden overflow-x-auto card-key xl:block">
       <table class="w-full border-collapse text-left text-sm">
         <thead class="bg-fino-surface-secondary text-xs font-semibold uppercase tracking-wide text-fino-text-muted">
           <tr>

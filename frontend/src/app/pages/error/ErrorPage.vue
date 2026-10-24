@@ -57,7 +57,7 @@ const errorDescription = computed(() =>
       class="relative z-10 w-full max-w-xl text-center"
     >
       <div
-        class="rounded-3xl border border-fino-border bg-fino-surface px-6 py-12 shadow-sm sm:px-12 sm:py-16"
+        class="card-key px-6 py-12 sm:px-12 sm:py-16"
       >
         <!-- Icon -->
         <div
@@ -80,7 +80,7 @@ const errorDescription = computed(() =>
 
         <!-- Text -->
         <h1
-          class="mt-5 text-2xl font-bold tracking-tight text-fino-text sm:text-3xl"
+          class="mt-5 text-3xl font-black text-fino-text sm:text-5xl"
         >
           {{ errorTitle }}
         </h1>
@@ -106,7 +106,8 @@ const errorDescription = computed(() =>
 
           <RouterLink
             :to="{ name: 'login' }"
-            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-fino-border bg-fino-surface px-6 text-sm font-semibold text-fino-text transition-colors hover:bg-fino-surface-hover"
+            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-fino-surface px-6 text-sm font-semibold
+          text-fino-text hover:bg-fino-surface-hover btn-key"
           >
             <i
               class="pi pi-sign-in text-primary"

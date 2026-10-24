@@ -127,7 +127,7 @@ const notVotedText = computed(() => {
           {{ company.shortName }}
         </p>
 
-        <h1 class="mt-1 text-2xl font-bold tracking-tight text-fino-text sm:text-3xl">
+        <h1 class="mt-1 text-3xl font-black text-fino-text sm:text-5xl">
           {{ title }} · {{ formatCurrency(application.request.amount, 'RUB') }}
         </h1>
 

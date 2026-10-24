@@ -7,7 +7,7 @@ import Skeleton from 'primevue/skeleton'
     class="flex flex-col gap-4"
     aria-busy="true"
   >
-    <div class="rounded-3xl border border-fino-border bg-fino-surface p-5">
+    <div class="card-key p-5">
       <Skeleton
         width="35%"
         height="0.75rem"
@@ -23,7 +23,7 @@ import Skeleton from 'primevue/skeleton'
       />
     </div>
 
-    <div class="rounded-3xl border border-fino-border bg-fino-surface p-5">
+    <div class="card-key p-5">
       <Skeleton
         width="40%"
         height="1rem"
@@ -39,7 +39,7 @@ import Skeleton from 'primevue/skeleton'
       </div>
     </div>
 
-    <div class="rounded-3xl border border-fino-border bg-fino-surface p-5">
+    <div class="card-key p-5">
       <Skeleton
         width="3rem"
         height="0.75rem"
@@ -55,7 +55,7 @@ import Skeleton from 'primevue/skeleton'
       />
     </div>
 
-    <div class="rounded-3xl border border-fino-border bg-fino-surface p-5">
+    <div class="card-key p-5">
       <Skeleton
         width="60%"
         height="0.875rem"

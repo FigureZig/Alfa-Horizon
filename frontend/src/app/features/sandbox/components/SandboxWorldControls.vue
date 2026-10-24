@@ -272,7 +272,7 @@ watch(() => props.inn, (inn) => {
       <button
         v-if="secondsToDeadline"
         type="button"
-        class="flex cursor-pointer items-center gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3
+        class="flex cursor-pointer items-center gap-3 rounded-2xl border border-amber-500/30 bg-fino-amber-soft px-4 py-3
                text-left transition-colors hover:bg-amber-500/15 disabled:cursor-not-allowed disabled:opacity-50
                motion-reduce:transition-none"
         :disabled="isBusy"
@@ -369,9 +369,8 @@ watch(() => props.inn, (inn) => {
 
       <button
         type="button"
-        class="cursor-pointer rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold
-                 text-primary-contrast transition-opacity hover:opacity-90
-                 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+        class="cursor-pointer rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-contrast
+                 disabled:cursor-not-allowed disabled:opacity-50 btn-key"
         :disabled="isBusy || !isEventReady"
         @click="handleCreateEvent"
       >
@@ -420,9 +419,8 @@ watch(() => props.inn, (inn) => {
 
       <button
         type="button"
-        class="cursor-pointer rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold
-                 text-primary-contrast transition-opacity hover:opacity-90
-                 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+        class="cursor-pointer rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-contrast
+                 disabled:cursor-not-allowed disabled:opacity-50 btn-key"
         :disabled="isBusy || !isFaultReady"
         @click="handleCreateFault"
       >
@@ -538,8 +536,7 @@ watch(() => props.inn, (inn) => {
 
       <button
         type="button"
-        class="cursor-pointer rounded-xl bg-primary px-4 py-2 text-sm font-semibold
-               text-primary-contrast transition-opacity hover:opacity-90 motion-reduce:transition-none"
+        class="cursor-pointer rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-contrast btn-key"
         @click="confirmReset"
       >
         {{ t('sandbox.world.reset.confirm') }}

@@ -3,7 +3,6 @@ import type { ApiResponse } from '@/app/types/api-response'
 import type { ApplicationDto } from '@/app/types/application/application-dto'
 import type { BankApplicationDto } from '@/app/types/bank/bank-application-dto'
 import type { BankApplicationsFilterInterface } from '@/app/types/bank/bank-application-interface'
-import type { BankAuditDto } from '@/app/types/bank/bank-audit-dto'
 import type { BankConfirmDto, BankDecisionDto } from '@/app/types/bank/bank-decision-dto'
 import type { BankDossierDto } from '@/app/types/bank/bank-dossier-dto'
 import type { BankMetricsDto } from '@/app/types/bank/bank-metrics-dto'
@@ -34,11 +33,6 @@ export const bankService = {
 
   async fetchMetrics($fetch: AxiosInstance) {
     return await $fetch.get<ApiResponse<BankMetricsDto>>(`${ROUTE_PREFIX_BANK}/metrics`)
-  },
-
-  // Пересчитывает цепочку хэшей журнала аудита с первой записи
-  async fetchAudit($fetch: AxiosInstance) {
-    return await $fetch.get<ApiResponse<BankAuditDto>>(`${ROUTE_PREFIX_BANK}/audit`)
   },
 
   async fetchDossier($fetch: AxiosInstance, applicationId: string) {

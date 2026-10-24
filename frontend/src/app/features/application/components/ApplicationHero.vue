@@ -8,12 +8,13 @@ import type { ApplicationStatusViewInterface } from '@/app/types/application/app
 import type { Nullable } from '@/app/types/nullable'
 
 // Цвет несёт смысл: янтарный — нужно действие, зелёный — готово, красный — отказ, остальное нейтрально
+// Тон статуса — акцентами макета: ждём действия — янтарь, успех — лайм, отказ — красный
 const TONE_CLASSES: Record<ApplicationStatusToneEnum, string> = {
-  [ApplicationStatusToneEnum.Neutral]: 'bg-fino-surface-secondary text-fino-text-muted',
-  [ApplicationStatusToneEnum.Busy]: 'bg-fino-surface-secondary text-fino-text-muted',
-  [ApplicationStatusToneEnum.Action]: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
-  [ApplicationStatusToneEnum.Success]: 'bg-green-500/10 text-green-700 dark:text-green-400',
-  [ApplicationStatusToneEnum.Danger]: 'bg-red-500/10 text-red-700 dark:text-red-400',
+  [ApplicationStatusToneEnum.Neutral]: 'bg-fino-surface text-fino-text',
+  [ApplicationStatusToneEnum.Busy]: 'bg-fino-blue-soft text-fino-blue',
+  [ApplicationStatusToneEnum.Action]: 'bg-fino-amber text-[#111]',
+  [ApplicationStatusToneEnum.Success]: 'bg-fino-lime text-[#111]',
+  [ApplicationStatusToneEnum.Danger]: 'bg-primary text-primary-contrast',
 }
 
 const props = defineProps<{
@@ -40,7 +41,7 @@ const isPrimaryPending = computed(() =>
 
 const deadlineClass = computed(() =>
   props.view.isDeadlineUrgent
-    ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
+    ? 'border-2 border-fino-line bg-fino-amber text-[#111]'
     : 'bg-fino-surface-secondary text-fino-text',
 )
 
@@ -59,19 +60,21 @@ function handleWithdraw() {
 
 <template>
   <section
-    class="flex flex-col gap-6 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm sm:p-8"
+    class="flex flex-col gap-6 card-key p-5 sm:p-8"
     :aria-busy="isBusy"
   >
     <div class="flex items-start gap-4 sm:gap-5">
       <span
-        class="flex size-12 shrink-0 items-center justify-center rounded-2xl transition-colors duration-300
-               motion-reduce:transition-none sm:size-14"
+        class="flex size-12 shrink-0 -rotate-6 items-center justify-center rounded-2xl border-2 border-fino-line
+               shadow-[3px_3px_0_var(--fino-shadow)] transition-colors duration-300 motion-reduce:transition-none sm:size-16"
         :class="toneClass"
         aria-hidden="true"
       >
+        <!-- Новый статус — новая иконка «выстреливает» -->
         <i
+          :key="view.icon"
           :class="view.icon"
-          class="text-xl sm:text-2xl motion-reduce:animate-none"
+          class="text-xl motion-safe:animate-tick-pop motion-reduce:animate-none sm:text-3xl"
         />
       </span>
 
@@ -79,7 +82,10 @@ function handleWithdraw() {
         class="min-w-0 flex-1"
         aria-live="polite"
       >
-        <h2 class="break-words text-xl font-bold tracking-tight text-balance text-fino-text sm:text-3xl">
+        <h2
+          :key="view.title"
+          class="break-words text-2xl font-black text-balance text-fino-text motion-safe:animate-fade-up sm:text-4xl"
+        >
           {{ view.title }}
         </h2>
 
@@ -103,7 +109,8 @@ function handleWithdraw() {
 
         <p
           v-if="view.deadline"
-          class="mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold sm:text-sm"
+          class="mt-3 inline-flex items-center gap-2 rounded-full border-2 border-fino-line px-3 py-1 font-mono text-xs
+                 font-bold"
           :class="deadlineClass"
         >
           <i
@@ -121,10 +128,9 @@ function handleWithdraw() {
             <RouterLink
               v-if="view.primary.to"
               :to="view.primary.to"
-              class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm
-                     font-semibold text-primary-contrast transition-all duration-200 hover:opacity-90 active:scale-95
-                     motion-reduce:transition-none
-                     focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold
+                     text-primary-contrast focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
+                     btn-key"
             >
               {{ view.primary.label }}
               <i
@@ -136,10 +142,9 @@ function handleWithdraw() {
             <button
               v-else
               type="button"
-              class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3
-                     text-sm font-semibold text-primary-contrast transition-all duration-200 hover:opacity-90
-                     active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none
-                     focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm
+                     font-semibold text-primary-contrast disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2
+                     focus-visible:outline-offset-2 focus-visible:outline-primary btn-key"
               :disabled="isPending"
               :aria-busy="isPrimaryPending"
               @click="handlePrimaryCommand"
@@ -156,9 +161,8 @@ function handleWithdraw() {
           <RouterLink
             v-if="view.secondary?.to"
             :to="view.secondary.to"
-            class="inline-flex min-h-12 items-center justify-center rounded-xl border border-fino-border px-5 py-3
-                   text-sm font-semibold text-fino-text transition-colors hover:bg-fino-surface-hover
-                   motion-reduce:transition-none"
+            class="inline-flex min-h-12 items-center justify-center rounded-xl bg-fino-surface px-5 py-3 text-sm
+                   font-semibold text-fino-text btn-key"
           >
             {{ view.secondary.label }}
           </RouterLink>

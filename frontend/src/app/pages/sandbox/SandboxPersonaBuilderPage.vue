@@ -653,7 +653,7 @@ onMounted(loadOptions)
           </RouterLink>
 
           <h1
-            class="mt-4 text-3xl font-bold tracking-tight text-fino-text sm:text-4xl"
+            class="mt-4 text-4xl font-black text-fino-text sm:text-6xl"
             :class="{ 'sm:text-center': stage === 'interview' }"
           >
             {{ isEdit ? t('sandbox.builder.editTitle') : t('sandbox.builder.title') }}
@@ -696,8 +696,8 @@ onMounted(loadOptions)
           <div>
             <button
               type="button"
-              class="cursor-pointer rounded-xl border border-fino-border bg-fino-surface px-5 py-3 text-sm font-semibold
-                     text-fino-text transition-colors hover:bg-fino-surface-hover motion-reduce:transition-none"
+              class="cursor-pointer rounded-xl bg-fino-surface px-5 py-3 text-sm font-semibold text-fino-text 
+                     hover:bg-fino-surface-hover btn-key"
               @click="backToForm"
             >
               {{ t('sandbox.builder.ready.edit') }}
@@ -790,7 +790,7 @@ onMounted(loadOptions)
             </li>
           </ol>
 
-          <div class="rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm sm:p-8 lg:p-10">
+          <div class="card-key p-5 sm:p-8 lg:p-10">
             <Transition
               mode="out-in"
               enter-active-class="transition duration-200 ease-out motion-reduce:transition-none"
@@ -811,7 +811,7 @@ onMounted(loadOptions)
                   <h2
                     ref="questionTitle"
                     tabindex="-1"
-                    class="mt-1 text-2xl font-bold tracking-tight text-fino-text outline-none sm:text-3xl"
+                    class="mt-1 text-2xl font-display font-black text-fino-text outline-none sm:text-3xl"
                   >
                     {{ t(`sandbox.builder.interview.${questionKey}`) }}
                   </h2>
@@ -1008,10 +1008,9 @@ onMounted(loadOptions)
               <button
                 v-if="questionKey === 'team'"
                 type="button"
-                class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3
-                       text-sm font-semibold text-primary-contrast transition-all duration-200 hover:opacity-90
-                       active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none
-                       focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm
+                       font-semibold text-primary-contrast disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2
+                       focus-visible:outline-offset-2 focus-visible:outline-primary btn-key"
                 :disabled="!selectedTeam"
                 @click="showResult"
               >
@@ -1025,10 +1024,9 @@ onMounted(loadOptions)
               <button
                 v-else-if="isQuestionAnswered"
                 type="button"
-                class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border
-                       border-fino-border bg-fino-surface px-6 py-3 text-sm font-semibold text-fino-text transition-colors
-                       duration-200 hover:bg-fino-surface-hover motion-reduce:transition-none
-                       focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl bg-fino-surface px-6 py-3
+                       text-sm font-semibold text-fino-text hover:bg-fino-surface-hover focus-visible:outline-2
+                       focus-visible:outline-offset-2 focus-visible:outline-primary btn-key"
                 @click="goForward"
               >
                 {{ t('sandbox.builder.interview.next') }}
@@ -1400,10 +1398,9 @@ onMounted(loadOptions)
             <div class="mt-2 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end lg:flex-col-reverse xl:flex-row">
               <button
                 type="button"
-                class="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-xl border border-fino-border
-                       bg-fino-surface px-5 py-3 text-sm font-semibold text-fino-text transition-colors duration-200
-                       hover:bg-fino-surface-hover disabled:cursor-not-allowed disabled:opacity-60
-                       motion-reduce:transition-none"
+                class="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-xl bg-fino-surface px-5 py-3 text-sm
+                       font-semibold text-fino-text hover:bg-fino-surface-hover disabled:cursor-not-allowed
+                       disabled:opacity-60 btn-key"
                 :disabled="isBusy"
                 @click="cancelBuilding"
               >
@@ -1412,9 +1409,8 @@ onMounted(loadOptions)
 
               <button
                 type="submit"
-                class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3
-                       text-sm font-semibold text-primary-contrast transition-all duration-200 hover:opacity-90
-                       active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
+                class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm
+                       font-semibold text-primary-contrast disabled:cursor-not-allowed disabled:opacity-60 btn-key"
                 :disabled="isBusy"
               >
                 {{ submitLabel }}

@@ -27,7 +27,7 @@ import Skeleton from 'primevue/skeleton'
     </div>
 
     <div class="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
-      <div class="flex flex-col gap-5 rounded-3xl border border-fino-border bg-fino-surface p-5 sm:p-6">
+      <div class="flex flex-col gap-5 card-key p-5 sm:p-6">
         <Skeleton height="2rem" />
 
         <Skeleton
@@ -42,7 +42,7 @@ import Skeleton from 'primevue/skeleton'
         />
       </div>
 
-      <div class="flex flex-col gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5">
+      <div class="flex flex-col gap-4 card-key p-5">
         <Skeleton
           v-for="index in 4"
           :key="index"

@@ -55,7 +55,7 @@ defineProps<{
       </div>
     </div>
 
-    <div class="flex flex-col gap-6 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm sm:p-8 lg:p-10">
+    <div class="flex flex-col gap-6 card-key p-5 sm:p-8 lg:p-10">
       <div class="flex flex-col gap-2">
         <Skeleton
           width="6rem"

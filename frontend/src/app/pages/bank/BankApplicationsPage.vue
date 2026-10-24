@@ -36,7 +36,7 @@ const isEmpty = computed(() => !isLoading.value && !error.value && !applications
 <template>
   <div class="flex min-w-0 flex-col gap-6">
     <div class="max-w-2xl">
-      <h1 class="text-2xl font-bold tracking-tight text-fino-text sm:text-3xl">
+      <h1 class="text-3xl font-black text-fino-text sm:text-5xl">
         {{ t('bank.applications.title') }}
       </h1>
 
@@ -102,7 +102,7 @@ const isEmpty = computed(() => !isLoading.value && !error.value && !applications
       v-else-if="isEmpty"
       class="flex flex-col items-center rounded-3xl border border-dashed border-fino-border bg-fino-surface px-6 py-14 text-center"
     >
-      <span class="flex size-14 items-center justify-center rounded-2xl bg-fino-accent text-primary">
+      <span class="flex size-14 items-center justify-center rounded-2xl bg-fino-accent text-primary border-2 border-fino-line">
         <i
           class="pi pi-inbox text-2xl"
           aria-hidden="true"

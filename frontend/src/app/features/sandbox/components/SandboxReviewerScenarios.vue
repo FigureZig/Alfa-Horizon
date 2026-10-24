@@ -39,13 +39,13 @@ const LAW_REFERENCE_PATTERN = /\s*\([^()]*(?:ст\.|ФЗ|ГК|art\.|Art\.)[^()]*
 
 // Ожидаемый статус теми же словами, что увидит пользователь на странице заявки
 const STATUS_TONES: Partial<Record<ApplicationDetailStatusEnum, string>> = {
-  [ApplicationDetailStatusEnum.Issued]: 'bg-green-500/10 text-green-700 dark:text-green-400',
-  [ApplicationDetailStatusEnum.Signed]: 'bg-green-500/10 text-green-700 dark:text-green-400',
-  [ApplicationDetailStatusEnum.Rejected]: 'bg-red-500/10 text-red-700 dark:text-red-400',
-  [ApplicationDetailStatusEnum.Withdrawn]: 'bg-red-500/10 text-red-700 dark:text-red-400',
-  [ApplicationDetailStatusEnum.Offered]: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
-  [ApplicationDetailStatusEnum.Signing]: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
-  [ApplicationDetailStatusEnum.InfoRequested]: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
+  [ApplicationDetailStatusEnum.Issued]: 'border-2 border-fino-line bg-fino-lime text-[#111]',
+  [ApplicationDetailStatusEnum.Signed]: 'border-2 border-fino-line bg-fino-lime text-[#111]',
+  [ApplicationDetailStatusEnum.Rejected]: 'border-2 border-fino-line bg-primary text-primary-contrast',
+  [ApplicationDetailStatusEnum.Withdrawn]: 'border-2 border-fino-line bg-primary text-primary-contrast',
+  [ApplicationDetailStatusEnum.Offered]: 'border-2 border-fino-line bg-fino-amber text-[#111]',
+  [ApplicationDetailStatusEnum.Signing]: 'border-2 border-fino-line bg-fino-amber text-[#111]',
+  [ApplicationDetailStatusEnum.InfoRequested]: 'border-2 border-fino-line bg-fino-amber text-[#111]',
 }
 const NEUTRAL_TONE = 'bg-fino-surface-secondary text-fino-text-muted'
 
@@ -67,7 +67,7 @@ const toast = useToast()
 const $fetch = useApiFetch()
 const { loginAsPersona } = useSession()
 // Открытый сценарий общий с панелью: экран входа открывает её сразу на нужном
-const { openScenarioId } = useReviewerPanel()
+const { openScenarioId, activeScenario, doneStepNumber, markStepDone } = useReviewerPanel()
 
 const scenarios = ref<SandboxScenarioInterface[]>([])
 const isLoading = ref(false)
@@ -130,6 +130,19 @@ function isForbiddenStep(step: SandboxScenarioStepInterface) {
 
 function isEventStep(step: SandboxScenarioStepInterface) {
   return step.action === ACTION_EVENT && Boolean(step.request.body)
+}
+
+// Следующий шаг сценария, который сейчас проходят: подсвечиваем, чтобы не искать глазами
+function isNextStep(scenario: SandboxScenarioInterface, step: SandboxScenarioStepInterface) {
+  if (activeScenario.value?.id !== scenario.id) return false
+
+  return step.number === scenario.steps.find((item) => item.number > doneStepNumber.value)?.number
+}
+
+function getStepClass(scenario: SandboxScenarioInterface, step: SandboxScenarioStepInterface) {
+  if (isNextStep(scenario, step)) return 'border-fino-line bg-fino-lime-soft shadow-[3px_3px_0_var(--fino-shadow)]'
+
+  return isStatusMatched(step) ? 'border-green-500/40' : 'border-fino-border'
 }
 
 // Статус заявки на экране совпал с ожидаемым после шага: ставим галочку
@@ -229,6 +242,7 @@ async function loginAtStep(scenario: SandboxScenarioInterface, step: SandboxScen
       life: 3000,
     })
 
+    markStepDone(scenario, step.number)
     emit('navigated')
   } catch (err: unknown) {
     console.error('Reviewer scenario login failed:', err)
@@ -239,13 +253,14 @@ async function loginAtStep(scenario: SandboxScenarioInterface, step: SandboxScen
   }
 }
 
-async function applyEventAtStep(step: SandboxScenarioStepInterface) {
+async function applyEventAtStep(scenario: SandboxScenarioInterface, step: SandboxScenarioStepInterface) {
   if (!step.request.body || isBusy.value) return
 
   busyStepNumber.value = step.number
 
   try {
     await sandboxService.createEvent($fetch, step.request.body as unknown as SandboxEventCreateDto)
+    markStepDone(scenario, step.number)
 
     toast.add({ severity: 'success', summary: t('toast.success'), detail: t('sandbox.scenarios.eventApplied'), life: 4000 })
   } catch (err: unknown) {
@@ -381,8 +396,8 @@ watch([openScenarioId, scenarios], scrollToOpenScenario)
             <li
               v-for="step in card.scenario.steps"
               :key="step.number"
-              class="flex gap-3 rounded-xl border p-3"
-              :class="isStatusMatched(step) ? 'border-green-500/40' : 'border-fino-border'"
+              class="flex gap-3 rounded-xl border-2 p-3"
+              :class="getStepClass(card.scenario, step)"
             >
               <span
                 class="flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
@@ -414,7 +429,7 @@ watch([openScenarioId, scenarios], scrollToOpenScenario)
                 <div class="flex flex-wrap items-center gap-2">
                   <span
                     v-if="isForbiddenStep(step)"
-                    class="rounded-lg bg-red-500/10 px-2 py-0.5 text-xs font-semibold text-red-700 dark:text-red-400"
+                    class="rounded-lg bg-fino-accent px-2 py-0.5 text-xs font-semibold text-red-700 dark:text-red-400"
                   >
                     {{ t('sandbox.scenarios.expectedForbidden') }}
                   </span>
@@ -435,8 +450,7 @@ watch([openScenarioId, scenarios], scrollToOpenScenario)
                     v-if="step.user"
                     type="button"
                     class="cursor-pointer rounded-xl bg-primary px-3.5 py-2 text-xs font-semibold text-primary-contrast
-                           transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50
-                           motion-reduce:transition-none"
+                           disabled:cursor-not-allowed disabled:opacity-50 btn-key"
                     :disabled="isBusy"
                     @click="loginAtStep(card.scenario, step)"
                   >
@@ -450,7 +464,7 @@ watch([openScenarioId, scenarios], scrollToOpenScenario)
                            text-fino-text transition-colors hover:bg-fino-surface-hover disabled:cursor-not-allowed
                            disabled:opacity-50 motion-reduce:transition-none"
                     :disabled="isBusy"
-                    @click="applyEventAtStep(step)"
+                    @click="applyEventAtStep(card.scenario, step)"
                   >
                     {{ t('sandbox.scenarios.applyEvent') }}
                   </button>
@@ -484,8 +498,7 @@ watch([openScenarioId, scenarios], scrollToOpenScenario)
 
         <button
           type="button"
-          class="cursor-pointer rounded-xl bg-primary px-4 py-2 text-sm font-semibold
-                 text-primary-contrast transition-opacity hover:opacity-90 motion-reduce:transition-none"
+          class="cursor-pointer rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-contrast btn-key"
           @click="confirmReset"
         >
           {{ t('sandbox.world.reset.confirm') }}

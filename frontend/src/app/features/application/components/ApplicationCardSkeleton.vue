@@ -3,7 +3,7 @@ import Skeleton from 'primevue/skeleton'
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5">
+  <div class="flex flex-col gap-4 card-key p-5">
     <div class="flex items-start justify-between gap-3">
       <Skeleton
         width="55%"

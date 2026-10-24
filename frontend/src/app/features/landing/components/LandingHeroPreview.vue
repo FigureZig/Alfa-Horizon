@@ -19,7 +19,7 @@ const { t } = useI18n({ useScope: 'global' })
 
     <!-- Прогноз остатка -->
     <div
-      class="relative rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-lg sm:p-6"
+      class="relative card-key p-5 sm:p-6"
       aria-hidden="true"
     >
       <div class="flex items-center justify-between gap-3">
@@ -33,7 +33,7 @@ const { t } = useI18n({ useScope: 'global' })
         </span>
       </div>
 
-      <p class="mt-4 text-xl font-bold tracking-tight text-fino-text sm:text-2xl">
+      <p class="mt-4 text-xl font-display font-black text-fino-text sm:text-2xl">
         {{ t('landing.preview.gap') }}
       </p>
 
@@ -94,8 +94,8 @@ const { t } = useI18n({ useScope: 'global' })
       <button
         type="button"
         tabindex="-1"
-        class="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary
-               px-4 text-sm font-semibold text-primary-contrast"
+        class="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold
+               text-primary-contrast btn-key"
       >
         {{ t('landing.preview.closeGap') }}
         <i class="pi pi-arrow-right text-xs" />
@@ -108,7 +108,7 @@ const { t } = useI18n({ useScope: 'global' })
              bg-fino-surface p-4 shadow-lg motion-safe:animate-fade-up sm:ml-12 sm:p-5"
       aria-hidden="true"
     >
-      <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-fino-accent text-primary">
+      <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-fino-accent text-primary border-2 border-fino-line">
         <i class="pi pi-wallet" />
       </span>
 

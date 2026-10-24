@@ -102,7 +102,7 @@ function handleRetry() {
 
 <template>
   <article
-    class="flex min-w-0 flex-col gap-5 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm"
+    class="flex min-w-0 flex-col gap-5 card-key p-5"
     :aria-label="t('bank.facts.title')"
   >
     <h2 class="text-sm font-semibold text-fino-text">

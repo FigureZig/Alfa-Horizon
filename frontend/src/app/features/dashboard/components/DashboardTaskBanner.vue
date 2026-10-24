@@ -114,7 +114,7 @@ function toggleOthers() {
 <template>
   <section
     v-if="mainTask"
-    class="animate-fade-up rounded-3xl border border-amber-500/30 bg-amber-500/10 p-4 motion-reduce:animate-none sm:p-5"
+    class="animate-fade-up rounded-3xl border border-amber-500/30 bg-fino-amber-soft p-4 motion-reduce:animate-none sm:p-5"
     :aria-label="t('dashboardTasks.label')"
   >
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -147,9 +147,8 @@ function toggleOthers() {
         v-if="mainTask.to"
         :to="mainTask.to"
         class="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm
-               font-semibold text-primary-contrast transition-all duration-200 hover:opacity-90 active:scale-95
-               motion-reduce:transition-none
-               focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+               font-semibold text-primary-contrast focus-visible:outline-2 focus-visible:outline-offset-2
+               focus-visible:outline-primary btn-key"
       >
         {{ t('dashboardTasks.open') }}
         <i

@@ -10,6 +10,7 @@ import TabPanels from 'primevue/tabpanels'
 import Tabs from 'primevue/tabs'
 import SandboxReviewerGuide from './SandboxReviewerGuide.vue'
 import SandboxReviewerScenarios from './SandboxReviewerScenarios.vue'
+import SandboxScenarioTracker from './SandboxScenarioTracker.vue'
 import SandboxWorldControls from './SandboxWorldControls.vue'
 import { useApiFetch } from '@/app/composables/useApiFetch'
 import { useReviewerPanel } from '@/app/composables/useReviewerPanel'
@@ -22,7 +23,7 @@ import type { Nullable } from '@/app/types/nullable'
 const { t } = useI18n({ useScope: 'global' })
 const route = useRoute()
 const $fetch = useApiFetch()
-const { isVisible, openScenarioId, openPanel: showPanel, closePanel } = useReviewerPanel()
+const { isVisible, openScenarioId, activeScenario, openPanel: showPanel, closePanel } = useReviewerPanel()
 
 const activeTab = ref('scenarios')
 const applicationStatus = ref<Nullable<ApplicationDetailStatusEnum>>(null)
@@ -49,8 +50,9 @@ const positionClass = computed(() => {
   return inn.value ? 'bottom-24 lg:bottom-6' : 'bottom-4 sm:bottom-6'
 })
 
+// Идёт сценарий — панель открывается сразу на нём
 function openPanel() {
-  showPanel()
+  showPanel(activeScenario.value?.id ?? null)
 }
 
 function handleVisibleChange(visible: boolean) {
@@ -89,21 +91,30 @@ watch(openScenarioId, (scenarioId) => {
 
 <template>
   <div
-    class="fixed right-4 z-40 sm:right-6"
+    class="fixed right-4 z-40 flex flex-col items-end gap-3 sm:right-6"
     :class="positionClass"
   >
+    <!-- Идёт сценарий: что сделать сейчас и кнопка следующего шага -->
+    <Transition
+      enter-active-class="transition duration-300 ease-out motion-reduce:transition-none"
+      enter-from-class="translate-y-4 opacity-0"
+      leave-active-class="transition duration-150 ease-in motion-reduce:transition-none"
+      leave-to-class="opacity-0"
+    >
+      <SandboxScenarioTracker v-if="!isVisible" />
+    </Transition>
+
     <button
       type="button"
-      class="flex h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-full border border-fino-border
-             bg-fino-surface text-sm font-semibold text-fino-text shadow-md transition-all duration-200
-             hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg active:scale-95 focus-visible:outline-2
-             focus-visible:outline-primary motion-reduce:transition-none sm:px-3.5"
+      class="flex h-12 min-w-12 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-fino-violet
+             font-display text-base font-extrabold text-white btn-key focus-visible:outline-2
+             focus-visible:outline-primary sm:px-4"
       :aria-label="t('reviewer.open')"
       :title="t('reviewer.open')"
       @click="openPanel"
     >
       <i
-        class="pi pi-compass text-primary"
+        class="pi pi-compass"
         aria-hidden="true"
       />
 

@@ -31,7 +31,7 @@ const consequence = computed(() => {
 
 <template>
   <section
-    class="flex animate-fade-up items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4
+    class="flex animate-fade-up items-start gap-3 rounded-2xl border border-amber-500/30 bg-fino-amber-soft p-4
            motion-reduce:animate-none sm:p-5"
     role="status"
   >

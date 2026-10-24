@@ -21,15 +21,11 @@ function isItemActive(exact: boolean, isActive: boolean, isExactActive: boolean)
 
 <template>
   <aside
-    class="hidden w-72 shrink-0 self-start rounded-3xl lg:sticky lg:top-28
-           border border-fino-border bg-fino-surface
-           p-4 shadow-sm motion-safe:animate-sidebar-enter
-           lg:block"
+    class="hidden w-72 shrink-0 self-start card-key p-4 lg:sticky lg:top-28 lg:block"
   >
     <div class="mb-4 px-3 pt-2">
       <p
-        class="text-xs font-semibold uppercase tracking-wider
-               text-fino-text-muted"
+        class="font-mono text-xs font-bold uppercase tracking-wider text-fino-text-muted"
       >
         {{ t('nav.menu') }}
       </p>
@@ -45,15 +41,13 @@ function isItemActive(exact: boolean, isActive: boolean, isExactActive: boolean)
       >
         <a
           :href="href"
-          class="group flex items-center gap-3 rounded-2xl
-                 px-4 py-3.5 text-sm font-medium
-                 transition-all duration-200
-                 hover:-translate-x-0.5
+          class="group flex items-center gap-3 rounded-2xl border-2 px-4 py-3 text-[15px] font-semibold
+                 transition-[background-color,box-shadow,transform] duration-200 motion-reduce:transition-none
                  focus-visible:outline-2 focus-visible:outline-primary"
           :class="
             isItemActive(item.exact, isActive, isExactActive)
-              ? 'bg-fino-accent font-semibold text-primary'
-              : 'text-fino-text-muted hover:bg-fino-surface-hover hover:text-fino-text'
+              ? 'border-fino-line bg-primary text-primary-contrast shadow-[4px_4px_0_var(--fino-shadow)]'
+              : 'border-transparent text-fino-text hover:border-fino-line hover:bg-fino-lime-soft'
           "
           :aria-current="isItemActive(item.exact, isActive, isExactActive) ? 'page' : undefined"
           @click="navigate"

@@ -7,7 +7,7 @@ import Skeleton from 'primevue/skeleton'
     class="flex flex-col gap-4"
     aria-busy="true"
   >
-    <div class="rounded-3xl border border-fino-border bg-fino-surface p-6">
+    <div class="card-key p-6">
       <Skeleton
         width="45%"
         height="1.5rem"
@@ -34,7 +34,7 @@ import Skeleton from 'primevue/skeleton'
       <div
         v-for="index in 2"
         :key="index"
-        class="rounded-3xl border border-fino-border bg-fino-surface p-5"
+        class="card-key p-5"
       >
         <Skeleton
           width="55%"

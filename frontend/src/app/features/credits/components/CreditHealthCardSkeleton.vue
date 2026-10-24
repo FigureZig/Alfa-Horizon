@@ -4,44 +4,19 @@ import Skeleton from 'primevue/skeleton'
 
 <template>
   <div
-    class="flex flex-col gap-5"
+    class="flex flex-col items-center gap-3"
     aria-busy="true"
   >
-    <div class="flex items-center gap-4">
-      <Skeleton
-        width="5rem"
-        height="3rem"
-      />
+    <!-- Полукруг спидометра и балл под ним -->
+    <Skeleton
+      width="16rem"
+      height="8rem"
+      border-radius="8rem 8rem 0 0"
+    />
 
-      <div class="flex flex-col gap-2">
-        <Skeleton
-          width="6rem"
-          height="1.5rem"
-          border-radius="0.5rem"
-        />
-
-        <Skeleton
-          width="4rem"
-          height="0.75rem"
-        />
-      </div>
-    </div>
-
-    <div class="grid grid-cols-4 gap-2">
-      <Skeleton
-        v-for="index in 4"
-        :key="index"
-        height="3rem"
-        border-radius="0.75rem"
-      />
-    </div>
-
-    <div class="flex flex-col gap-3">
-      <Skeleton
-        v-for="index in 5"
-        :key="index"
-        height="1.25rem"
-      />
-    </div>
+    <Skeleton
+      width="7rem"
+      height="2.5rem"
+    />
   </div>
 </template>

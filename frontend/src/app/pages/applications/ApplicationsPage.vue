@@ -41,7 +41,7 @@ const groups = computed(() => {
   <div class="flex min-w-0 flex-col gap-6">
     <div class="flex flex-wrap items-start justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold tracking-tight text-fino-text sm:text-3xl">
+        <h1 class="text-3xl font-black text-fino-text sm:text-5xl">
           {{ t('application.title') }}
         </h1>
 
@@ -52,10 +52,9 @@ const groups = computed(() => {
 
       <RouterLink
         :to="{ name: 'application-new', params: { inn } }"
-        class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5
-               text-sm font-semibold text-primary-contrast transition-all duration-200
-               hover:opacity-90 active:scale-95 motion-reduce:transition-none
-               focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold
+               text-primary-contrast focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
+               btn-key"
       >
         <i
           class="pi pi-plus text-xs"
@@ -87,7 +86,7 @@ const groups = computed(() => {
       class="flex flex-col items-center rounded-3xl border border-dashed
              border-fino-border bg-fino-surface px-6 py-12 text-center"
     >
-      <div class="flex size-14 items-center justify-center rounded-2xl bg-fino-accent text-primary">
+      <div class="flex size-14 items-center justify-center rounded-2xl bg-fino-accent text-primary border-2 border-fino-line">
         <i
           class="pi pi-file-edit text-2xl"
           aria-hidden="true"

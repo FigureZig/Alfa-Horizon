@@ -18,8 +18,12 @@ function toggleLocale() {
   document.documentElement.lang = locale.value
 }
 
-function changeTheme() {
-  toggleTheme()
+// Цвета старой темы уходят в центр кнопки
+function changeTheme(event: MouseEvent) {
+  const button = event.currentTarget as HTMLElement
+  const rect = button.getBoundingClientRect()
+
+  toggleTheme({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
 }
 </script>
 
@@ -29,10 +33,7 @@ function changeTheme() {
            motion-safe:animate-header-appear"
   >
     <div
-      class="mx-auto flex h-19 max-w-[1600px] items-center
-             justify-between gap-3 rounded-3xl
-             border border-fino-border bg-fino-surface
-             px-3 shadow-sm sm:px-5"
+      class="mx-auto flex h-19 max-w-[1600px] items-center justify-between gap-3 card-key px-3 sm:px-5"
     >
       <!-- Логотип -->
       <RouterLink
@@ -41,20 +42,19 @@ function changeTheme() {
         :aria-label="t('header.home')"
       >
         <div
-          class="flex size-11 shrink-0 items-center justify-center
-                 rounded-2xl bg-primary text-primary-contrast
-                 transition-transform duration-200
-                 group-hover:scale-105"
+          class="flex size-11 shrink-0 -rotate-3 items-center justify-center rounded-2xl border-2 border-fino-line
+                 bg-primary text-primary-contrast shadow-[3px_3px_0_var(--fino-shadow)] transition-transform
+                 duration-200 group-hover:rotate-0 motion-reduce:transition-none"
         >
-          <span class="text-xl font-bold">F.</span>
+          <span class="font-display text-xl font-black">F.</span>
         </div>
 
         <div class="hidden flex-col sm:flex">
-          <span class="text-xl font-bold tracking-tight text-fino-text">
+          <span class="font-display text-xl font-black tracking-tight text-fino-text">
             fino
           </span>
 
-          <span class="text-[10px] text-fino-text-muted">
+          <span class="font-mono text-[10px] font-semibold uppercase tracking-wider text-fino-text-muted">
             {{ t('header.tagline') }}
           </span>
         </div>
@@ -66,10 +66,9 @@ function changeTheme() {
         <button
           type="button"
           class="flex h-10 cursor-pointer items-center justify-center
-                 gap-2 rounded-xl bg-fino-surface-secondary
-                 px-2.5 text-fino-text transition-all duration-200
-                 hover:-translate-y-0.5 hover:bg-fino-surface-hover
-                 active:scale-95
+                 gap-2 rounded-xl border-2 border-fino-line bg-fino-surface
+                 px-2.5 text-fino-text transition-colors duration-200
+                 hover:bg-fino-lime hover:text-[#111]
                  focus-visible:outline-2 focus-visible:outline-primary
                  sm:px-3"
           :aria-label="t('common.language')"
@@ -89,10 +88,9 @@ function changeTheme() {
         <button
           type="button"
           class="flex size-10 cursor-pointer items-center justify-center
-                 rounded-xl bg-fino-surface-secondary text-fino-text
-                 transition-all duration-200
-                 hover:-translate-y-0.5 hover:bg-fino-surface-hover
-                 active:scale-95
+                 rounded-xl border-2 border-fino-line bg-fino-surface text-fino-text
+                 transition-colors duration-200
+                 hover:bg-fino-lime hover:text-[#111]
                  focus-visible:outline-2 focus-visible:outline-primary"
           :aria-label="
             isDark

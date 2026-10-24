@@ -59,17 +59,17 @@ export const FinoPreset = definePreset(Aura, {
 
                 surface: {
                     0: '#ffffff',
-                    50: '#f3f4f5',
-                    100: '#ebecef',
-                    200: '#dbdee1',
-                    300: '#c4c7cc',
-                    400: '#a1a4ab',
-                    500: '#75757e',
-                    600: '#5c5e66',
-                    700: '#43454c',
-                    800: '#2c2d33',
-                    900: '#212124',
-                    950: '#0e0e10',
+                    50: '#f5f5f5',
+                    100: '#ededed',
+                    200: '#dadada',
+                    300: '#bdbdbd',
+                    400: '#8f8f8f',
+                    500: '#4a4a4a',
+                    600: '#3a3a3a',
+                    700: '#2a2a2a',
+                    800: '#1e1e1e',
+                    900: '#111111',
+                    950: '#0b0b0b',
                 },
 
                 text: {
@@ -79,14 +79,15 @@ export const FinoPreset = definePreset(Aura, {
                     hoverMutedColor: '{surface.600}',
                 },
 
+                // Поля как в макете: белые, с чёрной обводкой; фокус — фиолетовым
                 formField: {
-                    background: '{surface.50}',
-                    filledBackground: '{surface.50}',
-                    filledHoverBackground: '{surface.100}',
+                    background: '{surface.0}',
+                    filledBackground: '{surface.0}',
+                    filledHoverBackground: '{surface.0}',
                     filledFocusBackground: '{surface.0}',
-                    borderColor: '{surface.50}',
-                    hoverBorderColor: '{surface.200}',
-                    focusBorderColor: '{surface.900}',
+                    borderColor: '#111111',
+                    hoverBorderColor: '#111111',
+                    focusBorderColor: '#8B2CF5',
                 },
             },
 
@@ -100,17 +101,17 @@ export const FinoPreset = definePreset(Aura, {
 
                 surface: {
                     0: '#ffffff',
-                    50: '#f3f4f5',
-                    100: '#e1e2e6',
-                    200: '#c6c7cc',
-                    300: '#a1a2a8',
-                    400: '#8d8d93',
-                    500: '#6b6b72',
-                    600: '#47474d',
-                    700: '#333338',
-                    800: '#26262b',
-                    900: '#1c1c20',
-                    950: '#121215',
+                    50: '#f4f4f4',
+                    100: '#e0e0e0',
+                    200: '#c4c4c4',
+                    300: '#b8b8b8',
+                    400: '#8f8f8f',
+                    500: '#6b6b6b',
+                    600: '#4a4a4a',
+                    700: '#2e2e2e',
+                    800: '#222222',
+                    900: '#171717',
+                    950: '#0b0b0b',
                 },
 
                 text: {
@@ -121,13 +122,13 @@ export const FinoPreset = definePreset(Aura, {
                 },
 
                 formField: {
-                    background: '{surface.800}',
-                    filledBackground: '{surface.800}',
-                    filledHoverBackground: '{surface.700}',
-                    filledFocusBackground: '{surface.800}',
-                    borderColor: '{surface.800}',
-                    hoverBorderColor: '{surface.600}',
-                    focusBorderColor: '{surface.0}',
+                    background: '{surface.900}',
+                    filledBackground: '{surface.900}',
+                    filledHoverBackground: '{surface.900}',
+                    filledFocusBackground: '{surface.900}',
+                    borderColor: '#F4F4F4',
+                    hoverBorderColor: '#F4F4F4',
+                    focusBorderColor: '#8B2CF5',
                 },
             },
         },
@@ -140,26 +141,27 @@ export const FinoPreset = definePreset(Aura, {
                 paddingX: '1.25rem',
                 paddingY: '0.75rem',
                 label: {
-                    fontWeight: '500',
+                    fontWeight: '700',
                 },
             },
         },
 
         inputtext: {
             root: {
-                borderRadius: '{border.radius.lg}',
+                borderRadius: '14px',
             },
         },
 
         select: {
             root: {
-                borderRadius: '{border.radius.lg}',
+                borderRadius: '14px',
             },
         },
 
         dialog: {
             root: {
-                borderRadius: '{border.radius.xl}',
+                borderRadius: '24px',
+                borderColor: '{text.color}',
             },
         },
 

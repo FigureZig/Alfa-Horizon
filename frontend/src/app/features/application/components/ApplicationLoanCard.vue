@@ -21,7 +21,7 @@ const disbursedAt = computed(() =>
 <template>
   <section class="flex flex-col gap-5">
     <div>
-      <p class="break-words text-3xl font-bold tracking-tight text-fino-text">
+      <p class="break-words text-3xl font-display font-black text-fino-text">
         {{ amount }}
       </p>
 

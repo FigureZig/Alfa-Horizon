@@ -136,8 +136,7 @@ function handleShowOptions() {
 
 <template>
   <article
-    class="flex min-w-0 flex-col gap-5 rounded-3xl border border-fino-border
-           bg-fino-surface p-5 shadow-sm sm:p-6"
+    class="flex min-w-0 flex-col gap-5 card-key p-5 sm:p-6"
   >
     <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
       <span class="text-sm text-fino-text-muted">
@@ -154,7 +153,7 @@ function handleShowOptions() {
     </div>
 
     <div>
-      <h2 class="flex items-start gap-2 break-words text-xl font-bold tracking-tight text-fino-text sm:text-2xl">
+      <h2 class="flex items-start gap-2 break-words text-xl font-display font-black text-fino-text sm:text-2xl">
         <i
           v-if="hasCashGap"
           class="pi pi-exclamation-circle mt-1 text-lg text-red-600 dark:text-red-400"
@@ -182,10 +181,9 @@ function handleShowOptions() {
         <button
           v-if="offer"
           type="button"
-          class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-5
-                 text-sm font-semibold text-primary-contrast shadow-sm transition-all duration-200 hover:opacity-90
-                 active:scale-95 motion-reduce:transition-none
-                 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm
+                 font-semibold text-primary-contrast focus-visible:outline-2 focus-visible:outline-offset-2
+                 focus-visible:outline-primary btn-key"
           @click="handleCloseGap"
         >
           <i

@@ -31,10 +31,8 @@ const benefits = computed(() => props.product.benefits.slice(0, MAX_BENEFITS))
 
 <template>
   <article
-    class="group flex h-full min-w-0 flex-col gap-5 rounded-3xl border border-fino-border
-           bg-fino-surface p-6 shadow-sm transition-all duration-300
-           hover:-translate-y-1 hover:border-primary/40 hover:shadow-md
-           motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+    class="group flex h-full min-w-0 flex-col gap-5 card-key p-6 transition-all duration-300 hover:-translate-y-1
+           hover:border-primary/40 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
   >
     <div class="flex items-start justify-between gap-3">
       <h3 class="min-w-0 break-words text-lg font-bold tracking-tight text-fino-text">
@@ -50,7 +48,7 @@ const benefits = computed(() => props.product.benefits.slice(0, MAX_BENEFITS))
     </div>
 
     <div>
-      <p class="break-words text-2xl font-bold tracking-tight text-fino-text">
+      <p class="break-words text-2xl font-display font-black text-fino-text">
         {{ amountRange }}
       </p>
 

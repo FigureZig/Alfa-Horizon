@@ -43,8 +43,8 @@ const statusLabel = computed(() => {
 })
 
 const statusClass = computed(() => {
-  if (approval.value?.status === ApprovalStatusEnum.Approved) return 'bg-green-500/10 text-green-700 dark:text-green-400'
-  if (approval.value?.status === ApprovalStatusEnum.Rejected) return 'bg-red-500/10 text-red-700 dark:text-red-400'
+  if (approval.value?.status === ApprovalStatusEnum.Approved) return 'border-2 border-fino-line bg-fino-lime text-[#111]'
+  if (approval.value?.status === ApprovalStatusEnum.Rejected) return 'border-2 border-fino-line bg-primary text-primary-contrast'
 
   return myVote.value ? 'bg-fino-surface-secondary text-fino-text-muted' : 'bg-fino-accent text-primary'
 })
@@ -56,9 +56,8 @@ const daysLeft = computed(() => (props.today ? getDaysLeft(props.item.task.dueDa
 <template>
   <RouterLink
     :to="{ name: 'vote', params: { inn, applicationId: item.application.id } }"
-    class="group flex h-full min-w-0 flex-col gap-4 rounded-3xl border border-fino-border bg-fino-surface p-6
-           shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md
-           focus-visible:outline-2 focus-visible:outline-primary motion-reduce:transition-none
+    class="group flex h-full min-w-0 flex-col gap-4 card-key p-6 transition-all duration-300 hover:-translate-y-1
+           hover:border-primary/40 focus-visible:outline-2 focus-visible:outline-primary motion-reduce:transition-none
            motion-reduce:hover:translate-y-0"
   >
     <div class="flex items-start justify-between gap-3">
@@ -75,7 +74,7 @@ const daysLeft = computed(() => (props.today ? getDaysLeft(props.item.task.dueDa
     </div>
 
     <div>
-      <p class="text-3xl font-bold tracking-tight text-fino-text">
+      <p class="text-3xl font-display font-black text-fino-text">
         {{ formatCurrency(item.application.request.amount, 'RUB') }}
       </p>
 

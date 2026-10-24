@@ -289,7 +289,7 @@ watch(() => [form.amount, form.termMonths], emitChange)
             <dt class="text-xs text-fino-text-muted">
               {{ t('credits.calculator.rate') }}
             </dt>
-            <dd class="mt-1 text-3xl font-bold tracking-tight text-primary">
+            <dd class="mt-1 text-3xl font-display font-black text-primary">
               {{ formatPercent(result.rate) }}
             </dd>
             <dd
@@ -304,7 +304,7 @@ watch(() => [form.amount, form.termMonths], emitChange)
             <dt class="text-xs text-fino-text-muted">
               {{ t('credits.calculator.payment') }}
             </dt>
-            <dd class="mt-1 break-words text-2xl font-bold tracking-tight text-fino-text">
+            <dd class="mt-1 break-words text-2xl font-display font-black text-fino-text">
               {{ formatCurrency(result.payment, 'RUB') }}
             </dd>
             <dd class="mt-1 text-xs text-fino-text-muted">
@@ -319,7 +319,7 @@ watch(() => [form.amount, form.termMonths], emitChange)
             <dt class="text-xs text-fino-text-muted">
               {{ t('credits.calculator.usageTitle') }}
             </dt>
-            <dd class="mt-1 break-words text-2xl font-bold tracking-tight text-fino-text">
+            <dd class="mt-1 break-words text-2xl font-display font-black text-fino-text">
               {{ result.usageExample ? formatCurrency(result.usageExample.interest, 'RUB') : '—' }}
             </dd>
             <dd
@@ -337,7 +337,7 @@ watch(() => [form.amount, form.termMonths], emitChange)
             <dt class="text-xs text-fino-text-muted">
               {{ t('credits.calculator.overpayment') }}
             </dt>
-            <dd class="mt-1 break-words text-2xl font-bold tracking-tight text-fino-text">
+            <dd class="mt-1 break-words text-2xl font-display font-black text-fino-text">
               {{ formatCurrency(result.overpayment, 'RUB') }}
             </dd>
             <dd class="mt-1 text-xs text-fino-text-muted">
@@ -368,10 +368,9 @@ watch(() => [form.amount, form.termMonths], emitChange)
         <RouterLink
           v-if="!isEmbedded"
           :to="applyRoute"
-          class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3
-                 text-sm font-semibold text-primary-contrast transition-all duration-200
-                 hover:opacity-90 active:scale-95 motion-reduce:transition-none sm:w-fit
-                 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm
+                 font-semibold text-primary-contrast sm:w-fit focus-visible:outline-2 focus-visible:outline-offset-2
+                 focus-visible:outline-primary btn-key"
         >
           {{ t('credits.calculator.apply') }}
           <i

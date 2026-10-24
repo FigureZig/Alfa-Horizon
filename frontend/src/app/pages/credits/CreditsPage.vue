@@ -192,7 +192,7 @@ watch(() => props.inn, onInnChange)
   <div class="flex min-w-0 flex-col gap-6">
     <div class="flex flex-wrap items-start justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold tracking-tight text-fino-text sm:text-3xl">
+        <h1 class="text-3xl font-black text-fino-text sm:text-5xl">
           {{ t('credits.title') }}
         </h1>
 
@@ -247,7 +247,7 @@ watch(() => props.inn, onInnChange)
           >
             <div class="flex items-start gap-3">
               <span
-                class="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-red-500/10 text-red-700
+                class="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-fino-accent text-red-700
                        dark:text-red-400"
                 aria-hidden="true"
               >
@@ -277,10 +277,9 @@ watch(() => props.inn, onInnChange)
 
             <button
               type="button"
-              class="inline-flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 text-sm
-                     font-semibold text-primary-contrast transition-all duration-200 hover:opacity-90 active:scale-95
-                     disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none
-                     focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              class="inline-flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold
+                     text-primary-contrast disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2
+                     focus-visible:outline-offset-2 focus-visible:outline-primary btn-key"
               :disabled="isOffersLoading"
               @click="loadOffers"
             >
@@ -302,10 +301,9 @@ watch(() => props.inn, onInnChange)
               <button
                 v-if="isBankChoiceVisible"
                 type="button"
-                class="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-xl border border-fino-border
-                       bg-fino-surface px-4 text-sm font-semibold text-fino-text transition-colors duration-200
-                       hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-primary
-                       motion-reduce:transition-none"
+                class="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-xl bg-fino-surface px-4 text-sm font-semibold
+                       text-fino-text hover:border-primary hover:text-primary focus-visible:outline-2
+                       focus-visible:outline-primary btn-key"
                 @click="handleBankChoice"
               >
                 <i
@@ -319,7 +317,7 @@ watch(() => props.inn, onInnChange)
             <!-- Без кредитной истории — одна строка над списком, а не плашка на каждой карточке -->
             <p
               v-if="isPreliminary"
-              class="flex items-start gap-2 rounded-2xl bg-amber-500/10 px-4 py-3 text-sm text-fino-text"
+              class="flex items-start gap-2 rounded-2xl bg-fino-amber-soft px-4 py-3 text-sm text-fino-text"
             >
               <i
                 class="pi pi-info-circle mt-0.5 text-amber-700 dark:text-amber-400"

@@ -248,7 +248,7 @@ async function confirmAction() {
       class="flex flex-col items-center rounded-3xl border border-dashed border-fino-border
              bg-fino-surface px-6 py-12 text-center"
     >
-      <div class="flex size-14 items-center justify-center rounded-2xl bg-fino-accent text-primary">
+      <div class="flex size-14 items-center justify-center rounded-2xl bg-fino-accent text-primary border-2 border-fino-line">
         <i
           class="pi pi-search text-2xl"
           aria-hidden="true"
@@ -288,7 +288,7 @@ async function confirmAction() {
         </RouterLink>
 
         <div class="mt-3 min-w-0">
-          <h1 class="break-words text-2xl font-bold tracking-tight text-fino-text sm:text-3xl">
+          <h1 class="break-words text-3xl font-black text-fino-text sm:text-5xl">
             {{ title }}
           </h1>
 
@@ -327,7 +327,7 @@ async function confirmAction() {
       >
         <div
           v-if="hasMainPanel"
-          class="flex min-w-0 flex-col gap-6 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm sm:p-6"
+          class="flex min-w-0 flex-col gap-6 card-key p-5 sm:p-6"
         >
           <!-- Содержимое шага; кнопки — только те, что вернул бэкенд -->
           <ApplicationOffersPanel
@@ -400,7 +400,7 @@ async function confirmAction() {
             @retry="loadExplanation"
           />
 
-          <div class="rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
+          <div class="card-key p-5">
             <ApplicationTimeline
               :events="events"
               :is-limit="isLimit"
@@ -410,7 +410,7 @@ async function confirmAction() {
 
         <div
           v-else
-          class="min-w-0 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm"
+          class="min-w-0 card-key p-5"
         >
           <ApplicationTimeline
             :events="events"
@@ -450,8 +450,7 @@ async function confirmAction() {
 
           <button
             type="button"
-            class="cursor-pointer rounded-xl bg-primary px-4 py-2 text-sm font-semibold
-                   text-primary-contrast transition-opacity hover:opacity-90 motion-reduce:transition-none"
+            class="cursor-pointer rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-contrast btn-key"
             @click="confirmAction"
           >
             {{ t('application.confirm.confirm') }}

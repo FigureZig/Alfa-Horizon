@@ -61,7 +61,7 @@ function openScenarios() {
   <div class="flex min-w-0 flex-col gap-6">
     <div class="flex flex-wrap items-start justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold tracking-tight text-fino-text sm:text-3xl">
+        <h1 class="text-3xl font-black text-fino-text sm:text-5xl">
           {{ t('bank.queue.title') }}
         </h1>
 
@@ -109,7 +109,7 @@ function openScenarios() {
       class="flex flex-col items-center rounded-3xl border border-dashed border-fino-border
              bg-fino-surface px-6 py-12 text-center"
     >
-      <div class="flex size-14 items-center justify-center rounded-2xl bg-fino-accent text-primary">
+      <div class="flex size-14 items-center justify-center rounded-2xl bg-fino-accent text-primary border-2 border-fino-line">
         <i
           class="pi pi-inbox text-2xl"
           aria-hidden="true"
@@ -131,10 +131,9 @@ function openScenarios() {
       <div class="mt-1 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
         <button
           type="button"
-          class="mt-3 inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-xl border border-fino-border
-                 bg-fino-surface px-3.5 text-sm font-semibold text-fino-text transition-colors
-                 hover:bg-fino-surface-hover focus-visible:outline-2 focus-visible:outline-primary
-                 motion-reduce:transition-none"
+          class="mt-3 inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-xl bg-fino-surface px-3.5 text-sm
+                 font-semibold text-fino-text hover:bg-fino-surface-hover focus-visible:outline-2
+                 focus-visible:outline-primary btn-key"
           @click="openScenarios"
         >
           <i
@@ -189,10 +188,9 @@ function openScenarios() {
 
         <button
           type="button"
-          class="mt-3 inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-xl border border-fino-border
-                 bg-fino-surface px-3.5 text-sm font-semibold text-fino-text transition-colors
-                 hover:bg-fino-surface-hover focus-visible:outline-2 focus-visible:outline-primary
-                 motion-reduce:transition-none"
+          class="mt-3 inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-xl bg-fino-surface px-3.5 text-sm
+                 font-semibold text-fino-text hover:bg-fino-surface-hover focus-visible:outline-2
+                 focus-visible:outline-primary btn-key"
           @click="openScenarios"
         >
           <i

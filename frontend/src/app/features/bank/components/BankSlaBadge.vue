@@ -12,8 +12,8 @@ const CALM_MINUTES = 120
 const URGENT_MINUTES = 60
 
 const NEUTRAL_CLASS = 'bg-fino-surface-secondary text-fino-text-muted'
-const WARNING_CLASS = 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
-const DANGER_CLASS = 'bg-red-500/10 text-red-700 dark:text-red-400'
+const WARNING_CLASS = 'border-2 border-fino-line bg-fino-amber text-[#111]'
+const DANGER_CLASS = 'border-2 border-fino-line bg-primary text-primary-contrast'
 
 const props = defineProps<{
   slaUntil: Nullable<string>

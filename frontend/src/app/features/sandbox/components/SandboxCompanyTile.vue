@@ -7,6 +7,13 @@ import type { Nullable } from '@/app/types/nullable'
 import type { SandboxPersonaInterface } from '@/app/types/sandbox/sandbox-persona-interface'
 
 // Буквы для значка компании: без формы и кавычек — «Вектор-Трейд» → «ВТ»
+// Значок компании — в одном из акцентов макета: плитки различаются с первого взгляда
+const MONOGRAM_COLORS = [
+  'bg-fino-lime text-[#111]',
+  'bg-fino-violet text-white',
+  'bg-fino-blue text-white',
+  'bg-fino-amber text-[#111]',
+]
 const LEGAL_FORM_PATTERN = /^(ООО|АО|ПАО|ИП)\s+/i
 const QUOTES_PATTERN = /[«»"]/g
 
@@ -41,6 +48,15 @@ const monogram = computed(() => {
   return words.slice(0, 2).map((word) => word[0]).join('').toUpperCase()
 })
 
+// Цвет — по ИНН, чтобы у компании он не менялся между заходами
+const monogramClass = computed(() => {
+  if (props.group.isBank) return 'bg-primary text-primary-contrast'
+
+  const seed = [...props.group.key].reduce((sum, char) => sum + char.charCodeAt(0), 0)
+
+  return MONOGRAM_COLORS[seed % MONOGRAM_COLORS.length]
+})
+
 const menuItems = computed(() => [
   { label: t('login.group.edit'), icon: 'pi pi-pencil', command: handleEdit },
   { label: t('login.group.delete'), icon: 'pi pi-trash', command: handleDelete },
@@ -65,15 +81,14 @@ function handleDelete() {
 
 <template>
   <article
-    class="flex h-full min-w-0 flex-col gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm
-           transition-[border-color,box-shadow] duration-300 hover:border-primary/40 hover:shadow-md
-           motion-reduce:transition-none"
+    class="flex h-full min-w-0 flex-col gap-4 card-key p-5"
     :aria-label="title"
   >
     <div class="flex items-start gap-3">
       <span
-        class="flex size-11 shrink-0 items-center justify-center rounded-2xl text-sm font-bold"
-        :class="group.isBank ? 'bg-primary text-primary-contrast' : 'bg-fino-accent text-primary'"
+        class="flex size-11 shrink-0 -rotate-3 items-center justify-center rounded-2xl border-2 border-fino-line
+               font-display text-sm font-black"
+        :class="monogramClass"
         aria-hidden="true"
       >
         <i
@@ -136,11 +151,11 @@ function handleDelete() {
       >
         <button
           type="button"
-          class="group/person flex min-h-12 w-full cursor-pointer items-center gap-3 rounded-xl border px-3 py-2
-                 text-left transition-colors duration-200 hover:border-primary/50 hover:bg-fino-surface-hover
+          class="group/person flex min-h-12 w-full cursor-pointer items-center gap-3 rounded-xl border-2 px-3 py-2
+                 text-left transition-colors duration-200 hover:border-fino-line hover:bg-fino-lime-soft
                  disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none
                  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          :class="persona.id === lastPersonaId ? 'border-primary/50 bg-fino-accent' : 'border-fino-border'"
+          :class="persona.id === lastPersonaId ? 'border-fino-line bg-fino-lime-soft' : 'border-fino-border'"
           :disabled="isBusy"
           :aria-label="t('login.enterAs', { name: persona.fullName })"
           @click="handleLogin(persona)"

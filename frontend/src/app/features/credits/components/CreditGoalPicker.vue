@@ -46,7 +46,7 @@ function handleTermInput(event: InputNumberInputEvent) {
 
 <template>
   <section
-    class="flex flex-col gap-5 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm sm:p-6"
+    class="flex flex-col gap-5 card-key p-5 sm:p-6"
     :aria-label="t('credits.goal.title')"
   >
     <div>

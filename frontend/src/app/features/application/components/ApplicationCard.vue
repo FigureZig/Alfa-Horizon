@@ -44,7 +44,7 @@ const hasAction = computed(() => props.application.availableActions.length > 0)
     </div>
 
     <div>
-      <p class="break-words text-2xl font-bold tracking-tight text-fino-text">
+      <p class="break-words text-2xl font-display font-black text-fino-text">
         {{ amount }}
       </p>
 

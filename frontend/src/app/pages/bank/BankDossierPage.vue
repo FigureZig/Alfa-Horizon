@@ -146,7 +146,7 @@ const backLabel = computed(() => (isFromApplications.value ? t('bank.dossier.bac
       class="flex flex-col items-center rounded-3xl border border-dashed border-fino-border
              bg-fino-surface px-6 py-12 text-center"
     >
-      <div class="flex size-14 items-center justify-center rounded-2xl bg-fino-accent text-primary">
+      <div class="flex size-14 items-center justify-center rounded-2xl bg-fino-accent text-primary border-2 border-fino-line">
         <i
           class="pi pi-search text-2xl"
           aria-hidden="true"
@@ -187,7 +187,7 @@ const backLabel = computed(() => (isFromApplications.value ? t('bank.dossier.bac
 
         <div class="mt-3 flex flex-wrap items-start justify-between gap-3">
           <div class="min-w-0">
-            <h1 class="break-words text-2xl font-bold tracking-tight text-fino-text sm:text-3xl">
+            <h1 class="break-words text-3xl font-black text-fino-text sm:text-5xl">
               {{ companyTitle }}
             </h1>
 
@@ -216,7 +216,7 @@ const backLabel = computed(() => (isFromApplications.value ? t('bank.dossier.bac
       <!-- Решение принято — сразу следующая заявка, без возврата в очередь -->
       <section
         v-if="isNextShown"
-        class="flex animate-fade-up flex-col gap-3 rounded-3xl border border-green-500/30 bg-green-500/10 p-4
+        class="flex animate-fade-up flex-col gap-3 rounded-3xl border border-green-500/30 bg-fino-lime-soft p-4
                motion-reduce:animate-none sm:flex-row sm:items-center sm:justify-between sm:p-5"
         role="status"
       >
@@ -232,9 +232,8 @@ const backLabel = computed(() => (isFromApplications.value ? t('bank.dossier.bac
         <RouterLink
           :to="nextRoute ?? queueRoute"
           class="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm
-                 font-semibold text-primary-contrast transition-all duration-200 hover:opacity-90 active:scale-95
-                 motion-reduce:transition-none
-                 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                 font-semibold text-primary-contrast focus-visible:outline-2 focus-visible:outline-offset-2
+                 focus-visible:outline-primary btn-key"
         >
           {{ nextItem ? t('bank.next.open') : t('bank.next.toQueue') }}
           <i
@@ -248,7 +247,7 @@ const backLabel = computed(() => (isFromApplications.value ? t('bank.dossier.bac
         <div class="flex min-w-0 flex-col gap-6">
           <!-- 1. Почему нужен человек и что просил клиент -->
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <article class="flex min-w-0 flex-col gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
+            <article class="flex min-w-0 flex-col gap-4 card-key p-5">
               <h2 class="text-sm font-semibold text-fino-text">
                 {{ t('bank.dossier.reasons') }}
               </h2>
@@ -280,7 +279,7 @@ const backLabel = computed(() => (isFromApplications.value ? t('bank.dossier.bac
               </ul>
             </article>
 
-            <article class="flex min-w-0 flex-col gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
+            <article class="flex min-w-0 flex-col gap-4 card-key p-5">
               <h2 class="text-sm font-semibold text-fino-text">
                 {{ t('bank.dossier.request') }}
               </h2>
@@ -318,7 +317,7 @@ const backLabel = computed(() => (isFromApplications.value ? t('bank.dossier.bac
 
           <!-- 4. Решение: набор элементов зависит от того, что бэкенд разрешил сотруднику -->
           <section
-            class="flex min-w-0 flex-col gap-5 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm sm:p-6"
+            class="flex min-w-0 flex-col gap-5 card-key p-5 sm:p-6"
             :aria-label="t('bank.decision.title')"
           >
             <BankConfirmPanel
@@ -387,12 +386,13 @@ const backLabel = computed(() => (isFromApplications.value ? t('bank.dossier.bac
             v-if="application.decision"
             :explanation="explanation"
             is-path-hidden
+            is-score-breakdown-visible
             :is-loading="isExplanationLoading"
             :has-error="explanationError"
             @retry="loadExplanation"
           />
 
-          <div class="rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
+          <div class="card-key p-5">
             <ApplicationTimeline
               :events="events"
               :is-limit="application?.loan?.isLimit ?? false"
