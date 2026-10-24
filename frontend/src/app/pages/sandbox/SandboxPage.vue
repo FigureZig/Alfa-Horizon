@@ -193,7 +193,8 @@ watch(locale, loadPersonas)
       <template #profile />
     </AppHeader>
 
-    <main class="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 py-6 sm:gap-8 sm:px-6 sm:py-10">
+    <!-- Снизу место под кнопку «Как проверить»: последнюю плитку она не закрывает -->
+    <main class="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 pt-6 pb-24 sm:gap-8 sm:px-6 sm:pt-10">
       <div class="max-w-2xl motion-safe:animate-fade-up">
         <h1 class="text-3xl font-bold tracking-tight text-fino-text sm:text-4xl">
           {{ t('login.title') }}

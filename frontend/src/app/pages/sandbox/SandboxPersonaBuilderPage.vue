@@ -732,8 +732,9 @@ onMounted(loadOptions)
           />
         </div>
 
+        <!-- Снизу место под полосу предпросмотра и кнопку «Как проверить»: кнопки формы они не закрывают -->
         <form
-          class="flex min-w-0 flex-col gap-3 pb-20 lg:pb-0"
+          class="flex min-w-0 flex-col gap-3 pb-32 lg:pb-16"
           novalidate
           :aria-busy="isSubmitting"
           @submit.prevent="submit"

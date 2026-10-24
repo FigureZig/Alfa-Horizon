@@ -89,11 +89,12 @@ watch([demoPersona, me, () => route.name], redirectByRole, { immediate: true })
       </template>
     </AppHeader>
 
+    <!-- Снизу место под кнопку «Как проверить» (и под нижнее меню на телефоне): конец страницы она не закрывает -->
     <div
       class="mx-auto flex max-w-[1600px] items-start
              gap-6 px-4 pt-6
-             pb-[calc(7rem+env(safe-area-inset-bottom))]
-             sm:px-6 lg:pb-6"
+             pb-[calc(10rem+env(safe-area-inset-bottom))]
+             sm:px-6 lg:pb-24"
     >
       <AppSidebar
         :inn="inn"
