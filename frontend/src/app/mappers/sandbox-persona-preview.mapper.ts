@@ -26,6 +26,7 @@ export class SandboxPersonaPreviewMapper {
       companyName: data.company.name,
       about: data.company.about,
       pathMeans: data.path.means,
+      signMode: data.path.sign_mode ?? null,
       people: data.people.map((person) => ({
         badge: person.badge,
         fullName: person.full_name,

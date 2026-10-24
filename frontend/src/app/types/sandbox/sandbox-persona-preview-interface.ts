@@ -31,6 +31,8 @@ export interface SandboxPersonaPreviewInterface {
   companyName: string
   about: string
   pathMeans: string
+  // Как подписывают договор: self, independent или joint — при совместной подписи доверенность одного не работает
+  signMode: Nullable<string>
   people: SandboxPersonaPreviewPersonInterface[]
   score: number
   riskClass: RiskClassEnum
