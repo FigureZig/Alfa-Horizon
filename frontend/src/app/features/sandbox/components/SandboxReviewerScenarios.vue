@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import type { RouteLocationRaw } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import Dialog from 'primevue/dialog'
 import Skeleton from 'primevue/skeleton'
@@ -13,8 +14,10 @@ import { SandboxScenarioMapper } from '@/app/mappers/sandbox-scenario.mapper'
 import { ApplicationDetailStatusEnum } from '@/app/types/application/application-detail-status-enum'
 import { SandboxPersonaKindEnum } from '@/app/types/sandbox/sandbox-persona-kind-enum'
 import type { AppLocale } from '@/app/i18n'
+import type { CompanyAccessInterface } from '@/app/types/company/company-access-interface'
 import type { Nullable } from '@/app/types/nullable'
 import type { SandboxEventCreateDto } from '@/app/types/sandbox/sandbox-world-dto'
+import type { SandboxPersonaInterface } from '@/app/types/sandbox/sandbox-persona-interface'
 import type {
   SandboxScenarioInterface,
   SandboxScenarioStepInterface,
@@ -48,6 +51,8 @@ const NEUTRAL_TONE = 'bg-fino-surface-secondary text-fino-text-muted'
 const props = defineProps<{
   // Заявка на текущем экране: по её статусу отмечаем шаги, которые уже совпали
   applicationId: Nullable<string>
+  // Компания открытой заявки: к заявке ведём, только если она из этого сценария
+  applicationInn: Nullable<string>
   applicationStatus: Nullable<ApplicationDetailStatusEnum>
 }>()
 
@@ -174,22 +179,53 @@ async function confirmReset() {
   }
 }
 
+// Куда вести после входа: к открытой заявке сценария — в том виде, в каком её видит этот человек
+function getStepRoute(
+  scenario: SandboxScenarioInterface,
+  persona: SandboxPersonaInterface,
+  companies: CompanyAccessInterface[],
+): RouteLocationRaw {
+  const companyInn = scenario.company.inn
+  const applicationId = props.applicationInn === companyInn ? props.applicationId : null
+
+  // Сотрудник банка — в досье этой заявки, без неё — в очередь
+  if (persona.kind === SandboxPersonaKindEnum.Bank) {
+    return applicationId
+      ? { name: 'bank-dossier', params: { inn: persona.inn, applicationId } }
+      : { name: 'bank-queue', params: { inn: persona.inn } }
+  }
+
+  const access = companies.find((company) => company.inn === companyInn)
+
+  // Участник без доступа к счёту видит только голосование
+  if (access && !access.canView && access.canApprove) {
+    return applicationId
+      ? { name: 'vote', params: { inn: companyInn, applicationId } }
+      : { name: 'votes', params: { inn: companyInn } }
+  }
+
+  return applicationId
+    ? { name: 'application', params: { inn: companyInn, applicationId } }
+    : { name: 'applications', params: { inn: companyInn } }
+}
+
 async function loginAtStep(scenario: SandboxScenarioInterface, step: SandboxScenarioStepInterface) {
   if (!step.user || isBusy.value) return
 
   busyStepNumber.value = step.number
 
   try {
-    const persona = await loginAsPersona(step.user.id)
+    const { persona, companies } = await loginAsPersona(step.user.id)
 
-    // Сотрудник банка — в очередь; клиент — к той же заявке, если она открыта, иначе к заявкам компании сценария
-    if (persona.kind === SandboxPersonaKindEnum.Bank) {
-      await router.push({ name: 'bank-queue', params: { inn: persona.inn } })
-    } else if (props.applicationId) {
-      await router.push({ name: 'application', params: { inn: scenario.company.inn, applicationId: props.applicationId } })
-    } else {
-      await router.push({ name: 'applications', params: { inn: scenario.company.inn } })
-    }
+    // Тот же адрес другим человеком — кабинет сам перечитает шапку, права и страницу
+    await router.push(getStepRoute(scenario, persona, companies))
+
+    toast.add({
+      severity: 'success',
+      summary: t('toast.success'),
+      detail: t('sandbox.scenarios.loggedInAs', { name: persona.fullName }),
+      life: 3000,
+    })
 
     emit('navigated')
   } catch (err: unknown) {

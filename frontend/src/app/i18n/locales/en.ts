@@ -1235,6 +1235,7 @@ export default {
             expectedForbidden: 'Expected refusal: this role is not allowed to do this',
             system: 'The bank',
             loginAs: 'Sign in as {name}',
+            loggedInAs: 'You are signed in as {name}',
             applyEvent: 'Apply event',
             eventApplied: 'Event applied. The bank will refresh the company data and review unfinished applications',
             reset: 'Start from a clean world',

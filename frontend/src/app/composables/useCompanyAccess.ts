@@ -12,6 +12,8 @@ const isLoading = ref(false)
 const error = ref(false)
 
 let pendingLoad: Nullable<Promise<void>> = null
+// Для чьего токена идёт запрос: после входа другим человеком начинаем новый, а не ждём прежний
+let pendingToken: Nullable<string> = null
 // Чьи права сейчас в памяти: после входа другим человеком прежние права не показываем
 let loadedToken: Nullable<string> = null
 
@@ -25,9 +27,7 @@ export function useCompanyAccess(inn: MaybeRefOrGetter<string>) {
   const company = computed(() => me.value?.companies.find((item) => item.inn === toValue(inn)) ?? null)
   const isVotesOnly = computed(() => Boolean(company.value && !company.value.canView && company.value.canApprove))
 
-  async function requestAccess() {
-    const token = getSessionToken()
-
+  async function requestAccess(token: Nullable<string>) {
     if (token !== loadedToken) {
       me.value = null
     }
@@ -38,21 +38,36 @@ export function useCompanyAccess(inn: MaybeRefOrGetter<string>) {
     try {
       const { data } = await authService.fetchMe($fetch)
 
+      // Пока шёл запрос, вошли другим человеком: его права придут своим запросом
+      if (token !== getSessionToken()) return
+
       me.value = CompanyAccessMapper.toMe(data.data)
       loadedToken = token
     } catch (err: unknown) {
+      if (token !== getSessionToken()) return
+
       console.error('Company access loading failed:', err)
       error.value = true
     } finally {
-      isLoading.value = false
+      if (token === getSessionToken()) {
+        isLoading.value = false
+      }
     }
   }
 
-  // Одновременные вызовы (layout и обновление по языку) склеиваем в один запрос
+  // Одновременные вызовы одним человеком (layout и обновление по языку) склеиваем в один запрос
   function loadAccess() {
-    pendingLoad ??= requestAccess().finally(() => {
-      pendingLoad = null
-    })
+    const token = getSessionToken()
+
+    if (!pendingLoad || pendingToken !== token) {
+      pendingToken = token
+
+      const request: Promise<void> = requestAccess(token).finally(() => {
+        if (pendingLoad === request) pendingLoad = null
+      })
+
+      pendingLoad = request
+    }
 
     return pendingLoad
   }

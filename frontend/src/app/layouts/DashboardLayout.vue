@@ -7,6 +7,7 @@ import AppSidebar from '@/app/components/layout/AppSidebar.vue'
 import ApplicationPageSkeleton from '@/app/features/application/components/ApplicationPageSkeleton.vue'
 import CompanyMenu from '@/app/features/demo-persona/components/CompanyMenu.vue'
 import DemoPersonaProfile from '@/app/features/demo-persona/components/DemoPersonaProfile.vue'
+import { currentSessionToken } from '@/app/composables/useApiFetch'
 import { useCompanyAccess } from '@/app/composables/useCompanyAccess'
 import { useDemoPersona } from '@/app/composables/useDemoPersona'
 
@@ -70,7 +71,8 @@ function redirectByRole() {
   }
 }
 
-watch([() => props.inn, locale], onDemoPersonaChange, { immediate: true })
+// Вошли другим человеком той же компании — адрес прежний, но шапка, права и страница должны стать его
+watch([() => props.inn, locale, currentSessionToken], onDemoPersonaChange, { immediate: true })
 watch([demoPersona, me, () => route.name], redirectByRole, { immediate: true })
 </script>
 

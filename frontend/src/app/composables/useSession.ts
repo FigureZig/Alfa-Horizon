@@ -37,8 +37,9 @@ export function useSession() {
     return signInWith(() => sandboxService.loginAsPersona($fetch, personaId, locale.value as AppLocale))
   }
 
-  async function loginAsPersona(personaId: string): Promise<SandboxPersonaInterface> {
-    return (await signIn(personaId)).persona
+  // Вход без перехода: кто вошёл и его права — куда вести, решает вызывающий (панель проверяющего)
+  function loginAsPersona(personaId: string): Promise<{ persona: SandboxPersonaInterface, companies: CompanyAccessInterface[] }> {
+    return signIn(personaId)
   }
 
   // Куда вести после входа: решают права из ответа входа, а не роль на глаз
