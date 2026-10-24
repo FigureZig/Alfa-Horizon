@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import type { RouteLocationRaw } from 'vue-router'
 import { useApiFetch } from '@/app/composables/useApiFetch'
-import { useSession } from '@/app/composables/useSession'
+import { readLastPersonaId, useSession } from '@/app/composables/useSession'
 import { sandboxService } from '@/app/services/sandbox/sandbox.service'
 import { ApplicationDetailStatusEnum } from '@/app/types/application/application-detail-status-enum'
 import { SandboxPersonaKindEnum } from '@/app/types/sandbox/sandbox-persona-kind-enum'
@@ -38,19 +38,32 @@ const EVENT_ACTION = 'event'
 const FORBIDDEN_ACTION = 'forbidden'
 
 const STORAGE_KEY = 'fino-scenario-run'
-const FINISHED = Number.POSITIVE_INFINITY
+// По этим статусам видно, что заявка ушла вперёд. «Подана», «Проверяем», «Дозапрос», «У специалиста» повторяются
+// в одном сценарии (до и после голосования), по ним догонять нельзя
+const PROGRESS_STATUSES: ApplicationDetailStatusEnum[] = [
+  ApplicationDetailStatusEnum.Offered,
+  ApplicationDetailStatusEnum.Signing,
+  ApplicationDetailStatusEnum.Signed,
+  ApplicationDetailStatusEnum.Disbursing,
+  ApplicationDetailStatusEnum.Issued,
+  ApplicationDetailStatusEnum.Rejected,
+  ApplicationDetailStatusEnum.Declined,
+  ApplicationDetailStatusEnum.Withdrawn,
+  ApplicationDetailStatusEnum.Expired,
+]
 
 interface StoredRunInterface {
   scenario: SandboxScenarioInterface
-  stepNumber: number
+  doneSteps: number[]
   applicationId: Nullable<string>
 }
 
 function readStored(): Nullable<StoredRunInterface> {
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY)
+    const value = raw ? (JSON.parse(raw) as StoredRunInterface) : null
 
-    return raw ? (JSON.parse(raw) as StoredRunInterface) : null
+    return Array.isArray(value?.doneSteps) ? value : null
   } catch {
     return null
   }
@@ -59,14 +72,16 @@ function readStored(): Nullable<StoredRunInterface> {
 // Прохождение одно на вкладку и переживает перезагрузку страницы
 const stored = readStored()
 const scenario = ref<Nullable<SandboxScenarioInterface>>(stored?.scenario ?? null)
-// Шаг, который нужно сделать сейчас; FINISHED — сценарий пройден
-const stepNumber = ref(stored?.stepNumber === null ? FINISHED : stored?.stepNumber ?? 0)
+// Выполненные шаги: люди могут сделать их не по порядку (Елена проголосовала раньше Алексея)
+const doneSteps = ref<number[]>(stored?.doneSteps ?? [])
 // Заявка сценария: появляется на шаге «создаёт заявку»
 const applicationId = ref<Nullable<string>>(stored?.applicationId ?? null)
 const status = ref<Nullable<ApplicationDetailStatusEnum>>(null)
+// Статус заявки в момент, когда текущий шаг стал текущим: если он сменился — заявка ушла вперёд
+const statusAtStep = ref<Nullable<ApplicationDetailStatusEnum>>(null)
 const isBusy = ref(false)
 
-watch([scenario, stepNumber, applicationId], () => {
+watch([scenario, doneSteps, applicationId], () => {
   try {
     if (!scenario.value) {
       sessionStorage.removeItem(STORAGE_KEY)
@@ -74,46 +89,63 @@ watch([scenario, stepNumber, applicationId], () => {
       return
     }
 
-    // JSON не хранит Infinity: пройденный сценарий сохраняем как null
-    const value = { scenario: scenario.value, stepNumber: Number.isFinite(stepNumber.value) ? stepNumber.value : null,
-      applicationId: applicationId.value }
-
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(value))
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+      scenario: scenario.value,
+      doneSteps: doneSteps.value,
+      applicationId: applicationId.value,
+    }))
   } catch {
     // Хранилище недоступно: прохождение живёт до перезагрузки
   }
-})
+}, { deep: true })
 
 const steps = computed(() => scenario.value?.steps ?? [])
-const currentStep = computed(() => steps.value.find((step) => step.number === stepNumber.value) ?? null)
+// Текущий шаг — первый невыполненный
+const currentStep = computed(() => steps.value.find((step) => !doneSteps.value.includes(step.number)) ?? null)
+const stepNumber = computed(() => currentStep.value?.number ?? Number.POSITIVE_INFINITY)
 const isFinished = computed(() => Boolean(scenario.value) && !currentStep.value)
-const doneCount = computed(() => steps.value.filter((step) => step.number < stepNumber.value).length)
+const doneCount = computed(() => steps.value.filter((step) => doneSteps.value.includes(step.number)).length)
+
+watch(stepNumber, () => {
+  statusAtStep.value = status.value
+})
 
 function isStepDone(step: SandboxScenarioStepInterface): boolean {
-  return step.number < stepNumber.value
+  return doneSteps.value.includes(step.number)
 }
 
 function isStepCurrent(step: SandboxScenarioStepInterface): boolean {
-  return step.number === stepNumber.value
+  return step.number === currentStep.value?.number
 }
 
-function advance() {
-  const next = steps.value.find((step) => step.number > stepNumber.value)
-
-  stepNumber.value = next ? next.number : FINISHED
-  advanceByStatus()
+function markDone(numbers: number[]) {
+  doneSteps.value = [...new Set([...doneSteps.value, ...numbers])].sort((first, second) => first - second)
 }
 
-// Системный шаг закрывается, когда заявка пришла в ожидаемый статус
+/**
+ * Догнать сценарий по статусу заявки.
+ * Системный шаг закрывается, когда статус стал ожидаемым. А если статус сменился с момента, когда текущий шаг
+ * стал текущим, и совпал с ожидаемым у одного из следующих шагов, — заявка ушла вперёд: всё до этого шага сделано
+ * (например, кредит уже выдан, а голос одного из участников мы не увидели).
+ */
 function advanceByStatus() {
-  while (
-    currentStep.value?.action === SYSTEM_ACTION
-    && status.value
-    && currentStep.value.expectedStatus === status.value
-  ) {
-    const next = steps.value.find((step) => step.number > stepNumber.value)
+  for (;;) {
+    const current = currentStep.value
 
-    stepNumber.value = next ? next.number : FINISHED
+    if (!current || !status.value) return
+
+    if (current.action === SYSTEM_ACTION && current.expectedStatus === status.value) {
+      markDone([current.number])
+      continue
+    }
+
+    if (status.value === statusAtStep.value || !PROGRESS_STATUSES.includes(status.value)) return
+
+    const reached = steps.value.find((step) => step.number >= current.number && step.expectedStatus === status.value)
+
+    if (!reached) return
+
+    markDone(steps.value.filter((step) => step.number <= reached.number).map((step) => step.number))
   }
 }
 
@@ -127,34 +159,52 @@ export function useScenarioRun() {
     const isSameRun = scenario.value?.id === value.id
 
     scenario.value = value
-    stepNumber.value = value.steps.find((step) => step.number >= fromStep)?.number ?? FINISHED
+    // Начали с шага N — всё до него считаем сделанным, а то, что после, — нет
+    doneSteps.value = value.steps.filter((step) => step.number < fromStep).map((step) => step.number)
 
     // Сценарий с начала — заявку создадут заново
     if (!isSameRun || fromStep <= 1) {
       applicationId.value = null
       status.value = null
     }
+
+    statusAtStep.value = status.value
   }
 
   function stop() {
     scenario.value = null
-    stepNumber.value = 0
+    doneSteps.value = []
     applicationId.value = null
     status.value = null
+    statusAtStep.value = null
   }
 
-  // Сообщение из кабинета: пользователь сделал действие с заявкой
+  /**
+   * Сообщение из кабинета: человек сделал действие с заявкой. Засчитываем ближайший невыполненный шаг
+   * с этим действием и этим человеком — голос Елены не закроет шаг Алексея.
+   */
   function reportAction(action: string, id: Nullable<string>, newStatus: Nullable<ApplicationDetailStatusEnum> = null) {
     if (!scenario.value || !currentStep.value) return
 
     if (id && (action === 'create' || !applicationId.value)) applicationId.value = id
-    if (newStatus) status.value = newStatus
 
-    if (ACTION_TO_STEP[action] === currentStep.value.action) {
-      advance()
-    } else {
-      advanceByStatus()
+    const personaId = readLastPersonaId()
+    const step = steps.value.find((item) =>
+      !isStepDone(item)
+      && item.number >= (currentStep.value?.number ?? 0)
+      && ACTION_TO_STEP[action] === item.action
+      && (!item.user || item.user.id === personaId),
+    )
+
+    if (step) markDone([step.number])
+
+    if (newStatus) {
+      // Статус после своего же действия — не «заявка ушла вперёд»: догоняем только системные шаги
+      statusAtStep.value = newStatus
+      status.value = newStatus
     }
+
+    advanceByStatus()
   }
 
   function reportStatus(id: string, newStatus: ApplicationDetailStatusEnum) {
@@ -226,7 +276,8 @@ export function useScenarioRun() {
     try {
       await sandboxService.createEvent($fetch, step.request.body as unknown as SandboxEventCreateDto)
 
-      if (isStepCurrent(step)) advance()
+      markDone([step.number])
+      advanceByStatus()
     } finally {
       isBusy.value = false
     }
@@ -234,7 +285,7 @@ export function useScenarioRun() {
 
   // Шаги «пробует — банк не даёт» и любые, которые нельзя заметить автоматически
   function confirmCurrentStep() {
-    if (currentStep.value) advance()
+    if (currentStep.value) markDone([currentStep.value.number])
   }
 
   // Что сделать на текущем шаге — словами, с названием кнопки в кабинете

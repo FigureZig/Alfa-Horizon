@@ -195,7 +195,7 @@ export default {
                 submit: 'Open the application and click “Submit application”.',
                 vote: 'Click the vote button — “for” or “against”, as the step says. The step closes by itself.',
                 accept: 'On the application page pick an offer option and click “Accept”.',
-                sign: 'On the application page click “Sign” and confirm the signature.',
+                sign: 'On the application page click “Review and sign”, then “Sign”.',
                 answer: 'On the application page answer the bank’s request and send the documents.',
                 bank: 'In the application dossier make a decision in the panel on the right.',
                 confirm: 'In the application dossier confirm the decision with the second key.',

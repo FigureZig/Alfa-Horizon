@@ -67,6 +67,8 @@ export function useTheme() {
                 {
                     duration: THEME_TRANSITION_MS,
                     easing: 'cubic-bezier(0.7, 0, 0.2, 1)',
+                    // Без forwards после конца анимации старый снимок на кадр возвращается целиком — вспышка старой темы
+                    fill: 'forwards',
                     pseudoElement: '::view-transition-old(root)',
                 },
             )
