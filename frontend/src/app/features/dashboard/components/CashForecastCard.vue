@@ -138,21 +138,36 @@ function handleShowOptions() {
   <article
     class="flex min-w-0 flex-col gap-5 card-key p-5 sm:p-6"
   >
-    <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-      <span class="text-sm text-fino-text-muted">
-        {{ t('cashForecast.subtitle', forecast.horizonDays) }}
-      </span>
-
-      <span
+    <!-- Остаток на счёте — первое, что ищет человек: крупно и сверху -->
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div
         v-if="balanceNow"
-        class="text-sm text-fino-text-muted"
+        class="flex min-w-0 items-center gap-3"
       >
-        {{ t('cashForecast.balanceNow') }}
-        <span class="font-semibold text-fino-text">{{ balanceNow }}</span>
+        <span
+          class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-fino-accent text-primary"
+          aria-hidden="true"
+        >
+          <i class="pi pi-wallet text-xl" />
+        </span>
+
+        <div class="min-w-0">
+          <p class="text-sm text-fino-text-muted">
+            {{ t('cashForecast.balanceNow') }}
+          </p>
+
+          <p class="break-words text-3xl font-display font-black tracking-tight text-fino-text sm:text-4xl">
+            {{ balanceNow }}
+          </p>
+        </div>
+      </div>
+
+      <span class="rounded-full bg-fino-surface-secondary px-3 py-1 text-xs font-semibold text-fino-text-muted">
+        {{ t('cashForecast.subtitle', forecast.horizonDays) }}
       </span>
     </div>
 
-    <div>
+    <div class="border-t border-fino-border pt-5">
       <h2 class="flex items-start gap-2 break-words text-xl font-display font-black text-fino-text sm:text-2xl">
         <i
           v-if="hasCashGap"
