@@ -6,6 +6,7 @@ import type { Nullable } from '@/app/types/nullable'
 export interface CompanyActivityInterface {
   okvedCode: string
   name: Nullable<string>
+  title: Nullable<string>
 }
 
 export interface CompanyDirectorInterface {

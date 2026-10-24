@@ -7,6 +7,7 @@ import AppSidebar from '@/app/components/layout/AppSidebar.vue'
 import ApplicationPageSkeleton from '@/app/features/application/components/ApplicationPageSkeleton.vue'
 import CompanyMenu from '@/app/features/demo-persona/components/CompanyMenu.vue'
 import DemoPersonaProfile from '@/app/features/demo-persona/components/DemoPersonaProfile.vue'
+import { currentSessionToken } from '@/app/composables/useApiFetch'
 import { useCompanyAccess } from '@/app/composables/useCompanyAccess'
 import { useDemoPersona } from '@/app/composables/useDemoPersona'
 
@@ -17,12 +18,19 @@ const props = defineProps<{
 const BANK_ROUTE_PREFIX = 'bank-'
 const VOTES_ROUTE_NAMES = ['votes', 'vote']
 
-const { locale } = useI18n({ useScope: 'global' })
+const { t, locale } = useI18n({ useScope: 'global' })
 const route = useRoute()
 const router = useRouter()
 const { demoPersona, error: demoPersonaError, loadDemoPersona } = useDemoPersona()
 
-const { me, isVotesOnly, error: accessError, loadAccess } = useCompanyAccess(() => props.inn)
+const { me, company, isVotesOnly, error: accessError, loadAccess } = useCompanyAccess(() => props.inn)
+
+// Подпись под именем в шапке: роль в этой компании, у сотрудника банка — роль в банке
+const roleCaption = computed(() => {
+  if (demoPersona.value?.isBankStaff) return t(`bank.role.${demoPersona.value.role}`)
+
+  return company.value ? t(`demoPersona.role.${company.value.role}`) : t('demoPersona.caption')
+})
 
 // Создатель своей компании (id вида c12) может её менять
 const ownerId = computed(() => (/^c\d+$/.test(demoPersona.value?.userId ?? '') ? demoPersona.value?.userId ?? null : null))
@@ -63,7 +71,8 @@ function redirectByRole() {
   }
 }
 
-watch([() => props.inn, locale], onDemoPersonaChange, { immediate: true })
+// Вошли другим человеком той же компании — адрес прежний, но шапка, права и страница должны стать его
+watch([() => props.inn, locale, currentSessionToken], onDemoPersonaChange, { immediate: true })
 watch([demoPersona, me, () => route.name], redirectByRole, { immediate: true })
 </script>
 
@@ -77,16 +86,17 @@ watch([demoPersona, me, () => route.name], redirectByRole, { immediate: true })
             :companies="me?.companies ?? []"
             :owner-id="ownerId"
           />
-          <DemoPersonaProfile />
+          <DemoPersonaProfile :caption="roleCaption" />
         </div>
       </template>
     </AppHeader>
 
+    <!-- Снизу место под кнопку «Как проверить» (и под нижнее меню на телефоне): конец страницы она не закрывает -->
     <div
       class="mx-auto flex max-w-[1600px] items-start
              gap-6 px-4 pt-6
-             pb-[calc(7rem+env(safe-area-inset-bottom))]
-             sm:px-6 lg:pb-6"
+             pb-[calc(10rem+env(safe-area-inset-bottom))]
+             sm:px-6 lg:pb-24"
     >
       <AppSidebar
         :inn="inn"

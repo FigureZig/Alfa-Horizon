@@ -44,6 +44,7 @@ export function useDashboardSummary(inn: MaybeRefOrGetter<string>, refreshKey?: 
   const cards = computed(() =>
     summaryCards.value.map((card) => ({
       id: card.id,
+      type: card.type,
       title: card.title,
       value: formatCurrency(card.amount, card.currency),
       icon: SUMMARY_CARD_ICONS[card.type] ?? DEFAULT_CARD_ICON,

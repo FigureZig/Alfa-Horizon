@@ -9,9 +9,12 @@ export interface CompanyAccessRightsDto {
 }
 
 export interface CompanyAccessRoleDto {
+  // owner — ИП, eio — директор, poa — доверенность, participant — участник ООО, bank_access — доступ в интернет-банк
   role: string
   // Доля участника ООО, %
   share?: number
+  // Уровень доступа в интернет-банк: owner, prepare, view
+  level?: string
 }
 
 /**

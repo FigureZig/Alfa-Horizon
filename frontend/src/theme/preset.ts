@@ -168,5 +168,20 @@ export const FinoPreset = definePreset(Aura, {
                 borderRadius: '{border.radius.md}',
             },
         },
+
+        // Поля — заливкой без рамки, а флажку и переключателю рамка нужна: серый квадрат на белом не видно
+        checkbox: {
+            colorScheme: {
+                light: { root: { borderColor: '{surface.500}', hoverBorderColor: '{surface.700}' } },
+                dark: { root: { borderColor: '{surface.500}', hoverBorderColor: '{surface.300}' } },
+            },
+        },
+
+        radiobutton: {
+            colorScheme: {
+                light: { root: { borderColor: '{surface.500}', hoverBorderColor: '{surface.700}' } },
+                dark: { root: { borderColor: '{surface.500}', hoverBorderColor: '{surface.300}' } },
+            },
+        },
     },
 })

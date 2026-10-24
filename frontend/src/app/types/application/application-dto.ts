@@ -6,6 +6,7 @@ import type { ApplicationVoteEnum } from '@/app/types/application/application-vo
 import type { ApprovalStatusEnum } from '@/app/types/application/approval-status-enum'
 import type { CreditGoalEnum } from '@/app/types/application/credit-goal-enum'
 import type { CreditProductCodeEnum } from '@/app/types/application/credit-product-code-enum'
+import type { DecisionKindEnum } from '@/app/types/application/decision-kind-enum'
 import type { DecisionOfferKindEnum } from '@/app/types/application/decision-offer-kind-enum'
 import type { DecisionOutcomeEnum } from '@/app/types/application/decision-outcome-enum'
 import type { SigningModeEnum } from '@/app/types/application/signing-mode-enum'
@@ -49,6 +50,8 @@ export interface ApplicationReasonDto {
 
 export interface ApplicationDecisionDto {
   outcome: DecisionOutcomeEnum
+  // Вид отказа; у остальных решений — null
+  kind?: Nullable<DecisionKindEnum>
   offer_kind: Nullable<DecisionOfferKindEnum>
   counter: string[]
   conditions: string[]
@@ -121,6 +124,12 @@ export interface ApplicationDeadlineDto {
  * Заявка целиком: GET v1/applications, GET v1/applications/{id} и ответ каждой команды.
  * `available_actions` — кнопки, которые текущий пользователь может нажать сейчас: права и статус бэкенд уже учёл.
  */
+export interface ApplicationCreatorDto {
+  inn: string
+  name: string
+  persona: Nullable<string>
+}
+
 export interface ApplicationDto {
   id: string
   company_inn: string
@@ -128,6 +137,8 @@ export interface ApplicationDto {
   flags: ApplicationFlagEnum[]
   created_at: string
   updated_at: string
+  // Кто подготовил заявку
+  created_by?: Nullable<ApplicationCreatorDto>
   request: ApplicationRequestDto
   consent_bki: boolean
   decision: Nullable<ApplicationDecisionDto>

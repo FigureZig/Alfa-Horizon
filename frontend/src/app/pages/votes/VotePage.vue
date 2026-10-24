@@ -8,6 +8,7 @@ import { useApplication } from '@/app/composables/useApplication'
 import { useCompanyAccess } from '@/app/composables/useCompanyAccess'
 import { useFormatters } from '@/app/composables/useFormatters'
 import { ApplicationActionEnum } from '@/app/types/application/application-action-enum'
+import { ApplicationVoteEnum } from '@/app/types/application/application-vote-enum'
 import { ApprovalStatusEnum } from '@/app/types/application/approval-status-enum'
 
 const props = defineProps<{
@@ -16,7 +17,7 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
-const { formatCurrency } = useFormatters()
+const { formatCurrency, formatDateTime, formatList, formatPercent, formatShortName } = useFormatters()
 const { me, company } = useCompanyAccess(() => props.inn)
 const { application, isLoading, error, isNotFound, pendingAction, hasAction, loadApplication, vote } =
   useApplication(() => props.applicationId)
@@ -59,6 +60,41 @@ const outcomeClass = computed(() => {
       return 'border-fino-border bg-fino-surface-secondary'
   }
 })
+
+// «Вы за. Нужно ещё 16 %»: сделку согласуют, когда «за» больше порога
+const outcomeText = computed(() => {
+  const current = approval.value
+
+  if (outcome.value === 'approved' || outcome.value === 'rejected') return t(`votes.outcome.${outcome.value}`)
+
+  if (outcome.value === 'waiting') {
+    const deadline = application.value?.deadline
+
+    return deadline
+      ? t('votes.outcome.waiting', { date: formatDateTime(deadline.at, { day: 'numeric', month: 'long' }) })
+      : t('votes.outcome.waitingNoDate')
+  }
+
+  if (myVote.value === ApplicationVoteEnum.Against || !current) return t('votes.outcome.votedAgainst')
+
+  const needed = Math.max(Math.floor(current.thresholdPercent - current.forPercent) + 1, 1)
+
+  return t('votes.outcome.votedFor', { needed: formatPercent(needed) })
+})
+
+// Кто ещё не голосовал — после своего голоса это главное, чего ждать
+const notVotedText = computed(() => {
+  const current = approval.value
+
+  if (outcome.value !== 'voted' || !current) return ''
+
+  const votedInns = current.votes.map((item) => item.inn)
+  const names = current.participants
+    .filter((participant) => !votedInns.includes(participant.inn))
+    .map((participant) => formatShortName(participant.fio))
+
+  return names.length ? t('votes.outcome.notVoted', { names: formatList(names) }) : ''
+})
 </script>
 
 <template>
@@ -86,7 +122,7 @@ const outcomeClass = computed(() => {
       <div>
         <p
           v-if="company"
-          class="text-xs font-semibold uppercase tracking-wide text-fino-text-muted"
+          class="text-sm font-semibold text-fino-text-muted"
         >
           {{ company.shortName }}
         </p>
@@ -103,24 +139,34 @@ const outcomeClass = computed(() => {
         </p>
       </div>
 
-      <!-- Почему спрашивают: одна строка с нормой закона -->
+      <!-- Почему спрашивают — одной строкой; норма закона — во всплывающей «i» -->
       <p
         class="flex items-start gap-3 rounded-2xl border border-fino-border bg-fino-surface p-4 text-sm
                leading-relaxed text-fino-text-muted"
       >
         <i
           class="pi pi-info-circle mt-0.5 shrink-0 text-primary"
-          aria-hidden="true"
+          :title="t('votes.whyLaw')"
+          :aria-label="t('votes.whyLaw')"
         />
         {{ t('votes.why') }}
       </p>
 
       <div
-        class="rounded-2xl border p-4 text-sm font-semibold text-fino-text"
+        class="rounded-2xl border p-4 text-sm text-fino-text"
         :class="outcomeClass"
         role="status"
       >
-        {{ t(`votes.outcome.${outcome}`, { vote: myVote ? t(`application.approval.vote.${myVote}`).toLowerCase() : '' }) }}
+        <p class="font-semibold">
+          {{ outcomeText }}
+        </p>
+
+        <p
+          v-if="notVotedText"
+          class="mt-1 text-fino-text-muted"
+        >
+          {{ notVotedText }}
+        </p>
       </div>
 
       <div class="max-w-2xl">

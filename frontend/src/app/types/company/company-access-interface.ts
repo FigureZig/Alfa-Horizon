@@ -1,3 +1,4 @@
+import type { CompanyRoleEnum } from '@/app/types/company/company-role-enum'
 import type { Nullable } from '@/app/types/nullable'
 
 export interface CompanyAccessInterface {
@@ -6,6 +7,7 @@ export interface CompanyAccessInterface {
   shortName: string
   canView: boolean
   canApprove: boolean
+  role: CompanyRoleEnum
   // Доля участника ООО, %
   share: Nullable<number>
 }

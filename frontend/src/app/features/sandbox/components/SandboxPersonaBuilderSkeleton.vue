@@ -1,38 +1,83 @@
 <script setup lang="ts">
 import Skeleton from 'primevue/skeleton'
+import SandboxPersonaPreviewSkeleton from './SandboxPersonaPreviewSkeleton.vue'
+
+defineProps<{
+  // Правка своей компании открывается сразу результатом: предпросмотр и «Уточнить»
+  isResult: boolean
+}>()
 </script>
 
 <template>
   <div
-    class="flex flex-col gap-8"
+    v-if="isResult"
+    class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_28rem]"
     aria-busy="true"
   >
-    <div
-      v-for="section in 3"
-      :key="section"
-      class="flex flex-col gap-4"
-    >
+    <SandboxPersonaPreviewSkeleton />
+
+    <div class="flex flex-col gap-3">
       <Skeleton
-        width="30%"
-        height="1.25rem"
+        width="40%"
+        height="1.5rem"
       />
 
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div
-          v-for="field in 6"
-          :key="field"
-          class="flex flex-col gap-2"
-        >
-          <Skeleton
-            width="50%"
-            height="0.875rem"
-          />
+      <Skeleton
+        v-for="section in 5"
+        :key="section"
+        height="3.75rem"
+        border-radius="1rem"
+      />
+    </div>
+  </div>
 
-          <Skeleton
-            height="2.5rem"
-            border-radius="0.75rem"
-          />
-        </div>
+  <!-- Интервью: шаги сверху и карточка вопроса с плитками ответов -->
+  <div
+    v-else
+    class="flex flex-col gap-6"
+    aria-busy="true"
+  >
+    <div class="flex items-start">
+      <div
+        v-for="step in 4"
+        :key="step"
+        class="flex flex-1 flex-col items-center gap-1.5"
+      >
+        <Skeleton
+          shape="circle"
+          size="2rem"
+        />
+        <Skeleton
+          width="5rem"
+          height="0.75rem"
+          class="hidden sm:block"
+        />
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-6 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm sm:p-8 lg:p-10">
+      <div class="flex flex-col gap-2">
+        <Skeleton
+          width="6rem"
+          height="0.875rem"
+        />
+        <Skeleton
+          width="45%"
+          height="2rem"
+        />
+        <Skeleton
+          width="70%"
+          height="1rem"
+        />
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <Skeleton
+          v-for="tile in 16"
+          :key="tile"
+          height="4rem"
+          border-radius="1rem"
+        />
       </div>
     </div>
   </div>

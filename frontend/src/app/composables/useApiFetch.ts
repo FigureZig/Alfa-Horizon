@@ -1,3 +1,4 @@
+import { readonly, ref } from 'vue'
 import axios, { HttpStatusCode, isAxiosError } from 'axios'
 import type { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { ApiErrorCodeEnum } from '@/app/types/api-error-code-enum'
@@ -29,14 +30,17 @@ function readStoredToken(): Nullable<string> {
   }
 }
 
-let sessionToken = readStoredToken()
+const sessionToken = ref<Nullable<string>>(readStoredToken())
+
+// Токен — это человек, под которым вошли: кабинет следит за ним и при смене человека перечитывает себя
+export const currentSessionToken = readonly(sessionToken)
 
 export function getSessionToken(): Nullable<string> {
-  return sessionToken
+  return sessionToken.value
 }
 
 export function setSessionToken(token: string) {
-  sessionToken = token
+  sessionToken.value = token
 
   try {
     localStorage.setItem(TOKEN_STORAGE_KEY, token)
@@ -46,7 +50,7 @@ export function setSessionToken(token: string) {
 }
 
 export function clearSessionToken() {
-  sessionToken = null
+  sessionToken.value = null
 
   try {
     localStorage.removeItem(TOKEN_STORAGE_KEY)
@@ -88,8 +92,8 @@ const apiClient = axios.create({
 })
 
 apiClient.interceptors.request.use((config) => {
-  if (sessionToken) {
-    config.headers.Authorization = `Bearer ${sessionToken}`
+  if (sessionToken.value) {
+    config.headers.Authorization = `Bearer ${sessionToken.value}`
   }
 
   return config

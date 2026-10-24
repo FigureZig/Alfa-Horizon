@@ -27,7 +27,9 @@ export interface ExplanationPathOptionInterface {
 
 export interface ExplanationCapInterface {
   code: string
+  title: string
   text: string
+  value: Nullable<number>
   // Сработавший лимит: выделяется в списке
   isBinding: boolean
 }
@@ -41,6 +43,10 @@ export interface ApplicationExplanationInterface {
   rate: Nullable<number>
   priceParts: ExplanationPricePartInterface[]
   caps: ExplanationCapInterface[]
+  // Сумма, которую банк готов дать: сработавший лимит с запасом и округлением
+  limitAmount: Nullable<number>
+  // Факторы оценки без данных — по ним видно, что решение пришло без кредитной истории
+  missingFactors: string[]
   pathTitle: Nullable<string>
   pathBlocked: boolean
   pathOptions: ExplanationPathOptionInterface[]

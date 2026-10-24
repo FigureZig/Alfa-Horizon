@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import Dialog from 'primevue/dialog'
 import AppErrorState from '@/app/components/AppErrorState.vue'
 import ApplicationExplanationCard from '@/app/features/application/components/ApplicationExplanationCard.vue'
@@ -14,22 +15,29 @@ import ApplicationSignDialog from '@/app/features/application/components/Applica
 import ApplicationSigningPanel from '@/app/features/application/components/ApplicationSigningPanel.vue'
 import ApplicationStatusPanel from '@/app/features/application/components/ApplicationStatusPanel.vue'
 import ApplicationTimeline from '@/app/features/application/components/ApplicationTimeline.vue'
+import ApplicationWorldNotice from '@/app/features/application/components/ApplicationWorldNotice.vue'
 import { useApplication } from '@/app/composables/useApplication'
 import { useApplicationExplanation } from '@/app/composables/useApplicationExplanation'
+import { useApplicationStatusView } from '@/app/composables/useApplicationStatusView'
+import { useApplicationWorldChange } from '@/app/composables/useApplicationWorldChange'
+import { useCompanyAccess } from '@/app/composables/useCompanyAccess'
 import { useCompanyProfile } from '@/app/composables/useCompanyProfile'
 import { useDemoPersona } from '@/app/composables/useDemoPersona'
 import { useFormatters } from '@/app/composables/useFormatters'
 import { ApplicationActionEnum } from '@/app/types/application/application-action-enum'
 import { ApplicationDetailStatusEnum } from '@/app/types/application/application-detail-status-enum'
+import { ApplicationFlagEnum } from '@/app/types/application/application-flag-enum'
+import { CreditProductCodeEnum } from '@/app/types/application/credit-product-code-enum'
 import type { Nullable } from '@/app/types/nullable'
 
 type ConfirmKind = 'withdraw' | 'decline'
 
-const RESTART_STATUSES: ApplicationDetailStatusEnum[] = [
-  ApplicationDetailStatusEnum.Rejected,
-  ApplicationDetailStatusEnum.Declined,
-  ApplicationDetailStatusEnum.Withdrawn,
-  ApplicationDetailStatusEnum.Expired,
+// Эти отметки объясняет шапка заявки и плашка «Данные компании изменились»
+const HEADER_FLAGS: ApplicationFlagEnum[] = [
+  ApplicationFlagEnum.Provisional,
+  ApplicationFlagEnum.Recheck,
+  ApplicationFlagEnum.SlaBreach,
+  ApplicationFlagEnum.DisburseError,
 ]
 
 const props = defineProps<{
@@ -38,9 +46,11 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
+const route = useRoute()
 const { demoPersona } = useDemoPersona()
+const { me } = useCompanyAccess(() => props.inn)
 const { profile } = useCompanyProfile(() => props.inn)
-const { formatCurrency, formatDateTime } = useFormatters()
+const { formatCurrency, formatDateTime, formatShortName } = useFormatters()
 
 const {
   application,
@@ -82,19 +92,57 @@ const isConfirmVisible = computed({
 })
 
 const status = computed(() => application.value?.status ?? null)
+const directors = computed(() => profile.value?.directors ?? [])
 
-// Совместная подпись: кого ещё ждём — по ИНН из заявки и руководителям из профиля компании
-const pendingSigners = computed(() => {
+// Шапка для того, кто смотрит: текст, срок и кнопка зависят от моих прав и от того, кто ещё действует
+const { view: statusView, step } = useApplicationStatusView(() =>
+  application.value
+    ? {
+      application: application.value,
+      explanation: explanation.value,
+      personInn: me.value?.personInn ?? null,
+      directors: directors.value,
+      today: demoPersona.value?.today ?? null,
+    }
+    : null,
+)
+
+// Событие реестра пересмотрело заявку: объясняем, что изменилось
+const { lastChange } = useApplicationWorldChange(events)
+const worldChange = computed(() =>
+  application.value?.flags.includes(ApplicationFlagEnum.Recheck) ? lastChange.value : null,
+)
+const isRecalculating = computed(() =>
+  status.value === ApplicationDetailStatusEnum.Checking || status.value === ApplicationDetailStatusEnum.Submitted,
+)
+const directorName = computed(() => {
+  const name = directors.value[0]?.fullName
+
+  return name ? formatShortName(name) : null
+})
+
+// Сколько показывал подбор до заявки: «Почему» объяснит, если банк дал меньше
+const shownAmount = computed(() => {
+  const value = Number(route.query.shown)
+
+  return Number.isFinite(value) && value > 0 ? value : null
+})
+const isProvisional = computed(() => Boolean(application.value?.flags.includes(ApplicationFlagEnum.Provisional)))
+
+const extraFlags = computed(() => application.value?.flags.filter((flag) => !HEADER_FLAGS.includes(flag)) ?? [])
+const isLimit = computed(() => {
   const current = application.value
 
-  if (!current?.signers || current.signers.required.length < 2) return []
-
-  const signedInns = current.signatures.map((signature) => signature.inn)
-
-  return current.signers.required
-    .filter((inn) => !signedInns.includes(inn))
-    .map((inn) => profile.value?.directors.find((director) => director.inn === inn)?.fullName ?? inn)
+  return current?.loan?.isLimit ?? (current?.offer ?? current?.offers[0])?.product === CreditProductCodeEnum.Overdraft
 })
+
+// Главную причину отказа называет шапка; остальные причины и подсказки — ниже
+const extraReasons = computed(() =>
+  status.value === ApplicationDetailStatusEnum.Rejected ? application.value?.decision?.reasons.slice(1) ?? [] : [],
+)
+const hints = computed(() =>
+  status.value === ApplicationDetailStatusEnum.Rejected ? application.value?.decision?.hints ?? [] : [],
+)
 
 // Условия, которые человек подписывает: принятое предложение
 const signOffer = computed(() => application.value?.offer ?? application.value?.offers[0] ?? null)
@@ -119,32 +167,41 @@ const createdAt = computed(() =>
     : '',
 )
 
-const deadlineAt = computed(() => application.value?.deadline?.at ?? null)
 
-const isBusy = computed(() => pendingAction.value !== null)
-const isSubmitting = computed(() => pendingAction.value === ApplicationActionEnum.Submit)
-const isRestartVisible = computed(() => Boolean(status.value && RESTART_STATUSES.includes(status.value)))
-
-// Отзыв доступен почти на всех шагах; на черновике и при оферте у него свои кнопки
-const isWithdrawVisible = computed(() =>
+// Отзыв доступен почти на всех шагах; при оферте вместо него — «Отказаться от предложения»
+const canWithdraw = computed(() =>
   hasAction(ApplicationActionEnum.Withdraw)
   && status.value !== ApplicationDetailStatusEnum.Offered,
 )
 
+// Карточка с содержимым шага: предложения, ответ банку, подписанты, договор, остальные причины отказа
+const hasMainPanel = computed(() => {
+  switch (status.value) {
+    case ApplicationDetailStatusEnum.Offered:
+    case ApplicationDetailStatusEnum.InfoRequested:
+    case ApplicationDetailStatusEnum.Signing:
+      return true
+    case ApplicationDetailStatusEnum.Issued:
+      return Boolean(application.value?.loan)
+    default:
+      return extraReasons.value.length > 0 || hints.value.length > 0
+  }
+})
+
 const confirmTitle = computed(() => (confirmKind.value ? t(`application.confirm.${confirmKind.value}.title`) : ''))
 const confirmText = computed(() => (confirmKind.value ? t(`application.confirm.${confirmKind.value}.text`) : ''))
 
-function handleSubmit() {
-  submit()
+// Главная кнопка шапки: подать черновик или открыть «Проверьте условия» перед подписью
+function handleCommand(action: ApplicationActionEnum) {
+  if (action === ApplicationActionEnum.Submit) {
+    submit()
+  } else if (action === ApplicationActionEnum.Sign) {
+    isSignVisible.value = true
+  }
 }
 
 function handleAccept(variant: number) {
   acceptOffer(variant)
-}
-
-// Подпись в два шага: сначала «Проверьте условия», потом сама подпись
-function handleSign() {
-  isSignVisible.value = true
 }
 
 function handleSignVisibleChange(visible: boolean) {
@@ -242,149 +299,124 @@ async function confirmAction() {
 
         <ApplicationFlags
           class="mt-3"
-          :flags="application.flags"
+          :flags="extraFlags"
         />
       </div>
 
-      <!-- Где заявка, кто сейчас действует и сколько осталось -->
+      <!-- Что происходит для меня, кто действует и сколько осталось -->
       <ApplicationHero
-        :application="application"
-        :today="demoPersona?.today ?? null"
-        :pending-signers="pendingSigners"
+        v-if="statusView"
+        :view="statusView"
+        :step="step"
+        :pending-action="pendingAction"
+        :can-withdraw="canWithdraw"
+        @command="handleCommand"
+        @withdraw="askWithdraw"
       />
 
-      <div class="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
-        <div class="flex min-w-0 flex-col gap-6">
-          <div class="flex min-w-0 flex-col gap-6 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm sm:p-6">
-            <!-- Содержимое зависит от статуса; кнопки — только те, что вернул бэкенд -->
-            <ApplicationOffersPanel
-              v-if="status === ApplicationDetailStatusEnum.Offered"
-              :offers="application.offers"
-              :request="application.request"
-              :decision="application.decision"
-              :can-accept="hasAction(ApplicationActionEnum.AcceptOffer)"
-              :can-decline="hasAction(ApplicationActionEnum.DeclineOffer)"
-              :pending-action="pendingAction"
-              :deadline-at="deadlineAt"
-              @accept="handleAccept"
-              @decline="askDecline"
-            />
+      <ApplicationWorldNotice
+        v-if="worldChange"
+        :change="worldChange"
+        :is-recalculating="isRecalculating"
+        :director-name="directorName"
+      />
 
-            <ApplicationInfoRequestPanel
-              v-else-if="status === ApplicationDetailStatusEnum.InfoRequested"
-              :info-request="application.infoRequest"
-              :approval="application.approval"
-              :can-answer="hasAction(ApplicationActionEnum.AnswerInfo)"
-              :can-vote="hasAction(ApplicationActionEnum.Vote)"
-              :pending-action="pendingAction"
-              @answer="answerInfo"
-              @vote="vote"
-            />
+      <div
+        class="grid grid-cols-1 items-start gap-6"
+        :class="hasMainPanel ? 'xl:grid-cols-[minmax(0,1fr)_24rem]' : application.decision ? 'xl:grid-cols-2' : ''"
+      >
+        <div
+          v-if="hasMainPanel"
+          class="flex min-w-0 flex-col gap-6 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm sm:p-6"
+        >
+          <!-- Содержимое шага; кнопки — только те, что вернул бэкенд -->
+          <ApplicationOffersPanel
+            v-if="status === ApplicationDetailStatusEnum.Offered"
+            :offers="application.offers"
+            :request="application.request"
+            :decision="application.decision"
+            :can-accept="hasAction(ApplicationActionEnum.AcceptOffer)"
+            :can-decline="hasAction(ApplicationActionEnum.DeclineOffer)"
+            :pending-action="pendingAction"
+            @accept="handleAccept"
+            @decline="askDecline"
+          />
 
-            <ApplicationSigningPanel
-              v-else-if="status === ApplicationDetailStatusEnum.Signing"
-              :signers="application.signers"
-              :signatures="application.signatures"
-              :flags="application.flags"
-              :can-sign="hasAction(ApplicationActionEnum.Sign)"
-              :pending-action="pendingAction"
-              :deadline-at="deadlineAt"
-              :pending-signers="pendingSigners"
-              @sign="handleSign"
-            />
+          <ApplicationInfoRequestPanel
+            v-else-if="status === ApplicationDetailStatusEnum.InfoRequested"
+            :info-request="application.infoRequest"
+            :approval="application.approval"
+            :can-answer="hasAction(ApplicationActionEnum.AnswerInfo)"
+            :can-vote="hasAction(ApplicationActionEnum.Vote)"
+            :pending-action="pendingAction"
+            @answer="answerInfo"
+            @vote="vote"
+          />
 
-            <ApplicationLoanCard
-              v-else-if="status === ApplicationDetailStatusEnum.Issued && application.loan"
-              :loan="application.loan"
-            />
+          <ApplicationSigningPanel
+            v-else-if="status === ApplicationDetailStatusEnum.Signing"
+            :signers="application.signers"
+            :signatures="application.signatures"
+            :directors="directors"
+          />
 
-            <ApplicationStatusPanel
-              v-else
-              :status="status"
-              :decision="application.decision"
-              :sla-until="application.slaUntil"
-            >
-              <!-- Черновик: подать или отозвать -->
-              <div
-                v-if="hasAction(ApplicationActionEnum.Submit)"
-                class="flex flex-col gap-3 sm:flex-row"
-              >
-                <button
-                  type="button"
-                  class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl
-                         bg-primary px-5 py-3 text-sm font-semibold text-primary-contrast
-                         transition-all duration-200 hover:opacity-90 active:scale-95
-                         disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none
-                         focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                  :disabled="isBusy"
-                  :aria-busy="isSubmitting"
-                  @click="handleSubmit"
-                >
-                  <i
-                    :class="isSubmitting ? 'pi pi-spinner pi-spin' : 'pi pi-send'"
-                    class="text-xs"
-                    aria-hidden="true"
-                  />
-                  {{ t('application.actions.submit') }}
-                </button>
-              </div>
+          <ApplicationLoanCard
+            v-else-if="status === ApplicationDetailStatusEnum.Issued && application.loan"
+            :loan="application.loan"
+          />
 
-              <!-- Заявка закрыта: можно начать заново -->
-              <div
-                v-if="isRestartVisible"
-                class="flex flex-wrap gap-4"
-              >
-                <RouterLink
-                  :to="{ name: 'application-new', params: { inn } }"
-                  class="inline-flex items-center gap-1 text-sm font-semibold text-primary transition-opacity hover:opacity-80"
-                >
-                  {{ t('application.actions.newApplication') }}
-                  <i
-                    class="pi pi-arrow-right text-xs"
-                    aria-hidden="true"
-                  />
-                </RouterLink>
-
-                <RouterLink
-                  :to="{ name: 'credits', params: { inn } }"
-                  class="inline-flex items-center gap-1 text-sm font-semibold text-fino-text-muted transition-colors hover:text-primary"
-                >
-                  {{ t('application.findCredit') }}
-                </RouterLink>
-              </div>
-            </ApplicationStatusPanel>
-
-            <div
-              v-if="isWithdrawVisible"
-              class="border-t border-fino-border pt-4"
-            >
-              <button
-                type="button"
-                class="cursor-pointer text-sm font-semibold text-fino-text-muted transition-colors
-                       hover:text-primary disabled:cursor-not-allowed disabled:opacity-60
-                       focus-visible:outline-2 focus-visible:outline-primary"
-                :disabled="isBusy"
-                @click="askWithdraw"
-              >
-                {{ t('application.actions.withdraw') }}
-              </button>
-            </div>
-          </div>
+          <ApplicationStatusPanel
+            v-else
+            :reasons="extraReasons"
+            :hints="hints"
+          />
         </div>
 
-        <aside class="flex min-w-0 flex-col gap-6">
+        <ApplicationExplanationCard
+          v-if="application.decision && !hasMainPanel"
+          :explanation="explanation"
+          :is-loading="isExplanationLoading"
+          :has-error="explanationError"
+          :requested-amount="application.request.amount"
+          :shown-amount="shownAmount"
+          :is-provisional="isProvisional"
+          :sources="profile?.sources ?? []"
+          @retry="loadExplanation"
+        />
+
+        <aside
+          v-if="hasMainPanel"
+          class="flex min-w-0 flex-col gap-6"
+        >
           <ApplicationExplanationCard
             v-if="application.decision"
             :explanation="explanation"
             :is-loading="isExplanationLoading"
             :has-error="explanationError"
+            :requested-amount="application.request.amount"
+            :shown-amount="shownAmount"
+            :is-provisional="isProvisional"
+            :sources="profile?.sources ?? []"
             @retry="loadExplanation"
           />
 
           <div class="rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
-            <ApplicationTimeline :events="events" />
+            <ApplicationTimeline
+              :events="events"
+              :is-limit="isLimit"
+            />
           </div>
         </aside>
+
+        <div
+          v-else
+          class="min-w-0 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm"
+        >
+          <ApplicationTimeline
+            :events="events"
+            :is-limit="isLimit"
+          />
+        </div>
       </div>
 
       <ApplicationSignDialog

@@ -12,11 +12,16 @@ import type { SandboxPersonaPreviewInterface } from '@/app/types/sandbox/sandbox
 // Шкала балла для полоски: от самого низкого класса до верха карты
 const SCORE_MIN = 300
 const SCORE_MAX = 850
+const JOINT_SIGNING = 'joint'
+// Нормы закона в скобках — только во всплывающей подсказке
+const LAW_REFERENCE_PATTERN = /\s*\([^()]*(?:ст\.|ФЗ|ГК)[^()]*\)/g
 
 const props = defineProps<{
   preview: Nullable<SandboxPersonaPreviewInterface>
   isLoading: boolean
   hasError: boolean
+  // В компании есть представитель по доверенности: при совместной подписи объясняем, почему он не подпишет
+  hasRepresentative: boolean
 }>()
 
 const emit = defineEmits<{
@@ -48,6 +53,17 @@ const classTone = computed(() => {
       return 'text-red-600 dark:text-red-400'
   }
 })
+
+// Риск словами: «Риск низкий», а не «A · 785»; балл — по наведению
+const riskWord = computed(() => (props.preview ? t(`application.explanation.risk.${props.preview.riskClass}`) : ''))
+const scoreTitle = computed(() =>
+  props.preview
+    ? t('sandbox.builder.preview.scoreTitle', { score: Math.round(animatedScore.value ?? props.preview.score), class: props.preview.riskClass })
+    : '',
+)
+
+const pathText = computed(() => props.preview?.pathMeans.replace(LAW_REFERENCE_PATTERN, '') ?? '')
+const isRepresentativeBlocked = computed(() => props.hasRepresentative && props.preview?.signMode === JOINT_SIGNING)
 
 const barTone = computed(() => {
   switch (props.preview?.riskClass) {
@@ -186,17 +202,18 @@ function handleRetry() {
         @focus="handleScoreHighlight"
         @blur="handleClearHighlight"
       >
-        <p
-          class="text-5xl font-bold tracking-tight transition-colors duration-300 motion-reduce:transition-none"
-          :class="classTone"
-          :aria-label="t('sandbox.builder.preview.riskClass', { class: preview.riskClass })"
-        >
-          {{ preview.riskClass }}
-        </p>
-
         <div class="min-w-0 flex-1">
-          <p class="text-sm font-semibold text-fino-text">
-            {{ t('sandbox.builder.preview.score', { score: Math.round(animatedScore ?? preview.score) }) }}
+          <p class="text-xs text-fino-text-muted">
+            {{ t('sandbox.builder.preview.risk') }}
+          </p>
+
+          <p
+            class="mt-0.5 text-2xl font-bold tracking-tight transition-colors duration-300 first-letter:uppercase
+                   motion-reduce:transition-none"
+            :class="classTone"
+            :title="scoreTitle"
+          >
+            {{ riskWord }}
           </p>
 
           <div
@@ -214,12 +231,28 @@ function handleRetry() {
 
       <!-- Кто подписывает и люди -->
       <div class="rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
-        <p class="flex items-start gap-2 text-sm leading-relaxed text-fino-text-muted">
+        <p
+          class="flex items-start gap-2 text-sm leading-relaxed text-fino-text-muted"
+          :title="preview.pathMeans"
+        >
           <i
             class="pi pi-file-edit mt-0.5 shrink-0 text-primary"
             aria-hidden="true"
           />
-          {{ preview.pathMeans }}
+          {{ pathText }}
+        </p>
+
+        <!-- Последствие устройства: при совместной подписи доверенность одного директора не работает -->
+        <p
+          v-if="isRepresentativeBlocked"
+          class="mt-3 flex items-start gap-2 rounded-2xl bg-amber-500/10 p-3 text-sm text-fino-text"
+          :title="t('sandbox.builder.preview.representativeLaw')"
+        >
+          <i
+            class="pi pi-info-circle mt-0.5 shrink-0 text-amber-700 dark:text-amber-400"
+            aria-hidden="true"
+          />
+          {{ t('sandbox.builder.preview.representativeBlocked') }}
         </p>
 
         <ul class="mt-4 flex flex-wrap gap-2">

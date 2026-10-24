@@ -16,9 +16,14 @@ import type { Nullable } from '@/app/types/nullable'
 
 const props = defineProps<{
   inn?: string
+  // Срок текущего шага заявки на экране: «Перемотать к сроку этого шага»
+  deadlineAt?: Nullable<string>
 }>()
 
 const SECONDS_IN_HOUR = 3600
+// Запас после срока: таймер банка закрывает шаг, когда срок уже прошёл
+const DEADLINE_MARGIN_SECONDS = 60
+const MS_IN_SECOND = 1000
 // Свой канал уведомлений: общие тосты справа сверху закрывают заголовок открытой панели
 const TOAST_GROUP = 'world'
 const CLOCK_STEP_DAYS = [1, 7, 30]
@@ -89,6 +94,22 @@ const clockToday = computed(() =>
 )
 const isClockShifted = computed(() => Boolean(clock.value?.offsetSeconds))
 
+// Сколько перемотать до срока шага по часам мира; срок уже прошёл — перематывать нечего
+const secondsToDeadline = computed(() => {
+  if (!props.deadlineAt || !clock.value) return 0
+
+  const seconds = (new Date(props.deadlineAt).getTime() - new Date(clock.value.now).getTime()) / MS_IN_SECOND
+
+  return seconds > 0 ? Math.ceil(seconds) + DEADLINE_MARGIN_SECONDS : 0
+})
+
+const deadlineDate = computed(() =>
+  props.deadlineAt
+    ? new Intl.DateTimeFormat(locale.value, { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })
+      .format(new Date(props.deadlineAt))
+    : '',
+)
+
 /**
  * Выполняет команду мира: блокирует кнопки на время запроса и показывает результат уведомлением.
  */
@@ -132,6 +153,12 @@ function handleAdvanceHours() {
 
 function handleAdvanceDays(days: number) {
   runCommand(() => advanceClock({ advance_days: days }), 'sandbox.world.clock.advanced')
+}
+
+function handleAdvanceToDeadline() {
+  if (!secondsToDeadline.value) return
+
+  runCommand(() => advanceClock({ advance_s: secondsToDeadline.value }), 'sandbox.world.clock.toDeadlineDone')
 }
 
 function handleResetClock() {
@@ -240,6 +267,26 @@ watch(() => props.inn, (inn) => {
       >
         {{ t('sandbox.world.clock.today', { date: clockToday }) }}
       </p>
+
+      <!-- Симуляция у объекта: срок этого шага заявки, как Run simulation у Stripe -->
+      <button
+        v-if="secondsToDeadline"
+        type="button"
+        class="flex cursor-pointer items-center gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3
+               text-left transition-colors hover:bg-amber-500/15 disabled:cursor-not-allowed disabled:opacity-50
+               motion-reduce:transition-none"
+        :disabled="isBusy"
+        @click="handleAdvanceToDeadline"
+      >
+        <i
+          class="pi pi-forward text-amber-700 dark:text-amber-400"
+          aria-hidden="true"
+        />
+        <span class="min-w-0">
+          <span class="block text-sm font-semibold text-fino-text">{{ t('sandbox.world.clock.toDeadline') }}</span>
+          <span class="block text-xs text-fino-text-muted">{{ t('sandbox.world.clock.toDeadlineHint', { date: deadlineDate }) }}</span>
+        </span>
+      </button>
 
       <div class="flex flex-wrap gap-2">
         <button

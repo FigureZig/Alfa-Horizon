@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, reactive, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Checkbox from 'primevue/checkbox'
 import InputNumber from 'primevue/inputnumber'
@@ -17,6 +17,14 @@ import type { ApplicationVoteEnum } from '@/app/types/application/application-vo
 import type { Nullable } from '@/app/types/nullable'
 
 const COMMENT_MAX_LENGTH = 2000
+// Загрузка — имитация: файл мгновение «загружается» и встаёт в список, банку уходит его имя
+const UPLOAD_DELAY = 700
+
+interface AttachedDocumentInterface {
+  id: number
+  name: string
+  isUploading: boolean
+}
 
 const props = defineProps<{
   infoRequest: Nullable<ApplicationInfoRequestInterface>
@@ -36,13 +44,17 @@ const { t, locale } = useI18n({ useScope: 'global' })
 const form = reactive({
   corporateApproval: false,
   collateralValue: null as Nullable<number>,
-  documentsText: '',
   comment: '',
 })
 
 const isSubmitted = ref(false)
 // Готовое решение собрания загружают отдельным явным действием, а не рядом с голосованием
 const isAnswerOpen = ref(false)
+const attachedDocuments = ref<AttachedDocumentInterface[]>([])
+const fileInput = useTemplateRef<HTMLInputElement>('fileInput')
+
+let lastDocumentId = 0
+const uploadTimers: number[] = []
 
 const asks = computed(() => props.infoRequest?.asks ?? [])
 const isCorpApprovalAsked = computed(() => asks.value.includes(ApplicationAskEnum.CorpApproval))
@@ -54,8 +66,10 @@ const isAnswering = computed(() => props.pendingAction === ApplicationActionEnum
 
 const askTexts = computed(() => asks.value.map((ask) => t(`application.infoRequest.ask.${ask}`)))
 
+const isUploading = computed(() => attachedDocuments.value.some((item) => item.isUploading))
+
 const documents = computed(() =>
-  form.documentsText.split('\n').map((line) => line.trim()).filter(Boolean),
+  attachedDocuments.value.filter((item) => !item.isUploading).map((item) => item.name),
 )
 
 // Нужен хоть какой-то ответ, а запрошенная стоимость залога — обязательна
@@ -88,6 +102,41 @@ function handleSubmit() {
 function openAnswer() {
   isAnswerOpen.value = true
 }
+
+function openFilePicker() {
+  fileInput.value?.click()
+}
+
+function finishUpload(id: number) {
+  const attached = attachedDocuments.value.find((item) => item.id === id)
+
+  if (attached) attached.isUploading = false
+}
+
+function handleFilesSelected(event: Event) {
+  const input = event.target as HTMLInputElement
+  const names = Array.from(input.files ?? [], (file) => file.name)
+
+  // Тот же файл можно выбрать снова после удаления
+  input.value = ''
+
+  for (const name of names) {
+    if (attachedDocuments.value.some((item) => item.name === name)) continue
+
+    const id = ++lastDocumentId
+
+    attachedDocuments.value.push({ id, name, isUploading: true })
+    uploadTimers.push(window.setTimeout(finishUpload, UPLOAD_DELAY, id))
+  }
+}
+
+function removeDocument(id: number) {
+  attachedDocuments.value = attachedDocuments.value.filter((item) => item.id !== id)
+}
+
+onBeforeUnmount(() => {
+  uploadTimers.forEach((timer) => window.clearTimeout(timer))
+})
 
 function handleVote(choice: ApplicationVoteEnum) {
   emit('vote', choice)
@@ -200,23 +249,77 @@ function handleVote(choice: ApplicationVoteEnum) {
         />
       </div>
 
+      <!-- Документы: «Прикрепить» — файл появляется в списке с именем -->
       <div class="flex flex-col gap-2">
-        <label
-          for="info-documents"
-          class="text-sm font-semibold text-fino-text"
-        >
+        <span class="text-sm font-semibold text-fino-text">
           {{ t('application.infoRequest.documents') }}
-        </label>
+        </span>
 
-        <Textarea
-          id="info-documents"
-          v-model="form.documentsText"
-          :placeholder="t('application.infoRequest.documentsPlaceholder')"
-          rows="2"
-          auto-resize
+        <ul
+          v-if="attachedDocuments.length"
+          class="flex flex-col gap-2"
+          aria-live="polite"
+        >
+          <li
+            v-for="item in attachedDocuments"
+            :key="item.id"
+            class="flex items-center gap-3 rounded-xl border border-fino-border bg-fino-surface px-3 py-2 text-sm"
+          >
+            <i
+              :class="item.isUploading ? 'pi pi-spinner pi-spin text-fino-text-muted' : 'pi pi-file text-primary'"
+              aria-hidden="true"
+            />
+
+            <span
+              class="min-w-0 flex-1 truncate text-fino-text"
+              :title="item.name"
+            >{{ item.name }}</span>
+
+            <span class="shrink-0 text-xs text-fino-text-muted">
+              {{ item.isUploading ? t('application.infoRequest.uploading') : t('application.infoRequest.uploaded') }}
+            </span>
+
+            <button
+              type="button"
+              class="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-lg text-fino-text-muted
+                     transition-colors hover:bg-fino-surface-hover hover:text-primary disabled:cursor-not-allowed
+                     disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-primary"
+              :aria-label="t('application.infoRequest.removeDocument', { name: item.name })"
+              :title="t('application.infoRequest.removeDocument', { name: item.name })"
+              :disabled="isBusy"
+              @click="removeDocument(item.id)"
+            >
+              <i
+                class="pi pi-times text-xs"
+                aria-hidden="true"
+              />
+            </button>
+          </li>
+        </ul>
+
+        <input
+          ref="fileInput"
+          type="file"
+          multiple
+          class="hidden"
+          @change="handleFilesSelected"
+        >
+
+        <button
+          type="button"
+          class="inline-flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-xl border border-dashed
+                 border-fino-border px-4 py-2.5 text-sm font-semibold text-fino-text transition-colors duration-200
+                 hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60
+                 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-primary"
           :disabled="isBusy"
-          fluid
-        />
+          @click="openFilePicker"
+        >
+          <i
+            class="pi pi-paperclip text-xs"
+            aria-hidden="true"
+          />
+          {{ t('application.infoRequest.attach') }}
+        </button>
       </div>
 
       <div class="flex flex-col gap-2">
@@ -254,7 +357,7 @@ function handleVote(choice: ApplicationVoteEnum) {
                transition-all duration-200 hover:opacity-90 active:scale-95 sm:w-fit
                disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none
                focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-        :disabled="isBusy"
+        :disabled="isBusy || isUploading"
         :aria-busy="isAnswering"
       >
         <i
@@ -265,12 +368,5 @@ function handleVote(choice: ApplicationVoteEnum) {
         {{ t('application.infoRequest.send') }}
       </button>
     </form>
-
-    <p
-      v-else-if="!approval"
-      class="rounded-2xl bg-fino-surface-secondary p-3 text-sm text-fino-text-muted"
-    >
-      {{ t('application.infoRequest.noRight') }}
-    </p>
   </section>
 </template>

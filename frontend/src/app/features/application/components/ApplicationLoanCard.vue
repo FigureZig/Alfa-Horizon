@@ -49,7 +49,10 @@ const disbursedAt = computed(() =>
         </dd>
       </div>
 
-      <div class="min-w-0">
+      <div
+        v-if="loan.number"
+        class="min-w-0"
+      >
         <dt class="text-xs text-fino-text-muted">
           {{ t('application.loan.number') }}
         </dt>

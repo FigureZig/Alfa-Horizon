@@ -9,7 +9,6 @@ import TabPanel from 'primevue/tabpanel'
 import TabPanels from 'primevue/tabpanels'
 import Tabs from 'primevue/tabs'
 import SandboxReviewerGuide from './SandboxReviewerGuide.vue'
-import SandboxReviewerLogin from './SandboxReviewerLogin.vue'
 import SandboxReviewerScenarios from './SandboxReviewerScenarios.vue'
 import SandboxWorldControls from './SandboxWorldControls.vue'
 import { useApiFetch } from '@/app/composables/useApiFetch'
@@ -28,6 +27,9 @@ const $fetch = useApiFetch()
 const isVisible = ref(false)
 const activeTab = ref('scenarios')
 const applicationStatus = ref<Nullable<ApplicationDetailStatusEnum>>(null)
+const loadedApplicationInn = ref<Nullable<string>>(null)
+// Срок текущего шага заявки на экране: к нему можно перемотать время мира
+const deadlineAt = ref<Nullable<string>>(null)
 
 function readHintDismissed(): boolean {
   try {
@@ -45,8 +47,16 @@ const inn = computed(() => (typeof route.params.inn === 'string' ? route.params.
 // События и отказы относятся к компании клиента; на рабочем месте банка ИНН компании подставлять не из чего
 const eventInn = computed(() => (String(route.name ?? '').startsWith(BANK_ROUTE_PREFIX) ? undefined : inn.value))
 
+// Компания открытой заявки — из самой заявки; участнику её не открыть (403), тогда — из адреса кабинета
+const applicationInn = computed(() =>
+  loadedApplicationInn.value ?? (applicationId.value ? eventInn.value ?? null : null),
+)
+
 // Подсказка проверяющему — один раз и только на экране входа, рядом с кнопкой
 const isHintVisible = computed(() => route.name === 'login' && !isHintDismissed.value && !isVisible.value)
+
+// После первого показа кнопка сжимается до иконки и не закрывает карточки
+const isLabelVisible = computed(() => !isHintDismissed.value)
 
 // В кабинете снизу мобильная навигация: кнопка стоит над ней
 const positionClass = computed(() => {
@@ -81,13 +91,18 @@ function dismissHint() {
 // Статус заявки на экране — для галочек в сценариях; чужая заявка (403) просто не отмечается
 async function loadApplicationStatus() {
   applicationStatus.value = null
+  loadedApplicationInn.value = null
+  deadlineAt.value = null
 
   if (!applicationId.value) return
 
   try {
     const { data } = await applicationsService.fetchApplication($fetch, applicationId.value)
+    const application = ApplicationMapper.toEntity(data.data)
 
-    applicationStatus.value = ApplicationMapper.toEntity(data.data).status
+    applicationStatus.value = application.status
+    loadedApplicationInn.value = application.companyInn
+    deadlineAt.value = application.deadline?.status === application.status ? application.deadline.at : null
   } catch (err: unknown) {
     console.error('Reviewer application status loading failed:', err)
   }
@@ -131,11 +146,13 @@ watch([isVisible, applicationId], ([visible]) => {
 
     <button
       type="button"
-      class="flex h-11 cursor-pointer items-center gap-2 rounded-full border border-fino-border bg-fino-surface px-3.5
-             text-sm font-semibold text-fino-text shadow-md transition-all duration-200 hover:-translate-y-0.5
-             hover:border-primary/40 hover:shadow-lg active:scale-95 focus-visible:outline-2
+      class="flex h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-full border border-fino-border
+             bg-fino-surface text-sm font-semibold text-fino-text shadow-md transition-all duration-200
+             hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg active:scale-95 focus-visible:outline-2
              focus-visible:outline-primary motion-reduce:transition-none"
+      :class="isLabelVisible ? 'px-3.5' : 'px-0'"
       :aria-label="t('reviewer.open')"
+      :title="t('reviewer.open')"
       @click="openPanel"
     >
       <i
@@ -143,7 +160,10 @@ watch([isVisible, applicationId], ([visible]) => {
         aria-hidden="true"
       />
 
-      <span class="hidden sm:inline">{{ t('reviewer.open') }}</span>
+      <span
+        v-if="isLabelVisible"
+        class="hidden sm:inline"
+      >{{ t('reviewer.open') }}</span>
     </button>
   </div>
 
@@ -166,9 +186,6 @@ watch([isVisible, applicationId], ([visible]) => {
         <Tab value="world">
           {{ t('reviewer.tabs.world') }}
         </Tab>
-        <Tab value="login">
-          {{ t('reviewer.tabs.login') }}
-        </Tab>
         <Tab value="why">
           {{ t('reviewer.tabs.why') }}
         </Tab>
@@ -178,17 +195,17 @@ watch([isVisible, applicationId], ([visible]) => {
         <TabPanel value="scenarios">
           <SandboxReviewerScenarios
             :application-id="applicationId"
+            :application-inn="applicationInn"
             :application-status="applicationStatus"
             @navigated="closePanel"
           />
         </TabPanel>
 
         <TabPanel value="world">
-          <SandboxWorldControls :inn="eventInn" />
-        </TabPanel>
-
-        <TabPanel value="login">
-          <SandboxReviewerLogin @navigated="closePanel" />
+          <SandboxWorldControls
+            :inn="eventInn"
+            :deadline-at="deadlineAt"
+          />
         </TabPanel>
 
         <TabPanel value="why">

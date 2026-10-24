@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ApplicationVoteBar from './ApplicationVoteBar.vue'
+import { useFormatters } from '@/app/composables/useFormatters'
 import { ApplicationActionEnum } from '@/app/types/application/application-action-enum'
 import { ApplicationVoteEnum } from '@/app/types/application/application-vote-enum'
 import type { ApplicationApprovalInterface } from '@/app/types/application/application-interface'
@@ -17,6 +19,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
+const { formatPercent } = useFormatters()
 
 const isBusy = computed(() => props.pendingAction !== null)
 
@@ -27,7 +30,7 @@ const participants = computed(() =>
     return {
       inn: participant.inn,
       fio: participant.fio,
-      share: t('application.approval.share', { share: participant.share }),
+      share: t('application.approval.share', { share: formatPercent(participant.share) }),
       voteLabel: vote ? t(`application.approval.vote.${vote}`) : t('application.approval.notVoted'),
       voteClass: vote === ApplicationVoteEnum.For
         ? 'text-green-700 dark:text-green-400'
@@ -38,8 +41,9 @@ const participants = computed(() =>
   }),
 )
 
-const forWidth = computed(() => ({ width: `${Math.min(props.approval.forPercent, 100)}%` }))
-const againstWidth = computed(() => ({ width: `${Math.min(props.approval.againstPercent, 100)}%` }))
+const ruleText = computed(() =>
+  t('application.approval.rule', { threshold: formatPercent(props.approval.thresholdPercent) }),
+)
 
 function handleVoteFor() {
   emit('vote', ApplicationVoteEnum.For)
@@ -55,33 +59,21 @@ function handleVoteAgainst() {
     class="flex flex-col gap-4 rounded-2xl border border-fino-border p-4"
     :aria-label="t('application.approval.title')"
   >
-    <div>
-      <h3 class="text-sm font-bold text-fino-text">
-        {{ t('application.approval.title') }}
-      </h3>
+    <!-- Правило голосования — один раз, во всплывающей «i»; на полосе — отметка порога -->
+    <h3 class="flex items-center gap-2 text-sm font-bold text-fino-text">
+      {{ t('application.approval.title') }}
+      <i
+        class="pi pi-info-circle text-xs text-fino-text-muted"
+        :title="ruleText"
+        :aria-label="ruleText"
+      />
+    </h3>
 
-      <p class="mt-1 text-xs leading-relaxed text-fino-text-muted">
-        {{ t('application.approval.description', { threshold: approval.thresholdPercent }) }}
-      </p>
-    </div>
-
-    <div>
-      <div class="flex h-2 overflow-hidden rounded-full bg-fino-surface-secondary">
-        <div
-          class="bg-green-500 transition-all duration-300 motion-reduce:transition-none"
-          :style="forWidth"
-        />
-        <div
-          class="bg-red-500 transition-all duration-300 motion-reduce:transition-none"
-          :style="againstWidth"
-        />
-      </div>
-
-      <p class="mt-2 flex justify-between text-xs text-fino-text-muted">
-        <span>{{ t('application.approval.forPercent', { percent: approval.forPercent }) }}</span>
-        <span>{{ t('application.approval.againstPercent', { percent: approval.againstPercent }) }}</span>
-      </p>
-    </div>
+    <ApplicationVoteBar
+      :for-percent="approval.forPercent"
+      :against-percent="approval.againstPercent"
+      :threshold-percent="approval.thresholdPercent"
+    />
 
     <ul class="flex flex-col divide-y divide-fino-border">
       <li
@@ -105,7 +97,7 @@ function handleVoteAgainst() {
 
     <div
       v-if="canVote"
-      class="grid grid-cols-2 gap-3"
+      class="grid grid-cols-1 gap-3 sm:grid-cols-2"
     >
       <button
         type="button"

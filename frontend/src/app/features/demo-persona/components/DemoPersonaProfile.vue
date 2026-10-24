@@ -5,6 +5,11 @@ import DemoPersonaProfileSkeleton from './DemoPersonaProfileSkeleton.vue'
 import { useDemoPersona } from '@/app/composables/useDemoPersona'
 import { useSession } from '@/app/composables/useSession'
 
+defineProps<{
+  // Кто человек в этой компании: «ИП», «Директор», «Сотрудник»; у сотрудника банка — его роль в банке
+  caption: string
+}>()
+
 const { t } = useI18n({ useScope: 'global' })
 const router = useRouter()
 const { demoPersona, isLoading, resetDemoPersona } = useDemoPersona()
@@ -39,7 +44,7 @@ async function logout() {
         </span>
 
         <span class="text-xs text-fino-text-muted">
-          {{ t('demoPersona.caption') }}
+          {{ caption }}
         </span>
       </div>
     </div>

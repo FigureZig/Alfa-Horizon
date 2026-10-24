@@ -2,7 +2,7 @@ import { readonly, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
-import { isNotFoundError, useApiFetch } from '@/app/composables/useApiFetch'
+import { getSessionToken, isNotFoundError, useApiFetch } from '@/app/composables/useApiFetch'
 import { demoPersonaService } from '@/app/services/demo-persona/demo-persona.service'
 import { DemoPersonaMapper } from '@/app/mappers/demo-persona.mapper'
 import type { AppLocale } from '@/app/i18n'
@@ -20,6 +20,8 @@ let lastRequestId = 0
 // Layout и страница просят одну и ту же персону одновременно — второй запрос не нужен
 let pendingKey = ''
 let pendingRequest: Nullable<Promise<void>> = null
+// Под чьим токеном загружена персона: после входа другим человеком прежнего в шапке не показываем
+let loadedToken: Nullable<string> = null
 
 function resetDemoPersona() {
   lastRequestId++
@@ -35,7 +37,7 @@ export function useDemoPersona() {
   const { t, locale } = useI18n({ useScope: 'global' })
 
   function loadDemoPersona(inn: string) {
-    const key = `${inn}:${locale.value}`
+    const key = `${inn}:${locale.value}:${getSessionToken() ?? ''}`
 
     if (pendingRequest && pendingKey === key) return pendingRequest
 
@@ -49,9 +51,10 @@ export function useDemoPersona() {
 
   async function requestDemoPersona(inn: string) {
     const requestId = ++lastRequestId
+    const token = getSessionToken()
 
-    // Не показываем данные предыдущей персоны, пока грузится новая
-    if (demoPersona.value?.inn !== inn) {
+    // Не показываем данные предыдущей персоны, пока грузится новая: другая компания или другой человек
+    if (demoPersona.value?.inn !== inn || token !== loadedToken) {
       demoPersona.value = null
     }
 
@@ -68,6 +71,7 @@ export function useDemoPersona() {
       if (requestId !== lastRequestId) return
 
       demoPersona.value = DemoPersonaMapper.toEntity(data.data)
+      loadedToken = token
     } catch (err: unknown) {
       if (requestId !== lastRequestId) return
 

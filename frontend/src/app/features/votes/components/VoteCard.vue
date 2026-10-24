@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ApplicationVoteBar from '@/app/features/application/components/ApplicationVoteBar.vue'
 import { useFormatters } from '@/app/composables/useFormatters'
-import { ApplicationVoteEnum } from '@/app/types/application/application-vote-enum'
 import { ApprovalStatusEnum } from '@/app/types/application/approval-status-enum'
 import type { Nullable } from '@/app/types/nullable'
 import type { VoteItemInterface } from '@/app/types/application/vote-item-interface'
@@ -49,13 +49,8 @@ const statusClass = computed(() => {
   return myVote.value ? 'bg-fino-surface-secondary text-fino-text-muted' : 'bg-fino-accent text-primary'
 })
 
-const forWidth = computed(() => ({ width: `${Math.min(approval.value?.forPercent ?? 0, 100)}%` }))
-const againstWidth = computed(() => ({ width: `${Math.min(approval.value?.againstPercent ?? 0, 100)}%` }))
-
 // Сколько дней осталось до срока голосования
 const daysLeft = computed(() => (props.today ? getDaysLeft(props.item.task.dueDate, props.today) : null))
-
-const isForVote = computed(() => myVote.value === ApplicationVoteEnum.For)
 </script>
 
 <template>
@@ -92,28 +87,12 @@ const isForVote = computed(() => myVote.value === ApplicationVoteEnum.For)
       </p>
     </div>
 
-    <div v-if="approval">
-      <div class="flex h-2 overflow-hidden rounded-full bg-fino-surface-secondary">
-        <div
-          class="bg-green-500 transition-all duration-300 motion-reduce:transition-none"
-          :style="forWidth"
-        />
-        <div
-          class="bg-red-500 transition-all duration-300 motion-reduce:transition-none"
-          :style="againstWidth"
-        />
-      </div>
-
-      <p class="mt-2 flex justify-between text-xs text-fino-text-muted">
-        <span>{{ t('votes.progress', { percent: approval.forPercent, threshold: approval.thresholdPercent }) }}</span>
-        <span v-if="myVote">
-          <i
-            :class="isForVote ? 'pi pi-check text-green-600' : 'pi pi-times text-red-600'"
-            aria-hidden="true"
-          />
-        </span>
-      </p>
-    </div>
+    <ApplicationVoteBar
+      v-if="approval"
+      :for-percent="approval.forPercent"
+      :against-percent="approval.againstPercent"
+      :threshold-percent="approval.thresholdPercent"
+    />
 
     <p
       v-if="daysLeft !== null"

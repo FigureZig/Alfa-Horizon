@@ -8,6 +8,7 @@ import DashboardSummarySection from '@/app/features/dashboard/components/Dashboa
 import { useBankQueue } from '@/app/composables/useBankQueue'
 import { useCompanyNames } from '@/app/composables/useCompanyNames'
 import { useDemoPersona } from '@/app/composables/useDemoPersona'
+import { useWorldClock } from '@/app/composables/useWorldClock'
 import { ApplicationActionEnum } from '@/app/types/application/application-action-enum'
 import type { BankQueueItemInterface } from '@/app/types/bank/bank-queue-item-interface'
 
@@ -21,6 +22,8 @@ const { t } = useI18n({ useScope: 'global' })
 const { demoPersona } = useDemoPersona()
 const { queue, isLoading, error, loadQueue } = useBankQueue()
 const { getCompanyName, isLoading: isNamesLoading } = useCompanyNames()
+// Срок рассмотрения — отсчётом по часам мира
+const { now } = useWorldClock()
 
 // Задача сотрудника — заявка, по которой бэкенд отдал ему решение или подтверждение
 function isMine(item: BankQueueItemInterface): boolean {
@@ -140,6 +143,7 @@ const roleLabel = computed(() => (demoPersona.value ? t(`bank.role.${demoPersona
         <BankQueueTable
           :inn="inn"
           :rows="myCards"
+          :now="now"
         />
       </section>
 
@@ -163,6 +167,7 @@ const roleLabel = computed(() => (demoPersona.value ? t(`bank.role.${demoPersona
         <BankQueueTable
           :inn="inn"
           :rows="colleaguesCards"
+          :now="now"
         />
       </section>
     </template>

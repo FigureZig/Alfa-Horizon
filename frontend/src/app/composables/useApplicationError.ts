@@ -33,7 +33,14 @@ export function useApplicationError() {
       return [problem?.detail, blockers[0]?.text].filter(Boolean).join(': ')
     }
 
-    return t(`application.errors.${(code && ERROR_KEYS[code]) || 'generic'}`)
+    if (code && ERROR_KEYS[code]) return t(`application.errors.${ERROR_KEYS[code]}`)
+
+    // Незнакомый код: бэкенд объясняет ошибку по-человечески — показываем его текст, а не общее «не удалось»
+    const detail = getApiProblem(err)?.detail
+
+    return typeof detail === 'string' && detail
+      ? detail.charAt(0).toUpperCase() + detail.slice(1)
+      : t('application.errors.generic')
   }
 
   return { getApplicationErrorMessage }

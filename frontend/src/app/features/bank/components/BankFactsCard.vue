@@ -20,7 +20,7 @@ const emit = defineEmits<{
 }>()
 
 const { t, te } = useI18n({ useScope: 'global' })
-const { formatCurrency, formatPercent, formatDate, formatDateTime } = useFormatters()
+const { formatAge, formatCurrency, formatPercent, formatDate, formatDateTime } = useFormatters()
 
 const isSkeletonVisible = computed(() => props.isLoading && !props.dossier)
 
@@ -45,7 +45,7 @@ const companyRows = computed(() => {
         ? formatDate(facts.registeredAt, { day: 'numeric', month: 'long', year: 'numeric' })
         : t('bank.facts.noData'),
     },
-    { key: 'age', label: t('bank.facts.age'), value: valueOrDash(facts.ageMonths, (value) => t('application.term', value)) },
+    { key: 'age', label: t('bank.facts.age'), value: valueOrDash(facts.ageMonths, formatAge) },
     {
       key: 'okved',
       label: t('bank.facts.okved'),

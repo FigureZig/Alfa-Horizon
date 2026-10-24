@@ -37,8 +37,9 @@ export function useSession() {
     return signInWith(() => sandboxService.loginAsPersona($fetch, personaId, locale.value as AppLocale))
   }
 
-  async function loginAsPersona(personaId: string): Promise<SandboxPersonaInterface> {
-    return (await signIn(personaId)).persona
+  // Вход без перехода: кто вошёл и его права — куда вести, решает вызывающий (панель проверяющего)
+  function loginAsPersona(personaId: string): Promise<{ persona: SandboxPersonaInterface, companies: CompanyAccessInterface[] }> {
+    return signIn(personaId)
   }
 
   // Куда вести после входа: решают права из ответа входа, а не роль на глаз
@@ -65,13 +66,6 @@ export function useSession() {
     await router.push(getEntryRoute(persona, companies))
   }
 
-  // Вход по ID, ИНН человека или ИНН компании: поле «Вход по ID» для проверяющих
-  async function enterCabinetByLogin(login: string): Promise<void> {
-    const { persona, companies } = await signInWith(() => authService.login($fetch, login, locale.value))
-
-    await router.push(getEntryRoute(persona, companies))
-  }
-
   async function logout() {
     try {
       await authService.logout($fetch)
@@ -83,5 +77,5 @@ export function useSession() {
     }
   }
 
-  return { loginAsPersona, enterCabinet, enterCabinetByLogin, logout }
+  return { loginAsPersona, enterCabinet, logout }
 }

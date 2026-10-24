@@ -25,4 +25,6 @@ export interface CompanyOfferOptionInterface {
 export interface CompanyOffersInterface {
   blockers: CompanyBlockerInterface[]
   options: CompanyOfferOptionInterface[]
+  // Банк уже видел кредитную историю: суммы и ставки не предварительные
+  isBkiKnown: boolean
 }

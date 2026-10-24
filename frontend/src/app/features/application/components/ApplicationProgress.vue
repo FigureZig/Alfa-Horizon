@@ -1,44 +1,27 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ApplicationDetailStatusEnum } from '@/app/types/application/application-detail-status-enum'
 
 const STEPS = ['submitted', 'checking', 'decision', 'signing', 'issued'] as const
 
-// Номер шага, на котором сейчас заявка (статусы дозапроса и ручного рассмотрения — это всё ещё проверка)
-const STATUS_STEP: Partial<Record<ApplicationDetailStatusEnum, number>> = {
-  [ApplicationDetailStatusEnum.Draft]: -1,
-  [ApplicationDetailStatusEnum.Submitted]: 0,
-  [ApplicationDetailStatusEnum.Checking]: 1,
-  [ApplicationDetailStatusEnum.InfoRequested]: 1,
-  [ApplicationDetailStatusEnum.UnderReview]: 1,
-  [ApplicationDetailStatusEnum.Offered]: 2,
-  [ApplicationDetailStatusEnum.Signing]: 3,
-  [ApplicationDetailStatusEnum.Signed]: 4,
-  [ApplicationDetailStatusEnum.Disbursing]: 4,
-  [ApplicationDetailStatusEnum.Issued]: 5,
-}
-
 const props = defineProps<{
-  status: ApplicationDetailStatusEnum
+  // Номер текущего шага: -1 — черновик, 5 — всё пройдено
+  step: number
+  // Что происходит внутри шага: «голосуют участники», «у специалиста»
+  substep: string
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
 
-const currentStep = computed(() => STATUS_STEP[props.status])
-
-// Для отказа, отзыва и истёкших сроков линейный путь не показываем
-const isVisible = computed(() => currentStep.value !== undefined)
-
 const steps = computed(() =>
   STEPS.map((step, index) => {
-    const current = currentStep.value ?? -1
-    const isDone = index < current
-    const isActive = index === current
+    const isDone = index < props.step
+    const isActive = index === props.step
 
     return {
       key: step,
       label: t(`application.progress.${step}`),
+      substep: isActive ? props.substep : '',
       isDone,
       isActive,
       markerClass: isDone
@@ -54,23 +37,22 @@ const steps = computed(() =>
 
 <template>
   <ol
-    v-if="isVisible"
     class="grid grid-cols-5 gap-1"
     :aria-label="t('application.progress.label')"
   >
     <li
-      v-for="(step, index) in steps"
-      :key="step.key"
+      v-for="(item, index) in steps"
+      :key="item.key"
       class="flex min-w-0 flex-col items-center gap-2 text-center"
-      :aria-current="step.isActive ? 'step' : undefined"
+      :aria-current="item.isActive ? 'step' : undefined"
     >
       <span
         class="flex size-8 items-center justify-center rounded-full text-xs font-bold
                transition-colors duration-300 motion-reduce:transition-none"
-        :class="step.markerClass"
+        :class="item.markerClass"
       >
         <i
-          v-if="step.isDone"
+          v-if="item.isDone"
           class="pi pi-check text-xs"
           aria-hidden="true"
         />
@@ -79,11 +61,20 @@ const steps = computed(() =>
         </template>
       </span>
 
-      <span
-        class="w-full truncate text-[11px] font-medium sm:text-xs"
-        :class="step.labelClass"
-      >
-        {{ step.label }}
+      <span class="flex w-full min-w-0 flex-col">
+        <span
+          class="truncate text-[11px] font-medium sm:text-xs"
+          :class="item.labelClass"
+        >
+          {{ item.label }}
+        </span>
+
+        <span
+          v-if="item.substep"
+          class="mt-0.5 text-[10px] leading-tight text-fino-text-muted sm:text-[11px]"
+        >
+          {{ item.substep }}
+        </span>
       </span>
     </li>
   </ol>

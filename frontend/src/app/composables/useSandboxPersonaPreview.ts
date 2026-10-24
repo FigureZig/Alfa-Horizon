@@ -43,6 +43,8 @@ export interface SandboxPersonaConflictInterface {
 export function useSandboxPersonaPreview(
   form: MaybeRefOrGetter<SandboxPersonaFormInterface>,
   personaId: MaybeRefOrGetter<Nullable<string>>,
+  // Пока человек отвечает на первые вопросы, банк не считает: предпросмотр появляется после них
+  isEnabled: MaybeRefOrGetter<boolean> = true,
 ) {
   const $fetch = useApiFetch()
   const { locale } = useI18n({ useScope: 'global' })
@@ -96,7 +98,11 @@ export function useSandboxPersonaPreview(
 
   const loadPreviewDebounced = debounce(loadPreview, PREVIEW_DEBOUNCE)
 
-  watch([() => toValue(form), locale], loadPreviewDebounced, { deep: true, immediate: true })
+  function onAnswersChange() {
+    if (toValue(isEnabled)) loadPreviewDebounced()
+  }
+
+  watch([() => toValue(form), locale, () => toValue(isEnabled)], onAnswersChange, { deep: true, immediate: true })
 
   onBeforeUnmount(() => loadPreviewDebounced.cancel())
 

@@ -8,33 +8,45 @@ const props = defineProps<{
   option: CompanyOfferOptionInterface
   // Рекомендованный вариант: крупно и с акцентом
   isFeatured: boolean
+  // Банк ещё не видел кредитную историю: сумма — «до», ставка — предварительная
+  isPreliminary: boolean
+  // Расчёт платежа раскрыт внутри этого варианта
+  isCalculatorOpen: boolean
+  // Подсветка после «Пусть банк подберёт»: вариант, который выбрал бы банк
+  isHighlighted?: boolean
 }>()
 
 const emit = defineEmits<{
-  apply: [option: CompanyOfferOptionInterface]
-  calculate: [option: CompanyOfferOptionInterface]
+  select: [option: CompanyOfferOptionInterface]
+  toggleCalculator: [option: CompanyOfferOptionInterface]
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
-const { formatCurrency, formatPercent } = useFormatters()
+const { formatCurrency, formatPercent, formatTerm } = useFormatters()
 
 // Сумма под запрос, а без него — максимум по данным банка
 const shownAmount = computed(() => props.option.amount ?? props.option.maxAmount)
 
+// Без кредитной истории сумма — потолок, а не обещание
 const amountText = computed(() => {
   if (shownAmount.value === null) return ''
 
-  return props.option.amount !== null
-    ? formatCurrency(shownAmount.value, 'RUB')
-    : t('credits.options.upTo', { amount: formatCurrency(shownAmount.value, 'RUB') })
+  const amount = formatCurrency(shownAmount.value, 'RUB')
+
+  return props.option.amount !== null && !props.isPreliminary ? amount : t('credits.options.upTo', { amount })
 })
 
 const conditions = computed(() => {
   const { rate, payment, termMonths, isRevolving } = props.option
   const parts: string[] = []
 
-  if (rate !== null) parts.push(t('credits.options.rate', { rate: formatPercent(rate) }))
-  if (termMonths !== null) parts.push(t('application.term', termMonths))
+  if (rate !== null) {
+    const rateText = t('credits.options.rate', { rate: formatPercent(rate) })
+
+    parts.push(props.isPreliminary ? t('credits.options.ratePreliminary', { rate: rateText }) : rateText)
+  }
+
+  if (termMonths !== null) parts.push(formatTerm(termMonths))
   if (payment !== null && !isRevolving) parts.push(t('credits.options.payment', { payment: formatCurrency(payment, 'RUB') }))
 
   return parts.join(' · ')
@@ -46,21 +58,23 @@ const stateClass = computed(() =>
     : 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
 )
 
-function handleApply() {
-  emit('apply', props.option)
+function handleSelect() {
+  emit('select', props.option)
 }
 
-function handleCalculate() {
-  emit('calculate', props.option)
+function handleToggleCalculator() {
+  emit('toggleCalculator', props.option)
 }
 </script>
 
 <template>
   <article
-    class="flex min-w-0 flex-col gap-4 rounded-3xl border p-5 shadow-sm sm:p-6"
-    :class="isFeatured
-      ? 'border-primary/30 bg-linear-to-br from-fino-accent to-fino-surface'
-      : 'border-fino-border bg-fino-surface'"
+    class="flex min-w-0 flex-col gap-4 rounded-3xl border p-5 shadow-sm transition-shadow duration-500 sm:p-6
+           motion-reduce:transition-none"
+    :class="[
+      isFeatured ? 'border-primary/30 bg-linear-to-br from-fino-accent to-fino-surface' : 'border-fino-border bg-fino-surface',
+      { 'ring-4 ring-primary/20': isHighlighted },
+    ]"
   >
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div class="min-w-0">
@@ -118,17 +132,18 @@ function handleCalculate() {
       </li>
     </ul>
 
-    <div class="flex flex-col gap-2 sm:flex-row">
+    <!-- Одно действие: выбрать вариант; расчёт — по запросу, внутри варианта -->
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
       <button
         type="button"
         class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm
                font-semibold text-primary-contrast transition-all duration-200 hover:opacity-90 active:scale-95
                focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
                motion-reduce:transition-none"
-        :aria-label="t('credits.options.applyLabel', { name: option.name })"
-        @click="handleApply"
+        :aria-label="t('credits.options.selectLabel', { name: option.name })"
+        @click="handleSelect"
       >
-        {{ t('credits.options.apply') }}
+        {{ t('credits.options.select') }}
         <i
           class="pi pi-arrow-right text-xs"
           aria-hidden="true"
@@ -137,18 +152,27 @@ function handleCalculate() {
 
       <button
         type="button"
-        class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-fino-border
-               bg-fino-surface px-5 text-sm font-semibold text-fino-text transition-colors duration-200
-               hover:bg-fino-surface-hover focus-visible:outline-2 focus-visible:outline-primary
-               motion-reduce:transition-none"
-        @click="handleCalculate"
+        class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 text-sm
+               font-semibold text-fino-text-muted transition-colors duration-200 hover:bg-fino-surface-hover
+               hover:text-fino-text focus-visible:outline-2 focus-visible:outline-primary motion-reduce:transition-none"
+        :aria-expanded="isCalculatorOpen"
+        @click="handleToggleCalculator"
       >
+        {{ t('credits.options.calculate') }}
         <i
-          class="pi pi-calculator text-xs"
+          class="pi pi-chevron-down text-xs transition-transform duration-200 motion-reduce:transition-none"
+          :class="{ 'rotate-180': isCalculatorOpen }"
           aria-hidden="true"
         />
-        {{ t('credits.options.calculate') }}
       </button>
+    </div>
+
+    <!-- Расчёт платежа и график — для выбранного варианта -->
+    <div
+      v-if="isCalculatorOpen"
+      class="border-t border-fino-border pt-5"
+    >
+      <slot name="calculator" />
     </div>
   </article>
 </template>

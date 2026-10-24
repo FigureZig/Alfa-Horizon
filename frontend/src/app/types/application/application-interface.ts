@@ -6,6 +6,7 @@ import type { ApplicationVoteEnum } from '@/app/types/application/application-vo
 import type { ApprovalStatusEnum } from '@/app/types/application/approval-status-enum'
 import type { CreditGoalEnum } from '@/app/types/application/credit-goal-enum'
 import type { CreditProductCodeEnum } from '@/app/types/application/credit-product-code-enum'
+import type { DecisionKindEnum } from '@/app/types/application/decision-kind-enum'
 import type { DecisionOfferKindEnum } from '@/app/types/application/decision-offer-kind-enum'
 import type { DecisionOutcomeEnum } from '@/app/types/application/decision-outcome-enum'
 import type { SigningModeEnum } from '@/app/types/application/signing-mode-enum'
@@ -39,6 +40,7 @@ export interface ApplicationReasonInterface {
 
 export interface ApplicationDecisionInterface {
   outcome: DecisionOutcomeEnum
+  kind: Nullable<DecisionKindEnum>
   offerKind: Nullable<DecisionOfferKindEnum>
   counter: string[]
   conditions: string[]
@@ -88,7 +90,8 @@ export interface ApplicationApprovalInterface {
 
 export interface ApplicationLoanInterface {
   isLimit: boolean
-  number: string
+  // Номер договора; у кредитов, выданных до появления номеров, его нет
+  number: Nullable<string>
   loanId: string
   amount: number
   rate: number
@@ -102,6 +105,11 @@ export interface ApplicationDeadlineInterface {
   then: ApplicationDetailStatusEnum
 }
 
+export interface ApplicationCreatorInterface {
+  inn: string
+  name: string
+}
+
 export interface ApplicationInterface {
   id: string
   companyInn: string
@@ -109,6 +117,7 @@ export interface ApplicationInterface {
   flags: ApplicationFlagEnum[]
   createdAt: string
   updatedAt: string
+  createdBy: Nullable<ApplicationCreatorInterface>
   request: ApplicationRequestInterface
   consentBki: boolean
   decision: Nullable<ApplicationDecisionInterface>

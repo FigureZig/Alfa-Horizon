@@ -11,14 +11,17 @@ import ApplicationTimeline from '@/app/features/application/components/Applicati
 import BankConfirmPanel from '@/app/features/bank/components/BankConfirmPanel.vue'
 import BankDecisionNote from '@/app/features/bank/components/BankDecisionNote.vue'
 import BankDecisionPanel from '@/app/features/bank/components/BankDecisionPanel.vue'
+import BankEngineProposal from '@/app/features/bank/components/BankEngineProposal.vue'
 import BankFactsCard from '@/app/features/bank/components/BankFactsCard.vue'
 import BankSlaBadge from '@/app/features/bank/components/BankSlaBadge.vue'
 import { useApplication } from '@/app/composables/useApplication'
 import { useApplicationExplanation } from '@/app/composables/useApplicationExplanation'
 import { useBankDecision } from '@/app/composables/useBankDecision'
 import { useBankDossier } from '@/app/composables/useBankDossier'
+import { useBankNextApplication } from '@/app/composables/useBankNextApplication'
 import { useCompanyNames } from '@/app/composables/useCompanyNames'
 import { useFormatters } from '@/app/composables/useFormatters'
+import { useWorldClock } from '@/app/composables/useWorldClock'
 import { ApplicationActionEnum } from '@/app/types/application/application-action-enum'
 import { ApplicationDetailStatusEnum } from '@/app/types/application/application-detail-status-enum'
 
@@ -31,8 +34,12 @@ const props = defineProps<{
 
 const { t } = useI18n({ useScope: 'global' })
 const route = useRoute()
-const { formatCurrency } = useFormatters()
+const { formatCurrency, formatTerm } = useFormatters()
 const { getCompanyName } = useCompanyNames()
+// Срок рассмотрения — отсчётом по часам мира
+const { now } = useWorldClock()
+// После решения — сразу следующая заявка в очереди
+const { nextItem, isShown: isNextShown, loadNext } = useBankNextApplication(() => props.applicationId)
 
 const {
   application,
@@ -82,30 +89,43 @@ const requestRows = computed(() => {
   return [
     { key: 'product', label: t('bank.dossier.product'), value: t(`application.product.${request.product}`) },
     { key: 'amount', label: t('bank.dossier.amount'), value: formatCurrency(request.amount, 'RUB') },
-    { key: 'term', label: t('bank.dossier.term'), value: request.termMonths ? t('application.term', request.termMonths) : '—' },
+    { key: 'term', label: t('bank.dossier.term'), value: request.termMonths ? formatTerm(request.termMonths) : '—' },
     { key: 'goal', label: t('bank.dossier.goal'), value: request.goal ? t(`application.goal.${request.goal}`) : '—' },
     { key: 'consent', label: t('bank.dossier.consent'), value: application.value?.consentBki ? t('bank.dossier.yes') : t('bank.dossier.no') },
   ]
 })
 
-// Причины, из-за которых нужен человек, выделяем; остальные — для полноты досье
+// Причины, из-за которых нужен человек, — первыми и с акцентом; без повторяющейся метки над каждой
 const reasons = computed(() =>
-  (application.value?.decision?.reasons ?? []).map((reason) => ({
-    code: reason.code,
-    text: reason.text,
-    isManual: reason.kind === MANUAL_REASON_KIND,
-    kind: t(`bank.reasonKind.${reason.kind}`),
-  })),
+  (application.value?.decision?.reasons ?? [])
+    .map((reason) => ({ code: reason.code, text: reason.text, isManual: reason.kind === MANUAL_REASON_KIND }))
+    .sort((a, b) => Number(b.isManual) - Number(a.isManual)),
 )
+
+const nextRoute = computed(() =>
+  nextItem.value ? { name: 'bank-dossier', params: { inn: props.inn, applicationId: nextItem.value.id } } : null,
+)
+const nextTitle = computed(() => {
+  const item = nextItem.value
+
+  if (!item) return ''
+
+  return t('bank.next.item', {
+    name: getCompanyName.value(item.inn) || t('bank.queue.companyInn', { inn: item.inn }),
+    product: t(`application.product.${item.request.product}`),
+    amount: formatCurrency(item.request.amount, 'RUB'),
+  })
+})
+const queueRoute = computed(() => ({ name: 'bank-queue', params: { inn: props.inn } }))
 
 const notes = computed(() => [application.value?.pendingDecision, application.value?.bankDecision].flatMap((note) => (note ? [note] : [])))
 
-function handleDecide(form: Parameters<typeof decide>[0]) {
-  decide(form)
+async function handleDecide(form: Parameters<typeof decide>[0]) {
+  if (await decide(form)) loadNext()
 }
 
-function handleConfirm(form: Parameters<typeof confirm>[0]) {
-  confirm(form)
+async function handleConfirm(form: Parameters<typeof confirm>[0]) {
+  if (await confirm(form)) loadNext()
 }
 const isFromApplications = computed(() => route.query.from === 'applications')
 
@@ -180,6 +200,7 @@ const backLabel = computed(() => (isFromApplications.value ? t('bank.dossier.bac
             <BankSlaBadge
               :sla-until="isUnderReview ? application.slaUntil : null"
               :flags="application.flags"
+              :now="now"
             />
 
             <ApplicationStatusBadge :status="application.status" />
@@ -192,10 +213,73 @@ const backLabel = computed(() => (isFromApplications.value ? t('bank.dossier.bac
         />
       </div>
 
+      <!-- Решение принято — сразу следующая заявка, без возврата в очередь -->
+      <section
+        v-if="isNextShown"
+        class="flex animate-fade-up flex-col gap-3 rounded-3xl border border-green-500/30 bg-green-500/10 p-4
+               motion-reduce:animate-none sm:flex-row sm:items-center sm:justify-between sm:p-5"
+        role="status"
+      >
+        <div class="min-w-0">
+          <p class="text-sm font-semibold text-fino-text">
+            {{ t('bank.next.done') }}
+          </p>
+          <p class="mt-0.5 break-words text-sm text-fino-text-muted">
+            {{ nextItem ? nextTitle : t('bank.next.empty') }}
+          </p>
+        </div>
+
+        <RouterLink
+          :to="nextRoute ?? queueRoute"
+          class="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm
+                 font-semibold text-primary-contrast transition-all duration-200 hover:opacity-90 active:scale-95
+                 motion-reduce:transition-none
+                 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        >
+          {{ nextItem ? t('bank.next.open') : t('bank.next.toQueue') }}
+          <i
+            class="pi pi-arrow-right text-xs"
+            aria-hidden="true"
+          />
+        </RouterLink>
+      </section>
+
       <div class="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
         <div class="flex min-w-0 flex-col gap-6">
-          <!-- Сначала читаем: почему нужен человек и что просил клиент -->
+          <!-- 1. Почему нужен человек и что просил клиент -->
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <article class="flex min-w-0 flex-col gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
+              <h2 class="text-sm font-semibold text-fino-text">
+                {{ t('bank.dossier.reasons') }}
+              </h2>
+
+              <p
+                v-if="!reasons.length"
+                class="text-sm text-fino-text-muted"
+              >
+                {{ t('bank.dossier.noReasons') }}
+              </p>
+
+              <ul
+                v-else
+                class="flex flex-col gap-2"
+              >
+                <li
+                  v-for="reason in reasons"
+                  :key="reason.code"
+                  class="flex items-start gap-2 rounded-xl px-3 py-2 text-sm text-fino-text"
+                  :class="reason.isManual ? 'bg-fino-accent' : 'bg-fino-surface-secondary'"
+                >
+                  <i
+                    :class="reason.isManual ? 'pi pi-user text-primary' : 'pi pi-info-circle text-fino-text-muted'"
+                    class="mt-0.5 text-xs"
+                    aria-hidden="true"
+                  />
+                  <span class="min-w-0 break-words">{{ reason.text }}</span>
+                </li>
+              </ul>
+            </article>
+
             <article class="flex min-w-0 flex-col gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
               <h2 class="text-sm font-semibold text-fino-text">
                 {{ t('bank.dossier.request') }}
@@ -216,44 +300,23 @@ const backLabel = computed(() => (isFromApplications.value ? t('bank.dossier.bac
                 </div>
               </dl>
             </article>
-
-            <article class="flex min-w-0 flex-col gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
-              <h2 class="text-sm font-semibold text-fino-text">
-                {{ t('bank.dossier.reasons') }}
-              </h2>
-
-              <p
-                v-if="!reasons.length"
-                class="text-sm text-fino-text-muted"
-              >
-                {{ t('bank.dossier.noReasons') }}
-              </p>
-
-              <ul
-                v-else
-                class="flex flex-col gap-2"
-              >
-                <li
-                  v-for="reason in reasons"
-                  :key="reason.code"
-                  class="rounded-xl px-3 py-2 text-sm"
-                  :class="reason.isManual ? 'bg-fino-accent text-fino-text' : 'bg-fino-surface-secondary text-fino-text'"
-                >
-                  <p
-                    class="text-[11px] font-semibold uppercase tracking-wide"
-                    :class="reason.isManual ? 'text-primary' : 'text-fino-text-muted'"
-                  >
-                    {{ reason.kind }}
-                  </p>
-
-                  <p class="mt-0.5 break-words">
-                    {{ reason.text }}
-                  </p>
-                </li>
-              </ul>
-            </article>
           </div>
-          <!-- Решение: набор элементов зависит от того, что бэкенд разрешил сотруднику -->
+
+          <!-- 2. Факты с источниками и свежестью — до решения -->
+          <BankFactsCard
+            :dossier="dossier"
+            :is-loading="isDossierLoading"
+            :has-error="dossierError"
+            @retry="loadDossier"
+          />
+
+          <!-- 3. Подсказка движка — свёрнута и после фактов: сначала своё суждение -->
+          <BankEngineProposal
+            v-if="canDecide"
+            :proposal="application.offer"
+          />
+
+          <!-- 4. Решение: набор элементов зависит от того, что бэкенд разрешил сотруднику -->
           <section
             class="flex min-w-0 flex-col gap-5 rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm sm:p-6"
             :aria-label="t('bank.decision.title')"
@@ -268,7 +331,6 @@ const backLabel = computed(() => (isFromApplications.value ? t('bank.dossier.bac
             <BankDecisionPanel
               v-else-if="canDecide"
               :key="application.id"
-              :proposal="application.offer"
               :request="application.request"
               :pending-command="pendingCommand"
               @decide="handleDecide"
@@ -330,15 +392,11 @@ const backLabel = computed(() => (isFromApplications.value ? t('bank.dossier.bac
             @retry="loadExplanation"
           />
 
-          <BankFactsCard
-            :dossier="dossier"
-            :is-loading="isDossierLoading"
-            :has-error="dossierError"
-            @retry="loadDossier"
-          />
-
           <div class="rounded-3xl border border-fino-border bg-fino-surface p-5 shadow-sm">
-            <ApplicationTimeline :events="events" />
+            <ApplicationTimeline
+              :events="events"
+              :is-limit="application?.loan?.isLimit ?? false"
+            />
           </div>
         </aside>
       </div>

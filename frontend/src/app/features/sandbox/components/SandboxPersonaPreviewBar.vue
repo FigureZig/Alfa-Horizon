@@ -50,11 +50,15 @@ function handleShow() {
       :aria-label="t('sandbox.builder.preview.title')"
       @click="handleShow"
     >
-      <span
-        class="text-3xl font-bold tracking-tight"
-        :class="classTone"
-      >
-        {{ preview.riskClass }}
+      <!-- Риск словами, а не буквой класса -->
+      <span class="flex shrink-0 flex-col">
+        <span class="text-[11px] text-fino-text-muted">{{ t('sandbox.builder.preview.risk') }}</span>
+        <span
+          class="text-base font-bold tracking-tight first-letter:uppercase"
+          :class="classTone"
+        >
+          {{ t(`application.explanation.risk.${preview.riskClass}`) }}
+        </span>
       </span>
 
       <span class="min-w-0 flex-1">

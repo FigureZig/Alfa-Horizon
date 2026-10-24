@@ -1,48 +1,18 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useFormatters } from '@/app/composables/useFormatters'
-import { ApplicationDetailStatusEnum } from '@/app/types/application/application-detail-status-enum'
-import type { ApplicationDecisionInterface } from '@/app/types/application/application-interface'
-import type { Nullable } from '@/app/types/nullable'
+import type { ApplicationReasonInterface } from '@/app/types/application/application-interface'
 
-const props = defineProps<{
-  status: ApplicationDetailStatusEnum
-  decision: Nullable<ApplicationDecisionInterface>
-  slaUntil: Nullable<string>
+// Главную причину отказа называет шапка заявки; здесь — остальные причины и подсказки банка
+defineProps<{
+  reasons: ApplicationReasonInterface[]
+  hints: string[]
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
-const { formatDateTime } = useFormatters()
-
-// Заголовок и «что сейчас» показывает ApplicationHero; здесь только причины, подсказки и действия
-const slaText = computed(() =>
-  props.status === ApplicationDetailStatusEnum.UnderReview && props.slaUntil
-    ? t('application.statusPanel.sla', {
-      date: formatDateTime(props.slaUntil, { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }),
-    })
-    : '',
-)
-
-// Причины и подсказки показываем только при отказе
-const isRejected = computed(() => props.status === ApplicationDetailStatusEnum.Rejected)
-const reasons = computed(() => (isRejected.value ? props.decision?.reasons ?? [] : []))
-const hints = computed(() => (isRejected.value ? props.decision?.hints ?? [] : []))
 </script>
 
 <template>
-  <section class="flex flex-col gap-4 empty:hidden">
-    <p
-      v-if="slaText"
-      class="flex items-center gap-2 text-sm text-fino-text-muted"
-    >
-      <i
-        class="pi pi-clock text-xs"
-        aria-hidden="true"
-      />
-      {{ slaText }}
-    </p>
-
+  <section class="flex flex-col gap-4">
     <ul
       v-if="reasons.length"
       class="flex flex-col gap-2"
@@ -79,7 +49,5 @@ const hints = computed(() => (isRejected.value ? props.decision?.hints ?? [] : [
         </li>
       </ul>
     </div>
-
-    <slot />
   </section>
 </template>

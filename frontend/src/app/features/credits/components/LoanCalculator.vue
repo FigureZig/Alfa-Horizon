@@ -25,10 +25,16 @@ const props = defineProps<{
   selectedCode: Nullable<CreditProductCodeEnum>
   context: Nullable<LoanCalcContextInterface>
   isProductsLoading: boolean
+  // Внутри варианта подбора: продукт уже выбран, заявку подаёт кнопка «Выбрать» самого варианта
+  isEmbedded?: boolean
+  // Сумма и срок варианта — с них начинается расчёт
+  initialAmount?: Nullable<number>
+  initialTermMonths?: Nullable<number>
 }>()
 
 const emit = defineEmits<{
   selectProduct: [productCode: CreditProductCodeEnum]
+  change: [amount: Nullable<number>, termMonths: Nullable<number>]
 }>()
 
 const { t, locale } = useI18n({ useScope: 'global' })
@@ -144,18 +150,24 @@ const applyRoute = computed(() => ({
   },
 }))
 
-// При выборе продукта подставляем предодобренные условия, иначе — минимум продукта
+// При выборе продукта подставляем условия варианта или предодобренные, иначе — минимум продукта
 function applyProductDefaults() {
   const product = selectedProduct.value
 
   if (!product) return
 
-  form.amount = preApproved.value
-    ? Math.min(Math.max(preApproved.value.amount, product.amountMin), product.amountMax)
-    : product.amountMin
-  form.termMonths = preApproved.value
-    ? Math.min(Math.max(preApproved.value.termMonths, product.termMonthsMin), product.termMonthsMax)
-    : product.termMonthsMin
+  const amount = props.initialAmount ?? preApproved.value?.amount ?? null
+  const termMonths = props.initialTermMonths ?? preApproved.value?.termMonths ?? null
+
+  form.amount = amount === null ? product.amountMin : Math.min(Math.max(amount, product.amountMin), product.amountMax)
+  form.termMonths = termMonths === null
+    ? product.termMonthsMin
+    : Math.min(Math.max(termMonths, product.termMonthsMin), product.termMonthsMax)
+}
+
+// Сумму и срок, которые человек подобрал здесь, вариант возьмёт в заявку
+function emitChange() {
+  emit('change', form.amount, form.termMonths)
 }
 
 function handleProductChange(productCode: CreditProductCodeEnum) {
@@ -164,11 +176,12 @@ function handleProductChange(productCode: CreditProductCodeEnum) {
 
 // Условия подставляем при выборе продукта (и когда каталог догрузился); позднее предодобрение введённое не затирает
 watch(() => selectedProduct.value?.code, applyProductDefaults, { immediate: true })
+watch(() => [form.amount, form.termMonths], emitChange)
 </script>
 
 <template>
   <section class="flex flex-col gap-6">
-    <div>
+    <div v-if="!isEmbedded">
       <h2 class="text-lg font-bold tracking-tight text-fino-text">
         {{ t('credits.calculator.title') }}
       </h2>
@@ -178,8 +191,12 @@ watch(() => selectedProduct.value?.code, applyProductDefaults, { immediate: true
       </p>
     </div>
 
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <div
+      class="grid grid-cols-1 gap-4 sm:grid-cols-2"
+      :class="{ 'xl:grid-cols-3': !isEmbedded }"
+    >
       <SandboxPersonaField
+        v-if="!isEmbedded"
         class="sm:col-span-2 xl:col-span-1"
         input-id="calc-product"
         :label="t('credits.calculator.product')"
@@ -349,6 +366,7 @@ watch(() => selectedProduct.value?.code, applyProductDefaults, { immediate: true
         />
 
         <RouterLink
+          v-if="!isEmbedded"
           :to="applyRoute"
           class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3
                  text-sm font-semibold text-primary-contrast transition-all duration-200
