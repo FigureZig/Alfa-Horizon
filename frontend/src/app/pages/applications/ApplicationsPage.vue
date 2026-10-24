@@ -1,11 +1,21 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppErrorState from '@/app/components/AppErrorState.vue'
 import ApplicationCard from '@/app/features/application/components/ApplicationCard.vue'
 import ApplicationCardSkeleton from '@/app/features/application/components/ApplicationCardSkeleton.vue'
 import { useApplications } from '@/app/composables/useApplications'
+import { ApplicationDetailStatusEnum } from '@/app/types/application/application-detail-status-enum'
 
 const APPLICATION_SKELETON_COUNT = 3
+// Заявка закончилась: денег выдали, отказали, отозвали или срок предложения вышел
+const CLOSED_STATUSES: ApplicationDetailStatusEnum[] = [
+  ApplicationDetailStatusEnum.Issued,
+  ApplicationDetailStatusEnum.Rejected,
+  ApplicationDetailStatusEnum.Declined,
+  ApplicationDetailStatusEnum.Withdrawn,
+  ApplicationDetailStatusEnum.Expired,
+]
 
 const props = defineProps<{
   inn: string
@@ -13,6 +23,18 @@ const props = defineProps<{
 
 const { t } = useI18n({ useScope: 'global' })
 const { applications, isLoading, error, loadApplications } = useApplications(() => props.inn)
+
+// Сначала то, что ждёт человека, потом — что ждёт банк, в конце — история
+const groups = computed(() => {
+  const needsAction = applications.value.filter((application) => application.availableActions.length > 0)
+  const rest = applications.value.filter((application) => !application.availableActions.length)
+
+  return [
+    { key: 'needsAction', items: needsAction },
+    { key: 'inProgress', items: rest.filter((application) => !CLOSED_STATUSES.includes(application.status)) },
+    { key: 'closed', items: rest.filter((application) => CLOSED_STATUSES.includes(application.status)) },
+  ].filter((group) => group.items.length)
+})
 </script>
 
 <template>
@@ -93,21 +115,44 @@ const { applications, isLoading, error, loadApplications } = useApplications(() 
       </RouterLink>
     </div>
 
-    <ul
+    <div
       v-else
-      class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
+      class="flex flex-col gap-8"
     >
-      <li
-        v-for="application in applications"
-        :key="application.id"
-        class="flex"
+      <section
+        v-for="group in groups"
+        :key="group.key"
+        class="flex flex-col gap-3"
+        :aria-labelledby="`applications-${group.key}`"
       >
-        <ApplicationCard
-          class="w-full"
-          :application="application"
-          :inn="inn"
-        />
-      </li>
-    </ul>
+        <div>
+          <h2
+            :id="`applications-${group.key}`"
+            class="flex items-center gap-2 text-lg font-bold tracking-tight text-fino-text"
+          >
+            {{ t(`application.groups.${group.key}.title`) }}
+            <span class="text-fino-text-muted">· {{ group.items.length }}</span>
+          </h2>
+
+          <p class="mt-0.5 text-sm text-fino-text-muted">
+            {{ t(`application.groups.${group.key}.hint`) }}
+          </p>
+        </div>
+
+        <ul class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <li
+            v-for="application in group.items"
+            :key="application.id"
+            class="flex"
+          >
+            <ApplicationCard
+              class="w-full"
+              :application="application"
+              :inn="inn"
+            />
+          </li>
+        </ul>
+      </section>
+    </div>
   </div>
 </template>

@@ -85,7 +85,20 @@ export default {
     },
     login: {
         title: 'Sign in to Fino Business',
-        description: 'You are already a bank client — choose a company and who to sign in as. No login or password needed.',
+        description: 'This is a bank demo: no login or password needed. Pick a company and a person to open their workspace.',
+        companiesTitle: 'Sign in as',
+        steps: {
+            pick: { title: 'Pick who to sign in as', text: 'A client — director, accountant or company member. Or a bank employee.' },
+            act: { title: 'Work in the workspace', text: 'Clients pick a loan and track applications; the bank works the queue and decides.' },
+            switch: { title: 'Switch roles', text: 'The “Switch” button in the header brings you back here to sign in as someone else.' },
+        },
+        scenarios: {
+            title: 'Ready-made test scenarios',
+            description: 'Step-by-step checks with role switching: who signs in, what to click and which status to expect.',
+            jump: 'Testing the product? Start with the ready-made scenarios',
+            steps: '{n} step | {n} steps',
+            start: 'Walk through',
+        },
         listLabel: 'Users',
         ownCompany: {
             title: 'Your own company',
@@ -177,7 +190,7 @@ export default {
             readme: 'README',
         },
         hint: {
-            text: 'For reviewers: role scenarios, world clock and events. Details are in the README.',
+            text: 'For reviewers: step-by-step role scenarios, world clock and events live here.',
             ok: 'Got it',
         },
     },
@@ -327,6 +340,11 @@ export default {
         createdAt: 'created {date}',
         updated: 'Updated {date}',
         needsAction: 'Action needed',
+        groups: {
+            needsAction: { title: 'Needs your action', hint: 'Submit, sign, answer the bank or accept an offer.' },
+            inProgress: { title: 'With the bank', hint: 'The bank is checking or disbursing — nothing needed from you yet.' },
+            closed: { title: 'Closed', hint: 'Issued, rejected, withdrawn and expired applications.' },
+        },
         deadlineUntil: 'Valid until {date}',
         term: '{n} month | {n} months',
         actions: {
@@ -862,6 +880,8 @@ export default {
             empty: 'The queue is empty',
             emptyHint: 'The engine decided every submitted application automatically — no specialist was needed.',
             toMetrics: 'View pipeline metrics',
+            howToFill: 'A specialist gets an application the engine could not decide: an investment loan, conflicting registry data or an amount above the threshold. Walk through a scenario with a specialist to get one here.',
+            openScenarios: 'Scenarios with a specialist',
             loadError: 'Failed to load the application queue.',
             companyInn: 'TIN {inn}',
             columns: {
@@ -1031,6 +1051,8 @@ export default {
         },
         caption: 'User',
         logout: 'Sign out',
+        switchUser: 'Switch user',
+        switchShort: 'Switch',
     },
     credits: {
         title: 'Find a loan',
