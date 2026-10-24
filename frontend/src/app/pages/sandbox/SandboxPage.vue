@@ -8,9 +8,9 @@ import AppErrorState from '@/app/components/AppErrorState.vue'
 import AppHeader from '@/app/components/layout/AppHeader.vue'
 import SandboxCompanyTile from '@/app/features/sandbox/components/SandboxCompanyTile.vue'
 import SandboxPersonaCardSkeleton from '@/app/features/sandbox/components/SandboxPersonaCardSkeleton.vue'
-import SandboxScenarioShortcuts from '@/app/features/sandbox/components/SandboxScenarioShortcuts.vue'
 import { useApiFetch } from '@/app/composables/useApiFetch'
-import { useSession } from '@/app/composables/useSession'
+import { useReviewerPanel } from '@/app/composables/useReviewerPanel'
+import { readLastPersonaId, useSession } from '@/app/composables/useSession'
 import { sandboxService } from '@/app/services/sandbox/sandbox.service'
 import { SandboxMapper } from '@/app/mappers/sandbox.mapper'
 import { SandboxPersonaKindEnum } from '@/app/types/sandbox/sandbox-persona-kind-enum'
@@ -20,12 +20,6 @@ import type { SandboxPersonaGroupInterface } from '@/app/types/sandbox/sandbox-p
 import type { SandboxPersonaInterface } from '@/app/types/sandbox/sandbox-persona-interface'
 
 const PERSONA_SKELETON_COUNT = 7
-// Как устроен вход — три шага над плитками
-const STEPS = [
-  { key: 'pick', icon: 'pi pi-building' },
-  { key: 'act', icon: 'pi pi-briefcase' },
-  { key: 'switch', icon: 'pi pi-users' },
-] as const
 // Сколько компаний видно сразу: остальные — по кнопке «Ещё N компаний»
 const VISIBLE_COMPANIES = 6
 // Создатель своей компании — id вида c12, её люди — c12-p1: удаляют и правят компанию через создателя
@@ -36,6 +30,9 @@ const router = useRouter()
 const toast = useToast()
 const $fetch = useApiFetch()
 const { enterCabinet } = useSession()
+const { openPanel } = useReviewerPanel()
+
+const lastPersonaId = readLastPersonaId()
 
 const personas = ref<SandboxPersonaInterface[]>([])
 const isLoading = ref(false)
@@ -79,8 +76,13 @@ const groups = computed<SandboxPersonaGroupInterface[]>(() => {
 // Плитка = компания: свои компании первыми, сотрудники банка — отдельной плиткой в конце
 const companyGroups = computed(() => groups.value.filter((group) => !group.isBank))
 const bankGroup = computed(() => groups.value.find((group) => group.isBank) ?? null)
+// Компания, в которую входили в прошлый раз, — первой: к ней чаще всего возвращаются
+const orderedCompanies = computed(() => [...companyGroups.value].sort((first, second) =>
+  Number(second.personas.some((persona) => persona.id === lastPersonaId))
+  - Number(first.personas.some((persona) => persona.id === lastPersonaId)),
+))
 const visibleCompanies = computed(() =>
-  isAllCompaniesVisible.value ? companyGroups.value : companyGroups.value.slice(0, VISIBLE_COMPANIES),
+  isAllCompaniesVisible.value ? orderedCompanies.value : orderedCompanies.value.slice(0, VISIBLE_COMPANIES),
 )
 const hiddenCount = computed(() => companyGroups.value.length - visibleCompanies.value.length)
 
@@ -135,6 +137,11 @@ async function loginAsPersona(persona: SandboxPersonaInterface) {
   } finally {
     isLoggingIn.value = false
   }
+}
+
+// Сценарии с шагами, входами и ожидаемыми статусами живут в панели «Как проверить»
+function openScenarios() {
+  openPanel()
 }
 
 function showAllCompanies() {
@@ -201,10 +208,10 @@ watch(locale, loadPersonas)
     </AppHeader>
 
     <!-- Снизу место под кнопку «Как проверить»: последнюю плитку она не закрывает -->
-    <main class="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 pt-6 pb-24 sm:gap-8 sm:px-6 sm:pt-10">
+    <main class="mx-auto flex max-w-[1600px] flex-col gap-8 px-4 pt-6 pb-24 sm:gap-10 sm:px-6 sm:pt-10">
       <div class="flex flex-col gap-5 motion-safe:animate-fade-up">
         <div class="max-w-2xl">
-          <h1 class="text-3xl font-bold tracking-tight text-fino-text sm:text-4xl">
+          <h1 class="text-3xl font-bold tracking-tight text-balance text-fino-text sm:text-4xl">
             {{ t('login.title') }}
           </h1>
 
@@ -213,170 +220,153 @@ watch(locale, loadPersonas)
           </p>
         </div>
 
-        <!-- Как это устроено: без этого непонятно, зачем выбирать человека и как потом сменить роль -->
-        <ol class="grid grid-cols-1 gap-3 md:grid-cols-3">
-          <li
-            v-for="(step, index) in STEPS"
-            :key="step.key"
-            class="flex items-start gap-3 rounded-2xl border border-fino-border bg-fino-surface p-4"
+        <!-- Два способа начать: по сценарию с подсказками или со своей компанией. Главный — сценарий -->
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-[3fr_2fr]">
+          <button
+            type="button"
+            class="group flex cursor-pointer items-center gap-4 rounded-3xl bg-primary p-5 text-left
+                   text-primary-contrast shadow-sm transition-shadow duration-200 hover:shadow-lg
+                   focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
+                   motion-reduce:transition-none sm:p-6"
+            @click="openScenarios"
           >
-            <span
-              class="flex size-8 shrink-0 items-center justify-center rounded-full bg-fino-accent text-sm font-bold
-                     text-primary"
-              aria-hidden="true"
-            >
-              {{ index + 1 }}
-            </span>
-
-            <span class="min-w-0">
-              <span class="block text-sm font-bold text-fino-text">{{ t(`login.steps.${step.key}.title`) }}</span>
-              <span class="mt-0.5 block text-xs leading-relaxed text-fino-text-muted">
-                {{ t(`login.steps.${step.key}.text`) }}
-              </span>
-            </span>
-          </li>
-        </ol>
-
-        <a
-          href="#login-scenarios"
-          class="inline-flex w-fit items-center gap-2 text-sm font-semibold text-primary transition-opacity
-                 hover:opacity-80 focus-visible:outline-2 focus-visible:outline-primary motion-reduce:transition-none"
-        >
-          <i
-            class="pi pi-compass"
-            aria-hidden="true"
-          />
-          {{ t('login.scenarios.jump') }}
-        </a>
-      </div>
-
-      <h2 class="-mb-2 text-xl font-bold tracking-tight text-fino-text sm:-mb-4">
-        {{ t('login.companiesTitle') }}
-      </h2>
-
-      <!-- Скелетоны при загрузке -->
-      <div
-        v-if="isLoading && !personas.length"
-        class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-        aria-busy="true"
-      >
-        <SandboxPersonaCardSkeleton
-          v-for="index in PERSONA_SKELETON_COUNT"
-          :key="index"
-        />
-      </div>
-
-      <AppErrorState
-        v-else-if="error"
-        :message="t('login.loadError')"
-        @retry="loadPersonas"
-      />
-
-      <div
-        v-else
-        class="flex flex-col gap-4"
-      >
-        <ul
-          class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-          :aria-label="t('login.listLabel')"
-        >
-          <!-- Своя компания — первой: главный способ попробовать кабинет на своём бизнесе -->
-          <li>
-            <RouterLink
-              :to="{ name: 'login-company' }"
-              class="group relative flex h-full flex-row items-center gap-4 overflow-hidden rounded-3xl bg-primary p-4
-                     text-primary-contrast shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg
-                     focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
-                     motion-reduce:transition-none motion-reduce:hover:translate-y-0
-                     sm:min-h-40 sm:flex-col sm:items-stretch sm:justify-between sm:p-5"
-            >
-              <div
-                class="pointer-events-none absolute -top-16 -right-14 size-44 rounded-full bg-white/10"
+            <span class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-xl">
+              <i
+                class="pi pi-compass"
                 aria-hidden="true"
               />
+            </span>
 
-              <div class="relative flex min-w-0 flex-1 items-start gap-3 sm:flex-none">
-                <span class="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-lg">
-                  <i
-                    class="pi pi-plus"
-                    aria-hidden="true"
-                  />
-                </span>
+            <span class="min-w-0 flex-1">
+              <span class="block text-lg font-bold tracking-tight">{{ t('login.start.scenario.title') }}</span>
+              <span class="mt-1 block text-sm leading-relaxed opacity-90">{{ t('login.start.scenario.text') }}</span>
+            </span>
 
-                <div class="min-w-0">
-                  <p class="text-base font-bold tracking-tight">
-                    {{ t('login.ownCompany.title') }}
-                  </p>
+            <i
+              class="pi pi-arrow-right shrink-0 transition-transform duration-200 group-hover:translate-x-1
+                     motion-reduce:transition-none"
+              aria-hidden="true"
+            />
+          </button>
 
-                  <p class="mt-1 line-clamp-2 text-sm leading-relaxed opacity-90">
-                    {{ t('login.ownCompany.text') }}
-                  </p>
-                </div>
-              </div>
-
-              <span
-                class="relative inline-flex min-h-11 w-fit shrink-0 items-center justify-center gap-2 rounded-xl bg-white
-                       px-3.5 text-sm font-semibold text-primary sm:px-4"
-              >
-                <span class="hidden sm:inline">{{ t('login.ownCompany.action') }}</span>
-                <i
-                  class="pi pi-arrow-right text-xs transition-transform duration-200 group-hover:translate-x-0.5"
-                  aria-hidden="true"
-                />
-              </span>
-            </RouterLink>
-          </li>
-
-          <li
-            v-for="group in visibleCompanies"
-            :key="group.key"
+          <RouterLink
+            :to="{ name: 'login-company' }"
+            class="group flex items-center gap-4 rounded-3xl border border-fino-border bg-fino-surface p-5
+                   transition-colors duration-200 hover:border-primary/50 focus-visible:outline-2
+                   focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none sm:p-6"
           >
-            <SandboxCompanyTile
-              :group="group"
-              :is-busy="isLoggingIn || isDeleting"
-              @login="loginAsPersona"
-              @edit="editGroup"
-              @delete="askDeleteGroup"
+            <span class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-fino-accent text-xl text-primary">
+              <i
+                class="pi pi-plus"
+                aria-hidden="true"
+              />
+            </span>
+
+            <span class="min-w-0 flex-1">
+              <span class="block text-lg font-bold tracking-tight text-fino-text">{{ t('login.start.own.title') }}</span>
+              <span class="mt-1 block text-sm leading-relaxed text-fino-text-muted">{{ t('login.start.own.text') }}</span>
+            </span>
+
+            <i
+              class="pi pi-arrow-right shrink-0 text-primary transition-transform duration-200 group-hover:translate-x-1
+                     motion-reduce:transition-none"
+              aria-hidden="true"
             />
-          </li>
-
-          <li v-if="bankGroup">
-            <SandboxCompanyTile
-              :group="bankGroup"
-              :is-busy="isLoggingIn || isDeleting"
-              @login="loginAsPersona"
-            />
-          </li>
-        </ul>
-
-        <button
-          v-if="hiddenCount"
-          type="button"
-          class="mx-auto inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-fino-border
-                 bg-fino-surface px-5 text-sm font-semibold text-fino-text transition-colors hover:bg-fino-surface-hover
-                 focus-visible:outline-2 focus-visible:outline-primary motion-reduce:transition-none"
-          @click="showAllCompanies"
-        >
-          {{ t('login.moreCompanies', hiddenCount) }}
-          <i
-            class="pi pi-chevron-down text-xs"
-            aria-hidden="true"
-          />
-        </button>
-
-        <p
-          v-if="isEmpty"
-          class="rounded-3xl border border-dashed border-fino-border bg-fino-surface px-6 py-12 text-center
-                 text-sm text-fino-text-muted"
-        >
-          {{ t('login.empty') }}
-        </p>
+          </RouterLink>
+        </div>
       </div>
 
-      <SandboxScenarioShortcuts
-        id="login-scenarios"
-        class="scroll-mt-28 pt-4"
-      />
+      <section
+        class="flex flex-col gap-4"
+        aria-labelledby="login-companies-title"
+      >
+        <div class="flex flex-col gap-1">
+          <h2
+            id="login-companies-title"
+            class="text-xl font-bold tracking-tight text-fino-text"
+          >
+            {{ t('login.companiesTitle') }}
+          </h2>
+
+          <p class="text-sm leading-relaxed text-fino-text-muted">
+            {{ t('login.companiesHint') }}
+          </p>
+        </div>
+
+        <!-- Скелетоны при загрузке -->
+        <div
+          v-if="isLoading && !personas.length"
+          class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          aria-busy="true"
+        >
+          <SandboxPersonaCardSkeleton
+            v-for="index in PERSONA_SKELETON_COUNT"
+            :key="index"
+          />
+        </div>
+
+        <AppErrorState
+          v-else-if="error"
+          :message="t('login.loadError')"
+          @retry="loadPersonas"
+        />
+
+        <div
+          v-else
+          class="flex flex-col gap-4"
+        >
+          <ul
+            class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            :aria-label="t('login.listLabel')"
+          >
+            <li
+              v-for="group in visibleCompanies"
+              :key="group.key"
+            >
+              <SandboxCompanyTile
+                :group="group"
+                :is-busy="isLoggingIn || isDeleting"
+                :last-persona-id="lastPersonaId"
+                @login="loginAsPersona"
+                @edit="editGroup"
+                @delete="askDeleteGroup"
+              />
+            </li>
+
+            <li v-if="bankGroup">
+              <SandboxCompanyTile
+                :group="bankGroup"
+                :is-busy="isLoggingIn || isDeleting"
+                :last-persona-id="lastPersonaId"
+                @login="loginAsPersona"
+              />
+            </li>
+          </ul>
+
+          <button
+            v-if="hiddenCount"
+            type="button"
+            class="mx-auto inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-fino-border
+                   bg-fino-surface px-5 text-sm font-semibold text-fino-text transition-colors hover:bg-fino-surface-hover
+                   focus-visible:outline-2 focus-visible:outline-primary motion-reduce:transition-none"
+            @click="showAllCompanies"
+          >
+            {{ t('login.moreCompanies', hiddenCount) }}
+            <i
+              class="pi pi-chevron-down text-xs"
+              aria-hidden="true"
+            />
+          </button>
+
+          <p
+            v-if="isEmpty"
+            class="rounded-3xl border border-dashed border-fino-border bg-fino-surface px-6 py-12 text-center
+                   text-sm text-fino-text-muted"
+          >
+            {{ t('login.empty') }}
+          </p>
+        </div>
+      </section>
     </main>
 
     <Dialog

@@ -4,31 +4,36 @@ import {
 } from 'vue-router'
 
 import DashboardLayout from '@/app/layouts/DashboardLayout.vue'
-import DashboardPage from '@/app/pages/dashboard/DashboardPage.vue'
-import CreditsPage from '@/app/pages/credits/CreditsPage.vue'
-import ApplicationsPage from '@/app/pages/applications/ApplicationsPage.vue'
-import ApplicationNewPage from '@/app/pages/applications/ApplicationNewPage.vue'
-import ApplicationPage from '@/app/pages/applications/ApplicationPage.vue'
-import BankDossierPage from '@/app/pages/bank/BankDossierPage.vue'
-import BankApplicationsPage from '@/app/pages/bank/BankApplicationsPage.vue'
-import BankMetricsPage from '@/app/pages/bank/BankMetricsPage.vue'
-import BankQueuePage from '@/app/pages/bank/BankQueuePage.vue'
-import VotePage from '@/app/pages/votes/VotePage.vue'
-import VotesPage from '@/app/pages/votes/VotesPage.vue'
-import ErrorPage from "@/app/pages/error/ErrorPage.vue";
-import LandingPage from '@/app/pages/landing/LandingPage.vue'
-import SandboxPage from '@/app/pages/sandbox/SandboxPage.vue'
-import SandboxPersonaBuilderPage from '@/app/pages/sandbox/SandboxPersonaBuilderPage.vue'
+
+declare module 'vue-router' {
+    interface RouteMeta {
+        // Ключ i18n заголовка вкладки
+        title?: string
+        // Раздел кабинета: рабочее место банка или голосование участника; без него — кабинет клиента
+        area?: 'bank' | 'votes'
+        errorCode?: number
+    }
+}
 
 export const router = createRouter({
     history: createWebHistory(),
 
+    // Новая страница открывается сверху, «назад» возвращает прежнюю прокрутку, якорь — к своему блоку
+    scrollBehavior(to, _from, savedPosition) {
+        if (savedPosition) return savedPosition
+        if (to.hash) return { el: to.hash, behavior: 'smooth' }
+
+        return { top: 0 }
+    },
+
+    // Страницы грузятся по требованию: в первый экран не попадают банк, конструктор компании и графики
     routes: [
         {
             // Пользовательский путь начинается с главной продукта, дальше — выбор пользователя
             path: '/',
             name: 'landing',
-            component: LandingPage,
+            component: () => import('@/app/pages/landing/LandingPage.vue'),
+            meta: { title: 'pageTitle.landing' },
         },
         {
             // ИНН компании демо-персоны в адресе: кабинет переживает перезагрузку страницы.
@@ -40,14 +45,16 @@ export const router = createRouter({
                 {
                     path: '',
                     name: 'dashboard',
-                    component: DashboardPage,
+                    component: () => import('@/app/pages/dashboard/DashboardPage.vue'),
                     props: true,
+                    meta: { title: 'pageTitle.dashboard' },
                 },
                 {
                     path: 'credits',
                     name: 'credits',
-                    component: CreditsPage,
+                    component: () => import('@/app/pages/credits/CreditsPage.vue'),
                     props: true,
+                    meta: { title: 'pageTitle.credits' },
                 },
                 {
                     // Родитель без компонента: пункт меню «Заявки» активен на всех страницах заявок
@@ -56,21 +63,24 @@ export const router = createRouter({
                         {
                             path: '',
                             name: 'applications',
-                            component: ApplicationsPage,
+                            component: () => import('@/app/pages/applications/ApplicationsPage.vue'),
                             props: true,
+                            meta: { title: 'pageTitle.applications' },
                         },
                         {
                             // Новая заявка; продукт, сумма, срок и цель подставляются из ?product=&amount=&term=&goal=
                             path: 'new',
                             name: 'application-new',
-                            component: ApplicationNewPage,
+                            component: () => import('@/app/pages/applications/ApplicationNewPage.vue'),
                             props: true,
+                            meta: { title: 'pageTitle.applicationNew' },
                         },
                         {
                             path: ':applicationId',
                             name: 'application',
-                            component: ApplicationPage,
+                            component: () => import('@/app/pages/applications/ApplicationPage.vue'),
                             props: true,
+                            meta: { title: 'pageTitle.application' },
                         },
                     ],
                 },
@@ -84,14 +94,16 @@ export const router = createRouter({
                         {
                             path: '',
                             name: 'votes',
-                            component: VotesPage,
+                            component: () => import('@/app/pages/votes/VotesPage.vue'),
                             props: true,
+                            meta: { title: 'pageTitle.votes', area: 'votes' },
                         },
                         {
                             path: ':applicationId',
                             name: 'vote',
-                            component: VotePage,
+                            component: () => import('@/app/pages/votes/VotePage.vue'),
                             props: true,
+                            meta: { title: 'pageTitle.vote', area: 'votes' },
                         },
                     ],
                 },
@@ -101,35 +113,40 @@ export const router = createRouter({
                         {
                             path: '',
                             name: 'bank-queue',
-                            component: BankQueuePage,
+                            component: () => import('@/app/pages/bank/BankQueuePage.vue'),
                             props: true,
+                            meta: { title: 'pageTitle.bankQueue', area: 'bank' },
                         },
                         {
                             path: ':applicationId',
                             name: 'bank-dossier',
-                            component: BankDossierPage,
+                            component: () => import('@/app/pages/bank/BankDossierPage.vue'),
                             props: true,
+                            meta: { title: 'pageTitle.bankDossier', area: 'bank' },
                         },
                     ],
                 },
                 {
                     path: 'bank/applications',
                     name: 'bank-applications',
-                    component: BankApplicationsPage,
+                    component: () => import('@/app/pages/bank/BankApplicationsPage.vue'),
                     props: true,
+                    meta: { title: 'pageTitle.bankApplications', area: 'bank' },
                 },
                 {
                     path: 'bank/metrics',
                     name: 'bank-metrics',
-                    component: BankMetricsPage,
+                    component: () => import('@/app/pages/bank/BankMetricsPage.vue'),
                     props: true,
+                    meta: { title: 'pageTitle.bankMetrics', area: 'bank' },
                 },
             ],
         },
         {
             path: '/login',
             name: 'login',
-            component: SandboxPage,
+            component: () => import('@/app/pages/sandbox/SandboxPage.vue'),
+            meta: { title: 'pageTitle.login' },
         },
         {
             // Прежний адрес выбора пользователя
@@ -139,14 +156,16 @@ export const router = createRouter({
         {
             path: '/login/company',
             name: 'login-company',
-            component: SandboxPersonaBuilderPage,
+            component: () => import('@/app/pages/sandbox/SandboxPersonaBuilderPage.vue'),
+            meta: { title: 'pageTitle.loginCompany' },
         },
         {
             // Правка своей компании: id её создателя
             path: '/login/company/:personaId',
             name: 'login-company-edit',
-            component: SandboxPersonaBuilderPage,
+            component: () => import('@/app/pages/sandbox/SandboxPersonaBuilderPage.vue'),
             props: true,
+            meta: { title: 'pageTitle.loginCompany' },
         },
         {
             path: '/sandbox/personas/new',
@@ -155,20 +174,20 @@ export const router = createRouter({
         {
             path: '/403',
             name: 'forbidden',
-            component: ErrorPage,
-            meta: { errorCode: 403 },
+            component: () => import('@/app/pages/error/ErrorPage.vue'),
+            meta: { errorCode: 403, title: 'pageTitle.forbidden' },
         },
         {
             path: '/500',
             name: 'server-error',
-            component: ErrorPage,
-            meta: { errorCode: 500 },
+            component: () => import('@/app/pages/error/ErrorPage.vue'),
+            meta: { errorCode: 500, title: 'pageTitle.serverError' },
         },
         {
             path: '/:pathMatch(.*)*',
             name: 'not-found',
-            component: ErrorPage,
-            meta: { errorCode: 404 },
+            component: () => import('@/app/pages/error/ErrorPage.vue'),
+            meta: { errorCode: 404, title: 'pageTitle.notFound' },
         },
     ],
 })

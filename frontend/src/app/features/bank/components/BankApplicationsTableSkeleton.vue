@@ -27,12 +27,12 @@ const ROW_COUNT = 6
       </div>
 
       <Skeleton
-        class="hidden lg:block"
+        class="hidden xl:block"
         width="7rem"
         height="1rem"
       />
       <Skeleton
-        class="hidden lg:block"
+        class="hidden xl:block"
         width="6rem"
         height="1rem"
       />

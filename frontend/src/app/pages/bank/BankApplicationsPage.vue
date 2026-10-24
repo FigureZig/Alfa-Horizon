@@ -81,7 +81,11 @@ const isEmpty = computed(() => !isLoading.value && !error.value && !applications
         :aria-label="t('bank.applications.columns.decision')"
       />
 
-      <span class="text-sm text-fino-text-muted lg:ml-auto">
+      <!-- Пока список грузится, счётчик не показываем: «0 заявок» до загрузки выглядит как пустая база -->
+      <span
+        v-if="!isSkeletonVisible"
+        class="whitespace-nowrap text-sm text-fino-text-muted lg:ml-auto"
+      >
         {{ t('bank.applications.count', applications.length) }}
       </span>
     </div>

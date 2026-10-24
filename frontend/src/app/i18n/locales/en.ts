@@ -85,26 +85,22 @@ export default {
     },
     login: {
         title: 'Sign in to Fino Business',
-        description: 'This is a bank demo: no login or password needed. Pick a company and a person to open their workspace.',
-        companiesTitle: 'Sign in as',
-        steps: {
-            pick: { title: 'Pick who to sign in as', text: 'A client — director, accountant or company member. Or a bank employee.' },
-            act: { title: 'Work in the workspace', text: 'Clients pick a loan and track applications; the bank works the queue and decides.' },
-            switch: { title: 'Switch roles', text: 'The “Switch” button in the header brings you back here to sign in as someone else.' },
+        description: 'This is a bank demo: no password needed. Walk through a guided scenario or sign in to any company yourself.',
+        start: {
+            scenario: {
+                title: 'Walk through a ready-made scenario',
+                text: 'Step-by-step hints: who to sign in as, what to click and which status to expect. 2–3 minutes.',
+            },
+            own: {
+                title: 'Your own company',
+                text: 'Describe a business in a minute and see what the bank would offer.',
+            },
         },
-        scenarios: {
-            title: 'Ready-made test scenarios',
-            description: 'Step-by-step checks with role switching: who signs in, what to click and which status to expect.',
-            jump: 'Testing the product? Start with the ready-made scenarios',
-            steps: '{n} step | {n} steps',
-            start: 'Walk through',
-        },
-        listLabel: 'Users',
-        ownCompany: {
-            title: 'Your own company',
-            text: 'Describe a business in a minute and see what the bank would offer.',
-            action: 'Create',
-        },
+        companiesTitle: 'Or sign in yourself',
+        companiesHint: 'Click a person to open their workspace. The “Switch” button in the header brings you back here.',
+        listLabel: 'Companies',
+        peopleLabel: 'Who to sign in as at {company}',
+        lastLogin: 'last signed in',
         group: {
             bank: 'Bank staff',
             members: '{n} person | {n} people | {n} people',
@@ -113,7 +109,6 @@ export default {
             delete: 'Delete',
         },
         enter: 'Sign in',
-        enterAsLabel: 'Sign in as',
         moreCompanies: '{n} more company | {n} more companies',
         bankTile: {
             title: 'Fino Bank',
@@ -129,10 +124,6 @@ export default {
         },
         empty: 'Nobody to choose yet.',
         loadError: 'Could not load the list of users.',
-        tools: {
-            label: 'For reviewers',
-            scenarios: 'Role scenarios',
-        },
     },
 
     votes: {
@@ -142,6 +133,8 @@ export default {
         empty: {
             title: 'No vote needed right now',
             text: 'When the bank asks for approval of a major transaction, the application will appear here.',
+            role: 'You are a company participant without account access: the director takes the loan, and your vote is only needed for a major transaction.',
+            scenario: 'Open the voting scenario',
         },
         status: {
             waiting: 'Waiting for your vote',
@@ -188,10 +181,6 @@ export default {
                 history: { what: 'Who did what', where: '“Application history”: actions by name and role.' },
             },
             readme: 'README',
-        },
-        hint: {
-            text: 'For reviewers: step-by-step role scenarios, world clock and events live here.',
-            ok: 'Got it',
         },
     },
 
@@ -1092,6 +1081,12 @@ export default {
                     REVIEW: 'With a specialist',
                     UNAVAILABLE: 'Not suitable',
                 },
+                stateHint: {
+                    PREAPPROVED: 'The bank is ready to lend based on what it already knows',
+                    CONDITIONAL: 'Available once the conditions below are met',
+                    REVIEW: 'A bank specialist will decide',
+                    UNAVAILABLE: 'The company does not meet the product requirements yet',
+                },
             },
         products: {
             title: 'Bank products',
@@ -1214,6 +1209,25 @@ export default {
     applications: {
         title: 'Applications',
         description: 'Track the status of your loan applications',
+    },
+    pageTitle: {
+        landing: 'Loans for small business',
+        login: 'Sign in',
+        loginCompany: 'Your own company',
+        dashboard: 'Home',
+        credits: 'Find a loan',
+        applications: 'Applications',
+        applicationNew: 'New application',
+        application: 'Application',
+        votes: 'Voting',
+        vote: 'Transaction vote',
+        bankQueue: 'Queue',
+        bankDossier: 'Application dossier',
+        bankApplications: 'All applications',
+        bankMetrics: 'Metrics',
+        forbidden: 'Access denied',
+        serverError: 'Server error',
+        notFound: 'Page not found',
     },
     nav: {
         menu: 'Navigation',

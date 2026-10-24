@@ -44,7 +44,8 @@ const STATUS_STEPS: Partial<Record<ApplicationDetailStatusEnum, number>> = {
   [ApplicationDetailStatusEnum.Checking]: 1,
   [ApplicationDetailStatusEnum.InfoRequested]: 2,
   [ApplicationDetailStatusEnum.UnderReview]: 2,
-  [ApplicationDetailStatusEnum.Offered]: 2,
+  // Банк уже решил: дальше клиент принимает оферту и подписывает — активен шаг подписи, а не «Решение»
+  [ApplicationDetailStatusEnum.Offered]: 3,
   [ApplicationDetailStatusEnum.Signing]: 3,
   [ApplicationDetailStatusEnum.Signed]: 4,
   [ApplicationDetailStatusEnum.Disbursing]: 4,

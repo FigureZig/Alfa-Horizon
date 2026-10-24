@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed, ref, useTemplateRef } from 'vue'
+import { computed, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Menu from 'primevue/menu'
-import Select from 'primevue/select'
 import type { SandboxPersonaGroupInterface } from '@/app/types/sandbox/sandbox-persona-group-interface'
+import type { Nullable } from '@/app/types/nullable'
 import type { SandboxPersonaInterface } from '@/app/types/sandbox/sandbox-persona-interface'
 
 // Буквы для значка компании: без формы и кавычек — «Вектор-Трейд» → «ВТ»
@@ -13,6 +13,8 @@ const QUOTES_PATTERN = /[«»"]/g
 const props = defineProps<{
   group: SandboxPersonaGroupInterface
   isBusy: boolean
+  // Кем входили в прошлый раз — подсвечиваем, чтобы смена роли не начиналась с поиска
+  lastPersonaId: Nullable<string>
 }>()
 
 const emit = defineEmits<{
@@ -25,10 +27,6 @@ const { t } = useI18n({ useScope: 'global' })
 
 const menu = useTemplateRef<InstanceType<typeof Menu>>('menu')
 const menuId = `company-menu-${props.group.key}`
-const selectId = `company-people-${props.group.key}`
-
-// Первым в компании идёт её главный человек — директор или ИП
-const selectedId = ref(props.group.personas[0]?.id ?? '')
 
 const title = computed(() => (props.group.isBank ? t('login.bankTile.title') : props.group.title ?? ''))
 
@@ -43,11 +41,6 @@ const monogram = computed(() => {
   return words.slice(0, 2).map((word) => word[0]).join('').toUpperCase()
 })
 
-const selectedPersona = computed(() =>
-  props.group.personas.find((persona) => persona.id === selectedId.value) ?? props.group.personas[0] ?? null,
-)
-const hasChoice = computed(() => props.group.personas.length > 1)
-
 const menuItems = computed(() => [
   { label: t('login.group.edit'), icon: 'pi pi-pencil', command: handleEdit },
   { label: t('login.group.delete'), icon: 'pi pi-trash', command: handleDelete },
@@ -57,10 +50,8 @@ function toggleMenu(event: Event) {
   menu.value?.toggle(event)
 }
 
-function handleLogin() {
-  if (selectedPersona.value) {
-    emit('login', selectedPersona.value)
-  }
+function handleLogin(persona: SandboxPersonaInterface) {
+  emit('login', persona)
 }
 
 function handleEdit() {
@@ -134,77 +125,40 @@ function handleDelete() {
       </template>
     </div>
 
-    <!-- Кем войти: у каждого значок роли, чтобы было понятно, зачем им входить -->
-    <div class="mt-auto flex flex-col gap-2">
-      <label
-        :for="selectId"
-        class="sr-only text-xs font-semibold text-fino-text-muted sm:not-sr-only"
+    <!-- Кем войти: каждый человек — своя кнопка с ролью, ничего не спрятано в выпадающем списке -->
+    <ul
+      class="mt-auto flex flex-col gap-2"
+      :aria-label="t('login.peopleLabel', { company: title })"
+    >
+      <li
+        v-for="persona in group.personas"
+        :key="persona.id"
       >
-        {{ t('login.enterAsLabel') }}
-      </label>
-
-      <div class="flex items-stretch gap-2">
-        <Select
-          v-if="hasChoice"
-          v-model="selectedId"
-          :input-id="selectId"
-          :options="group.personas"
-          option-label="fullName"
-          option-value="id"
-          :disabled="isBusy"
-          class="min-w-0 flex-1"
-        >
-          <!-- Роль первой: «Директор · Павел Орлов» — роль видна, даже если имя не помещается -->
-          <template #value>
-            <span
-              v-if="selectedPersona"
-              class="flex min-w-0 items-baseline gap-1.5 text-sm"
-            >
-              <span class="shrink-0 font-semibold text-fino-text">{{ selectedPersona.badge }}</span>
-              <span class="truncate text-fino-text-muted">{{ selectedPersona.fullName }}</span>
-            </span>
-          </template>
-
-          <template #option="{ option }">
-            <span class="flex min-w-0 flex-col">
-              <span class="flex min-w-0 items-center gap-2">
-                <span class="truncate font-semibold">{{ option.fullName }}</span>
-                <span class="shrink-0 rounded-md bg-fino-surface-secondary px-1.5 py-0.5 text-[11px] font-semibold text-fino-text-muted">
-                  {{ option.badge }}
-                </span>
-              </span>
-              <span class="mt-0.5 max-w-72 truncate text-xs text-fino-text-muted">{{ option.roleTitle }}</span>
-            </span>
-          </template>
-        </Select>
-
-        <p
-          v-else-if="selectedPersona"
-          :id="selectId"
-          class="flex min-h-11 min-w-0 flex-1 items-baseline gap-1.5 self-center rounded-xl bg-fino-surface-secondary
-                 px-3 py-3 text-sm"
-        >
-          <span class="shrink-0 font-semibold text-fino-text">{{ selectedPersona.badge }}</span>
-          <span class="truncate text-fino-text-muted">{{ selectedPersona.fullName }}</span>
-        </p>
-
         <button
           type="button"
-          class="inline-flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary
-                 px-4 text-sm font-semibold text-primary-contrast transition-all duration-200 hover:opacity-90
-                 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none
+          class="group/person flex min-h-12 w-full cursor-pointer items-center gap-3 rounded-xl border px-3 py-2
+                 text-left transition-colors duration-200 hover:border-primary/50 hover:bg-fino-surface-hover
+                 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none
                  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          :disabled="isBusy || !selectedPersona"
-          :aria-label="selectedPersona ? t('login.enterAs', { name: selectedPersona.fullName }) : t('login.enter')"
-          @click="handleLogin"
+          :class="persona.id === lastPersonaId ? 'border-primary/50 bg-fino-accent' : 'border-fino-border'"
+          :disabled="isBusy"
+          :aria-label="t('login.enterAs', { name: persona.fullName })"
+          @click="handleLogin(persona)"
         >
-          {{ t('login.enter') }}
+          <span class="min-w-0 flex-1">
+            <span class="block truncate text-sm font-semibold text-fino-text">{{ persona.fullName }}</span>
+            <span class="block truncate text-xs text-fino-text-muted">
+              {{ persona.badge }}<template v-if="persona.id === lastPersonaId"> · {{ t('login.lastLogin') }}</template>
+            </span>
+          </span>
+
           <i
-            class="pi pi-arrow-right text-xs"
+            class="pi pi-arrow-right shrink-0 text-xs text-primary transition-transform duration-200
+                   group-hover/person:translate-x-0.5 motion-reduce:transition-none"
             aria-hidden="true"
           />
         </button>
-      </div>
-    </div>
+      </li>
+    </ul>
   </article>
 </template>

@@ -1,28 +1,15 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
 import { useTheme } from '@/app/composables/useTheme'
+
+// Логотип всегда ведёт на главную продукта: главная кабинета — первый пункт меню
+const HOME_ROUTE = { name: 'landing' }
 
 const { theme, toggleTheme } = useTheme()
 const { t, locale } = useI18n({ useScope: 'global' })
 
-const route = useRoute()
-
 const isDark = computed(() => theme.value === 'dark')
-
-// В кабинете логотип ведёт на главную текущего пользователя (у сотрудника банка — в очередь), вне кабинета — на главную продукта
-const homeRoute = computed(() => {
-  if (!route.params.inn) return { name: 'landing' }
-
-  const routeName = String(route.name ?? '')
-  const isBankRoute = routeName.startsWith('bank-')
-  const isVotesRoute = routeName === 'votes' || routeName === 'vote'
-
-  if (isVotesRoute) return { name: 'votes', params: { inn: route.params.inn } }
-
-  return { name: isBankRoute ? 'bank-queue' : 'dashboard', params: { inn: route.params.inn } }
-})
 
 function toggleLocale() {
   locale.value = locale.value === 'ru' ? 'en' : 'ru'
@@ -49,7 +36,7 @@ function changeTheme() {
     >
       <!-- Логотип -->
       <RouterLink
-        :to="homeRoute"
+        :to="HOME_ROUTE"
         class="group flex min-w-0 items-center gap-3"
         :aria-label="t('header.home')"
       >

@@ -116,6 +116,11 @@ function handleToggleCalculator() {
       <p class="mt-1 text-sm text-fino-text-muted">
         {{ conditions }}
       </p>
+
+      <!-- Что значит плашка статуса: «Доступен» и «С условиями» без пояснения не различить -->
+      <p class="mt-2 text-xs text-fino-text-muted">
+        {{ t(`credits.options.stateHint.${option.label}`) }}
+      </p>
     </div>
 
     <!-- Что понадобится: поручитель, залог, документы -->

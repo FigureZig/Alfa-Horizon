@@ -18,8 +18,6 @@ import { ApplicationMapper } from '@/app/mappers/application.mapper'
 import type { ApplicationDetailStatusEnum } from '@/app/types/application/application-detail-status-enum'
 import type { Nullable } from '@/app/types/nullable'
 
-const HINT_STORAGE_KEY = 'fino-reviewer-hint'
-const BANK_ROUTE_PREFIX = 'bank-'
 
 const { t } = useI18n({ useScope: 'global' })
 const route = useRoute()
@@ -32,29 +30,16 @@ const loadedApplicationInn = ref<Nullable<string>>(null)
 // Срок текущего шага заявки на экране: к нему можно перемотать время мира
 const deadlineAt = ref<Nullable<string>>(null)
 
-function readHintDismissed(): boolean {
-  try {
-    return localStorage.getItem(HINT_STORAGE_KEY) === 'true'
-  } catch {
-    return false
-  }
-}
-
-const isHintDismissed = ref(readHintDismissed())
-
 const applicationId = computed(() => (typeof route.params.applicationId === 'string' ? route.params.applicationId : null))
 const inn = computed(() => (typeof route.params.inn === 'string' ? route.params.inn : undefined))
 
 // События и отказы относятся к компании клиента; на рабочем месте банка ИНН компании подставлять не из чего
-const eventInn = computed(() => (String(route.name ?? '').startsWith(BANK_ROUTE_PREFIX) ? undefined : inn.value))
+const eventInn = computed(() => (route.meta.area === 'bank' ? undefined : inn.value))
 
 // Компания открытой заявки — из самой заявки; участнику её не открыть (403), тогда — из адреса кабинета
 const applicationInn = computed(() =>
   loadedApplicationInn.value ?? (applicationId.value ? eventInn.value ?? null : null),
 )
-
-// Подсказка проверяющему — один раз и только на экране входа, рядом с кнопкой
-const isHintVisible = computed(() => route.name === 'login' && !isHintDismissed.value && !isVisible.value)
 
 // В кабинете снизу мобильная навигация: кнопка стоит над ней
 const positionClass = computed(() => {
@@ -70,16 +55,6 @@ function openPanel() {
 
 function handleVisibleChange(visible: boolean) {
   isVisible.value = visible
-}
-
-function dismissHint() {
-  isHintDismissed.value = true
-
-  try {
-    localStorage.setItem(HINT_STORAGE_KEY, 'true')
-  } catch {
-    // Хранилище недоступно: подсказка покажется снова при следующем входе на экран
-  }
 }
 
 // Статус заявки на экране — для галочек в сценариях; чужая заявка (403) просто не отмечается
@@ -114,35 +89,9 @@ watch(openScenarioId, (scenarioId) => {
 
 <template>
   <div
-    class="fixed right-4 z-40 flex flex-col items-end gap-3 sm:right-6"
+    class="fixed right-4 z-40 sm:right-6"
     :class="positionClass"
   >
-    <!-- Одна тихая подсказка на экране входа -->
-    <Transition
-      enter-active-class="transition duration-300 ease-out motion-reduce:transition-none"
-      enter-from-class="translate-y-2 opacity-0"
-      leave-active-class="transition duration-150 ease-in motion-reduce:transition-none"
-      leave-to-class="opacity-0"
-    >
-      <div
-        v-if="isHintVisible"
-        class="w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-fino-border bg-fino-surface p-4 shadow-lg"
-        role="status"
-      >
-        <p class="text-sm leading-relaxed text-fino-text">
-          {{ t('reviewer.hint.text') }}
-        </p>
-
-        <button
-          type="button"
-          class="mt-3 cursor-pointer text-sm font-semibold text-primary transition-opacity hover:opacity-80"
-          @click="dismissHint"
-        >
-          {{ t('reviewer.hint.ok') }}
-        </button>
-      </div>
-    </Transition>
-
     <button
       type="button"
       class="flex h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-full border border-fino-border

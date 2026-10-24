@@ -9,8 +9,28 @@ import { SandboxPersonaKindEnum } from '@/app/types/sandbox/sandbox-persona-kind
 import type { ApiResponse } from '@/app/types/api-response'
 import type { AppLocale } from '@/app/i18n'
 import type { CompanyAccessInterface } from '@/app/types/company/company-access-interface'
+import type { Nullable } from '@/app/types/nullable'
 import type { SandboxLoginDto } from '@/app/types/sandbox/sandbox-login-dto'
 import type { SandboxPersonaInterface } from '@/app/types/sandbox/sandbox-persona-interface'
+
+const LAST_PERSONA_STORAGE_KEY = 'fino-last-persona'
+
+// Кем входили в прошлый раз: экран входа подсвечивает этого человека, чтобы смена роли не начиналась с нуля
+export function readLastPersonaId(): Nullable<string> {
+  try {
+    return localStorage.getItem(LAST_PERSONA_STORAGE_KEY)
+  } catch {
+    return null
+  }
+}
+
+function rememberPersona(personaId: string) {
+  try {
+    localStorage.setItem(LAST_PERSONA_STORAGE_KEY, personaId)
+  } catch {
+    // Хранилище недоступно: подсветки на экране входа просто не будет
+  }
+}
 
 /**
  * Демо-сессия: вход персоной даёт JWT, его подставляет API-клиент; выход забывает токен.
@@ -26,6 +46,7 @@ export function useSession() {
     const { data } = await request()
 
     setSessionToken(data.data.token)
+    rememberPersona(data.data.persona.id)
 
     return {
       persona: SandboxMapper.toEntity(data.data.persona),

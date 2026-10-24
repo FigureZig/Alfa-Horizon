@@ -50,7 +50,8 @@ function isDecidedByBank(decidedBy: BankDecidedByEnum | null) {
 <template>
   <div>
     <!-- Десктоп: таблица -->
-    <div class="hidden overflow-hidden rounded-3xl border border-fino-border bg-fino-surface shadow-sm lg:block">
+    <!-- Таблица — с xl: на lg рядом сайдбар и колонки не помещаются; прокрутка внутри — страховка от обрезки -->
+    <div class="hidden overflow-x-auto rounded-3xl border border-fino-border bg-fino-surface shadow-sm xl:block">
       <table class="w-full border-collapse text-left text-sm">
         <thead class="bg-fino-surface-secondary text-xs font-semibold uppercase tracking-wide text-fino-text-muted">
           <tr>
@@ -168,7 +169,7 @@ function isDecidedByBank(decidedBy: BankDecidedByEnum | null) {
     </div>
 
     <!-- Мобильный: карточки -->
-    <ul class="flex flex-col gap-3 lg:hidden">
+    <ul class="flex flex-col gap-3 xl:hidden">
       <li
         v-for="item in applications"
         :key="item.id"

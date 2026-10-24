@@ -4,10 +4,13 @@ import AppErrorState from '@/app/components/AppErrorState.vue'
 import VoteCard from '@/app/features/votes/components/VoteCard.vue'
 import VoteCardSkeleton from '@/app/features/votes/components/VoteCardSkeleton.vue'
 import { useCompanyAccess } from '@/app/composables/useCompanyAccess'
+import { useReviewerPanel } from '@/app/composables/useReviewerPanel'
 import { useDemoPersona } from '@/app/composables/useDemoPersona'
 import { useVoteTasks } from '@/app/composables/useVoteTasks'
 
 const VOTE_SKELETON_COUNT = 2
+// Сценарий, в котором банк просит участников согласовать крупную сделку (id из /sandbox/scenarios)
+const VOTE_SCENARIO_ID = 'large-deal'
 
 const props = defineProps<{
   inn: string
@@ -17,6 +20,11 @@ const { t } = useI18n({ useScope: 'global' })
 const { demoPersona } = useDemoPersona()
 const { me, company } = useCompanyAccess(() => props.inn)
 const { items, isLoading, error, loadVotes } = useVoteTasks(() => props.inn)
+const { openPanel } = useReviewerPanel()
+
+function openVoteScenario() {
+  openPanel(VOTE_SCENARIO_ID)
+}
 </script>
 
 <template>
@@ -67,6 +75,26 @@ const { items, isLoading, error, loadVotes } = useVoteTasks(() => props.inn)
       <p class="mt-1 max-w-sm text-sm text-fino-text-muted">
         {{ t('votes.empty.text') }}
       </p>
+
+      <!-- Участник видит только голосование: объясняем роль и даём путь, а не тупик -->
+      <p class="mt-3 max-w-md text-sm text-fino-text-muted">
+        {{ t('votes.empty.role') }}
+      </p>
+
+      <button
+        type="button"
+        class="mt-4 inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-fino-border
+               bg-fino-surface px-4 text-sm font-semibold text-fino-text transition-colors
+               hover:bg-fino-surface-hover focus-visible:outline-2 focus-visible:outline-primary
+               motion-reduce:transition-none"
+        @click="openVoteScenario"
+      >
+        <i
+          class="pi pi-compass text-primary"
+          aria-hidden="true"
+        />
+        {{ t('votes.empty.scenario') }}
+      </button>
     </div>
 
     <ul

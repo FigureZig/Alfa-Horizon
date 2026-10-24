@@ -16,9 +16,6 @@ const props = defineProps<{
   inn: string
 }>()
 
-const BANK_ROUTE_PREFIX = 'bank-'
-const VOTES_ROUTE_NAMES = ['votes', 'vote']
-
 const { t, locale } = useI18n({ useScope: 'global' })
 const route = useRoute()
 const router = useRouter()
@@ -44,11 +41,12 @@ const roleCaption = computed(() => {
 const ownerId = computed(() => (/^c\d+$/.test(demoPersona.value?.userId ?? '') ? demoPersona.value?.userId ?? null : null))
 
 const isBankStaff = computed(() => demoPersona.value?.isBankStaff ?? false)
-const isBankRoute = computed(() => String(route.name ?? '').startsWith(BANK_ROUTE_PREFIX))
+// Раздел страницы задан в роутере (meta.area): банк, голосование или кабинет клиента
+const isBankRoute = computed(() => route.meta.area === 'bank')
 
 // Страницы показываем, когда известна роль и маршрут ей подходит: клиент не видит рабочее место банка и наоборот.
 // Если роль не загрузилась, страницы сами покажут свою ошибку.
-const isVotesRoute = computed(() => VOTES_ROUTE_NAMES.includes(String(route.name ?? '')))
+const isVotesRoute = computed(() => route.meta.area === 'votes')
 const isAccessKnown = computed(() => Boolean(me.value) || accessError.value)
 
 // Клиент не видит рабочее место банка, а участник без доступа к счёту — ничего, кроме голосования
@@ -113,6 +111,14 @@ watch([demoPersona, me, () => route.name], redirectByRole, { immediate: true })
       />
 
       <main class="min-w-0 flex-1">
+        <!-- На телефоне имя и роль в шапке не помещаются: кто вошёл — строкой над страницей -->
+        <p
+          v-if="demoPersona"
+          class="mb-4 truncate text-xs text-fino-text-muted md:hidden"
+        >
+          <span class="font-semibold text-fino-text">{{ demoPersona.fullName }}</span> · {{ roleCaption }}
+        </p>
+
         <RouterView v-if="isPageAllowed" />
 
         <ApplicationPageSkeleton v-else />
