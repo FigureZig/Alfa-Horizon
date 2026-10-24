@@ -15,6 +15,7 @@ import ApplicationSignDialog from '@/app/features/application/components/Applica
 import ApplicationSigningPanel from '@/app/features/application/components/ApplicationSigningPanel.vue'
 import ApplicationStatusPanel from '@/app/features/application/components/ApplicationStatusPanel.vue'
 import ApplicationTimeline from '@/app/features/application/components/ApplicationTimeline.vue'
+import ApplicationSourcesCheck from '@/app/features/application/components/ApplicationSourcesCheck.vue'
 import ApplicationWorldNotice from '@/app/features/application/components/ApplicationWorldNotice.vue'
 import { useApplication } from '@/app/composables/useApplication'
 import { useApplicationExplanation } from '@/app/composables/useApplicationExplanation'
@@ -320,6 +321,9 @@ async function confirmAction() {
         :is-recalculating="isRecalculating"
         :director-name="directorName"
       />
+
+      <!-- Что банк проверил сам и за сколько: главное обещание продукта — без анкет -->
+      <ApplicationSourcesCheck :events="events" />
 
       <div
         class="grid grid-cols-1 items-start gap-6"

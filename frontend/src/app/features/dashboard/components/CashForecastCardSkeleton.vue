@@ -7,23 +7,39 @@ import Skeleton from 'primevue/skeleton'
     class="flex min-w-0 flex-col gap-5 card-key p-5 sm:p-6"
     aria-busy="true"
   >
-    <div class="flex items-center gap-3">
+    <div class="flex items-start justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <Skeleton
+          size="3rem"
+          border-radius="1rem"
+        />
+
+        <div class="flex flex-col gap-2">
+          <Skeleton
+            width="7rem"
+            height="0.875rem"
+          />
+
+          <Skeleton
+            width="12rem"
+            height="2.25rem"
+          />
+        </div>
+      </div>
+
       <Skeleton
-        width="7rem"
+        width="9rem"
         height="1.5rem"
         border-radius="9999px"
       />
-
-      <Skeleton
-        width="10rem"
-        height="0.875rem"
-      />
     </div>
 
-    <Skeleton
-      width="60%"
-      height="1.75rem"
-    />
+    <div class="border-t border-fino-border pt-5">
+      <Skeleton
+        width="60%"
+        height="1.75rem"
+      />
+    </div>
 
     <Skeleton
       height="12rem"
