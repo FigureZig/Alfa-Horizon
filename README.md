@@ -180,6 +180,20 @@ cd frontend && pnpm lint && pnpm build                 # фронт: линте�
 | [`infra/`](infra/docker-compose.yml) | один `docker-compose.yml` на весь стенд |
 | [`docs/`](docs/README.md) | документация: как устроен продукт, движок решений, скоринг, архитектура, контракт API, диаграммы |
 
+### Что приложено к решению
+
+| Что | Где |
+|---|---|
+| Архитектурная схема | [`docs/06_architecture.md`](docs/06_architecture.md); C4 с потоками данных — [`docs/diagrams/c4-data-flows.drawio`](docs/diagrams/c4-data-flows.drawio) (PNG — [`docs/diagrams/png/`](docs/diagrams/png/)), архитектура как код — [`docs/diagrams/architecture.c4`](docs/diagrams/architecture.c4) (LikeC4) |
+| Описание API | [`docs/api/README.md`](docs/api/README.md) — конверт ответа, ошибки, вход, какие ручки за какими экранами |
+| OpenAPI / Swagger | [`docs/api/openapi.json`](docs/api/openapi.json); на запущенном стенде — Swagger http://localhost:8000/api/docs и ReDoc http://localhost:8000/api/redoc |
+| Коллекция запросов | [`docs/api/postman_collection.json`](docs/api/postman_collection.json) — Postman v2.1, прогоняется `newman` |
+| Диаграмма состояний заявки | [`docs/diagrams/application_state.md`](docs/diagrams/application_state.md) (Mermaid) |
+| Модель данных | [`docs/diagrams/data_model.md`](docs/diagrams/data_model.md) (Mermaid ER), схема БД — [`backend/migrations/`](backend/migrations/) |
+| Тестовые сценарии | [`docs/test-scenarios.md`](docs/test-scenarios.md); сценарии со сменой ролей — [`docs/15_roles.md`](docs/15_roles.md), BPMN — [`docs/diagrams/scenarios-bpmn.drawio`](docs/diagrams/scenarios-bpmn.drawio); автотесты — `backend/tests` |
+
+OpenAPI, коллекция, модель данных и тестовые сценарии собираются из кода, CI проверяет, что они не устарели.
+
 С чего начать читать документацию:
 
 - [`docs/02_product.md`](docs/02_product.md) — что за продукт и какие в нём экраны и статусы;
