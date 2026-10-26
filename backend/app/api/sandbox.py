@@ -129,7 +129,8 @@ async def list_personas(lang: Lang = "ru"):
 
 
 class PersonaIn(BaseModel):
-    """Своя персона. Поля карточки — как у фронта (SandboxPersonaCreateDto); незаданные тексты бэкенд посчитает сам.
+    """Своя компания и её пользователь (kind=client) или свой сотрудник банка (kind=bank). Поля карточки — как у фронта
+    (SandboxPersonaCreateDto); незаданные тексты бэкенд посчитает сам.
     Параметры компании строят ИНН, ОГРН, людей, выписку, КИ и отчётность тем же seed/world.py, что и мир симулятора."""
     model_config = ConfigDict(json_schema_extra={"examples": [
         {"full_name": "Олег Петров", "organization": "ООО «Пекарня у дома»", "okved": "10.71", "okved_name": "Производство хлеба",
@@ -382,7 +383,8 @@ def _client_persona(base: dict, seq: int, company: dict, people: dict) -> dict:
 @router.post("/personas", status_code=201,
              **doc(S.PersonaCardResponse, 409, 422, status=201, summary="Создать свою компанию и её пользователя"))
 async def create_persona(body: PersonaIn, lang: Lang = "ru"):
-    """Собрать свою персону: компания встаёт в WireMock на лету (приоритет 3), worker сразу подтягивает её данные."""
+    """Собрать свою компанию: она встаёт в WireMock на лету (приоритет 3), worker сразу подтягивает её данные; каждый
+    человек компании появляется отдельным пользователем. С kind=bank — свой сотрудник банка."""
     pool = await store.pool()
     async with pool.acquire() as conn:
         inn = await _check_inn(conn, body.inn) if body.kind == "client" else None
@@ -616,8 +618,8 @@ async def _apply_scenario_faults(persona: dict) -> None:
 
 @router.post("/personas/{persona_id}/login", **doc(S.LoginResponse, 404, summary="Войти пользователем из списка"))
 async def login(persona_id: str, lang: Lang = "ru", wait_s: WaitS = 5):
-    """Войти персоной: банк собирает данные её компаний, выдаётся JWT. Запросы без токена дальше тоже идут от этой
-    персоны (одна сессия симулятора, docs/08 §2). Мир при входе не меняется: перелогин между людьми одной компании —
+    """Войти пользователем: банк собирает данные его компаний, выдаётся JWT. Запросы без токена дальше тоже идут от этого
+    пользователя (одна сессия симулятора, docs/08 §2). Мир при входе не меняется: перелогин между людьми одной компании —
     главный способ пройти заявку, и события реестров (смена директора, отзыв МЧД, погашенная недоимка) и отказы из
     панели остаются, пока их не снимут или не сбросят мир. Пересобираются только отказы сценария самого пользователя."""
     pool = await store.pool()
@@ -909,7 +911,9 @@ async def move_clock(body: ClockIn):
 
 @router.post("/reset", **doc(S.StatusResponse, summary="Вернуть мир в исходное состояние"))
 async def reset():
-    """Вернуть штатный мир: снять отказы, события и свои персоны в WireMock, обнулить часы, снять паузу воркера."""
+    """Вернуть штатный мир: снять отказы, события и свои компании в WireMock, обнулить часы, снять паузу воркера; выданные
+    кредиты остаются в истории заявок, но прогноз и предложения их больше не учитывают. Запросы без токена — снова от
+    пользователя по умолчанию."""
     async with _client() as client:
         await client.post(f"{ADMIN}/mappings/reset")
         await client.post(f"{ADMIN}/scenarios/reset")

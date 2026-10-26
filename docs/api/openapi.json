@@ -3,7 +3,7 @@
   "info": {
     "title": "Alfa Horizon — умный кредитный кабинет",
     "summary": "Кредитный конвейер для малого бизнеса: кабинет предпринимателя и рабочее место банка",
-    "description": "\nКредитный конвейер для малого бизнеса: кабинет предпринимателя и рабочее место банка в одном процессе — от потребности\nдо выдачи денег. Внешние системы (ЕГРЮЛ и ЕГРИП, ФНС, ГИР БО, БКИ, ЕИС, банк) смоделированы в форматах первоисточников;\nвсе компании и люди вымышленные.\n\n## Быстрый старт\n0. **Без входа.** `GET /api/v1/catalog/products` — продукты для главной страницы: ставка «от» из ключевой ставки и спредов,\n   сумма, срок, кто решает.\n1. **Войти.** `POST /api/v1/auth/login` с телом `{\"login\": \"s7\"}` — ID пользователя, его ИНН или ИНН компании.\n   Готовые пользователи — `GET /api/v1/sandbox/personas`.\n2. **Authorize.** Вставьте `data.token` из ответа. Без токена запросы идут от последнего вошедшего пользователя,\n   а ручки компании `/companies/{inn}/…` — от пользователя этой компании.\n3. **Кабинет.** `GET /api/v1/companies/770100000079/insights` — прогноз остатка и кассовый разрыв 28.10;\n   `…/products` — предодобренные продукты; `…/score` — кредитное здоровье с рычагами; `…/repayment?amount=400000` —\n   фиксированный график или доля поступлений (K4).\n4. **Заявка.** `POST /api/v1/applications` → `POST …/{id}/submit` → через пару секунд `GET …/{id}` вернёт `OFFERED` →\n   `POST …/{id}/offer/accept` → `POST …/{id}/signatures` → выдача, статус `ISSUED`. «Почему так» — `GET …/{id}/explain`,\n   живой таймлайн — `GET …/{id}/stream` (Server-Sent Events).\n5. **Банк.** Войдите как `bank` (кредитный специалист) или `risk` (риск-менеджер): `GET /api/v1/bank/queue`, досье,\n   решение, второй ключ; `GET /api/v1/bank/metrics` — доля решений без специалиста и время решения против целей SLA.\n\n## Пользователи\n| ID | Кто | Что показывает |\n|---|---|---|\n| `s7` | ИП Смирнова, кофейня | кассовый разрыв, предложение в 1 клик, выдача |\n| `s3` | ООО «Вектор-Трейд» | встречное предложение: нагрузка не позволяет всю сумму |\n| `s2` | ООО «Мастер-Строй» | крупная сделка и голосование участников (`u-li`, `u-morozov`) |\n| `s4` | ООО «Ромашка-Сервис» | отказ из-за недоимки и путь к одобрению |\n| `s5`, `r8` | Иван Иванов, три компании | разные права в каждой: подпись, подготовка, просмотр |\n| `r12` | ООО «Лента-Опт» | смена директора во время подписи; новый директор — `u-novikova` |\n| `u-kuznetsova` | ООО «Вектор-Трейд» | подпись по доверенности (МЧД); после отзыва МЧД — подписывает директор `s3` |\n| `n1`, `n2` | БКИ не отвечает | предварительная оферта и ручное рассмотрение |\n| `bank`, `risk` | Fino Банк | очередь, досье, решения до 15 млн ₽, второй ключ выше |\n\nПошаговый гид по сценариям со сменой ролей — `GET /api/v1/sandbox/scenarios`: кем войти, что нажать, какой статус ждать.\nСвоя компания с флагами (недоимка, просрочка, крупная сделка, БКИ не отвечает…) — `POST /api/v1/sandbox/personas`,\nкаталог флагов и параметров — `GET /api/v1/sandbox/persona-options`.\n\n## Статусы заявки\n`DRAFT → SUBMITTED → CHECKING → OFFERED | INFO_REQUESTED | UNDER_REVIEW | REJECTED → SIGNING → SIGNED → DISBURSING → ISSUED`.\nКонец — `ISSUED`, `REJECTED`, `DECLINED`, `WITHDRAWN`, `EXPIRED`. Флаги — бейджи, а не статусы: `PROVISIONAL`, `RECHECK`,\n`SOURCE_WAIT`, `SLA_BREACH`, `DEGRADED_DATA`, `DISBURSE_ERROR`. Кнопки текущего пользователя — `available_actions` заявки.\n\n## Соглашения\n- Успех — `{\"data\": …}`; ошибка — RFC 9457 `application/problem+json` с машинным `code`: ветвиться по нему, `detail` — для людей.\n- Поля — snake_case, даты — ISO 8601. Деньги в ядре — строкой (`\"400000.00\"`, без потерь), в витрине кабинета — числами.\n- `X-Request-Id` у каждого ответа (можно прислать свой); подача заявки принимает `Idempotency-Key`.\n- Решение объяснимо: причины с правилом или нормой, вклад факторов скоринга, ставка из частей (ключевая + отрасль + риск).\n",
+    "description": "\nКредитный конвейер для малого бизнеса: кабинет предпринимателя и рабочее место банка в одном процессе — от потребности\nдо выдачи денег. Внешние системы (ЕГРЮЛ и ЕГРИП, ФНС, ГИР БО, БКИ, ЕИС, банк) смоделированы в форматах первоисточников;\nвсе компании и люди вымышленные.\n\n## Быстрый старт\n0. **Без входа.** `GET /api/v1/catalog/products` — продукты для главной страницы: ставка «от» из ключевой ставки и спредов,\n   сумма, срок, кто решает.\n1. **Войти.** `POST /api/v1/auth/login` с телом `{\"login\": \"s7\"}` — ID пользователя, его ИНН или ИНН компании.\n   Готовые пользователи — `GET /api/v1/sandbox/personas`.\n2. **Authorize.** Вставьте `data.token` из ответа. Без токена запросы идут от последнего вошедшего пользователя,\n   а ручки компании `/companies/{inn}/…` — от пользователя этой компании.\n3. **Кабинет.** `GET /api/v1/companies/770100000079/insights` — прогноз остатка и кассовый разрыв 28.10;\n   `…/products` — предодобренные продукты; `…/score` — кредитное здоровье с рычагами; `…/repayment?amount=400000` —\n   фиксированный график или доля поступлений (K4).\n4. **Заявка.** `POST /api/v1/applications` → `POST …/{id}/submit` → через пару секунд `GET …/{id}` вернёт `OFFERED` →\n   `POST …/{id}/offer/accept` → `POST …/{id}/signatures` → выдача, статус `ISSUED`. «Почему так» — `GET …/{id}/explain`,\n   живой таймлайн — `GET …/{id}/stream` (Server-Sent Events).\n5. **Банк.** Войдите как `bank` (кредитный специалист) или `risk` (риск-менеджер): `GET /api/v1/bank/queue`, досье,\n   решение, второй ключ; `GET /api/v1/bank/metrics` — доля решений без специалиста и время решения против целей SLA.\n\n## Пользователи\n| ID | Кто | Что показывает |\n|---|---|---|\n| `s7` | ИП Смирнова, кофейня | кассовый разрыв, предложение в 1 клик, выдача |\n| `s3` | ООО «Вектор-Трейд» | встречное предложение: нагрузка не позволяет всю сумму |\n| `s2` | ООО «Мастер-Строй» | крупная сделка и голосование участников (`u-li`, `u-morozov`) |\n| `s4` | ООО «Ромашка-Сервис» | отказ из-за недоимки и путь к одобрению |\n| `s5` | ООО «Северный Хлеб» | сумма выше порога автоматического решения: досье и решение кредитного специалиста |\n| `r8` | Иван Иванов, три компании | разные права в каждой: подпись, подготовка, просмотр |\n| `s8` | ООО «Код и Облако» | продукт не для отрасли — банк предлагает экспресс-кредит под ту же цель |\n| `agro` | ООО «Зелёное Поле» | сезонный кредит: лимит от годовых поступлений, погашение после урожая |\n| `r12` | ООО «Лента-Опт» | смена директора во время подписи; новый директор — `u-novikova` |\n| `u-kuznetsova` | ООО «Вектор-Трейд» | подпись по доверенности (МЧД); после отзыва МЧД — подписывает директор `s3` |\n| `n1`, `n2` | БКИ не отвечает | предварительная оферта и ручное рассмотрение |\n| `bank`, `risk` | Fino Банк | очередь, досье, решения до 15 млн ₽, второй ключ выше |\n\n`r8`, `n1`, `n2` в списке входа не показываются — вход по ID. Пошаговый гид по сценариям со сменой ролей —\n`GET /api/v1/sandbox/scenarios`: кем войти, что нажать, какой статус ждать.\nСвоя компания с флагами (недоимка, просрочка, крупная сделка, БКИ не отвечает…) — `POST /api/v1/sandbox/personas`,\nкаталог флагов и параметров — `GET /api/v1/sandbox/persona-options`.\n\n## Статусы заявки\n`DRAFT → SUBMITTED → CHECKING → OFFERED | INFO_REQUESTED | UNDER_REVIEW | REJECTED → SIGNING → SIGNED → DISBURSING → ISSUED`.\nКонец — `ISSUED`, `REJECTED`, `DECLINED`, `WITHDRAWN`, `EXPIRED`. Флаги — бейджи, а не статусы: `PROVISIONAL`, `RECHECK`,\n`SOURCE_WAIT`, `SLA_BREACH`, `DEGRADED_DATA`, `DISBURSE_ERROR`. Кнопки текущего пользователя — `available_actions` заявки.\n\n## Соглашения\n- Успех — `{\"data\": …}`; ошибка — RFC 9457 `application/problem+json` с машинным `code`: ветвиться по нему, `detail` — для людей.\n- Поля — snake_case, даты — ISO 8601. Деньги в ядре — строкой (`\"400000.00\"`, без потерь), в витрине кабинета — числами.\n- `X-Request-Id` у каждого ответа (можно прислать свой); подача заявки принимает `Idempotency-Key`.\n- Решение объяснимо: причины с правилом или нормой, вклад факторов скоринга, ставка из частей (ключевая + отрасль + риск).\n",
     "version": "0.3.0"
   },
   "paths": {
@@ -603,6 +603,16 @@
               }
             }
           },
+          "409": {
+            "description": "Действие недоступно сейчас: статус (INVALID_STATUS с app_status), данные компании ещё собираются (COMPANY_NOT_LOADED), ждём свежий реестр (SOURCE_WAIT), кредитную историю (BKI_PENDING), второй ключ (AWAITING_SECOND_KEY)…",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Ошибка в данных запроса (VALIDATION_ERROR с errors[], INN_INVALID с suggested_inn, FLAG_UNKNOWN…)",
             "content": {
@@ -748,7 +758,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -843,7 +853,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -932,7 +942,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1038,7 +1048,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1127,7 +1137,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1216,7 +1226,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1315,7 +1325,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1420,7 +1430,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1519,7 +1529,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1657,7 +1667,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1752,7 +1762,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1780,7 +1790,7 @@
           "cabinet"
         ],
         "summary": "K1 прогноз остатка и K2 предложение",
-        "description": "K1 — прогноз остатка на 30 дней: точки по дням, самый глубокий разрыв и платежи, которые к нему ведут;\nK2 — предложение, которое этот разрыв закрывает. `cash_forecast` пустой, если выписки нет.",
+        "description": "K1 — прогноз остатка на 30 дней: точки по дням, самый глубокий разрыв и платежи, которые к нему ведут;\nK2 — предложение, которое этот разрыв закрывает. `cash_forecast` пустой, если выписки нет. Выданные банком кредиты\nуже учтены: минус в пределах подключённого овердрафта — `COVERED`. Если заявка на предложенный продукт уже идёт,\n`offer.application_id` — её номер: кнопка открывает эту заявку, а не заводит вторую. У ИНН банка — пустой ответ.",
         "operationId": "insights_api_v1_companies__inn__insights_get",
         "security": [
           {
@@ -1840,6 +1850,16 @@
           },
           "403": {
             "description": "Нет права: в этой компании (FORBIDDEN с why и нормой закона), только для банка (BANK_ONLY) или риск-менеджера (ROLE_REQUIRED), голосуют участники (NOT_A_PARTICIPANT)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1946,7 +1966,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1984,7 +2004,7 @@
           "cabinet"
         ],
         "summary": "Предодобренные продукты",
-        "description": "Предодобренные продукты (K2) — лимит, ставка, срок по данным банка и реестров; решение окончательное — по заявке.",
+        "description": "Предодобренные продукты (K2) — лимит, ставка, срок по данным банка и реестров; решение окончательное — по заявке.\nУ ИНН банка — пустой список.",
         "operationId": "products_api_v1_companies__inn__products_get",
         "security": [
           {
@@ -2044,6 +2064,16 @@
           },
           "403": {
             "description": "Нет права: в этой компании (FORBIDDEN с why и нормой закона), только для банка (BANK_ONLY) или риск-менеджера (ROLE_REQUIRED), голосуют участники (NOT_A_PARTICIPANT)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2205,6 +2235,16 @@
           },
           "403": {
             "description": "Нет права: в этой компании (FORBIDDEN с why и нормой закона), только для банка (BANK_ONLY) или риск-менеджера (ROLE_REQUIRED), голосуют участники (NOT_A_PARTICIPANT)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2375,7 +2415,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2732,7 +2772,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2760,7 +2800,7 @@
           "cabinet"
         ],
         "summary": "Карточки главной: остаток, списания, поступления",
-        "description": "Карточки главной (контракт фронта DashboardSummaryCardDto): остаток сегодня, что спишется и что поступит до даты\nразрыва (или за 14 дней) — из того же прогноза K1.",
+        "description": "Карточки главной (контракт фронта DashboardSummaryCardDto): остаток сегодня, что спишется и что поступит до даты\nразрыва (или за 14 дней) — из того же прогноза K1. У ИНН банка — карточки рабочего места: на рассмотрении (сумма,\nкоторую просили клиенты, как в колонке «Запрос» очереди), ждут второго ключа, выдано сегодня.",
         "operationId": "dashboard_cards_api_v1_demo_personas__inn__dashboard_summary_get",
         "security": [
           {
@@ -3198,7 +3238,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3287,7 +3327,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3386,7 +3426,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3480,7 +3520,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3604,7 +3644,7 @@
           "simulator"
         ],
         "summary": "Создать свою компанию и её пользователя",
-        "description": "Собрать свою персону: компания встаёт в WireMock на лету (приоритет 3), worker сразу подтягивает её данные.",
+        "description": "Собрать свою компанию: она встаёт в WireMock на лету (приоритет 3), worker сразу подтягивает её данные; каждый\nчеловек компании появляется отдельным пользователем. С kind=bank — свой сотрудник банка.",
         "operationId": "create_persona_api_v1_sandbox_personas_post",
         "parameters": [
           {
@@ -3777,7 +3817,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3839,7 +3879,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3938,7 +3978,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3977,7 +4017,7 @@
           "simulator"
         ],
         "summary": "Войти пользователем из списка",
-        "description": "Войти персоной: банк собирает данные её компаний, выдаётся JWT. Запросы без токена дальше тоже идут от этой\nперсоны (одна сессия симулятора, docs/08 §2). Мир при входе не меняется: перелогин между людьми одной компании —\nглавный способ пройти заявку, и события реестров (смена директора, отзыв МЧД, погашенная недоимка) и отказы из\nпанели остаются, пока их не снимут или не сбросят мир. Пересобираются только отказы сценария самого пользователя.",
+        "description": "Войти пользователем: банк собирает данные его компаний, выдаётся JWT. Запросы без токена дальше тоже идут от этого\nпользователя (одна сессия симулятора, docs/08 §2). Мир при входе не меняется: перелогин между людьми одной компании —\nглавный способ пройти заявку, и события реестров (смена директора, отзыв МЧД, погашенная недоимка) и отказы из\nпанели остаются, пока их не снимут или не сбросят мир. Пересобираются только отказы сценария самого пользователя.",
         "operationId": "login_api_v1_sandbox_personas__persona_id__login_post",
         "parameters": [
           {
@@ -4032,7 +4072,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4237,7 +4277,7 @@
             }
           },
           "404": {
-            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+            "description": "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4330,7 +4370,7 @@
           "simulator"
         ],
         "summary": "Вернуть мир в исходное состояние",
-        "description": "Вернуть штатный мир: снять отказы, события и свои персоны в WireMock, обнулить часы, снять паузу воркера.",
+        "description": "Вернуть штатный мир: снять отказы, события и свои компании в WireMock, обнулить часы, снять паузу воркера; выданные\nкредиты остаются в истории заявок, но прогноз и предложения их больше не учитывают. Запросы без токена — снова от\nпользователя по умолчанию.",
         "operationId": "reset_api_v1_sandbox_reset_post",
         "responses": {
           "200": {
@@ -9286,7 +9326,7 @@
         },
         "type": "object",
         "title": "PersonaIn",
-        "description": "Своя персона. Поля карточки — как у фронта (SandboxPersonaCreateDto); незаданные тексты бэкенд посчитает сам.\nПараметры компании строят ИНН, ОГРН, людей, выписку, КИ и отчётность тем же seed/world.py, что и мир симулятора.",
+        "description": "Своя компания и её пользователь (kind=client) или свой сотрудник банка (kind=bank). Поля карточки — как у фронта\n(SandboxPersonaCreateDto); незаданные тексты бэкенд посчитает сам.\nПараметры компании строят ИНН, ОГРН, людей, выписку, КИ и отчётность тем же seed/world.py, что и мир симулятора.",
         "examples": [
           {
             "flags": [
@@ -11570,7 +11610,7 @@
     },
     {
       "name": "cabinet",
-      "description": "Кабинет компании по ИНН в контракте фронта (суммы — числами): прогноз остатка и кассовый разрыв (K1), предодобренные продукты (K2), кредитное здоровье с рычагами (K3), профиль, заявки и задачи. ИНН банка открывает рабочее место сотрудника."
+      "description": "Кабинет компании по ИНН в контракте фронта (суммы — числами): прогноз остатка и кассовый разрыв (K1), предодобренные продукты и подбор от задачи (K2), кредитное здоровье с рычагами (K3), график погашения или доля поступлений (K4), профиль, заявки и задачи. ИНН банка открывает рабочее место сотрудника."
     },
     {
       "name": "company",
@@ -11604,11 +11644,11 @@
     },
     {
       "url": "http://localhost:8000",
-      "description": "API напрямую"
+      "description": "API напрямую, локально (порт по умолчанию, API_PORT)"
     },
     {
       "url": "http://localhost:8080",
-      "description": "стенд: через nginx фронта"
+      "description": "стенд: через nginx фронта (порт по умолчанию, WEB_PORT)"
     }
   ],
   "x-tagGroups": [

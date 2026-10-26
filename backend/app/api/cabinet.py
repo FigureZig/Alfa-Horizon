@@ -197,10 +197,12 @@ def _contract_signal(facts: dict, cards: list[dict]) -> dict | None:
 
 
 @router.get("/companies/{inn}/insights", dependencies=[feature("K1")],
-            **doc(S.InsightsResponse, 401, 403, 409, summary="K1 прогноз остатка и K2 предложение"))
+            **doc(S.InsightsResponse, 401, 403, 404, 409, summary="K1 прогноз остатка и K2 предложение"))
 async def insights(inn: Inn, who: Me, lang: Lang = "ru"):
     """K1 — прогноз остатка на 30 дней: точки по дням, самый глубокий разрыв и платежи, которые к нему ведут;
-    K2 — предложение, которое этот разрыв закрывает. `cash_forecast` пустой, если выписки нет."""
+    K2 — предложение, которое этот разрыв закрывает. `cash_forecast` пустой, если выписки нет. Выданные банком кредиты
+    уже учтены: минус в пределах подключённого овердрафта — `COVERED`. Если заявка на предложенный продукт уже идёт,
+    `offer.application_id` — её номер: кнопка открывает эту заявку, а не заводит вторую. У ИНН банка — пустой ответ."""
     if _is_bank(who, inn):
         return ok({"inn": inn, "cash_forecast": None, "offer": None, "contract": None})
     pool = await store.pool()
@@ -251,9 +253,10 @@ async def company_score(inn: Inn, who: Me, lang: Lang = "ru"):
 
 
 @router.get("/companies/{inn}/products", dependencies=[feature("K2")],
-            **doc(S.ProductsResponse, 401, 403, 409, summary="Предодобренные продукты"))
+            **doc(S.ProductsResponse, 401, 403, 404, 409, summary="Предодобренные продукты"))
 async def products(inn: Inn, who: Me, lang: Lang = "ru"):
-    """Предодобренные продукты (K2) — лимит, ставка, срок по данным банка и реестров; решение окончательное — по заявке."""
+    """Предодобренные продукты (K2) — лимит, ставка, срок по данным банка и реестров; решение окончательное — по заявке.
+    У ИНН банка — пустой список."""
     if _is_bank(who, inn):
         return ok([])
     pool = await store.pool()
@@ -274,7 +277,7 @@ Goal = Literal["cash_gap", "stock", "equipment", "growth", "contract"]
 
 
 @router.get("/companies/{inn}/offers", dependencies=[feature("K2")],
-            **doc(S.OffersResponse, 401, 403, 409, summary="Подбор от задачи: что банк готов дать этой компании"))
+            **doc(S.OffersResponse, 401, 403, 404, 409, summary="Подбор от задачи: что банк готов дать этой компании"))
 async def offers(inn: Inn, who: Me, goal: Annotated[Goal | None, Query(description="на что деньги")] = None,
                  amount: Annotated[float | None, Query(gt=0, description="сколько нужно, ₽; нет — максимум продукта, "
                                                                          "для кассового разрыва — сумма разрыва")] = None,
@@ -500,7 +503,8 @@ async def cabinet_user(inn: Inn, who: Me, lang: Lang = "ru"):
             **doc(S.SummaryCardsResponse, 401, 403, 409, summary="Карточки главной: остаток, списания, поступления"))
 async def dashboard_cards(inn: Inn, who: Me, lang: Lang = "ru"):
     """Карточки главной (контракт фронта DashboardSummaryCardDto): остаток сегодня, что спишется и что поступит до даты
-    разрыва (или за 14 дней) — из того же прогноза K1."""
+    разрыва (или за 14 дней) — из того же прогноза K1. У ИНН банка — карточки рабочего места: на рассмотрении (сумма,
+    которую просили клиенты, как в колонке «Запрос» очереди), ждут второго ключа, выдано сегодня."""
     t = CARDS[lang]
     pool = await store.pool()
     if _is_bank(who, inn):

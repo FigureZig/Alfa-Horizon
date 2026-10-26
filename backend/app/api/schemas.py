@@ -851,7 +851,8 @@ ERRORS = {
     401: "Нужен вход: токен битый, истёк или пользователя больше нет (TOKEN_INVALID, LOGIN_REQUIRED, USER_UNKNOWN)",
     403: "Нет права: в этой компании (FORBIDDEN с why и нормой закона), только для банка (BANK_ONLY) или риск-менеджера "
          "(ROLE_REQUIRED), голосуют участники (NOT_A_PARTICIPANT)",
-    404: "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…)",
+    404: "Нет такого ресурса (APPLICATION_NOT_FOUND, COMPANY_NOT_FOUND, PERSONA_NOT_FOUND, USER_NOT_FOUND…), функция "
+         "выключена флагом (FEATURE_OFF) или у ИНН банка такой ручки нет (NOT_A_CLIENT)",
     409: "Действие недоступно сейчас: статус (INVALID_STATUS с app_status), данные компании ещё собираются (COMPANY_NOT_LOADED), "
          "ждём свежий реестр (SOURCE_WAIT), кредитную историю (BKI_PENDING), второй ключ (AWAITING_SECOND_KEY)…",
     422: "Ошибка в данных запроса (VALIDATION_ERROR с errors[], INN_INVALID с suggested_inn, FLAG_UNKNOWN…)",
