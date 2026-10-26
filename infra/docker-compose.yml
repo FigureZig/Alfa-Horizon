@@ -1,9 +1,10 @@
 # Весь стенд одной командой (Docker Compose ≥ 2.20 — нужен include):
 #   cd infra && docker compose up --build
-#   Фронт     http://localhost:8080            (nginx: /api → сервис api)
-#   API       http://localhost:8000/api/docs
-#   WireMock  http://localhost:8081/__admin    (моки реестров, БКИ, банка)
-#   Postgres  localhost:55432
+#   Фронт     :8080             (WEB_PORT; nginx: /api → сервис api, документация API — /api/docs и /api/redoc)
+#   API       :8000/api/docs    (API_PORT)
+#   WireMock  :8081/__admin     (WIREMOCK_PORT; моки реестров, БКИ, банка)
+#   Postgres  :55432            (DB_PORT)
+# Служебные порты слушают только BIND_HOST (по умолчанию 127.0.0.1); фронт — все интерфейсы.
 # Бэкенд описан в backend/docker-compose.yml и подключается сюда целиком: один источник правды, бэкенд можно
 # поднимать и отдельно. Фронт собирается из frontend/ без правок в нём — Dockerfile лежит здесь, в infra/.
 name: alfa-horizon
