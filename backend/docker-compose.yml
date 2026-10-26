@@ -1,7 +1,8 @@
 # Бэкенд одной командой: cd backend && docker compose up --build
-#   API       http://localhost:8000/api/docs
-#   WireMock  http://localhost:8081/__admin   (моки ЕГРЮЛ, ЕГРИП, ФНС, ГИР БО, БКИ, банка, ЕИС)
-#   Postgres  localhost:55432
+#   API       :8000/api/docs    (API_PORT)
+#   WireMock  :8081/__admin     (WIREMOCK_PORT; моки ЕГРЮЛ, ЕГРИП, ФНС, ГИР БО, БКИ, банка, ЕИС)
+#   Postgres  :55432            (DB_PORT)
+# Служебные порты слушают только BIND_HOST (по умолчанию 127.0.0.1): на сервере наружу смотрит только фронт.
 # Значения берутся из .env (если его нет — из значений по умолчанию ниже), шаблон — .env.example.
 name: alfa-horizon
 
@@ -35,7 +36,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-app}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
       POSTGRES_DB: ${POSTGRES_DB:-credit}
-    ports: ["55432:5432"]
+    ports: ["${BIND_HOST:-127.0.0.1}:${DB_PORT:-55432}:5432"]
     volumes: [pgdata:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
@@ -48,7 +49,7 @@ services:
     command: ["--global-response-templating", "--disable-banner", "--max-request-journal-entries", "1000"]
     environment:
       JAVA_OPTS: -Xmx256m
-    ports: ["8081:8080"]
+    ports: ["${BIND_HOST:-127.0.0.1}:${WIREMOCK_PORT:-8081}:8080"]
     volumes: ["./wiremock:/home/wiremock:ro"]
 
   migrate:
@@ -62,7 +63,7 @@ services:
   api:
     <<: *app
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-    ports: ["8000:8000"]
+    ports: ["${BIND_HOST:-127.0.0.1}:${API_PORT:-8000}:8000"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/live')"]
       interval: 5s

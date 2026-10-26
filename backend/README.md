@@ -1,7 +1,7 @@
 # Бэкенд
 
 FastAPI (API) + worker в одном пакете, PostgreSQL (5 таблиц), WireMock вместо реестров. Логика — `docs/04`, `docs/12`, `docs/13`; устройство — `docs/06`.
-Документация API — Swagger http://localhost:8000/api/docs и ReDoc http://localhost:8000/api/redoc; схемы ответов — `app/api/schemas.py`.
+Документация API — `/api/docs` (Swagger) и `/api/redoc` (ReDoc) на стенде или на самом API; схемы ответов — `app/api/schemas.py`.
 
 ## Как это работает
 ```
@@ -27,7 +27,7 @@ docker compose up --build     # postgres, migrate, api, worker, wiremock
 docker compose up -d postgres wiremock
 uv sync
 uv run --env-file .env python -m app.migrate
-uv run --env-file .env uvicorn app.main:app --reload --port 8000   # http://localhost:8000/api/docs
+uv run --env-file .env uvicorn app.main:app --reload --port 8000   # документация — /api/docs
 uv run --env-file .env python -m app.worker
 uv run pytest                 # юнит: без базы и сети
 uv run pytest -m e2e          # сквозные: нужны postgres и wiremock из compose, база credit_e2e создаётся сама
@@ -37,7 +37,7 @@ uv run pytest -m e2e          # сквозные: нужны postgres и wiremoc
 ## Проверить руками
 Ответ — `{"data": …}`, ошибка — RFC 9457 с `code` (соглашения — `docs/api/README.md`). Без токена запрос идёт от последнего вошедшего пользователя.
 ```bash
-A=localhost:8000/api/v1
+A=${API_URL:-http://localhost:8000}/api/v1                                      # адрес API; на сервере — его адрес
 curl "$A/sandbox/personas?lang=ru"                                               # кто есть на экране входа
 curl -X POST $A/auth/login -H 'content-type: application/json' -d '{"login":"s7"}'   # войти по ID → data.token
 curl $A/me                                                                       # компании и права с нормами
@@ -93,8 +93,8 @@ curl -X POST $A/sandbox/personas -H 'content-type: application/json' \
 |---|---|---|
 | golden-сценарии мира симулятора | `tests/test_scenarios.py` | точные числа и исходы из `scenario.expect` |
 | граф статусов | `tests/test_state.py`, `qa/graph.py` | достижимость, тупики, круги без выхода, «не зависает», 16 прогонов покрывают все переходы; диаграмма в docs = таблица в коде |
-| механика на своих персонах | `tests/test_mechanics.py`, `qa/pairwise.py`, `qa/invariants.py` | pairwise (IPOG) по форме, отрасли, продукту, сумме, профилю, сроку, сбою; инварианты чисел; монотонность |
-| сущности и моки | `tests/test_world.py` | контрольные цифры, согласованность источников, моки = мир, стабы своей персоны = запросы worker |
+| механика на своих компаниях | `tests/test_mechanics.py`, `qa/pairwise.py`, `qa/invariants.py` | pairwise (IPOG) по форме, отрасли, продукту, сумме, профилю, сроку, сбою; инварианты чисел; монотонность |
+| сущности и моки | `tests/test_world.py` | контрольные цифры, согласованность источников, моки = мир, стабы своей компании = запросы worker |
 | права | `tests/test_rights.py` | ИП, директор, дисквалификация, недостоверность, участник ООО и АО, ДБО, совместные директора |
 | K1 и K3 | `tests/test_forecast.py`, `tests/test_levers.py` | регулярные платежи и разрыв S7; каждый рычаг улучшает решение, у неустранимого рычагов нет |
 | скоринг на синтетике | `tests/test_scoring_validation.py`, `qa/scoring.py` | AUC и KS, порядок классов, калибровка, PSI, монотонность сильных факторов |
@@ -107,5 +107,5 @@ curl -X POST $A/sandbox/personas -H 'content-type: application/json' \
 `docs/api/postman_collection.json` — `uv run python -m qa.postman` (CI прогоняет её `newman` по стенду в Docker).
 
 ## Что дальше
-КЭП и криптопроверка МЧД ·
-смена директора на лету (R12) · несколько компаний у своего пользователя · типизированные ответы API (pydantic-модели в OpenAPI).
+КЭП и криптопроверка МЧД · несколько компаний у своего пользователя · pydantic-модели в самих ответах API (сейчас схемы
+только описывают ответы в OpenAPI).
