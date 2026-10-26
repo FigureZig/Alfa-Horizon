@@ -13,3 +13,9 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Локальные настройки инструментов разработчиков
+.claude/
+CLAUDE.md
+AGENTS.md
+skills-lock.json

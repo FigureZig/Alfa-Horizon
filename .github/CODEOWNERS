@@ -1,4 +1,6 @@
-# Замените @… на логины GitHub: основной и запасной на каждую зону, чтобы мерж не вставал.
-*           @back-lead @back-backup
-/backend/   @back-lead @back-backup
-/docs/      @back-lead @analyst
+# Владельцы зон: GitHub сам зовёт их в ревью PR, который трогает их файлы
+*            @FigureZig
+/backend/    @FigureZig
+/docs/       @FigureZig
+/infra/      @FigureZig
+/frontend/   @lyublyukotikov

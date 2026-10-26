@@ -1,4 +1,6 @@
-# AGENTS.md — Fino Frontend Development Rules
+# Fino Frontend — Development Rules
+
+Как устроен и как пишется фронтенд: стиль, структура, компоненты, типы, сервисы. Общие правила репозитория — в [`../CONTRIBUTING.md`](../CONTRIBUTING.md).
 
 ## 1. Styling and Design
 
