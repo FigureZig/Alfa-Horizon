@@ -1,6 +1,6 @@
 // Архитектура «Умный кредитный кабинет» (LikeC4) — источник правды для C4.
-// Просмотр: npx likec4 start kb/diagrams   Проверка: npx likec4 validate kb/diagrams
-// Ground truth — kb/README.md. Ручки и поля внешних систем — kb/09_data_contracts.md; права из сущностей — kb/05_legal.md; устойчивость — kb/07_resilience.md.
+// Просмотр: npx likec4 start docs/diagrams   Проверка: npx likec4 validate docs/diagrams
+// Описание — docs/06_architecture.md. Ручки и поля внешних систем — docs/09_data_contracts.md; права из сущностей — docs/05_legal.md; устойчивость — docs/07_resilience.md.
 // BPMN: scenarios-bpmn.drawio (K0, S0, E1, D1–D4, F1–F2, R1–R13); draw.io C4 L2 / L3 / L3-W — c4-data-flows.drawio.
 
 specification {
@@ -28,9 +28,9 @@ model {
   underwriter = actor 'Кредитный аналитик' {
     description 'Ручное рассмотрение исключений'
   }
-  tester = actor 'Проверяющий (демо)' {
+  tester = actor 'Проверяющий' {
     #demo
-    description 'Песочница сценариев, только DEMO_MODE'
+    description 'Симулятор: сценарии, события, сбои и часы мира; только DEMO_MODE'
   }
 
   cabinet = system 'Умный кредитный кабинет' {
@@ -38,7 +38,7 @@ model {
 
     web = container 'Web' {
       technology 'nginx + Vue 3 SPA'
-      description 'Зоны: клиент, банк, песочница (DEMO_MODE); reverse proxy /api'
+      description 'Зоны: клиент, банк, симулятор (DEMO_MODE); reverse proxy /api'
     }
 
     api = container 'API' {
@@ -60,7 +60,7 @@ model {
       }
       insights = component 'insights' {
         #smart
-        description 'Доп. слой K (kb/14), за фича-флагами: forecast (K1), signals (K1, K5), offers (K2), advisor (K3), repayment (K4). Зависит только от основы'
+        description 'Доп. слой K (docs/03), за фича-флагами: forecast (K1), signals (K1, K5), offers (K2), advisor (K3), repayment (K4). Зависит только от основы'
       }
       tasks = component 'tasks' {
         description 'Inbox задач и in-app уведомления: вычисляется по заявкам в ожидании и правам, отдельной таблицы нет'
@@ -76,7 +76,7 @@ model {
       }
       sandbox = component 'sandbox' {
         #demo
-        description 'Песочница: персоны, пресеты R1–R13, события реестров; пишет только в моки'
+        description 'Симулятор: пользователи, пресеты R1–R13, события реестров; пишет только в моки'
       }
     }
 
@@ -111,7 +111,7 @@ model {
 
   outer = external 'Внешний мир (моки WireMock)' {
     #mocked
-    description 'Поля — по реальным спецификациям (kb/18)'
+    description 'Поля — по реальным спецификациям (docs/09)'
     egrul = external 'ЕГРЮЛ / ЕГРИП' {
       #mocked
       technology 'формат ФНС 4.06'
@@ -158,7 +158,7 @@ model {
     }
     wmadmin = external 'WireMock admin API' {
       #demo
-      description 'только DEMO_MODE: песочница меняет «реестры»'
+      description 'только DEMO_MODE: симулятор меняет «реестры»'
     }
   }
 
@@ -168,7 +168,7 @@ model {
   underwriter -> cabinet.web 'разбирает очередь' {
     technology 'HTTPS'
   }
-  tester -> cabinet.web 'песочница /sandbox' {
+  tester -> cabinet.web 'симулятор: «Как проверить»' {
     technology 'HTTPS'
   }
 
@@ -284,14 +284,14 @@ views {
 
   dynamic view n1_bki_timeout {
     title 'N1: БКИ не отвечает → предварительная оферта, без перезапусков'
-    tester -> cabinet.web 'песочница: отказ «БКИ таймаут»'
+    tester -> cabinet.web 'симулятор: отказ «БКИ таймаут»'
     cabinet.web -> cabinet.api.sandbox 'POST /api/v1/sandbox/faults'
     cabinet.api.sandbox -> outer.wmadmin 'стаб отказа, priority 1'
     cabinet.worker -> outer.bki 'кредитный отчёт: таймаут, ретраи с jitter'
     cabinet.worker -> cabinet.db 'шаг RETRY_WAIT, breaker, флаг SOURCE_WAIT'
     cabinet.api.applications -> cabinet.api.decisioning 'дедлайн: политика PROVISIONAL'
     client -> cabinet.web 'видит предварительную оферту и честный статус'
-    tester -> cabinet.web 'песочница: снять отказ'
+    tester -> cabinet.web 'симулятор: снять отказ'
     cabinet.worker -> outer.bki 'отчёт получен'
     cabinet.api.applications -> cabinet.api.decisioning 'пересмотр: оферта подтверждена или дифф'
   }

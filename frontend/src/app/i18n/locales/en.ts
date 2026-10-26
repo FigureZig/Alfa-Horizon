@@ -88,7 +88,7 @@ export default {
     },
     login: {
         title: 'Sign in to Fino Business',
-        description: 'This is a bank demo: no password needed. Walk through a guided scenario or sign in to any company yourself.',
+        description: 'No password needed — you are already a bank client. Walk through a guided scenario or sign in to any company yourself.',
         start: {
             scenario: {
                 title: 'Walk through a ready-made scenario',
@@ -164,9 +164,9 @@ export default {
     },
 
     onboarding: {
-        open: 'How to use the demo',
+        open: 'How to walk through a scenario',
         title: 'How to walk through a scenario',
-        description: 'The demo shows a loan through the eyes of different people: client, accountant, participant, bank specialist. A scenario guides you step by step.',
+        description: 'A loan through the eyes of different people: client, accountant, participant, bank specialist. A scenario guides you step by step.',
         stepLabel: 'Step {number}',
         steps: {
             pick: { title: 'Pick a scenario', text: 'Click “Walk through a ready-made scenario” and choose a story — for example, a major transaction or signing by power of attorney.' },
@@ -249,6 +249,7 @@ export default {
         offerLine: '{name}: limit {limit} at {rate} — the rest stays for later',
         closeGap: 'Close the gap',
         closeGapFor: 'Close the gap for ≈{interest}',
+        openApplication: 'Open the application',
         otherOptions: 'Other options',
         findCredit: 'Find a loan',
         coveredTitle: 'On {date} the balance goes {amount} below zero — your overdraft covers it',
@@ -957,6 +958,7 @@ export default {
             backToApplications: 'Back to the register',
             request: 'Client request',
             reasons: 'Why a human is needed',
+            limits: 'Why the amount is below the request',
             noReasons: 'The engine left no reasons: the application got here by a deadline or a source failure.',
             product: 'Product',
             amount: 'Amount',
@@ -1299,9 +1301,9 @@ export default {
             badgeDone: 'done',
             restart: {
                 button: 'Start over',
-                hint: '“Start over” cancels registry events, source failures and time travel, then opens step 1. Past applications stay in the history.',
+                hint: '“Start over” cancels registry events, source failures and time travel, deletes your companies from the builder and opens step 1. Past applications stay in the history.',
                 title: 'Start the scenario over?',
-                text: 'The demo world goes back to its initial state: registry events, source failures, time travel and your own companies are reset. The scenario starts from step 1 — we sign in as the right person right away. Applications from past runs stay in the history.',
+                text: 'The world goes back to its initial state: registry events, source failures, time travel and your own companies are reset. The scenario starts from step 1 — we sign in as the right person right away. Applications from past runs stay in the history.',
                 confirm: 'Reset and start',
                 cancel: 'Cancel',
                 done: 'The world is reset — starting the scenario from step 1',
@@ -1560,7 +1562,7 @@ export default {
         dashboardLoadError: 'Failed to load financial data. Please try again.',
         dashboardLoaded: 'Financial data updated',
         sandboxLoadError: 'Could not load the list of users. Please try again.',
-        sandboxCreateError: 'Failed to create the persona. Please try again.',
+        sandboxCreateError: 'Failed to create the company. Please try again.',
         sandboxDeleteError: 'Could not delete the company. Please try again.',
         demoPersonaLoadError: 'Could not load user data. Please try again.',
         demoPersonaNotFound: 'User not found. Choose who to sign in as.',

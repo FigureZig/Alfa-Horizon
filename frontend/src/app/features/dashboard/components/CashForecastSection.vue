@@ -54,6 +54,15 @@ const contract = computed(() => props.forecast?.contract ?? null)
 const isSkeletonVisible = computed(() => props.isLoading && !props.forecast)
 
 function openCloseGap() {
+  const applicationId = props.offer?.applicationId
+
+  // Заявка на этот продукт уже идёт — открываем её вместо второй
+  if (applicationId) {
+    router.push({ name: 'application', params: { inn: props.inn, applicationId } })
+
+    return
+  }
+
   isCloseGapVisible.value = true
 }
 

@@ -11,6 +11,8 @@ export interface CashGapCoverDto {
 
 export interface CashGapOfferDto extends CreditProductDto {
   cover: Nullable<CashGapCoverDto>
+  // Заявка на этот продукт уже идёт — кнопка ведёт в неё, а не заводит вторую
+  application_id?: Nullable<string>
 }
 
 // K5: действующий госконтракт в ЕИС — повод для кредита на исполнение

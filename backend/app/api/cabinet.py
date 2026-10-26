@@ -18,6 +18,7 @@ from ..config import settings
 from ..domain import catalog, engine, forecast, levers, matching
 from ..domain import repayment as repay
 from ..domain.scoring import explain_factor
+from ..domain.state import TERMINAL
 from ..features import INFLOW_SKIP, account_operations, person_links
 from ..policy import load as load_policy
 from . import schemas as S
@@ -158,6 +159,11 @@ def _amount(app: dict):
     return Decimal(str((offer or data["request"])["amount"]))
 
 
+def _requested(app: dict) -> Decimal:
+    """Сколько просил клиент — та же сумма, что в колонке «Запрос» очереди."""
+    return Decimal(str(app["data"]["request"]["amount"]))
+
+
 async def _bank_cards(conn, inn: str, lang: str) -> list[dict]:
     t, pol = BANK_CARDS[lang], load_policy()
     queue = await store.queue(conn)
@@ -169,7 +175,7 @@ async def _bank_cards(conn, inn: str, lang: str) -> list[dict]:
     limit = f"{pol['params']['specialist_authority_max']:,}".replace(",", " ")
     late = sum("SLA_BREACH" in a["flags"] for a in queue)
     return [
-        {"id": f"{inn}-review", "type": "balance", "title": t["review"], "amount": num(sum(map(_amount, queue), Decimal(0))),
+        {"id": f"{inn}-review", "type": "balance", "title": t["review"], "amount": num(sum(map(_requested, queue), Decimal(0))),
          "currency": CURRENCY, "description": t["review_d"].format(n=_count(len(queue), "app", lang), late=late)},
         {"id": f"{inn}-second-key", "type": "outflow", "title": t["second"],
          "amount": num(sum(map(_amount, pending), Decimal(0))), "currency": CURRENCY,
@@ -201,6 +207,7 @@ async def insights(inn: Inn, who: Me, lang: Lang = "ru"):
     async with pool.acquire() as conn:
         _, facts = await require(conn, who, inn, "view")
         fc = await _forecast(conn, inn, facts)
+        active = [a for a in await store.applications(conn, inn) if a["status"] not in TERMINAL]
     if fc is None:
         return ok({"inn": inn, "cash_forecast": None, "offer": None, "contract": None})
     gap = fc["cash_gap"]
@@ -209,6 +216,9 @@ async def insights(inn: Inn, who: Me, lang: Lang = "ru"):
     if offer and offer["product"] == "OVERDRAFT":     # сколько стоит закрыть разрыв: проценты только за дни в минусе
         cost = forecast.cover_cost(fc["points"], offer["rate"])
         offer["cover"] = cost and {"amount": num(cost["amount"]), "days": cost["days"], "interest": num(cost["interest"])}
+    if offer:     # заявка на этот продукт уже идёт — кнопка ведёт в неё, а не заводит вторую
+        offer["application_id"] = next((str(a["id"]) for a in active
+                                         if a["data"]["request"].get("product") == offer["product"]), None)
     return ok({"inn": inn, "offer": offer, "contract": _contract_signal(facts, cards), "cash_forecast": {
         "status": fc["status"], "horizon_days": fc["horizon_days"], "currency": CURRENCY,
         "points": [{"date": p["date"], "balance": num(p["balance"])} for p in fc["points"]],

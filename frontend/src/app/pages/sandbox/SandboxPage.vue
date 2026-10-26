@@ -10,7 +10,7 @@ import AppHeader from '@/app/components/layout/AppHeader.vue'
 import SandboxCompanyTile from '@/app/features/sandbox/components/SandboxCompanyTile.vue'
 import SandboxOnboardingDialog from '@/app/features/sandbox/components/SandboxOnboardingDialog.vue'
 import SandboxPersonaCardSkeleton from '@/app/features/sandbox/components/SandboxPersonaCardSkeleton.vue'
-import { useApiFetch } from '@/app/composables/useApiFetch'
+import { isNotFoundError, useApiFetch } from '@/app/composables/useApiFetch'
 import { useReviewerPanel } from '@/app/composables/useReviewerPanel'
 import { readLastPersonaId, useSession } from '@/app/composables/useSession'
 import { sandboxService } from '@/app/services/sandbox/sandbox.service'
@@ -160,12 +160,17 @@ async function loginAsPersona(persona: SandboxPersonaInterface) {
   } catch (err: unknown) {
     console.error('Sandbox login failed:', err)
 
+    // Человека уже нет (мир сбросили в другой вкладке или панели) — список устарел, перечитываем
+    const isGone = isNotFoundError(err)
+
     toast.add({
       severity: 'error',
       summary: t('toast.error'),
-      detail: t('toast.loginError'),
+      detail: isGone ? t('toast.demoPersonaNotFound') : t('toast.loginError'),
       life: 4000,
     })
+
+    if (isGone) await loadPersonas()
   } finally {
     isLoggingIn.value = false
   }

@@ -42,6 +42,19 @@ async def test_officer_opens_the_bank_workspace_by_bank_inn(stand):
     assert denied.status_code == 403 and denied.json()["code"] == "BANK_ONLY"
 
 
+async def test_pause_holds_applications_while_company_data_still_loads(stand):
+    """Пауза — наш сбой: поданная заявка ждёт в очереди, а кабинет компании, в которую ещё не входили, открывается."""
+    headers = await stand.login("s7")
+    await stand.call("POST", "/sandbox/worker/pause")
+    app = await stand.call("POST", "/applications", headers, expect=201,
+                           json={"inn": SMIRNOVA, "product": "OVERDRAFT", "amount": 400000, "goal": "cash_gap"})
+    await stand.call("POST", f"/applications/{app['id']}/submit", headers)
+    assert await stand.call("GET", f"/companies/{HLEB}/profile", await stand.login("s5"))
+    assert await stand.status(app["id"]) == "SUBMITTED"
+    await stand.call("POST", "/sandbox/worker/resume")
+    await stand.until_left(app["id"], "SUBMITTED")
+
+
 async def test_custom_company_flags_change_the_outcome(stand):
     options = await stand.call("GET", "/sandbox/persona-options", params={"lang": "ru"})
     assert {"tax_debt", "large_deal", "bki_down"} <= {f["id"] for f in options["flags"]}

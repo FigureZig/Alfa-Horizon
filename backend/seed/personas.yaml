@@ -73,7 +73,7 @@ presets:
     person: ivanov
     company: hleb
     title: { ru: "Сумма выше порога автоматического решения", en: "Amount above the automatic approval limit" }
-    about: { ru: "Хлебозавод: 60 сотрудников; ещё участник логистической компании и готовит заявки в оптовой",
+    about: { ru: "Хлебозавод: 60 сотрудников; ещё участник логистической компании и готовит заявки в оптовой компании",
              en: "A bakery: 60 staff; also a member of a logistics company and prepares applications for a wholesaler" }
     preview: { ru: "Заявка уходит кредитному специалисту: досье, скоринг с вкладами, решение и оферта",
                en: "The application goes to a loan officer: dossier, scorecard contributions, decision and offer" }
@@ -100,7 +100,7 @@ presets:
     person: ivanov
     company: hleb
     title: { ru: "Один человек — три компании", en: "One person, three companies" }
-    about: { ru: "Хлебозавод: 60 сотрудников; ещё участник логистической компании и готовит заявки в оптовой",
+    about: { ru: "Хлебозавод: 60 сотрудников; ещё участник логистической компании и готовит заявки в оптовой компании",
              en: "A bakery: 60 staff; also a member of a logistics company and prepares applications for a wholesaler" }
     listed: false                # вход по ID для документации и тестов; в списке входа не показываем
     preview: { ru: "Переключение компаний: в каждой свои права — подпись, подготовка заявки, только просмотр",

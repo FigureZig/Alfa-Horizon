@@ -26,6 +26,8 @@ import { ApplicationActionEnum } from '@/app/types/application/application-actio
 import { ApplicationDetailStatusEnum } from '@/app/types/application/application-detail-status-enum'
 
 const MANUAL_REASON_KIND = 'manual'
+// Ограничение суммы объясняет, почему движок предложил меньше, а не зачем нужен человек
+const CAP_REASON_KIND = 'cap'
 
 const props = defineProps<{
   inn: string
@@ -98,8 +100,14 @@ const requestRows = computed(() => {
 // Причины, из-за которых нужен человек, — первыми и с акцентом; без повторяющейся метки над каждой
 const reasons = computed(() =>
   (application.value?.decision?.reasons ?? [])
+    .filter((reason) => reason.kind !== CAP_REASON_KIND)
     .map((reason) => ({ code: reason.code, text: reason.text, isManual: reason.kind === MANUAL_REASON_KIND }))
     .sort((a, b) => Number(b.isManual) - Number(a.isManual)),
+)
+const amountLimits = computed(() =>
+  (application.value?.decision?.reasons ?? [])
+    .filter((reason) => reason.kind === CAP_REASON_KIND)
+    .map((reason) => reason.text),
 )
 
 const nextRoute = computed(() =>
@@ -277,6 +285,30 @@ const backLabel = computed(() => (isFromApplications.value ? t('bank.dossier.bac
                   <span class="min-w-0 break-words">{{ reason.text }}</span>
                 </li>
               </ul>
+
+              <!-- Ограничения суммы — отдельно: они объясняют, почему движок дал меньше, а не зачем нужен человек -->
+              <div
+                v-if="amountLimits.length"
+                class="flex flex-col gap-2"
+              >
+                <h3 class="text-xs font-semibold text-fino-text-muted">
+                  {{ t('bank.dossier.limits') }}
+                </h3>
+
+                <ul class="flex flex-col gap-2">
+                  <li
+                    v-for="limit in amountLimits"
+                    :key="limit"
+                    class="flex items-start gap-2 rounded-xl bg-fino-surface-secondary px-3 py-2 text-sm text-fino-text"
+                  >
+                    <i
+                      class="pi pi-info-circle mt-0.5 text-xs text-fino-text-muted"
+                      aria-hidden="true"
+                    />
+                    <span class="min-w-0 break-words">{{ limit }}</span>
+                  </li>
+                </ul>
+              </div>
             </article>
 
             <article class="flex min-w-0 flex-col gap-4 card-key p-5">

@@ -147,14 +147,16 @@ async def pending(conn, kind: str, application_id) -> bool:
                                        AND status IN ('PENDING', 'RUNNING', 'RETRY_WAIT') LIMIT 1""", kind, application_id))
 
 
-async def claim(conn, lease_s: int = 120) -> dict | None:
+async def claim(conn, lease_s: int = 120, kinds: tuple[str, ...] | None = None) -> dict | None:
+    """Следующая задача; `kinds` — только задачи этих видов."""
     row = await conn.fetchrow(
         """UPDATE jobs SET status = 'RUNNING', attempts = attempts + 1, lease_until = now() + make_interval(secs => $1)
            WHERE id = (SELECT id FROM jobs
-                       WHERE (status IN ('PENDING', 'RETRY_WAIT') AND run_at <= now())
-                          OR (status = 'RUNNING' AND lease_until < now())       -- воркер упал: перезапуск
+                       WHERE ((status IN ('PENDING', 'RETRY_WAIT') AND run_at <= now())
+                              OR (status = 'RUNNING' AND lease_until < now()))  -- воркер упал: перезапуск
+                         AND ($2::text[] IS NULL OR kind = ANY($2::text[]))
                        ORDER BY run_at FOR UPDATE SKIP LOCKED LIMIT 1)
-           RETURNING *""", lease_s)
+           RETURNING *""", lease_s, None if kinds is None else list(kinds))
     return dict(row) if row else None
 
 
