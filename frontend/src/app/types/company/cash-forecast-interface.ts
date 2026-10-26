@@ -34,6 +34,8 @@ export interface CashGapCoverInterface {
 // Предложение под разрыв: продукт с ценой закрытия разрыва
 export interface CashGapOfferInterface extends CreditProductInterface {
   cover: Nullable<CashGapCoverInterface>
+  // Уже идущая заявка на этот продукт
+  applicationId: Nullable<string>
 }
 
 export interface CompanyContractInterface {

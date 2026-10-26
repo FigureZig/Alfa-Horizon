@@ -32,7 +32,11 @@ export class CompanyInsightsMapper {
         amount: outflow.amount,
       })),
       offer: data.offer
-        ? { ...CreditProductMapper.toEntity(data.offer), cover: data.offer.cover ?? null }
+        ? {
+          ...CreditProductMapper.toEntity(data.offer),
+          cover: data.offer.cover ?? null,
+          applicationId: data.offer.application_id ?? null,
+        }
         : null,
       contract: data.contract
         ? {

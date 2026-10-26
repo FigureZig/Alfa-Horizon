@@ -92,6 +92,9 @@ const offerLine = computed(() => {
 })
 
 const closeGapLabel = computed(() => {
+  // Заявка на этот продукт уже идёт — вторую не заводим, ведём в неё
+  if (props.offer?.applicationId) return t('cashForecast.openApplication')
+
   const interest = props.offer?.cover?.interest
 
   return interest !== undefined
