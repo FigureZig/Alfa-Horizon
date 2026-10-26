@@ -285,7 +285,7 @@ def _view(app: dict, granted: dict, who) -> dict:
     return views.application(app, granted["can"], role=who.role, person_inn=who.inn)
 
 
-@router.get("/applications", tags=["application"], **doc(S.ApplicationsResponse, 401, 403, 422, summary="Заявки компании"))
+@router.get("/applications", tags=["application"], **doc(S.ApplicationsResponse, 401, 403, 409, 422, summary="Заявки компании"))
 async def list_applications(who: Me, company_inn: Annotated[str | None, Query(pattern=r"^\d{10}$|^\d{12}$")] = None):
     """Заявки компании, новые сверху. Без company_inn — активной компании пользователя."""
     pool = await store.pool()

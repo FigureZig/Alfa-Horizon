@@ -22,7 +22,7 @@ FastAPI (API) + worker в одном пакете, PostgreSQL (5 таблиц), 
 cp .env.example .env          # необязательно: без .env подставятся те же значения
 docker compose up --build     # postgres, migrate, api, worker, wiremock
 ```
-Для разработки без пересборки образа — база и моки в Docker, код локально:
+Для разработки без пересборки образа — база и моки в Docker, код локально (Python 3.13 и [uv](https://docs.astral.sh/uv/)):
 ```bash
 docker compose up -d postgres wiremock
 uv sync
@@ -31,6 +31,7 @@ uv run --env-file .env uvicorn app.main:app --reload --port 8000   # докум�
 uv run --env-file .env python -m app.worker
 uv run pytest                 # юнит: без базы и сети
 uv run pytest -m e2e          # сквозные: нужны postgres и wiremock из compose, база credit_e2e создаётся сама
+uv run ruff check .           # линтер, как в CI
 ```
 `.env` в git не попадает; шаблон — `.env.example`.
 
@@ -56,6 +57,8 @@ curl -X POST $A/sandbox/faults -H 'content-type: application/json' \
 curl -X POST $A/sandbox/events -H 'content-type: application/json' \
      -d '{"type":"legal.bankruptcy_started","inn":"770100000079"}'               # событие мира → пересмотр оферт компании
 curl -X POST $A/sandbox/clock -H 'content-type: application/json' -d '{"advance_s":3600}'   # истекают оферты и подписи
+curl -X POST $A/sandbox/worker/pause                                             # наш сбой: заявки ждут, данные компаний собираются; resume — снять
+curl "$A/sandbox/scenarios?lang=ru"                                              # гид: сценарии по ролям — кем войти и что нажать
 curl -X POST "$A/sandbox/personas/bank/login" && curl $A/bank/queue              # кредитный специалист: очередь исключений
 curl -X POST "$A/sandbox/personas/risk/login"                                    # риск-менеджер: второй ключ выше 15 млн ₽
 curl -X POST $A/bank/applications/<id>/decision/confirm -H 'content-type: application/json' -d '{"approve":true}'
@@ -72,7 +75,9 @@ curl -X POST $A/sandbox/personas -H 'content-type: application/json' \
   и дохода, платёж по кредиту в выписке = платёж в БКИ, отметки ЕГРЮЛ только у юрлиц). Платежи и остатки кредитов выводятся
   из суммы, ставки и срока, а не пишутся руками.
 - **Своя компания** — `POST /api/v1/sandbox/personas`: компания из параметров профиля → те же `world.py` и проверка → стабы
-  с приоритетом 3 через admin API WireMock → worker обновляет снапшоты. `GET …/personas` — список, `POST …/reset` — убрать.
+  с приоритетом 3 через admin API WireMock → worker обновляет снапшоты. Вопросы и флаги конструктора — `GET …/persona-options`
+  (`seed/persona_flags.yaml`), «что скажет банк» до создания — `POST …/personas/preview`, правка — `PUT …/personas/{id}`,
+  удаление — `DELETE …/personas/{id}`; `POST /sandbox/reset` снимает все свои компании вместе со штатным сбросом.
 - **Приоритеты стабов:** 1 — отказы симулятора, 2 — события мира, 3 — свои компании, 5 — штатный мир, 9 — «не найдено».
 - **Отказы на лету** — `POST /api/v1/sandbox/faults` ставит стаб с приоритетом 1, `DELETE …/faults/{id}` снимает, `POST /sandbox/reset` возвращает штатный мир. Без перезапусков.
 
@@ -88,23 +93,27 @@ curl -X POST $A/sandbox/personas -H 'content-type: application/json' \
 | роль или сценарий со сменой ролей | права — `app/domain/rights.py`, кнопки — `lifecycle.actions`, сценарий — `seed/flows.py` → `uv run python -m qa.roles` |
 
 ## Тесты
-`uv run pytest` — за полсекунды, без БД и сети: ответы источников строятся в памяти тем же `seed/world.py` и проходят через JSON.
+`uv run pytest` — за пару секунд, без БД и сети: ответы источников строятся в памяти тем же `seed/world.py` и проходят через JSON.
 | Что | Где | Как |
 |---|---|---|
 | golden-сценарии мира симулятора | `tests/test_scenarios.py` | точные числа и исходы из `scenario.expect` |
 | граф статусов | `tests/test_state.py`, `qa/graph.py` | достижимость, тупики, круги без выхода, «не зависает», 16 прогонов покрывают все переходы; диаграмма в docs = таблица в коде |
 | механика на своих компаниях | `tests/test_mechanics.py`, `qa/pairwise.py`, `qa/invariants.py` | pairwise (IPOG) по форме, отрасли, продукту, сумме, профилю, сроку, сбою; инварианты чисел; монотонность |
 | сущности и моки | `tests/test_world.py` | контрольные цифры, согласованность источников, моки = мир, стабы своей компании = запросы worker |
+| деньги и каталог | `tests/test_calc.py`, `tests/test_catalog.py`, `tests/test_scoring.py`, `tests/test_repayment.py` | аннуитет и округления, отрасли, ставка и цена риска, баллы скоринга, K4 — график из поступлений |
 | права | `tests/test_rights.py` | ИП, директор, дисквалификация, недостоверность, участник ООО и АО, ДБО, совместные директора |
 | K1 и K3 | `tests/test_forecast.py`, `tests/test_levers.py` | регулярные платежи и разрыв S7; каждый рычаг улучшает решение, у неустранимого рычагов нет |
 | скоринг на синтетике | `tests/test_scoring_validation.py`, `qa/scoring.py` | AUC и KS, порядок классов, калибровка, PSI, монотонность сильных факторов |
 | контракт API | `tests/test_api_contract.py` | конверт `{data}`, ошибки RFC 9457, CORS, `X-Request-Id`, DTO кабинета |
-| **сквозные** (`-m e2e`) | `tests/e2e/test_routes.py`, `test_session.py`, `test_flows.py`, `test_cabinet.py`, `test_mocks.py`, `test_simulator.py` | 16 прогонов графа через HTTP API: каждый переход вызывает тот, кто его делает (клиент, конвейер, таймер, специалист, событие мира); вход по ID и карточкой, права R8, главная, своя компания с флагами, N1; 9 сценариев со сменой ролей и токенов, гид по сценариям, живой таймлайн (SSE); кабинет в контракте фронта и рабочее место банка; WireMock отвечает как мир. Каждый успешный ответ сверяется со схемой OpenAPI своей ручки |
+| **сквозные** (`-m e2e`) | `tests/e2e/test_routes.py`, `test_session.py`, `test_flows.py`, `test_cabinet.py`, `test_mocks.py`, `test_simulator.py`, `test_scenarios_guide.py`, `test_stream.py` | 16 прогонов графа через HTTP API: каждый переход вызывает тот, кто его делает (клиент, конвейер, таймер, специалист, событие мира); вход по ID и карточкой, права R8, главная, своя компания с флагами, N1; 9 сценариев со сменой ролей и токенов, гид по сценариям, живой таймлайн (SSE); кабинет в контракте фронта и рабочее место банка; WireMock отвечает как мир. Каждый успешный ответ сверяется со схемой OpenAPI своей ручки |
 | флаги своей компании | `tests/test_persona_flags.py` | каждый флаг на эталонной заявке даёт обещанную причину, продукт или отказ источника — без флага этого нет |
 | документация API | `tests/test_api_contract.py` | у каждой ручки русское название, схема ответа, ошибки RFC 9457, вход Bearer |
+| границы модулей | `tests/test_architecture.py` | домен без ввода-вывода, ядро решения не зависит от K1–K5, FastAPI знают только API и точка входа |
+| модель данных и тексты гида | `tests/test_data_model.py`, `tests/test_flows_texts.py` | диаграмма = миграции и схемы API; у каждого сценария гида есть английский текст |
 Документы из кода (CI сверяет, что они актуальны): `docs/test-scenarios.md` — `uv run python -m qa.report`, `docs/15_roles.md` —
 `uv run python -m qa.roles`, `docs/scoring_validation.md` — `uv run python -m qa.scoring`, коллекция запросов
-`docs/api/postman_collection.json` — `uv run python -m qa.postman` (CI прогоняет её `newman` по стенду в Docker).
+`docs/api/postman_collection.json` — `uv run python -m qa.postman` (CI прогоняет её `newman` по стенду в Docker),
+`docs/diagrams/data_model.md` — `uv run python -m qa.er`, контракт `docs/api/openapi.json` — `uv run python -m app.openapi`.
 
 ## Что дальше
 КЭП и криптопроверка МЧД · несколько компаний у своего пользователя · pydantic-модели в самих ответах API (сейчас схемы
