@@ -1,0 +1,14 @@
+# Вход на сервере: Caddy сам получает и продлевает сертификат Let's Encrypt для DOMAIN (нужны открытые 80 и 443)
+# и отдаёт всё на web — nginx фронта, который уже проксирует /api на api. Запуск — docker-compose.prod.yml.
+{$DOMAIN:alfahorizon.duckdns.org} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	reverse_proxy web:80
+}

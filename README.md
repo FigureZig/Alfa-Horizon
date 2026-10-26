@@ -130,6 +130,34 @@ docker compose up --build
 
 ---
 
+## Деплой на сервер
+
+Стенд разворачивается за [Caddy](https://caddyserver.com): он сам получает и продлевает HTTPS-сертификат Let's Encrypt и отдаёт кабинет на домене. По умолчанию это **https://alfahorizon.duckdns.org**.
+
+Что нужно на сервере:
+
+- Docker с Compose 2.24 или новее;
+- открытые порты 80 и 443: через 80 Let's Encrypt проверяет домен, на 443 работает сайт;
+- DNS-запись домена указывает на IP сервера. Для DuckDNS IP обновляется так: `curl "https://www.duckdns.org/update?domains=alfahorizon&token=<токен DuckDNS>&ip="` (пустой `ip` — взять адрес, с которого пришёл запрос).
+
+```bash
+cd Alfa-Horizon/infra
+cp .env.example .env              # впишите DEMO_TOKEN_SECRET: openssl rand -hex 32
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
+```
+
+| Адрес | Что там |
+|---|---|
+| https://alfahorizon.duckdns.org | кабинет |
+| https://alfahorizon.duckdns.org/api/docs | Swagger |
+| https://alfahorizon.duckdns.org/api/redoc | ReDoc |
+
+Наружу смотрят только 80 и 443. Порт фронта 8080 закрыт, а API, WireMock и PostgreSQL слушают только `127.0.0.1` — до них можно дойти через SSH-туннель, например `ssh -L 8000:localhost:8000 <сервер>`.
+
+Другой домен — `DOMAIN` в `infra/.env`. Без `DEMO_TOKEN_SECRET` стенд не запустится: секрет по умолчанию из репозитория на сервере не годится. Сертификаты лежат в томе `caddy_data` — не удаляйте его, иначе Caddy будет запрашивать их заново и может упереться в лимиты Let's Encrypt. Обновить стенд после `git pull` — та же команда `up --build -d`.
+
+---
+
 ## Если хотите запускать по частям (для разработки)
 
 Обычно это не нужно — `docker compose up` в `infra/` поднимает всё сразу. Но если вы правите код и не хотите каждый раз пересобирать образы:
