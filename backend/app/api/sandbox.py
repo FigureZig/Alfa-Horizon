@@ -925,7 +925,8 @@ async def reset():
 
 @router.post("/worker/{action}", **doc(S.WorkerResponse, 422, summary="Пауза и запуск обработки заявок"))
 async def worker(action: Literal["pause", "resume"]):
-    """Наш собственный сбой: воркер перестаёт брать задачи, API продолжает работать."""
+    """Наш собственный сбой: воркер перестаёт брать задачи по заявкам, API продолжает работать. Данные компаний воркер
+    собирает и на паузе — кабинет компании, в которую ещё не входили, открывается."""
     pool = await store.pool()
     async with pool.acquire() as conn:
         await store.kv_set(conn, "worker:paused", action == "pause")

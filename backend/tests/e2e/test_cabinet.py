@@ -84,3 +84,6 @@ async def test_applications_summary_and_tasks(stand):
 
     inbox = await stand.call("GET", "/tasks", headers)
     assert any(t["application_id"] == app["id"] and t["action"] == "sign" for t in inbox)
+
+    offer = (await stand.call("GET", f"/companies/{SMIRNOVA}/insights", headers))["offer"]
+    assert offer["product"] == "OVERDRAFT" and offer["application_id"] == app["id"]   # разрыв закроет уже идущая заявка

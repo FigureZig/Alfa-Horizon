@@ -428,6 +428,8 @@ class CreditProductCard(Schema):
     conditions: list[str] = []
     cover: dict[str, Any] | None = Field(None, description="у предложения под разрыв: amount — сколько взять, days — на сколько "
                                                          "дней, interest — проценты за эти дни, ₽")
+    application_id: str | None = Field(None, description="у предложения под разрыв: заявка на этот продукт уже идёт — "
+                                                         "открыть её, а не заводить вторую")
 
 
 class MatchOption(Schema):

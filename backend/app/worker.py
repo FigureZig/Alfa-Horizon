@@ -14,6 +14,7 @@ from .features import person_links
 log = logging.getLogger("worker")
 RETRY_DELAYS_S = (2, 5, 15, 30, 60)        # дальше — FAILED, заявка уходит специалисту (docs/07 §8)
 SWEEP_EVERY_S = 1.0
+DATA_JOBS = ("refresh_company", "refresh_person")   # на паузе стоят заявки, а данные компаний банк собирает дальше
 HANDLERS = {}
 
 
@@ -70,9 +71,8 @@ async def bki_followup(conn, job: dict, client: httpx.AsyncClient) -> None:
 
 async def run_once(pool, client: httpx.AsyncClient) -> bool:
     async with pool.acquire() as conn:
-        if await store.kv_get(conn, "worker:paused", False):     # наш собственный сбой из симулятора (docs/07 §7)
-            return False
-        job = await store.claim(conn)
+        paused = await store.kv_get(conn, "worker:paused", False)    # наш собственный сбой из симулятора (docs/07 §7)
+        job = await store.claim(conn, kinds=DATA_JOBS if paused else None)
     if job is None:
         return False
     async with pool.acquire() as conn:
