@@ -1,83 +1,136 @@
 # Сторонние компоненты и лицензии
 
-Что входит в стенд и под какими лицензиями. Версии — из `backend/uv.lock`, `frontend/pnpm-lock.yaml` и образов `infra/docker-compose.yml`;
-лицензии — из метаданных пакетов (Python — `importlib.metadata` в образе API, npm — реестр npmjs.org для версии из lock-файла).
-Проверено 22.10.2026. Платных и закрытых сервисов нет; ML-моделей и LLM в стенде нет.
+Стенд собран из открытых компонентов с разрешительными лицензиями. Платных сервисов, закрытых библиотек и моделей ИИ в нём нет. Внешние системы банка и государства смоделированы: стенд никуда не ходит за пределы своих контейнеров.
+
+Проверено 26 октября 2026 года. Версии взяты из `backend/uv.lock`, `frontend/pnpm-lock.yaml` и запущенных образов. Лицензии — из метаданных пакетов: для Python `importlib.metadata` в образе API, для npm `pnpm licenses list` по lock-файлу.
+
+## Коротко
+
+| Часть стенда | Сколько | Лицензии |
+|---|---|---|
+| [Образы Docker](#образы-docker) | 6 | PostgreSQL License, Apache-2.0, PSF-2.0, MIT, BSD-2-Clause |
+| [Бэкенд в образе API и worker](#бэкенд-в-образе-api-и-worker) | 24 пакета | MIT, BSD-3-Clause, Apache-2.0, MPL-2.0, PSF-2.0 |
+| [Бэкенд: тесты и линтер](#бэкенд-тесты-и-линтер) | 8 пакетов | MIT, BSD-3-Clause, BSD-2-Clause, Apache-2.0 |
+| [Фронтенд в браузере](#фронтенд-в-браузере) | 9 пакетов и 3 шрифта | MIT, OFL-1.1 |
+| [Фронтенд: сборка и проверка](#фронтенд-сборка-и-проверка) | 11 пакетов | MIT, Apache-2.0 |
+| [Внешние системы](#внешние-системы-смоделированы) | 8 групп | смоделированы, реальных подключений нет |
+
+Копилефтных лицензий (GPL, LGPL, AGPL) среди пакетов Python и npm нет. MPL-2.0 стоит у двух пакетов, и мы их не меняем: у `certifi` (корневые сертификаты в бэкенде) и у `lightningcss` (сборка CSS, в браузер не попадает).
 
 ## Образы Docker
 
-| Образ | Версия | Лицензия | Где |
+| Образ | Версия | Лицензия | Зачем |
 |---|---|---|---|
-| PostgreSQL (`postgres:17-alpine`) | 17.11 | PostgreSQL License | база |
-| WireMock (`wiremock/wiremock:3.9.1`) | 3.9.1 | Apache-2.0 | моки внешних систем |
-| Python (`python:3.13-slim`) | 3.13.16 | PSF-2.0 | API и worker |
-| uv | 0.11.26 | MIT OR Apache-2.0 | установка зависимостей в образе |
-| Node.js (`node:20.11.1-alpine`) | 20.11.1 | MIT | только сборка фронта |
-| nginx (`nginx:1.27-alpine`) | 1.27.5 | BSD-2-Clause | раздача фронта и прокси `/api` |
+| `postgres:17-alpine` | PostgreSQL 17.11 | PostgreSQL License | база заявок, событий, задач и снимков данных |
+| `wiremock/wiremock:3.9.1` | 3.9.1 | Apache-2.0 | моки внешних систем |
+| `python:3.13-slim` | Python 3.13.16 | PSF-2.0 | API и worker |
+| uv | 0.11.26 | MIT или Apache-2.0 | установка зависимостей при сборке образа |
+| `node:20.11.1-alpine` | Node.js 20.11.1 | MIT | только сборка фронтенда |
+| `nginx:1.27-alpine` | nginx 1.27.5 | BSD-2-Clause | раздача фронтенда и прокси `/api` |
 
 Базовые образы содержат пакеты дистрибутивов Alpine и Debian под их собственными лицензиями.
 
-## Бэкенд: что попадает в образ
+## Бэкенд в образе API и worker
 
-| Пакет | Версия | Лицензия |
-|---|---|---|
-| fastapi | 0.157.0 | MIT |
-| starlette | 1.9.0 | BSD-3-Clause |
-| pydantic / pydantic_core | 2.14.1 / 2.50.1 | MIT |
-| uvicorn[standard] | 0.54.0 | BSD-3-Clause |
-| uvloop | 0.23.0 | Apache-2.0 и MIT |
-| httptools | 0.9.0 | MIT |
-| watchfiles | 1.3.0 | MIT |
-| websockets | 17.3 | BSD-3-Clause |
-| python-dotenv | 1.2.4 | BSD-3-Clause |
-| asyncpg | 0.32.0 | Apache-2.0 |
-| httpx / httpcore | 0.28.1 / 1.0.9 | BSD-3-Clause |
-| h11 | 0.16.0 | MIT |
-| anyio | 4.15.1 | MIT |
-| idna | 3.20 | BSD-3-Clause |
-| certifi | 2026.10.19 | MPL-2.0 |
-| click | 8.5.0 | BSD-3-Clause |
-| PyYAML | 6.0.3 | MIT |
-| typing_extensions | 4.16.0 | PSF-2.0 |
-| annotated-types, annotated-doc, typing-inspection | 0.8.0, 0.0.5, 0.4.4 | MIT |
-| opentelemetry-api | 1.45.1 | Apache-2.0 |
+| Пакет | Версия | Лицензия | Зачем |
+|---|---|---|---|
+| fastapi | 0.157.0 | MIT | HTTP API, OpenAPI, Swagger и ReDoc |
+| starlette | 1.9.0 | BSD-3-Clause | основа FastAPI |
+| pydantic, pydantic_core | 2.14.1, 2.50.1 | MIT | схемы запросов и ответов, проверка данных |
+| uvicorn[standard] | 0.54.0 | BSD-3-Clause | сервер приложения |
+| uvloop | 0.23.0 | MIT и Apache-2.0 | быстрый цикл событий для uvicorn |
+| httptools | 0.9.0 | MIT | разбор HTTP в uvicorn |
+| watchfiles | 1.3.0 | MIT | перезапуск uvicorn при разработке |
+| websockets | 17.3 | BSD-3-Clause | WebSocket в uvicorn |
+| python-dotenv | 1.2.4 | BSD-3-Clause | чтение `.env` в uvicorn |
+| click | 8.5.0 | BSD-3-Clause | командная строка uvicorn |
+| asyncpg | 0.32.0 | Apache-2.0 | драйвер PostgreSQL |
+| httpx, httpcore, h11 | 0.28.1, 1.0.9, 0.16.0 | BSD-3-Clause, BSD-3-Clause, MIT | запросы worker к внешним системам |
+| anyio | 4.15.1 | MIT | асинхронный ввод-вывод |
+| idna | 3.20 | BSD-3-Clause | доменные имена в httpx |
+| certifi | 2026.10.19 | MPL-2.0 | корневые сертификаты для httpx |
+| PyYAML | 6.0.3 | MIT | кредитная политика и мир симулятора в YAML |
+| typing_extensions | 4.16.0 | PSF-2.0 | типы для pydantic и FastAPI |
+| annotated-types, annotated-doc, typing-inspection | 0.8.0, 0.0.5, 0.4.4 | MIT | типы для pydantic и FastAPI |
+| opentelemetry-api | 1.45.1 | Apache-2.0 | зависимость FastAPI; экспортёра в стенде нет, данные никуда не уходят |
 
-Только для разработки и тестов (в образ не входят): pytest 9.1.1 (MIT), ruff 0.17.1 (MIT), networkx 3.7 (BSD-3-Clause) — граф статусов,
-allpairspy 2.5.1 (MIT) — pairwise-наборы, pluggy 1.7.0 и iniconfig 2.3.1 (MIT), packaging 26.3 (Apache-2.0 OR BSD-2-Clause),
-Pygments 2.21.0 (BSD-2-Clause).
+## Бэкенд: тесты и линтер
 
-## Фронт
+В образ не попадают, ставятся только для разработки (`uv sync`).
 
-| Пакет | Версия | Лицензия |
-|---|---|---|
-| vue | 3.5.44 | MIT |
-| vue-router | 5.4.0 | MIT |
-| pinia | 3.0.4 | MIT |
-| vue-i18n | 11.4.16 | MIT |
-| primevue, @primeuix/themes, primeicons | 4.4.1, 1.2.5, 7.0.0 | MIT |
-| axios | 1.20.0 | MIT |
-| lodash-es | 4.18.1 | MIT |
+| Пакет | Версия | Лицензия | Зачем |
+|---|---|---|---|
+| pytest | 9.1.1 | MIT | юнит- и e2e-тесты |
+| pluggy, iniconfig | 1.7.0, 2.3.1 | MIT | зависимости pytest |
+| packaging | 26.3 | Apache-2.0 или BSD-2-Clause | зависимость pytest |
+| Pygments | 2.21.0 | BSD-2-Clause | подсветка отчётов pytest |
+| ruff | 0.17.1 | MIT | линтер |
+| networkx | 3.7 | BSD-3-Clause | проверка графа статусов заявки |
+| allpairspy | 2.5.1 | MIT | pairwise-наборы тестовых компаний |
 
-Для сборки: vite 6.4.1, @vitejs/plugin-vue 5.2.4, tailwindcss и @tailwindcss/vite 4.3.3, tailwindcss-primeui 0.6.1, vue-tsc 3.3.13,
-eslint 9.39.1, eslint-plugin-vue 10.11.1, @vue/eslint-config-typescript 14.9.0, @types/lodash-es 4.17.12 — MIT; typescript 5.9.3 — Apache-2.0.
-Транзитивные зависимости — в `frontend/pnpm-lock.yaml`.
+## Фронтенд в браузере
 
-## Что смоделировано, а не подключено
+| Пакет | Версия | Лицензия | Зачем |
+|---|---|---|---|
+| vue | 3.5.44 | MIT | интерфейс |
+| vue-router | 5.4.0 | MIT | страницы и переходы |
+| pinia | 3.0.4 | MIT | общее состояние |
+| vue-i18n | 11.4.16 | MIT | русский и английский интерфейс |
+| primevue, @primeuix/themes | 4.4.1, 1.2.5 | MIT | компоненты: диалоги, формы, уведомления |
+| primeicons | 7.0.0 | MIT | иконки |
+| axios | 1.20.0 | MIT | запросы к API |
+| lodash-es | 4.18.1 | MIT | обработка данных |
 
-Реальных банковских и государственных систем в стенде нет: эксперты кейса просили автономный воспроизводимый прототип на моках
-и синтетике. Каждая система ниже — стабы WireMock в форматах первоисточника (`docs/09_data_contracts.md`), ответы строит
-`backend/seed/world.py` из вымышленного мира `backend/seed/personas.yaml`.
+Шрифты подключены через пакеты Fontsource (`frontend/src/style.css`). Лицензия SIL Open Font License 1.1 разрешает встраивать шрифты в приложение и раздавать их вместе с ним.
 
-| Система | Формат, на который опираемся |
+| Шрифт | Пакет | Версия | Лицензия |
+|---|---|---|---|
+| Golos Text | `@fontsource-variable/golos-text` | 5.3.0 | OFL-1.1 |
+| Inter Tight | `@fontsource-variable/inter-tight` | 5.3.0 | OFL-1.1 |
+| JetBrains Mono | `@fontsource-variable/jetbrains-mono` | 5.3.0 | OFL-1.1 |
+
+## Фронтенд: сборка и проверка
+
+В браузер не попадают.
+
+| Пакет | Версия | Лицензия | Зачем |
+|---|---|---|---|
+| vite, @vitejs/plugin-vue | 6.4.1, 5.2.4 | MIT | сборка |
+| tailwindcss, @tailwindcss/vite | 4.3.3 | MIT | стили |
+| tailwindcss-primeui | 0.6.1 | MIT | стили PrimeVue в Tailwind |
+| typescript | 5.9.3 | Apache-2.0 | типизация |
+| vue-tsc | 3.3.13 | MIT | проверка типов в компонентах |
+| eslint, eslint-plugin-vue, @vue/eslint-config-typescript | 9.39.1, 10.11.1, 14.9.0 | MIT | линтер |
+| @types/lodash-es | 4.17.12 | MIT | типы lodash |
+
+Всего в `frontend/pnpm-lock.yaml` 258 пакетов вместе с транзитивными. Лицензии:
+
+| Лицензия | Пакетов |
+|---|---|
+| MIT | 216 |
+| Apache-2.0 | 14 |
+| ISC | 10 |
+| BSD-2-Clause | 8 |
+| OFL-1.1 | 3 |
+| BSD-3-Clause | 2 |
+| MPL-2.0 | 2 |
+| BSD | 1 |
+| Python-2.0 | 1 |
+| BlueOak-1.0.0 | 1 |
+
+## Внешние системы: смоделированы
+
+Реальных банковских и государственных систем в стенде нет. По условиям кейса прототип автономен и работает на моках и синтетических данных. Каждая система ниже — заглушка WireMock в формате первоисточника (описание форматов — `docs/09_data_contracts.md`). Ответы строит `backend/seed/world.py` из вымышленного мира `backend/seed/personas.yaml`.
+
+| Система | На какой формат опираемся |
 |---|---|
 | ЕГРЮЛ, ЕГРИП | XSD ФНС, версия формата 4.06 |
 | Открытые данные ФНС: реестр МСП, численность, уплаченные налоги, недоимки, налоговые режимы, дисквалифицированные лица | XSD и паспорта наборов nalog.gov.ru |
 | ГИР БО (бухгалтерская отчётность) | структура ответа bo.nalog.gov.ru |
 | Бюро кредитных историй | формат кредитного отчёта ЦБ v3.4, информационная часть |
-| Реестр МЧД | статусы публичного сервиса m4d.nalog.gov.ru; коды полномочий — плейсхолдер |
+| Реестр машиночитаемых доверенностей (МЧД) | статусы публичного сервиса m4d.nalog.gov.ru; коды полномочий — заглушка |
 | ЕИС (госконтракты) | сокращённый контракт: номер, заказчик, цена, даты, аванс — упрощение |
 | Юридические проверки (банкротство, суды, исполнительные производства) | сокращённый сводный ответ — упрощение |
-| Банк: карточка клиента, доступы ДБО, устав, выписка по счёту, АБС (выдача) | внутренние контракты, описаны в `docs/09_data_contracts.md` |
+| Банк: карточка клиента, доступы в интернет-банк, устав, выписка по счёту, выдача кредита | внутренние контракты, описаны в `docs/09_data_contracts.md` |
 
-Все компании, люди, ИНН, ОГРН, СНИЛС и счета вымышленные: контрольные цифры правильные, совпадение с реальными лицами случайно.
-Нормы права, ставки ЦБ и рыночные цифры — со ссылками на первоисточники в `docs/10_sources.md`.
+Все компании, люди, ИНН, ОГРН, СНИЛС и счета вымышленные. Контрольные цифры у них правильные, совпадение с реальными лицами случайно. Нормы права, ставки ЦБ и рыночные цифры приведены со ссылками на первоисточники в `docs/10_sources.md`.
